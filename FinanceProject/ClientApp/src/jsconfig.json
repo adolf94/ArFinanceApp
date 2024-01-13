@@ -1,0 +1,12 @@
+﻿{
+		"compilerOptions": {
+				"baseUrl": "./src",
+				"jsx": "preserve",
+				"paths": {
+						"@/*": [ "./src/*" ],
+						"@material/*": [ "./node_modules/@mui/material/*" ],
+						"@m-icons/*": [ "./node_modules/@mui/icons-material/*" ]
+				}
+		},
+		"exclude": [ "node_modules", "build" ]
+}

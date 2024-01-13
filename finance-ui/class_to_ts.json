@@ -1,0 +1,25 @@
+{
+        "namespace": "'FinanceProject'",
+
+    "include": [
+        "../FinanceProject/Models/*.cs",
+        "../FinanceProject/Dtos/*.cs",
+        "../FinanceProject/QueryParams/*.cs"
+    ],
+        "output": "./src/@types/FinanceProject/index.d.ts",
+        "camelCase": true,
+        "camelCaseEnums": false,
+        "camelCaseOptions": {
+            "pascalCase": false,
+            "preserveConsecutiveUppercase": false,
+            "locale": "en-US"
+        },
+        "numericEnums": false,
+        "omitFilePathComment": false,
+        "omitSemicolon": false,
+        "stringLiteralTypesInsteadOfEnums": false,
+        "customTypeTranslations": {
+            "ProductName": "string",
+            "ProductNumber": "string"
+        }
+    }
