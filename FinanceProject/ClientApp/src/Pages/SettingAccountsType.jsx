@@ -4,21 +4,22 @@ import api from '../components/api'
 import useDropdown from '../components/useDropdown'
 
 import db from '../components/LocalDb'
+import { useMutateType } from '../repositories/accountTypes'
+
 const NewAccountType = (props) => {
   const { show, handleClose } = props
   const [value, setValue] = useState("")
   const { accountTypes, set } = useDropdown()
+  const mutateType = useMutateType()
 
   const createNewAccountType = () => {
-    api.post("accounttypes", {
-      name: value,
-      enabled:true
-    }).then((res) => {
-      console.log(res.data)
+
+    mutateType.createAsync({
+        name: value,
+        enabled:true
+    }).then(() => {
       setValue("")
-      db.accountTypes.add(res.data)
-      
-      handleClose()
+      handleClose();
     })
   }
 
@@ -26,7 +27,7 @@ const NewAccountType = (props) => {
     <Dialog open={show} onClose={handleClose} >
       <DialogTitle>New Type</DialogTitle>
       <DialogContent>
-        <TextField label="Account Group Name" value={value} onChange={(e) => setValue(e.target.value)} variant="standard" />
+        <TextField label="Account Type Name" value={value} onChange={(e) => setValue(e.target.value)} variant="standard" />
       </DialogContent>
       <DialogActions>
         <Button onClick={handleClose}>Cancel</Button>

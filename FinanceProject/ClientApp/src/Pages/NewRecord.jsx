@@ -1,9 +1,9 @@
 ﻿import { faArrowLeftLong } from "@fortawesome/free-solid-svg-icons"
-import React, { useState, createContext } from 'react'
-import { AppBar, IconButton, Button, Toolbar, Typography, Grid, Dialog,List, ListItem, FormLabel, TextField, useTheme, useMediaQuery } from '@mui/material'
+import React, { useState, createContext, useRef } from 'react'
+import { AppBar, IconButton, Button, Toolbar, Typography, Grid, Dialog, List, ListItem, FormLabel, TextField, useTheme, useMediaQuery, Box } from '@mui/material'
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { Link } from "react-router-dom"
-import { makeStyles } from '@mui/styles'
+//import { makeStyles } from '@emotion/styles'
 
 import NewRecordForm from './NewRecordComponents/NewRecordForm'
 import SelectAccount from "./NewRecordComponents/SelectAccount"
@@ -11,15 +11,15 @@ import moment from 'moment'
 
 
 export const SelectAccountContext = createContext({})
-const useStyles = makeStyles({
+//const useStyles = makeStyles({
  
-  dialogHalf: {
-    position: "absolute",
-    top: "80%",
-    left: "50%",
-    transform: "translate(-50%, -50%)"
-  }
-});
+//  dialogHalf: {
+//    position: "absolute",
+//    top: "80%",
+//    left: "50%",
+//    transform: "translate(-50%, -50%)"
+//  }
+//});
 const NewRecordPage = (props) => {
   const [formData, setFormData] = useState({
     type: 'expense',
@@ -30,7 +30,8 @@ const NewRecordPage = (props) => {
     vendor:null
   })
   const theme = useTheme();
-  const styles = useStyles();
+  const con = useRef()
+  //const styles = useStyles();
   const sm = useMediaQuery(theme.breakpoints.down('md'));
 
   const [selectView, setSelectView] = useState({
@@ -44,8 +45,7 @@ const NewRecordPage = (props) => {
 
     setSelectView({ ...selectView, ...data });
   }
-
-  console.log(selectView)
+  console.log(con)
   return <> <AppBar position="static">
     <Toolbar>
       <Link to="/records">
@@ -59,25 +59,14 @@ const NewRecordPage = (props) => {
   </AppBar>
     <SelectAccountContext.Provider value={{ ...selectView, setViewContext }}>
       <Grid container>
-        <Grid item md={6}  xs={12}>
-          <NewRecordForm formData={formData}   setFormData={setFormData}    />
+        <Grid item lg={6}  sm={12}>
+          <NewRecordForm formData={formData} selectPortal={con.current}  setFormData={setFormData}    />
         </Grid>
-        <Grid item md={6} display={{ xs: "none", sm:'flex' }} >
-          <SelectAccount view={{ ...selectView, setViewContext }} />
 
+        <Grid item sm={6}>
+          <Box ref={con}></Box>
         </Grid>
-        {
-        sm ?
-            <Dialog
-              classes={{
-                paper: styles.dialogHalf
-              }} fullScreen open={!!selectView.type} onClose={() => setViewContext({ type: "" })}>
-              <Button onClick={() => setViewContext({ type: "" })}></Button>
-              <SelectAccount view={{ ...selectView, setViewContext }} />
-
-
-            </Dialog> : null
-        }
+       
       </Grid>
     </SelectAccountContext.Provider>
   </>

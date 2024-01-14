@@ -1,7 +1,7 @@
 ﻿import React, { useState, useEffect, useContext } from 'react'
-import { List, Grid, Button, TextField, ListItem, FormLabel, createStyles } from '@mui/material'
+import { List, Grid, Button, TextField, ListItem, FormLabel, createStyles, Portal } from '@mui/material'
 import { SelectAccountContext } from "../NewRecord"
-import { makeStyles } from '@mui/styles'
+//import { makeStyles } from '@mui/styles'
 import { DateTimePicker } from '@mui/x-date-pickers'
 import { Link } from 'react-router-dom'
 import usePrevious from 'use-previous'
@@ -9,16 +9,17 @@ import db from '../../components/LocalDb'
 import moment from 'moment'
 import { v4 as uid} from 'uuid'
 import api from '../../components/api'
+import SelectAccount from './SelectAccount'
 
 
-const usePlaceholderBlack = makeStyles((theme)=>({
-  input: {
-    '&::placeholder': {
-      fontColor: 'black',
-      fontStyle: 'italic',
-    },
-  },
-}));
+//const usePlaceholderBlack = makeStyles((theme)=>({
+//  input: {
+//    '&::placeholder': {
+//      fontColor: 'black',
+//      fontStyle: 'italic',
+//    },
+//  },
+//}));
 
 
 const VendorTextField = (props) => {
@@ -32,11 +33,27 @@ const VendorTextField = (props) => {
   }, [props.view, focused])
 
   const onTyped = (e) => {
-    view.setViewContext({searchValue:e})
+    setInternalValue(e)
+    props.onSearchChange(e)
+
+  }
+
+  const displayValue = () => {
+    if (focused) {
+      return internalValue || ""
+    } else {
+      return props.value?.name  || ""
+    }
+
+
   }
             
   return <TextField fullWidth {...props} placeholder={(view.type == "vendor") ? (view.searchValue || props.value?.name) : (props.value?.name || "")}
-    value={view.searchValue} variant="standard"
+    value={displayValue()} variant="standard"
+    onFocus={() => {
+      setFocused(true);
+      setInternalValue("")
+    }}
     onBlur={() => { setFocused(false) }}
     onChange={(e) => onTyped(e.target.value)}
     sx={{ input: { color: "black" }, "label": { color: "black" } }} 
@@ -52,9 +69,9 @@ const NewRecordForm = (props) => {
   const prevDebit = usePrevious(formData.debit)
   const prevCredit = usePrevious(formData.credit)
   const [assetCredit,setAsset] = useState(null)
-
+  const [viewA, setView] = useState("")
   const setType = (data) => setFormData({...formData, type: data})
-
+  const [searchStr, setSearch] = useState("")
 
 
   const actualData = () => {
@@ -148,8 +165,18 @@ const NewRecordForm = (props) => {
   }
 
 
+  const [selectAccountProps, setSelectProps] = useState({
+      show: false,
+      value: null,
+      onChange: () => { },
+      selectType: 'account',
+      dest:"",
+      typeId:""
+    }) 
 
-  return <List>
+
+  return <>
+    <List>
     <ListItem>
       <Grid container spacing={2}>
         <Grid item xs={4}>
@@ -186,12 +213,20 @@ const NewRecordForm = (props) => {
           <FormLabel >{type=="transfer"?"From:":"Asset:"}</FormLabel>
         </Grid>
         <Grid item xs={8}>
-          {
-            (() => {
-              const dest = type == 'income' ? { obj: 'debit', id: 'debitId' } : { obj: 'credit', id: 'creditId' }
-              return <TextField fullWidth autoComplete="off" variant="standard" value={formData[dest.obj]?.name || ""} onClick={() => view.setViewContext({ type: 'account', groupId: "892f20e5-b8dc-42b6-10c9-08dabb20ff77", onChange: getCallBack("account", (d) => ({ [dest.obj]: d, [dest.id]: d?.id })) })} />
-            })()
-          }
+
+                <TextField fullWidth autoComplete="off" variant="standard" 
+                  value={type == 'income' ? formData.debit?.name || "" : formData.credit?.name || ""}
+              onClick={() => setSelectProps({ ...selectAccountProps, show: true, dest: "source" })}
+                />
+                { /*
+                //  viewA == "source" && <SelectAccount value={formData[dest.obj]} internalKey="source" 
+                //  onChange={(value) => setFormData({
+                //    ...formData,
+                //    [dest.obj]: value,
+                //    [dest.id]: value.id
+                //  })} show
+                //  selectType="account" typeId="892f20e5-b8dc-42b6-10c9-08dabb20ff77" selectPortal={props.selectPortal} />
+                // */}
           </Grid>
       </Grid>
     </ListItem>
@@ -201,7 +236,18 @@ const NewRecordForm = (props) => {
           <FormLabel >Vendor</FormLabel>
         </Grid>
         <Grid item xs={8}>
-          <VendorTextField autoComplete="off" fullWidth view={view} variant="standard" value={formData.vendor} onClick={() => view.setViewContext({ type: 'vendor', onChange: getCallBack("vendor", (d) => ({ "vendor": d, "vendorId": d?.id })) })} />
+            <VendorTextField autoComplete="off" fullWidth view={view} variant="standard" value={formData.vendor} onSearchChange={(text) => setSearch(text)}
+              onClick={() => setSelectProps({ ...selectAccountProps, show: true, dest: "vendor" })} />
+              
+          {/*
+            viewA == "vendor" && <SelectAccount value={formData.vendor} internalKey="vendor" 
+              onChange={(value) => setFormData({
+                ...formData,
+                vendor: value,
+                vendorId: value.id
+              })} show
+              selectType="vendor" typeId="" selectPortal={props.selectPortal} />
+          */}
         </Grid>
       </Grid>
     </ListItem>
@@ -211,14 +257,24 @@ const NewRecordForm = (props) => {
           <FormLabel >{ (type=="transfer"? "To" :type.charAt(0).toUpperCase() + type.slice(1)) + ":" }</FormLabel>
         </Grid>
         <Grid item xs={8}>
-          {
-            (() => {
-              const dest = type == "income" ? { obj: "credit", id: 'creditId' } : { obj: 'debit', id: 'debitId' }
-              const acct = type == "transfer" ? "892f20e5-b8dc-42b6-10c9-08dabb20ff77" : (type == "expense" ? "a68ebd61-ce5d-4c99-10ca-08dabb20ff77" :"04c78118-1131-443f-2fa6-08dac49f6ad4")
-              return <TextField autoComplete="off" fullWidth variant="standard" value={formData[dest.obj]?.name || ""} onClick={() => view.setViewContext({ type: 'account', groupId: acct, onChange: getCallBack("account", (d) => ({ [dest.obj]: d, [dest.id]: d?.id })) })} />
-              
-            })()
-          }
+                 <TextField autoComplete="off" fullWidth variant="standard"
+                  value={type == 'income' ? formData.credit?.name || "" : formData.debit?.name || ""}
+              onClick={() => setSelectProps({ ...selectAccountProps, show: true, dest: "destination" })}
+                />
+
+              { /*
+                  viewA == "destination" && <SelectAccount internalKey="destination" value={formData[dest.obj]}
+                  onChange={(value) => setFormData({
+                    ...formData,
+                    [dest.obj]: value,
+                    [dest.id]: value.id
+                  })} show
+                  selectType="account" typeId={acct}  selectPortal={props.selectPortal} />
+                */ }
+
+              {/*const acct = type == "transfer" ? "892f20e5-b8dc-42b6-10c9-08dabb20ff77" : (type == "expense" ? "a68ebd61-ce5d-4c99-10ca-08dabb20ff77" :"04c78118-1131-443f-2fa6-08dac49f6ad4")*/}
+           
+
         </Grid>
       </Grid>
     </ListItem>
@@ -251,8 +307,53 @@ const NewRecordForm = (props) => {
         </Grid>
       </Grid>
     </ListItem>
-  </List>
+    </List>
+    <Portal container={props.selectPortal}>
 
+      <SelectAccount show={selectAccountProps.show && selectAccountProps.dest == "source"} onChange={(value) => {
+          setFormData({
+              ...formData,
+              [type == 'income' ? "debit" : "credit"]: value,
+              [type == 'income' ? "debitId" : "creditId"]: value.id
+            })
+            setSelectProps({ ...selectAccountProps, show: false, dest: "" })
+        }}
+        value={type=="income"?formData.debit:formData.credit}
+        selectType='account'
+        internalKey="destination"
+        typeId="892f20e5-b8dc-42b6-10c9-08dabb20ff77" />
+
+      <SelectAccount show={selectAccountProps.show && selectAccountProps.dest == "vendor"} onChange={(value) => {
+        setFormData({
+          ...formData,
+          vendor: value,
+          vendorId: value.id
+        })
+        setSelectProps({ ...selectAccountProps, show: false, dest: "" })
+      }}
+        searchStr={searchStr}
+        value={ formData.vendor}
+        selectType='vendor'
+        internalKey="vendor"
+        typeId="" />
+
+      <SelectAccount show={selectAccountProps.show && selectAccountProps.dest == "destination"} onChange={(value) => {
+        console.log(value)
+        setFormData({
+          ...formData,
+          [type == 'income' ? "credit" : "debit"]: value,
+          [type == 'income' ? "creditId" : "debitId"]: value.id
+        })
+        setSelectProps({ ...selectAccountProps, show: false, dest: "" })
+      }}
+        value={type == "income" ? formData.credit : formData.debit}
+        selectType='account'
+        selectPortal={props.selectPortal}
+        internalKey="destination"
+        typeId={type == "transfer" ? "892f20e5-b8dc-42b6-10c9-08dabb20ff77" :
+          (type == "expense" ? "a68ebd61-ce5d-4c99-10ca-08dabb20ff77" : "04c78118-1131-443f-2fa6-08dac49f6ad4")} />
+    </Portal>
+  </>
 }
 
 export default NewRecordForm;

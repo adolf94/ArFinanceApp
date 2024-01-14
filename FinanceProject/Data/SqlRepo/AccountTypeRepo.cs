@@ -27,7 +27,15 @@ namespace FinanceProject.Data.SqlRepo
 
 				public ICollection<AccountType> GetAllType()
 				{
-						throw new NotImplementedException();
+						try
+						{
+
+								return _context.AccountTypes!.ToArray();	
+						}catch(Exception ex)
+						{
+								_logger.LogError(ex, ex.Message);
+								throw;
+						}
 				}
 
 				public AccountType? GetOne(Guid id)

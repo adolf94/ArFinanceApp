@@ -30,7 +30,14 @@ namespace FinanceProject.Data.SqlRepo
 
 				public ICollection<Account> GetAccounts()
 				{
-						throw new NotImplementedException();
+						try
+						{
+								return _context.Accounts!.ToArray();
+						}catch(Exception ex)
+						{
+								_logger.LogError(ex, ex.Message);
+								return Array.Empty<Account>();
+						}
 				}
 
 				public Account? GetOne(Guid id)

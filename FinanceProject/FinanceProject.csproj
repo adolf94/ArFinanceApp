@@ -38,6 +38,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="ClientApp\src\Pages\NewRecordComponents\SelectAccount.tsx" />
+    <None Remove="ClientApp\src\Pages\NewRecordComponents\SelectAccountNew.tsx" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Include="Data\AppDbContextCosmos.cs" />
   </ItemGroup>
 
@@ -55,6 +60,15 @@
 
   <ItemGroup>
     <Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="ClientApp\src\%40types\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <TypeScriptCompile Include="ClientApp\src\Pages\NewRecordComponents\SelectAccount.tsx" />
+    <TypeScriptCompile Include="ClientApp\src\Pages\NewRecordComponents\SelectAccountNew.tsx" />
   </ItemGroup>
 
   <Target Name="PublishRunWebpack" AfterTargets="ComputeFilesToPublish">

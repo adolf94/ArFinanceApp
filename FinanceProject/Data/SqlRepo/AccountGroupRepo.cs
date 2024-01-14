@@ -28,7 +28,14 @@ namespace FinanceProject.Data.SqlRepo
 
 				public ICollection<AccountGroup> GetAccounts()
 				{
-						throw new NotImplementedException();
+						try
+						{
+								return _context.AccountGroups!.ToArray();
+						}catch(Exception ex)
+						{
+								_logger.LogError(ex, ex.Message);
+								throw;
+						}
 				}
 
 				public ICollection<AccountGroup> GetByType(Guid id)

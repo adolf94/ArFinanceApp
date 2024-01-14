@@ -1,13 +1,21 @@
 ﻿import React, { useState, useEffect, useContext } from 'react'
-import { Grid, List, ListItem } from '@mui/material'
+import { Grid, List, ListItem, Button, Dialog } from '@mui/material'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faChevronRight } from '@fortawesome/free-solid-svg-icons'
 import useDropdown from '../../components/useDropdown'
 import { v4 as uid} from 'uuid'
 import api from '../../components/api'
 import db from '../../components/LocalDb'
+import { useQuery } from '@tanstack/react-query'
+import { ACCOUNT, fetchAccounts } from '../../repositories/accounts'
+import { ACCOUNT_GROUP, fetchGroups } from '../../repositories/accountgroups'
+
 const SelectAccount = (props) => {
-  const { accountGroups, accounts,vendors } = useDropdown()
+  const { data: accounts } = useQuery({queryKey:[ACCOUNT]}, queryFn: fetchAccounts)
+  const { data: accountGroups } = useQuery({queryKey:[ACCOUNT_GROUP], queryFn: fetchGroups})
+  const vendors = []
+
+  //const { accountGroups, accounts,vendors } = useDropdown()
   const [accountGroup, setAccountGroup] = useState(null)
   const [account, setAccount] = useState(null)
   const { view } = props
@@ -41,7 +49,8 @@ const SelectAccount = (props) => {
           {
             accountGroups.filter(e => e.accountTypeId == view.groupId).map(e => <ListItem button
               selected={e.id == accountGroup?.id}
-              onClick={()=>setAccountGroup(e)}
+              onClick={() => setAccountGroup(e)}
+              key={e.id} 
               secondaryAction={<FontAwesomeIcon icon={faChevronRight} />}>
               { e.name }
             </ListItem>)
@@ -53,7 +62,9 @@ const SelectAccount = (props) => {
         {
             accounts.filter(e => accountGroup && e.accountGroupId == accountGroup?.id).map(f => <ListItem button
               selected={f.id == account?.id}
-              onClick={() => setAccount(f)}>
+              onClick={() => setAccount(f)}
+              key={ f.id}
+            >
               {f.name}
             </ListItem>)
           }
@@ -71,7 +82,8 @@ const SelectAccount = (props) => {
             {
               vendors.sort((a,b)=>a.name==b.name?0:(a.name<b.name?1:-1)).map(f => <ListItem button
                 selected={f.id == account?.id}
-                onClick={() => setAccount(f)}>
+                onClick={() => setAccount(f)}
+                key={f.id} >
                 {f.name}
               </ListItem>)
             }
@@ -82,4 +94,30 @@ const SelectAccount = (props) => {
   </Grid>
 }
 
-export default SelectAccount
+
+const SelectAccountContainer = (props) => {
+
+
+  return <>
+    {props.show?<Portal container={() => props.selectContainer}>
+    <Box display={{ xs: "none", sm: 'block' }} >
+      <SelectAccount {...props}  />
+    </Box>
+    <Dialog
+      sx={{
+        position: "absolute",
+        top: "80%",
+        left: "50%",
+        transform: "translate(-50%, -50%)"
+      }}
+      fullScreen open={!!props.selectView.type} onClose={() => props.setViewContext({ type: "" })}>
+      <Button onClick={() => props.setViewContext({ type: "" })}></Button>
+      <SelectAccount {...props} />
+
+
+    </Dialog>
+  </Portal>:null;
+  </>
+
+}
+export default SelectAccountContainer

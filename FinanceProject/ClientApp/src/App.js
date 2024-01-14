@@ -12,12 +12,33 @@ import '@fontsource/roboto/500.css';
 import '@fontsource/roboto/700.css';
 import { AdapterMoment } from '@mui/x-date-pickers/AdapterMoment';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { persistQueryClient } from '@tanstack/react-query-persist-client'
+import { createSyncStoragePersister } from '@tanstack/query-sync-storage-persister'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+
+
+
+
+export const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      cacheTime: 1000 * 60 * 60 * 24, // 24 hours
+    },
+  },
+})
+
+const localStoragePersister = createSyncStoragePersister({ storage: window.localStorage })
+// const sessionStoragePersister = createSyncStoragePersister({ storage: window.sessionStorage })
+
+persistQueryClient({
+  queryClient,
+  persister: localStoragePersister,
+})
 
 
 const TheApp = (props) => {
 
   const [dropdown, setDropdown] = useState(defaultData)
-
 
   const setDropdownValue = (name, values) => {
     setDropdown({...dropdown,[name]:values})
@@ -46,7 +67,8 @@ const TheApp = (props) => {
 
 
   return <DropdownContext.Provider value={{ ...dropdown, set: setDropdownValue } } >
-  <Routes>
+  
+    <Routes>
     {AppRoutes.map((route, index) => {
       const { element, ...rest } = route;
       return <Route key={index} {...rest} element={element} />;
@@ -62,7 +84,9 @@ export default class App extends Component {
     return (
       <Layout>
         <LocalizationProvider dateAdapter={ AdapterMoment } >
-          <TheApp />
+          <QueryClientProvider client={ queryClient} >
+            <TheApp />
+          </QueryClientProvider>
         </LocalizationProvider>
       </Layout>
     );
