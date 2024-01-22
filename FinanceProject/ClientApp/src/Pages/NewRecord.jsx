@@ -45,7 +45,6 @@ const NewRecordPage = (props) => {
 
     setSelectView({ ...selectView, ...data });
   }
-  console.log(con)
   return <> <AppBar position="static">
     <Toolbar>
       <Link to="/records">
@@ -59,7 +58,7 @@ const NewRecordPage = (props) => {
   </AppBar>
     <SelectAccountContext.Provider value={{ ...selectView, setViewContext }}>
       <Grid container>
-        <Grid item lg={6}  sm={12}>
+        <Grid item xs={12} lg={6}>
           <NewRecordForm formData={formData} selectPortal={con.current}  setFormData={setFormData}    />
         </Grid>
 

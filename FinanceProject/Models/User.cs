@@ -7,7 +7,7 @@ namespace FinanceProject.Models
 				public Guid Id { get; set; } = new Guid();
 
 				public string? UserName { get; set; }
-				public int AzureId { get; set; }
+				public string? AzureId { get; set; }
 
 				[JsonIgnore]
 				public ICollection<Transaction>? Transactions { get; set; }

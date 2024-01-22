@@ -1,15 +1,34 @@
 ﻿import { QueryClient, useMutation, useQueryClient } from "@tanstack/react-query"
 import { Account } from "FinanceApi"
 import api from "../components/api"
+import { queryClient } from "../App"
 
 export const ACCOUNT = "account"
+
 
 export const fetchAccounts = () => {
 
   return api.get("accounts")
-    .then(e=>e.data)
+    .then(e => {
+      e.data.forEach(acct => {
+        queryClient.setQueryData([ACCOUNT, { id: acct.id }], acct )
+      })
+      return e.data
+    })
 
 }
+
+export const fetchByAccountId = (id: string) => {
+
+  return api.get("accounts/" + id)
+    .then(e => {
+      return e.data
+    })
+
+
+
+}
+
 
 export const useMutateAccount = () => {
   const queryClient = useQueryClient()

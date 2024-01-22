@@ -1,9 +1,10 @@
 ﻿using FinanceProject.Dto;
+using FinanceProject.Models;
 
 namespace FinanceProject.Data
 {
 		public interface ITransactionRepo
 		{
-				public NewTransactionResponseDto CreateTransaction(CreateTransactionDto item);
+				public Transaction CreateTransaction(CreateTransactionDto item);
 		}
 }

@@ -31,7 +31,7 @@ namespace FinanceProject.Controllers
 
 
 				[HttpPost("vendors")]
-				public async Task<IActionResult> CreateVendor(Vendor vendor)
+				public async Task<IActionResult> CreateVendor([FromBody] Vendor vendor)
 				{
 
 						bool result = _repo.CreateVendor(vendor);

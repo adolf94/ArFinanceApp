@@ -47,31 +47,30 @@ declare module 'FinanceApi' {
         id: string;
         creditId: string;
         credit?: Account;
+        type: string;
         debitId: string;
         debit?: Account;
         amount: number;
-        currAmount: number;
         addByUserId?: string;
         addByUser?: User;
         vendorId?: string;
         vendor?: Vendor;
         date: string;
         dateAdded: string;
+        description: string;
     }
 
     // ..\Models\User.cs
     export interface User {
         id: string;
         userName?: string;
-        azureId: number;
+        azureId?: string;
     }
 
     // ..\Models\Vendor.cs
     export interface Vendor {
         id: string;
         name?: string;
-        accountTypeId: string;
-        accountType?: AccountType;
         enabled: boolean;
     }
 

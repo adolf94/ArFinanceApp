@@ -1,15 +1,21 @@
 ﻿import React, { useState, useEffect, useContext } from 'react'
-import { List, Grid, Button, TextField, ListItem, FormLabel, createStyles, Portal } from '@mui/material'
+import { List, Grid, Button, TextField, ListItem, FormLabel, createStyles, Portal, Autocomplete, Box, createFilterOptions, useTheme, useMediaQuery, IconButton } from '@mui/material'
 import { SelectAccountContext } from "../NewRecord"
 //import { makeStyles } from '@mui/styles'
 import { DateTimePicker } from '@mui/x-date-pickers'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import usePrevious from 'use-previous'
 import db from '../../components/LocalDb'
 import moment from 'moment'
 import { v4 as uid} from 'uuid'
 import api from '../../components/api'
 import SelectAccount from './SelectAccount'
+import { useQuery } from '@tanstack/react-query'
+import { v4 as uuid } from 'uuid'
+import { fetchVendors, useMutateVendor, VENDOR } from '../../repositories/vendors'
+import { Calculate } from '@mui/icons-material'
+import { Transaction } from 'FinanceApi'
+import { useMutateTransaction } from '../../repositories/transactions'
 
 
 //const usePlaceholderBlack = makeStyles((theme)=>({
@@ -20,18 +26,15 @@ import SelectAccount from './SelectAccount'
 //    },
 //  },
 //}));
-
+const filter = createFilterOptions();
 
 const VendorTextField = (props) => {
   const [internalValue, setInternalValue] = useState("")
   const [focused, setFocused] = useState(false)
-  const view = useContext(SelectAccountContext)
-  useEffect(() => {
-    if (view.type == "vendor") {
-
-    }
-  }, [props.view, focused])
-
+  const { data: vendors } = useQuery({ queryKey: [VENDOR], queryFn: fetchVendors })
+  const mutateVendor = useMutateVendor()
+  const view = useContext<any>(SelectAccountContext)
+  
   const onTyped = (e) => {
     setInternalValue(e)
     props.onSearchChange(e)
@@ -42,36 +45,101 @@ const VendorTextField = (props) => {
     if (focused) {
       return internalValue || ""
     } else {
-      return props.value?.name  || ""
+      return props.value?.name || ""
     }
-
-
   }
-            
-  return <TextField fullWidth {...props} placeholder={(view.type == "vendor") ? (view.searchValue || props.value?.name) : (props.value?.name || "")}
-    value={displayValue()} variant="standard"
-    onFocus={() => {
-      setFocused(true);
-      setInternalValue("")
-    }}
-    onBlur={() => { setFocused(false) }}
-    onChange={(e) => onTyped(e.target.value)}
-    sx={{ input: { color: "black" }, "label": { color: "black" } }} 
-  />
+
+
+  const createNewVendor = (newVendor) => {
+    mutateVendor.create({
+
+      id: uuid(),
+      name: newVendor,
+      enabled: true
+    }).then(e => {
+      props.onChange  (e)
+    })
+  }
+
+
+  return <>
+      <Box sx={{ display: {lg:'block', xs:'none'} } }>
+        <Autocomplete
+          disablePortal
+          id="combo-box-demo"
+          options={vendors}
+          fullWidth
+          getOptionLabel={e => e.name}
+          getOptionKey={ e=>e.id}
+          value={props.value}
+          filterOptions={(options, params) => {
+            const filtered = filter(options, params);
+
+            const { inputValue } = params;
+            // Suggest the creation of a new value
+            const isExisting = options.some((option) => inputValue === option.title);
+            if (inputValue !== '' && !isExisting) {
+              filtered.push({
+                id: uuid(),
+                name: `Add "${inputValue}"`,
+              });
+            }
+
+            return filtered;
+          }}
+          onOpen={props.onClick}
+          onChange={(event, newValue) => {
+            if (typeof newValue === 'string') {
+              createNewVendor(newValue)
+            } else if (newValue && newValue.inputValue) {
+              // Create a new value from the user input
+              createNewVendor(newValue.inputValue)
+            } else {
+              props.onChange(newValue);
+            }
+          }}
+          renderInput={(params) => <TextField {...params} variant="standard" />}
+        />
+      </Box>
+    <Box sx={{ display: {sx:'block', lg:'none'} } }>
+      <TextField fullWidth {...props} placeholder={(view.type == "vendor") ? (view.searchValue || props.value?.name) : (props.value?.name || "")}
+      value={displayValue()} variant="standard"
+      onFocus={() => {
+        setFocused(true);
+        setInternalValue("")
+      }}
+       onBlur={() => { setFocused(false) }}
+       onChange={(e) => onTyped(e.target.value)}
+        sx={{ input: { color: "black" }, "label": { color: "black" } }} 
+      />
+    </Box>
+    </>
+
+
+  //return <TextField fullWidth {...props} placeholder={(view.type == "vendor") ? (view.searchValue || props.value?.name) : (props.value?.name || "")}
+  //  value={displayValue()} variant="standard"
+  //  onFocus={() => {
+  //    setFocused(true);
+  //    setInternalValue("")
+  //  }}
+  //  onBlur={() => { setFocused(false) }}
+  //  onChange={(e) => onTyped(e.target.value)}
+  //  sx={{ input: { color: "black" }, "label": { color: "black" } }} 
 }
 
 const NewRecordForm = (props) => {
   const { formData,setFormData } = props
-  const view = useContext(SelectAccountContext)
+  const view = useContext<any>(SelectAccountContext)
+  const mutateTransaction = useMutateTransaction()
+  const navigate = useNavigate()
 
   const type = props.formData.type
   const prevType = usePrevious(type)
   const prevDebit = usePrevious(formData.debit)
   const prevCredit = usePrevious(formData.credit)
-  const [assetCredit,setAsset] = useState(null)
-  const [viewA, setView] = useState("")
   const setType = (data) => setFormData({...formData, type: data})
-  const [searchStr, setSearch] = useState("")
+  const theme = useTheme();
+  const sm = useMediaQuery(theme.breakpoints.down('lg'));
 
 
   const actualData = () => {
@@ -100,8 +168,8 @@ const NewRecordForm = (props) => {
     switch (prevType) {
 
       case "income":
-        if (type == 'expense') setFormData({ ...formData,credit: prevDebit, debitId: prevDebit?.id, debit: null, debitId: null })
-        if (type == 'transfer') setFormData({ ...formData, credit: prevDebit, creditId: prevDebit?.id, debit: null, debit: null })
+        if (type == 'expense') setFormData({ ...formData,credit: prevDebit, creditId: prevDebit?.id, debit: null, debitId: null })
+        if (type == 'transfer') setFormData({ ...formData, credit: prevDebit, creditId: prevDebit?.id, debit: null, debitId: null })
         break
       case "expense":
         if (type == 'income') setFormData({ ...formData, debit: prevCredit, debitId: prevCredit?.id, credit: null, creditId: null })
@@ -119,49 +187,27 @@ const NewRecordForm = (props) => {
     if(prevType!=type)view.setViewContext({ type: null, groupId: "892f20e5-b8dc-42b6-10c9-08dabb20ff77", onChange: () => { } })
   }, [type])
 
-  const submitTransaction = async () => {
-
-    const newItem = {
-      id: uid(),
-      credit: formData.credit,
-      debit: formData.debit,
+  const submitTransaction =  () => {
+    const newItem: Partial<Transaction> = {
+        id: uuid(), 
+        addByUserId: "1668b555-9788-40ed-a6e8-feeabe9538f6",
       creditId: formData.creditId,
       debitId: formData.debitId,
       amount: formData.amount,
-      currAmount: formData.amount,
-      date: formData.date,
+      vendorId: formData.vendorId,
+      date: moment(formData.date).toISOString(),
       dateAdded: moment().toISOString(),
-      isSaved:0
+      description: formData.description || "",
+      type:formData.type
+
     }
 
-
-    await db.transactions.put(newItem)
-      .then((r) => {
-        console.log(r)
-
-        setFormData({
-          type: formData.type,
-          date: moment().toISOString(),
-          credit: null,
-          debit: null,
-          amount: 0,
-          vendor: null
-        })
+    mutateTransaction.create(newItem)
+      .then(item => {
+        navigate("../records")
       })
-    
-    await db.transactions.where("isSaved").equals(0)
-      .toArray().then((f) => {
-        f.forEach(row => {
-          api.post("transactions", row)
-            .then(res => {
-              console.log(res.data)
-              db.transactions.bulkPut(res.data.transactions)
-              db.accounts.bulkPut(res.data.accounts)
-            }).then(e => {
-              row.isSaved = 1
-            })
-        });
-      });
+
+
   }
 
 
@@ -216,17 +262,8 @@ const NewRecordForm = (props) => {
 
                 <TextField fullWidth autoComplete="off" variant="standard" 
                   value={type == 'income' ? formData.debit?.name || "" : formData.credit?.name || ""}
-              onClick={() => setSelectProps({ ...selectAccountProps, show: true, dest: "source" })}
+                  onClick={() => setSelectProps({ ...selectAccountProps, show: true, dest: "source" })}
                 />
-                { /*
-                //  viewA == "source" && <SelectAccount value={formData[dest.obj]} internalKey="source" 
-                //  onChange={(value) => setFormData({
-                //    ...formData,
-                //    [dest.obj]: value,
-                //    [dest.id]: value.id
-                //  })} show
-                //  selectType="account" typeId="892f20e5-b8dc-42b6-10c9-08dabb20ff77" selectPortal={props.selectPortal} />
-                // */}
           </Grid>
       </Grid>
     </ListItem>
@@ -236,18 +273,10 @@ const NewRecordForm = (props) => {
           <FormLabel >Vendor</FormLabel>
         </Grid>
         <Grid item xs={8}>
-            <VendorTextField autoComplete="off" fullWidth view={view} variant="standard" value={formData.vendor} onSearchChange={(text) => setSearch(text)}
+            <VendorTextField autoComplete="off" fullWidth view={view} variant="standard" value={formData.vendor} 
+              onChange={value=>setFormData({ ...formData,vendor:value})}
               onClick={() => setSelectProps({ ...selectAccountProps, show: true, dest: "vendor" })} />
               
-          {/*
-            viewA == "vendor" && <SelectAccount value={formData.vendor} internalKey="vendor" 
-              onChange={(value) => setFormData({
-                ...formData,
-                vendor: value,
-                vendorId: value.id
-              })} show
-              selectType="vendor" typeId="" selectPortal={props.selectPortal} />
-          */}
         </Grid>
       </Grid>
     </ListItem>
@@ -262,18 +291,6 @@ const NewRecordForm = (props) => {
               onClick={() => setSelectProps({ ...selectAccountProps, show: true, dest: "destination" })}
                 />
 
-              { /*
-                  viewA == "destination" && <SelectAccount internalKey="destination" value={formData[dest.obj]}
-                  onChange={(value) => setFormData({
-                    ...formData,
-                    [dest.obj]: value,
-                    [dest.id]: value.id
-                  })} show
-                  selectType="account" typeId={acct}  selectPortal={props.selectPortal} />
-                */ }
-
-              {/*const acct = type == "transfer" ? "892f20e5-b8dc-42b6-10c9-08dabb20ff77" : (type == "expense" ? "a68ebd61-ce5d-4c99-10ca-08dabb20ff77" :"04c78118-1131-443f-2fa6-08dac49f6ad4")*/}
-           
 
         </Grid>
       </Grid>
@@ -283,9 +300,16 @@ const NewRecordForm = (props) => {
         <Grid item xs={4} alignItems="center">
           <FormLabel >Amount</FormLabel>
         </Grid>
-        <Grid item xs={8}>
-          <TextField inputProps={{ min: 0, style: { textAlign: 'right' } }} fullWidth variant="standard" type="number" step="any"
-            value={formData.amount} onBlur={(e) => setFormData({ ...formData, amount: (Math.round(e.target.value * 100) / 100).toFixed(2) })} onChange={(e) => setFormData({ ...formData, amount: e.target.value })} />
+          <Grid item xs={8}>
+            {/*@ts-ignore*/}
+            <TextField inputProps={{ min: 0, style: { textAlign: 'right' } }} fullWidth variant="standard" type="number" step="0.01"
+              value={formData.amount} onBlur={(e) => setFormData({ ...formData, amount: (Math.round(Number.parseFloat(e.target.value) * 100) / 100).toFixed(2) })}
+              onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
+              onClick={() => setSelectProps((prev) => ({ ...prev, dest: "amount" }))}
+              InputProps={{
+                endAdornment: <IconButton onClick={() => setSelectProps(prev=>({ ...selectAccountProps, show: true, dest: "amount" }))} ><Calculate /></IconButton>
+              }}
+            />
         </Grid>
       </Grid>
     </ListItem>
@@ -316,22 +340,21 @@ const NewRecordForm = (props) => {
               [type == 'income' ? "debit" : "credit"]: value,
               [type == 'income' ? "debitId" : "creditId"]: value.id
             })
-            setSelectProps({ ...selectAccountProps, show: false, dest: "" })
         }}
-        value={type=="income"?formData.debit:formData.credit}
+        onClose={() => setSelectProps({ ...selectAccountProps, show: false, dest: "" })}
+        value={type =="income"?formData.debit:formData.credit}
         selectType='account'
         internalKey="destination"
         typeId="892f20e5-b8dc-42b6-10c9-08dabb20ff77" />
 
-      <SelectAccount show={selectAccountProps.show && selectAccountProps.dest == "vendor"} onChange={(value) => {
+      <SelectAccount show={selectAccountProps.show && sm && selectAccountProps.dest == "vendor"} onChange={(value) => {
         setFormData({
           ...formData,
           vendor: value,
           vendorId: value.id
         })
-        setSelectProps({ ...selectAccountProps, show: false, dest: "" })
       }}
-        searchStr={searchStr}
+        onClose={() => setSelectProps({ ...selectAccountProps, show: false, dest: "" })}
         value={ formData.vendor}
         selectType='vendor'
         internalKey="vendor"
@@ -344,14 +367,25 @@ const NewRecordForm = (props) => {
           [type == 'income' ? "credit" : "debit"]: value,
           [type == 'income' ? "creditId" : "debitId"]: value.id
         })
-        setSelectProps({ ...selectAccountProps, show: false, dest: "" })
       }}
+        onClose={() => setSelectProps({ ...selectAccountProps, show: false, dest: "" })}
         value={type == "income" ? formData.credit : formData.debit}
         selectType='account'
-        selectPortal={props.selectPortal}
         internalKey="destination"
         typeId={type == "transfer" ? "892f20e5-b8dc-42b6-10c9-08dabb20ff77" :
           (type == "expense" ? "a68ebd61-ce5d-4c99-10ca-08dabb20ff77" : "04c78118-1131-443f-2fa6-08dac49f6ad4")} />
+
+      
+      <SelectAccount show={selectAccountProps.show && selectAccountProps.dest == "amount"} onChange={(value) => {
+        setFormData({
+          ...formData,
+          amount:value
+        })
+      }}
+        onClose={() => setSelectProps({ ...selectAccountProps, show: false, dest: "" })}
+        value={formData.amount}
+        selectType='calculate'
+        internalKey="amount" />
     </Portal>
   </>
 }

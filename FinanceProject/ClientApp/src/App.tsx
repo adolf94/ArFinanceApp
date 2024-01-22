@@ -15,6 +15,7 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { persistQueryClient } from '@tanstack/react-query-persist-client'
 import { createSyncStoragePersister } from '@tanstack/query-sync-storage-persister'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import {  createTheme, ThemeProvider } from '@mui/material/styles';
 
 
 
@@ -22,10 +23,20 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
+      //@ts-ignore
       cacheTime: 1000 * 60 * 60 * 24, // 24 hours
     },
   },
 })
+
+const theme = createTheme({
+  typography: {
+      transactionHeaderDate: {
+        fontSize: '1rem',
+        fontWeight: '600'
+      }
+    }
+  })
 
 const localStoragePersister = createSyncStoragePersister({ storage: window.localStorage })
 // const sessionStoragePersister = createSyncStoragePersister({ storage: window.sessionStorage })
@@ -45,27 +56,10 @@ const TheApp = (props) => {
   }
 
   useEffect(() => {
-    Promise.all([
-      api.get("accounttypes").then(e=>e.data),
-      api.get("accountgroups").then(e => e.data),
-      api.get("accounts").then(e => e.data),
-      api.get("vendors").then(e => e.data)
-    ]).then(async (data) => {
-      db.accountTypes.bulkPut(data[0])
-      db.accountGroups.bulkPut(data[1])
-      let currentAccounts = await db.accounts.toArray()
-      let accounts = data[2].map((a) => {
-        let saved = currentAccounts.find(s => s.id == a.id)
-        if (saved) return saved
-        return a
-      })
-      db.accounts.bulkPut(accounts)
-      db.vendors.bulkPut(data[3])
-    })
 
   },[])
 
-
+  //@ts-ignore
   return <DropdownContext.Provider value={{ ...dropdown, set: setDropdownValue } } >
   
     <Routes>
@@ -85,7 +79,9 @@ export default class App extends Component {
       <Layout>
         <LocalizationProvider dateAdapter={ AdapterMoment } >
           <QueryClientProvider client={ queryClient} >
-            <TheApp />
+            <ThemeProvider theme={theme}>
+              <TheApp />
+            </ThemeProvider>
           </QueryClientProvider>
         </LocalizationProvider>
       </Layout>

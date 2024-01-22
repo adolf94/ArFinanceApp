@@ -1,19 +1,21 @@
 ﻿import { useQuery } from "@tanstack/react-query"
 import { ACCOUNT_GROUP, fetchGroups } from "../../repositories/accountgroups"
 import { ACCOUNT, fetchAccounts } from "../../repositories/accounts"
-import { Box, Dialog, Grid, List, ListItem, Portal, useMediaQuery, useTheme } from "@mui/material"
-import { ArrowForwardIos as IcoArrowForwardIos} from '@mui/icons-material'
+import { Box, Dialog, Grid, IconButton, List, ListItem, Portal, TextField, Typography, useMediaQuery, useTheme } from "@mui/material"
+import { Close, ArrowForwardIos as IcoArrowForwardIos} from '@mui/icons-material'
 import React, { useEffect, useState } from "react"
 import { Account, AccountGroup, Vendor } from "FinanceApi"
+import { v4 as uuid } from 'uuid'
+import { fetchVendors, useMutateVendor, VENDOR } from '../../repositories/vendors'
+import Calculator from "../../components/Calculator"
 
 interface SelectAccountProps<T>{
   value: T,
   onChange: (value: T) => void,
+  onClose: () => void,
   selectType: string,
   typeId?: string,
-  selectPortal: any,
   show: boolean,
-  searchStr:string,
   internalKey: string
 }
 
@@ -21,11 +23,14 @@ interface SelectAccountProps<T>{
 function SelectAccount(props: SelectAccountProps<any>) {
     const { data: accountGroups, isLoading: groupLoading } = useQuery({ queryKey: [ACCOUNT_GROUP], queryFn: fetchGroups })
   const { data: accounts, isLoading: acctLoading } = useQuery({ queryKey: [ACCOUNT], queryFn: fetchAccounts })
-
+  const { data: vendors, isLoading: vendorLoading } = useQuery<Vendor[]>({ queryKey: [VENDOR], queryFn: fetchVendors })
+    const [searchQuery, setSearchQuery] = useState("") 
+  const mutateVendor = useMutateVendor()
 
     const [acctGroup, setAcctGroup] = useState<AccountGroup | Vendor>()
     const [acct, setAcct] = useState<Account>()
-
+    const theme = useTheme()
+  const sm = useMediaQuery(theme.breakpoints.down('lg'));
 
   const filteredGroups = (accountGroups || []).filter(e => e.accountTypeId == props.typeId)
     const setValue = (value) => {
@@ -37,27 +42,60 @@ function SelectAccount(props: SelectAccountProps<any>) {
       if(!props.value) return 
       const value = props.value;
       if (props.selectType == "account") {
-        if (value.accountGroup == null) value.accountGroup = (accountGroups || []).find(e=>e.id = value.accountGroupId)
+        if (value.accountGroup == null) value.accountGroup = (accountGroups || []).find(e=>e.id == value.accountGroupId)
         setAcctGroup(value.accountGroup)
         setAcct(value)
       }
     }, [props.value])
 
-  const newVendor = () => {
 
+  const createNewVendor = () => {
+    mutateVendor.create({
+
+      id: uuid(),
+      name: searchQuery,
+      enabled: true
+    }).then(e => {
+      props.onChange(e)
+      setSearchQuery("")
+      props.onClose()
+    })
   }
 
 
-    return <>
-      {props.selectType == "account" && !groupLoading
-            && <Grid container><Grid item xs={6}>
+  const onClose = () => {
+    setSearchQuery("")
+    props.onClose()
+  }
+
+
+  const filteredVendors = (vendors || []).filter(f => f.name.indexOf(searchQuery) > -1)
+
+
+  return <Grid container> 
+    <Grid item xs={12} sx={{px:2,pt:1} }>
+          <Grid container sx={{display:'flex', justifyItems:'center'} }>
+            <Grid item sx={{ flexGrow: 1 }}>
+          {props.selectType == "vendor" ? <TextField value={searchQuery} fullWidth onChange={evt => setSearchQuery(evt.target.value)} variant="standard" placeholder="Search Vendors" />
+            : <Typography variant="body1" sx={{pt:1} }>Select</Typography>}
+            </Grid>
+            <Grid item sx={{ flexShrink: 1 }} ><IconButton onClick={() => onClose()}><Close /></IconButton></Grid>
+          </Grid>
+      </Grid>
+    {props.selectType == "account" && !groupLoading
+        &&<>
+          <Grid item xs={6}>
                 <List>
-            {(accountGroups || []).filter(e => e.accountTypeId == props.typeId).map((e, i) => <ListItem button
-                      selected={e.id === acctGroup?.id}
-                      onClick={() => setAcctGroup(e)}
-                      key={(i)} >
-                        {e.name}
-                    </ListItem>)}
+          {(accountGroups || []).filter(e => e.accountTypeId == props.typeId).map((e, i) => {
+            console.log(acctGroup?.name + " " + e.name + " " + (e.id === acctGroup?.id).toString())
+
+            return <ListItem button
+              selected={!!acctGroup && e.id === acctGroup?.id}
+              onClick={() => setAcctGroup(e)}
+              key={(i)} >
+              {e.name}
+            </ListItem>
+          })}
                 </List>
             </Grid>
                 <Grid item xs={6}>
@@ -71,24 +109,30 @@ function SelectAccount(props: SelectAccountProps<any>) {
                       </ListItem>)}
 
                     </List>
-                </Grid>
-            </Grid>}
-        {props.selectType == "vendor"
-            && <Grid container>
+      </Grid>
+    </>}
+        {props.selectType == "vendor"   
+            && 
                 <Grid item xs={8}>
-                    <List>
-              {props.searchStr
+                  <List>
+                  {
+                    (filteredVendors || []).map((e,i) => <ListItem button
+                      selected={e.id == acct?.id}
+                      onClick={() => setValue(e)}
+                      key={(i)} >
+                      {e.name}
+                    </ListItem>)
+                  }
+              {searchQuery && !filteredVendors.some(f=>f.name.startsWith(searchQuery))
                 && <ListItem button
-                  onClick={() => { }}
+                  onClick={createNewVendor}
                 >
-                  Add {props.searchStr}
+                  Add "{searchQuery}"
                 </ListItem>
               }
             </List>
-                </Grid>
             </Grid>}
-
-    </>
+   </Grid >
 }
 
 function SelectAccountContainer (props: SelectAccountProps<any>) {
@@ -101,14 +145,16 @@ function SelectAccountContainer (props: SelectAccountProps<any>) {
 
   return <>
     {props.show && !sm && <Box display={{ xs: "none", sm: 'block' }}>
-      <SelectAccount {...props} />
+      {props.selectType !== "calculate" && <SelectAccount {...props} />}
+      {props.selectType === "calculate" && <Calculator {...props} />}
     </Box>
     }
     <Dialog open={props.show && sm} fullScreen  sx={{
-      position: "absolute",
-      top: "30%"
-}} maxWidth="lg">
-      <SelectAccount {...props} />
+        position: "absolute",
+        top: "30%"
+      }} maxWidth="lg">
+      {props.selectType !== "calculate" && <SelectAccount {...props} />}
+      {props.selectType === "calculate" && <Calculator {...props} />}
     </Dialog>
   </>
 }
