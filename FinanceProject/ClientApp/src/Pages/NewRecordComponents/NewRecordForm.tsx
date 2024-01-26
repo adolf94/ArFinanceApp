@@ -274,7 +274,7 @@ const NewRecordForm = (props) => {
         </Grid>
         <Grid item xs={8}>
             <VendorTextField autoComplete="off" fullWidth view={view} variant="standard" value={formData.vendor} 
-              onChange={value=>setFormData({ ...formData,vendor:value})}
+              onChange={value=>setFormData({ ...formData,vendor:value, vendorId:value.id})}
               onClick={() => setSelectProps({ ...selectAccountProps, show: true, dest: "vendor" })} />
               
         </Grid>
@@ -288,7 +288,7 @@ const NewRecordForm = (props) => {
         <Grid item xs={8}>
                  <TextField autoComplete="off" fullWidth variant="standard"
                   value={type == 'income' ? formData.credit?.name || "" : formData.debit?.name || ""}
-              onClick={() => setSelectProps({ ...selectAccountProps, show: true, dest: "destination" })}
+                  onClick={() => setSelectProps({ ...selectAccountProps, show: true, dest: "destination" })}
                 />
 
 

@@ -17,11 +17,21 @@ namespace FinanceProject.Data.SqlRepo
 				public Transaction CreateTransaction(CreateTransactionDto item)
 				{
 
+
+
+						
+
 						Transaction tran = _mapper.Map<Transaction>(item);
 						_context.Transactions!.Add(tran);
 						_context.SaveChanges();
 						return tran;
 						
+				}
+				
+				public IEnumerable<Transaction> GetByMonth(int year, int month)
+				{
+						return _context.Transactions!.Where(t=>t.Date.Month == month && t.Date.Year == year)
+								.ToList();
 				}
 		}
 }

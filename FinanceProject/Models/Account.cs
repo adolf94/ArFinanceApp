@@ -3,7 +3,6 @@ using TypeLite;
 
 namespace FinanceProject.Models
 {
-		[TsClass]
 		public class Account
 		{
 				public Guid Id { get; set; } = new Guid();
@@ -17,8 +16,8 @@ namespace FinanceProject.Models
 
 
 				[JsonIgnore]
-				public ICollection<Transaction>? TransactionsAsDebit { get; set; }
+				public virtual ICollection<Transaction>? TransactionsAsDebit { get; set; }
 				[JsonIgnore]
-				public ICollection<Transaction>? TransactionsAsCredit { get; set; }
+				public virtual ICollection<Transaction>? TransactionsAsCredit { get; set; }
 		}
 }

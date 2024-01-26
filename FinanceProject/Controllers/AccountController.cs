@@ -18,7 +18,7 @@ namespace FinanceProject.Controllers
 				[HttpGet("accounts")]
 				public async Task<IActionResult> GetAll()
 				{
-						IEnumerable<Account> accounts = _repo.GetAccounts();
+						IEnumerable<Account> accounts = _repo.GetAccounts(false);
 						return await Task.FromResult(Ok(accounts));
 				}
 

@@ -15,6 +15,10 @@ const AppRoutes = [
     element: <Counter />
   },
   {
+    path: "/records/:view",
+    element: <Records />
+  },
+  {
     path: "/records",
     element: <Records />
   },

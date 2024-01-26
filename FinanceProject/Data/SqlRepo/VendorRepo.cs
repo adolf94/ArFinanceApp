@@ -1,6 +1,5 @@
 ﻿using FinanceProject.Models;
 using Microsoft.EntityFrameworkCore;
-using System.Numerics;
 
 namespace FinanceProject.Data.SqlRepo
 {
@@ -41,6 +40,11 @@ namespace FinanceProject.Data.SqlRepo
 								_logger.LogError(ex, ex.Message);
 								throw;
 						}
+				}
+
+				public Vendor? GetOne(Guid id)
+				{
+						return _context.Vendors!.Find(id);
 				}
 		}
 }

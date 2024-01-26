@@ -6,7 +6,12 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faChevronLeft, faChevronRight, faPlus } from '@fortawesome/free-solid-svg-icons'
 import AccountsPage from './Accounts'
 
-import { Link } from 'react-router-dom'
+import { Link, useMatch, useNavigate, useParams } from 'react-router-dom'
+import moment from 'moment'
+import { useEffect } from 'react'
+import Daily from './RecordsComponents/Daily'
+import { useQuery } from '@tanstack/react-query'
+import { TRANSACTION, fetchTransactionsByMonth } from '../repositories/transactions'
 
 
 
@@ -26,23 +31,33 @@ const fabGreenStyle = {
 
 
 const Records = () => {
-  const [value, setValue] = useState(0);
+  const [value, setValue] = useState("daily");
+  const [month, setMonth] = useState(moment())
+  const { view } = useParams()
+  const navigate = useNavigate()
+  const { data: records } = useQuery({
+    queryKey: [TRANSACTION, { month: month.get("month") + 1, year: month.get("year") }],
+    queryFn: () => fetchTransactionsByMonth(month.get("year"), month.get("month") + 1)
+  })
 
   const handleChange = (event, newValue) => {
-    setValue(newValue);
+    //setValue(newValue);
+    navigate("../records/" + newValue)
   };
 
-
+  useEffect(() => {
+    if(!view) navigate("daily")
+  },[view])
 
   return <>
     <AppBar position="static">
       <Toolbar>
         <IconButton>
-          <FontAwesomeIcon icon={ faChevronLeft } />
+          <FontAwesomeIcon icon={faChevronLeft} onClick={() => setMonth(month.clone().add(-1, "month"))} />
         </IconButton>
-        <span className="my-1">Oct 2022</span>
+        <span className="my-1">{month.format("MMM yyyy")}</span>
         <IconButton>
-          <FontAwesomeIcon icon={faChevronRight} />
+          <FontAwesomeIcon icon={faChevronRight} onClick={()=>setMonth(month.clone().add(1,"month"))} />
         </IconButton>
       </Toolbar>
     </AppBar>
@@ -52,262 +67,23 @@ const Records = () => {
           <AccountsPage />
         </Paper>
       </Grid>
-      <Grid item xs={12} md={8} sx={{maxHeight: '85vh', overflow:'overlay'} }>
+      <Grid item xs={12} md={8}>
         <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-          <Tabs value={value} onChange={handleChange} aria-label="basic tabs example">
-            <Tab label="Daily" value="1" />
-            <Tab label="Calendar" value="2" />
-            <Tab label="Weekly" value="3" />
-            <Tab label="Monthly" value="4" />
-            <Tab label="Total" value="5" />
+          <Tabs value={view} onChange={handleChange} aria-label="basic tabs example">
+            <Tab label="Daily" value="daily" />
+            <Tab label="Calendar" value="calendar" />
+            <Tab label="Weekly" value="weekly" />
+            <Tab label="Monthly" value="monthly" />
+            <Tab label="Total" value="total" />
           </Tabs>
         </Box>
-        <div role="tabpanel" hidden={value != 1}>
-          <Paper sx={{ my: 1 }}>
-            <List>
-              <ListItem dense>
-                <Grid container sx={{ display: "flex", alignItems: 'center' }}>
-                  <Grid item xs={6}>
-                    <Typography sx={{ px: 1 }} variant="transactionHeaderDate">22</Typography> <Chip label="Mon" sx={{ mr: 1 }}></Chip> 01-2023
-                  </Grid>
-                  <Grid item xs={3} sx={{ display: 'flex', textAlign: 'center', justifyContent: 'center' }}>
-                    <Typography color="green" sx={{ px: 1, alignSelf: 'center', fontColor: 'success' }} variant="transactionHeaderDate">0.00</Typography>
-                  </Grid>
-                  <Grid item xs={3} sx={{ display: 'flex', textAlign: 'center', justifyContent: 'center' }}>
-                    <Typography color="red" sx={{ px: 1, alignSelf: 'center', fontColor: 'danger' }} variant="transactionHeaderDate">0.00</Typography>
-                  </Grid>
-                </Grid>
-              </ListItem>
-              <Divider />
-              <ListItem>
-                <Grid container>
-                  <Grid item xs={3}>
-                    <Typography sx={{ px: 1 }} variant="body1">Transfer</Typography>
-                  </Grid>
-                  <Grid item xs={5}>
-                    <Typography sx={{ fontWeight: 600 }} variant="body1">Comments</Typography>
-                    BPI4229
-                  </Grid>
-                  <Grid item xs={4} sx={{ textAlign: 'right' }}>
-                    <Typography sx={{ px: 1, fontWeight: 600 }} variant="body1">P 0.00</Typography>
-                  </Grid>
-                </Grid>
-              </ListItem>
-              <ListItem>
-                <Grid container>
-                  <Grid item xs={3}>
-                    <Typography sx={{ px: 1 }} variant="body1">Transfer</Typography>
-                  </Grid>
-                  <Grid item xs={5}>
-                    <Typography sx={{ fontWeight: 600 }} variant="body1">Comments</Typography>
-                    BPI4229
-                  </Grid>
-                  <Grid item xs={4} sx={{ textAlign: 'right' }}>
-                    <Typography sx={{ px: 1, fontWeight: 600 }} variant="body1">P 0.00</Typography>
-                  </Grid>
-                </Grid>
-              </ListItem>
-              <ListItem>
-                <Grid container>
-                  <Grid item xs={3}>
-                    <Typography sx={{ px: 1 }} variant="body1">Transfer</Typography>
-                  </Grid>
-                  <Grid item xs={5}>
-                    <Typography sx={{ fontWeight: 600 }} variant="body1">Comments</Typography>
-                    BPI4229
-                  </Grid>
-                  <Grid item xs={4} sx={{ textAlign: 'right' }}>
-                    <Typography sx={{ px: 1, fontWeight: 600 }} variant="body1">P 0.00</Typography>
-                  </Grid>
-                </Grid>
-              </ListItem>
-            </List>
-          </Paper>
-          <Paper sx={{ my: 1 }}>
-            <List>
-              <ListItem dense>
-                <Grid container sx={{ display: "flex", alignItems: 'center' }}>
-                  <Grid item xs={6}>
-                    <Typography sx={{ px: 1 }} variant="transactionHeaderDate">22</Typography> <Chip label="Mon" sx={{ mr: 1 }}></Chip> 01-2023
-                  </Grid>
-                  <Grid item xs={3} sx={{ display: 'flex', textAlign: 'center', justifyContent: 'center' }}>
-                    <Typography color="green" sx={{ px: 1, alignSelf: 'center', fontColor: 'success' }} variant="transactionHeaderDate">0.00</Typography>
-                  </Grid>
-                  <Grid item xs={3} sx={{ display: 'flex', textAlign: 'center', justifyContent: 'center' }}>
-                    <Typography color="red" sx={{ px: 1, alignSelf: 'center', fontColor: 'danger' }} variant="transactionHeaderDate">0.00</Typography>
-                  </Grid>
-                </Grid>
-              </ListItem>
-              <Divider />
-              <ListItem>
-                <Grid container>
-                  <Grid item xs={3}>
-                    <Typography sx={{ px: 1 }} variant="body1">Transfer</Typography>
-                  </Grid>
-                  <Grid item xs={5}>
-                    <Typography sx={{ fontWeight: 600 }} variant="body1">Comments</Typography>
-                    BPI4229
-                  </Grid>
-                  <Grid item xs={4} sx={{ textAlign: 'right' }}>
-                    <Typography sx={{ px: 1, fontWeight: 600 }} variant="body1">P 0.00</Typography>
-                  </Grid>
-                </Grid>
-              </ListItem>
-              <ListItem>
-                <Grid container>
-                  <Grid item xs={3}>
-                    <Typography sx={{ px: 1 }} variant="body1">Transfer</Typography>
-                  </Grid>
-                  <Grid item xs={5}>
-                    <Typography sx={{ fontWeight: 600 }} variant="body1">Comments</Typography>
-                    BPI4229
-                  </Grid>
-                  <Grid item xs={4} sx={{ textAlign: 'right' }}>
-                    <Typography sx={{ px: 1, fontWeight: 600 }} variant="body1">P 0.00</Typography>
-                  </Grid>
-                </Grid>
-              </ListItem>
-              <ListItem>
-                <Grid container>
-                  <Grid item xs={3}>
-                    <Typography sx={{ px: 1 }} variant="body1">Transfer</Typography>
-                  </Grid>
-                  <Grid item xs={5}>
-                    <Typography sx={{ fontWeight: 600 }} variant="body1">Comments</Typography>
-                    BPI4229
-                  </Grid>
-                  <Grid item xs={4} sx={{ textAlign: 'right' }}>
-                    <Typography sx={{ px: 1, fontWeight: 600 }} variant="body1">P 0.00</Typography>
-                  </Grid>
-                </Grid>
-              </ListItem>
-            </List>
-          </Paper>
-          <Paper sx={{ my: 1 }}>
-            <List>
-              <ListItem dense>
-                <Grid container sx={{ display: "flex", alignItems: 'center' }}>
-                  <Grid item xs={6}>
-                    <Typography sx={{ px: 1 }} variant="transactionHeaderDate">22</Typography> <Chip label="Mon" sx={{ mr: 1 }}></Chip> 01-2023
-                  </Grid>
-                  <Grid item xs={3} sx={{ display: 'flex', textAlign: 'center', justifyContent: 'center' }}>
-                    <Typography color="green" sx={{ px: 1, alignSelf: 'center', fontColor: 'success' }} variant="transactionHeaderDate">0.00</Typography>
-                  </Grid>
-                  <Grid item xs={3} sx={{ display: 'flex', textAlign: 'center', justifyContent: 'center' }}>
-                    <Typography color="red" sx={{ px: 1, alignSelf: 'center', fontColor: 'danger' }} variant="transactionHeaderDate">0.00</Typography>
-                  </Grid>
-                </Grid>
-              </ListItem>
-              <Divider />
-              <ListItem>
-                <Grid container>
-                  <Grid item xs={3}>
-                    <Typography sx={{ px: 1 }} variant="body1">Transfer</Typography>
-                  </Grid>
-                  <Grid item xs={5}>
-                    <Typography sx={{ fontWeight: 600 }} variant="body1">Comments</Typography>
-                    BPI4229
-                  </Grid>
-                  <Grid item xs={4} sx={{ textAlign: 'right' }}>
-                    <Typography sx={{ px: 1, fontWeight: 600 }} variant="body1">P 0.00</Typography>
-                  </Grid>
-                </Grid>
-              </ListItem>
-              <ListItem>
-                <Grid container>
-                  <Grid item xs={3}>
-                    <Typography sx={{ px: 1 }} variant="body1">Transfer</Typography>
-                  </Grid>
-                  <Grid item xs={5}>
-                    <Typography sx={{ fontWeight: 600 }} variant="body1">Comments</Typography>
-                    BPI4229
-                  </Grid>
-                  <Grid item xs={4} sx={{ textAlign: 'right' }}>
-                    <Typography sx={{ px: 1, fontWeight: 600 }} variant="body1">P 0.00</Typography>
-                  </Grid>
-                </Grid>
-              </ListItem>
-              <ListItem>
-                <Grid container>
-                  <Grid item xs={3}>
-                    <Typography sx={{ px: 1 }} variant="body1">Transfer</Typography>
-                  </Grid>
-                  <Grid item xs={5}>
-                    <Typography sx={{ fontWeight: 600 }} variant="body1">Comments</Typography>
-                    BPI4229
-                  </Grid>
-                  <Grid item xs={4} sx={{ textAlign: 'right' }}>
-                    <Typography sx={{ px: 1, fontWeight: 600 }} variant="body1">P 0.00</Typography>
-                  </Grid>
-                </Grid>
-              </ListItem>
-            </List>
-          </Paper>
-          <Paper sx={{ my: 1 }}>
-            <List>
-              <ListItem dense>
-                <Grid container sx={{ display: "flex", alignItems: 'center' }}>
-                  <Grid item xs={6}>
-                    <Typography sx={{ px: 1 }} variant="transactionHeaderDate">22</Typography> <Chip label="Mon" sx={{ mr: 1 }}></Chip> 01-2023
-                  </Grid>
-                  <Grid item xs={3} sx={{ display: 'flex', textAlign: 'center', justifyContent: 'center' }}>
-                    <Typography color="green" sx={{ px: 1, alignSelf: 'center', fontColor: 'success' }} variant="transactionHeaderDate">0.00</Typography>
-                  </Grid>
-                  <Grid item xs={3} sx={{ display: 'flex', textAlign: 'center', justifyContent: 'center' }}>
-                    <Typography color="red" sx={{ px: 1, alignSelf: 'center', fontColor: 'danger' }} variant="transactionHeaderDate">0.00</Typography>
-                  </Grid>
-                </Grid>
-              </ListItem>
-              <Divider />
-              <ListItem>
-                <Grid container>
-                  <Grid item xs={3}>
-                    <Typography sx={{ px: 1 }} variant="body1">Transfer</Typography>
-                  </Grid>
-                  <Grid item xs={5}>
-                    <Typography sx={{ fontWeight: 600 }} variant="body1">Comments</Typography>
-                    BPI4229
-                  </Grid>
-                  <Grid item xs={4} sx={{ textAlign: 'right' }}>
-                    <Typography sx={{ px: 1, fontWeight: 600 }} variant="body1">P 0.00</Typography>
-                  </Grid>
-                </Grid>
-              </ListItem>
-              <ListItem>
-                <Grid container>
-                  <Grid item xs={3}>
-                    <Typography sx={{ px: 1 }} variant="body1">Transfer</Typography>
-                  </Grid>
-                  <Grid item xs={5}>
-                    <Typography sx={{ fontWeight: 600 }} variant="body1">Comments</Typography>
-                    BPI4229
-                  </Grid>
-                  <Grid item xs={4} sx={{ textAlign: 'right' }}>
-                    <Typography sx={{ px: 1, fontWeight: 600 }} variant="body1">P 0.00</Typography>
-                  </Grid>
-                </Grid>
-              </ListItem>
-              <ListItem>
-                <Grid container>
-                  <Grid item xs={3}>
-                    <Typography sx={{ px: 1 }} variant="body1">Transfer</Typography>
-                  </Grid>
-                  <Grid item xs={5}>
-                    <Typography sx={{ fontWeight: 600 }} variant="body1">Comments</Typography>
-                    BPI4229
-                  </Grid>
-                  <Grid item xs={4} sx={{ textAlign: 'right' }}>
-                    <Typography sx={{ px: 1, fontWeight: 600 }} variant="body1">P 0.00</Typography>
-                  </Grid>
-                </Grid>
-              </ListItem>
-            </List>
-          </Paper>
+        <div role="tabpanel" hidden={view != "daily"}>
+          <Daily records={(records||[])} />
         </div>
-        <div role="tabpanel" hidden={value != 2}>
+        <div role="tabpanel" hidden={value != ""}>
           2
         </div>
-        <div role="tabpanel" hidden={value != 3}>
+        <div role="tabpanel" hidden={value != ""}>
           3
         </div>
       </Grid>

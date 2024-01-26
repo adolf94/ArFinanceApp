@@ -4,8 +4,9 @@ namespace FinanceProject.Dto
 {
 		public class NewTransactionResponseDto
 		{
-				public ICollection<Transaction>? transactions{ get; set; }
+				public Transaction? Transaction { get; set; }
 				
-				public IEnumerable<Account>? accounts { get; set; }
+				public List<Account> Accounts { get; set; } = new List<Account>();
+				public List<AccountBalance> Balances { get; set; } = new List<AccountBalance>();
 		}
 }

@@ -30,7 +30,7 @@ namespace FinanceProject.Data.SqlRepo
 						try
 						{
 
-								return _context.AccountTypes!.ToArray();	
+								return _context.AccountTypes!.Where(e => e.Enabled == true).ToArray();	
 						}catch(Exception ex)
 						{
 								_logger.LogError(ex, ex.Message);

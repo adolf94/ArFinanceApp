@@ -26,7 +26,9 @@ namespace FinanceProject.Controllers
 				[HttpGet("vendors/{id}")]
 				public async Task<IActionResult> GetOne(Guid id)
 				{
-						return await Task.FromResult(Ok(_repo.GetVendors()));
+						Vendor? vendor = _repo.GetOne(id);
+						if(vendor == null) return NotFound();
+						return await Task.FromResult(Ok(vendor));
 				}
 
 

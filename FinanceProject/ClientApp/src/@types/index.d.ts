@@ -11,6 +11,14 @@ declare module 'FinanceApi' {
         currBalance: number;
     }
 
+    // ..\Models\AccountBalance.cs
+    export interface AccountBalance {
+        accountId: string;
+        month: number;
+        year: number;
+        balance: number;
+    }
+
     // ..\Models\AccountGroup.cs
     export interface AccountGroup {
         id: string;
@@ -81,6 +89,29 @@ declare module 'FinanceApi' {
         startDate: string;
         startBalance: number;
         endBalance: number;
+    }
+
+    // ..\Dto\AppProfile.cs
+    export interface AppProfile extends Profile {
+    }
+
+    // ..\Dto\CreateTransactionDto.cs
+    export interface CreateTransactionDto {
+        id: string;
+        creditId: string;
+        vendorId?: string;
+        debitId: string;
+        amount: number;
+        date: string;
+        type: string;
+        description: string;
+    }
+
+    // ..\Dto\NewTransactionResponseDto.cs
+    export interface NewTransactionResponseDto {
+        transaction?: Transaction;
+        accounts: Account[];
+        balances: AccountBalance[];
     }
 
 }

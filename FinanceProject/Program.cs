@@ -30,6 +30,7 @@ builder.Services.AddScoped<IAccountTypeRepo,AccountTypeRepo>();
 builder.Services.AddScoped<IAccountGroupRepo,AccountGroupRepo>();
 builder.Services.AddScoped<IAccountRepo,AccountRepo>();
 builder.Services.AddScoped<ITransactionRepo,TransactionRepo>();
+builder.Services.AddScoped<IAccountBalanceRepo,AccountBalanceRepo>();
 builder.Services.AddScoped<IVendorRepo,VendorRepo>();
 builder.Services.AddControllersWithViews();
 

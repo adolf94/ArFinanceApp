@@ -1,7 +1,7 @@
 {
     "include": [
         "../Models/*.cs",
-        "../Dtos/*.cs",
+        "../Dto/*.cs",
         "../QueryParams/*.cs"
 
     ],

@@ -52,22 +52,29 @@ const TheApp = (props) => {
   const [dropdown, setDropdown] = useState(defaultData)
 
   const setDropdownValue = (name, values) => {
-    setDropdown({...dropdown,[name]:values})
+    setDropdown({ ...dropdown, [name]: values })
   }
 
   useEffect(() => {
 
-  },[])
+  }, [])
+
+
+  const RouteMapper = (routes) => {
+    return routes.map((route, index) => {
+      const { element,children, ...rest } = route;
+      return <Route key={index} {...rest} element={element}>
+          {children != undefined && RouteMapper(children) }
+        </Route>;
+    })
+  }
 
   //@ts-ignore
   return <DropdownContext.Provider value={{ ...dropdown, set: setDropdownValue } } >
   
     <Routes>
-    {AppRoutes.map((route, index) => {
-      const { element, ...rest } = route;
-      return <Route key={index} {...rest} element={element} />;
-    })}
-  </Routes>
+    {RouteMapper(AppRoutes)}
+    </Routes>
   </DropdownContext.Provider>
 }
 

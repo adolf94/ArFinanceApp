@@ -63,7 +63,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="ClientApp\src\%40types\" />
+    <Folder Include="ClientApp\src\%40types\NewFolder\" />
+    <Folder Include="ClientApp\src\Pages\NewFolder\" />
   </ItemGroup>
 
   <ItemGroup>
