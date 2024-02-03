@@ -22,8 +22,7 @@ namespace FinanceProject.Data.SqlRepo
 								{
 										AccountId = group.Id,
 										Balance = 0m,
-										Month = DateTime.Now.Month,
-										Year = DateTime.Now.Year
+										Month = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1)
 								});
 								if(group.Balance != 0)
 								{		
@@ -58,9 +57,8 @@ namespace FinanceProject.Data.SqlRepo
 						else
 						{
 								debit.Balance += amount;
-								_context.Entry(debit).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
+								//_context.Entry(debit).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
 						}
-						_context.SaveChanges();
 						return debit;
 
 				}
@@ -75,10 +73,9 @@ namespace FinanceProject.Data.SqlRepo
 						else
 						{
 								credit.Balance += -amount;
-								_context.Entry(credit).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
+								//_context.Entry(credit).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
 						}
 
-						_context.SaveChanges();
 						return credit;
 
 				}

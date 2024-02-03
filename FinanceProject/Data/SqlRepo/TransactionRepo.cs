@@ -18,9 +18,6 @@ namespace FinanceProject.Data.SqlRepo
 				{
 
 
-
-						
-
 						Transaction tran = _mapper.Map<Transaction>(item);
 						_context.Transactions!.Add(tran);
 						_context.SaveChanges();
@@ -28,10 +25,22 @@ namespace FinanceProject.Data.SqlRepo
 						
 				}
 				
+				public Transaction? GetOneTransaction(Guid id)
+				{
+						return _context.Transactions!.Find(id);					
+				}
+
+
 				public IEnumerable<Transaction> GetByMonth(int year, int month)
 				{
 						return _context.Transactions!.Where(t=>t.Date.Month == month && t.Date.Year == year)
 								.ToList();
+				}
+
+				public Transaction UpdateTransaction(Transaction item)
+				{
+						_context.SaveChanges();
+						return item;
 				}
 		}
 }

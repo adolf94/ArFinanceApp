@@ -8,6 +8,7 @@ import { Link } from "react-router-dom"
 import NewRecordForm from './NewRecordComponents/NewRecordForm'
 import SelectAccount from "./NewRecordComponents/SelectAccount"
 import moment from 'moment'
+import { ChevronLeft } from "@mui/icons-material"
 
 
 export const SelectAccountContext = createContext({})
@@ -49,7 +50,8 @@ const NewRecordPage = (props) => {
     <Toolbar>
       <Link to="/records">
         <IconButton size="large" >
-          <FontAwesomeIcon icon={faArrowLeftLong} />
+          {/*<FontAwesomeIcon icon={faArrowLeftLong} />*/}
+          <ChevronLeft />
         </IconButton>
       </Link>
       <Typography sx={{ flexGrow: 1 }} variant="h5" component="div">New</Typography>

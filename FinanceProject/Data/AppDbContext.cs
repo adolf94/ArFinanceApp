@@ -64,7 +64,7 @@ namespace FinanceProject.Data
 								.HasOne(e => e.Vendor)	;
 
 						builder.Entity<WeeklyBalance>().HasKey(bal => new { bal.AccountId, bal.StartDate });
-						builder.Entity<AccountBalance>().HasKey(bal => new { bal.AccountId, bal.Month, bal.Year });
+						builder.Entity<AccountBalance>().HasKey(bal => new { bal.AccountId, bal.Month });
 
 						base.OnModelCreating(builder);
 				}

@@ -9,13 +9,14 @@ declare module 'FinanceApi' {
         foreignExchange: number;
         balance: number;
         currBalance: number;
+        periodStartDay: number;
+        resetEndOfPeriod: boolean;
     }
 
     // ..\Models\AccountBalance.cs
     export interface AccountBalance {
         accountId: string;
-        month: number;
-        year: number;
+        month: string;
         balance: number;
     }
 
@@ -48,6 +49,14 @@ declare module 'FinanceApi' {
         currencyId: number;
         currencyName: string;
         currencyCode: string;
+    }
+
+    // ..\Models\ScheduledTransactions.cs
+    export interface ScheduledTransactions extends Transaction {
+        cronExpression: string;
+        cronId: string;
+        lastTransactionId?: string;
+        endDate: string;
     }
 
     // ..\Models\Transaction.cs

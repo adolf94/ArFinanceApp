@@ -1,5 +1,5 @@
-﻿using Newtonsoft.Json;
-using TypeLite;
+﻿
+using System.Text.Json.Serialization;
 
 namespace FinanceProject.Models
 {
@@ -13,11 +13,13 @@ namespace FinanceProject.Models
 				public decimal ForeignExchange { get; set; }
 				public decimal Balance { get; set; }
 				public decimal CurrBalance { get; set; }
+				public int PeriodStartDay { get; set; } = 1;
+				public bool ResetEndOfPeriod { get; set; } = false;
 
 
 				[JsonIgnore]
-				public virtual ICollection<Transaction>? TransactionsAsDebit { get; set; }
+				public ICollection<Transaction>? TransactionsAsDebit { get; set; }
 				[JsonIgnore]
-				public virtual ICollection<Transaction>? TransactionsAsCredit { get; set; }
+				public ICollection<Transaction>? TransactionsAsCredit { get; set; }
 		}
 }

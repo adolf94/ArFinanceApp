@@ -4,6 +4,7 @@ using FinanceProject.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FinanceProject.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240127031821_ChangeToDate")]
+    partial class ChangeToDate
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -46,12 +48,6 @@ namespace FinanceProject.Migrations
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("PeriodStartDay")
-                        .HasColumnType("int");
-
-                    b.Property<bool>("ResetEndOfPeriod")
-                        .HasColumnType("bit");
-
                     b.HasKey("Id");
 
                     b.HasIndex("AccountGroupId");
@@ -67,9 +63,7 @@ namespace FinanceProject.Migrations
                             CurrBalance = 0m,
                             Enabled = false,
                             ForeignExchange = 0m,
-                            Name = "Adjustments",
-                            PeriodStartDay = 1,
-                            ResetEndOfPeriod = false
+                            Name = "Adjustments"
                         });
                 });
 

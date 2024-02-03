@@ -1,11 +1,14 @@
+import { IndexRouteProps, LayoutRouteProps, PathRouteProps } from "react-router";
 import { Counter } from "./components/Counter";
 import { FetchData } from "./components/FetchData";
 import { Home } from "./components/Home";
+import React from 'react'
 import AccountsPage from "./Pages/AccountsPage";
 import NewRecordPage from "./Pages/NewRecord";
 import Records from "./Pages/Records";
+import ViewAccount from "./Pages/Accounts/ViewAccount";
 
-const AppRoutes = [
+const AppRoutes : (PathRouteProps | IndexRouteProps | LayoutRouteProps)[]= [
   {
     index: true,
     element: <Home />
@@ -23,8 +26,12 @@ const AppRoutes = [
     element: <Records />
   },
   {
-    path: "/records/new",
+    path: "/transactions/:transId",
     element: <NewRecordPage />
+  }, 
+  {
+    path: "/accounts/:acctId",
+    element: <ViewAccount />
   },
   {
     path: "/accounts",

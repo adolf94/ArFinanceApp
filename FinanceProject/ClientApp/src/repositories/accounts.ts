@@ -7,7 +7,6 @@ export const ACCOUNT = "account"
 
 
 export const fetchAccounts = () => {
-
   return api.get("accounts")
     .then(e => {
       e.data.forEach(acct => {
@@ -19,7 +18,7 @@ export const fetchAccounts = () => {
 }
 
 export const fetchByAccountId = (id: string) => {
-
+  //[ACCOUNT, { id: acct.id }]
   return api.get("accounts/" + id)
     .then(e => {
       return e.data

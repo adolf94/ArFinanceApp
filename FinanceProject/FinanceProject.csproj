@@ -8,7 +8,7 @@
     <IsPackable>false</IsPackable>
     <SpaRoot>ClientApp\</SpaRoot>
 		<DefaultItemExcludes>$(DefaultItemExcludes);$(SpaRoot)node_modules\**</DefaultItemExcludes>
-    <SpaProxyServerUrl>http://localhost:3000</SpaProxyServerUrl>
+    <SpaProxyServerUrl>https://localhost:44442</SpaProxyServerUrl>
     <!--<SpaProxyLaunchCommand>npm start</SpaProxyLaunchCommand>-->
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
@@ -38,9 +38,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Remove="ClientApp\src\Pages\NewRecordComponents\SelectAccount.tsx" />
-    <None Remove="ClientApp\src\Pages\NewRecordComponents\SelectAccountNew.tsx" />
+    <None Remove="ClientApp\src\common\file.tsx" />
+    <None Remove="ClientApp\src\common\Select.ts" />
   </ItemGroup>
+
 
   <ItemGroup>
     <None Include="Data\AppDbContextCosmos.cs" />
@@ -63,14 +64,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="ClientApp\src\%40types\NewFolder\" />
-    <Folder Include="ClientApp\src\Pages\NewFolder\" />
+    <TypeScriptCompile Include="ClientApp\src\common\file.tsx" />
+    <TypeScriptCompile Include="ClientApp\src\common\Select.tsx" />
   </ItemGroup>
 
-  <ItemGroup>
-    <TypeScriptCompile Include="ClientApp\src\Pages\NewRecordComponents\SelectAccount.tsx" />
-    <TypeScriptCompile Include="ClientApp\src\Pages\NewRecordComponents\SelectAccountNew.tsx" />
-  </ItemGroup>
 
   <Target Name="PublishRunWebpack" AfterTargets="ComputeFilesToPublish">
     <!-- As part of publishing, ensure the JS resources are freshly built in production mode -->

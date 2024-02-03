@@ -89,7 +89,7 @@ const Records = () => {
       </Grid>
 
     </Grid>
-    <Link to="/records/new">
+    <Link to="/transactions/new">
       <Fab color="primary" sx={fabGreenStyle}>
         <FontAwesomeIcon color="inherit" icon={faPlus} size="xl" />
       </Fab>

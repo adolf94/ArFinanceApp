@@ -9,6 +9,10 @@ using System.Configuration;
 using TypeLite;
 using TypeLite.Net4;
 
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using System.Text.Json.Serialization;
+
 var builder = WebApplication.CreateBuilder(args);
 var Configuration = builder.Configuration;
 // Add services to the container.
@@ -32,8 +36,10 @@ builder.Services.AddScoped<IAccountRepo,AccountRepo>();
 builder.Services.AddScoped<ITransactionRepo,TransactionRepo>();
 builder.Services.AddScoped<IAccountBalanceRepo,AccountBalanceRepo>();
 builder.Services.AddScoped<IVendorRepo,VendorRepo>();
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews()
 
+		.AddJsonOptions(options =>
+				options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles)
 ; var mapperConfig = new MapperConfiguration(mc =>
 {
 		//mc.SetGeneratePropertyMaps<Generate>()

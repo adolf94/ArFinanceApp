@@ -2,6 +2,7 @@ import { Box, Chip, Divider, Grid, List, ListItem, Paper, Typography } from "@mu
 import { Transaction } from "FinanceApi"
 import moment from "moment"
 import React, { useEffect, useState } from 'react'
+import { useNavigate } from "react-router"
 
 
 interface DailyViewProps {
@@ -20,9 +21,10 @@ interface RecordViewTransaction {
 
 
 const Daily = (props : DailyViewProps) => {
-
+    
 
   const [records, setRecords] = useState<RecordViewTransaction[]>([])
+  const navigate = useNavigate()
   const [totals, setTotals] = useState({
       income: 0,
       expense: 0,
@@ -97,8 +99,8 @@ const Daily = (props : DailyViewProps) => {
     {
       records.map((data) => <Paper sx={{my:1} }>
         <List>
-          <ListItem dense>
-            <Grid item xs={6}>
+          <ListItem dense onClick={() => navigate("/transactions/new?date="+data.dateGroup)}>
+              <Grid item xs={6}>
               <Typography sx={{ px: 1 }} variant="transactionHeaderDate">{data.day}</Typography> <Chip label={data.dayOfWeek} sx={{ mr: 1 }}></Chip>
             </Grid>
             <Grid item xs={3} sx={{ display: 'flex', textAlign: 'center', justifyContent: 'center' }}>
@@ -110,7 +112,8 @@ const Daily = (props : DailyViewProps) => {
           </ListItem>
           <Divider />
           {
-            data.items.map((item) => <ListItem>
+            data.items.map((item) => <ListItem onClick={() => navigate("../transactions/" + item.id)}>
+
                 <Grid container>
                 <Grid item xs={3}>
                   <Typography sx={{ px: 1 }} variant="body1">

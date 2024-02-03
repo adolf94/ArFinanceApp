@@ -1,21 +1,21 @@
-﻿import React, { useState, useEffect, useContext } from 'react'
+﻿import React, { useState, useEffect, useContext, ReactNode } from 'react'
 import { List, Grid, Button, TextField, ListItem, FormLabel, createStyles, Portal, Autocomplete, Box, createFilterOptions, useTheme, useMediaQuery, IconButton } from '@mui/material'
 import { SelectAccountContext } from "../NewRecord"
 //import { makeStyles } from '@mui/styles'
 import { DateTimePicker } from '@mui/x-date-pickers'
-import { Link, useNavigate } from 'react-router-dom'
-import usePrevious from 'use-previous'
-import db from '../../components/LocalDb'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import moment from 'moment'
-import { v4 as uid} from 'uuid'
-import api from '../../components/api'
 import SelectAccount from './SelectAccount'
 import { useQuery } from '@tanstack/react-query'
 import { v4 as uuid } from 'uuid'
 import { fetchVendors, useMutateVendor, VENDOR } from '../../repositories/vendors'
-import { Calculate } from '@mui/icons-material'
+import { Calculate, Repeat as IcoRepeat } from '@mui/icons-material'
 import { Transaction } from 'FinanceApi'
 import { useMutateTransaction } from '../../repositories/transactions'
+import NumberInput from '../../common/NumberInput'
+import DropdownSelect from '../../common/Select'
+import usePrevious from 'use-previous'
+import cron from 'cron-parser'
 
 
 //const usePlaceholderBlack = makeStyles((theme)=>({
@@ -28,12 +28,28 @@ import { useMutateTransaction } from '../../repositories/transactions'
 //}));
 const filter = createFilterOptions();
 
+const cronOptions = [
+  {name:"Monthly", cron: "0 0 DD *"},
+  { name: "Twice a month 15/30", cron: "0 0 15,30 *" },
+
+  ]
+
+const CustomDateEndAdornment = (props : any) => {
+  console.log([props])
+  return <>
+    {props.testParams}
+
+  </>
+}
+
+
 const VendorTextField = (props) => {
   const [internalValue, setInternalValue] = useState("")
   const [focused, setFocused] = useState(false)
   const { data: vendors } = useQuery({ queryKey: [VENDOR], queryFn: fetchVendors })
   const mutateVendor = useMutateVendor()
   const view = useContext<any>(SelectAccountContext)
+  const { transId } = useParams()
   
   const onTyped = (e) => {
     setInternalValue(e)
@@ -60,6 +76,9 @@ const VendorTextField = (props) => {
       props.onChange  (e)
     })
   }
+
+
+
 
 
   return <>
@@ -132,15 +151,18 @@ const NewRecordForm = (props) => {
   const view = useContext<any>(SelectAccountContext)
   const mutateTransaction = useMutateTransaction()
   const navigate = useNavigate()
-
+  const { transId } = useParams()
+  const prevCronId = usePrevious(formData.cronId)
   const type = props.formData.type
-  const prevType = usePrevious(type)
-  const prevDebit = usePrevious(formData.debit)
-  const prevCredit = usePrevious(formData.credit)
-  const setType = (data) => setFormData({...formData, type: data})
   const theme = useTheme();
   const sm = useMediaQuery(theme.breakpoints.down('lg'));
+  const [recurring, setRecurring] = useState(false)  
 
+
+  useEffect(() => {
+    if(formData.cronId == prevCronId) return
+    if(formData.cronId != "") setRecurring(true)
+  }, [formData.cronId])
 
   const actualData = () => {
     return formData
@@ -164,32 +186,33 @@ const NewRecordForm = (props) => {
 
   }
 
-  useEffect(() => {
-    switch (prevType) {
+
+  const setType = (type) => { 
+    switch (formData.type) {
 
       case "income":
-        if (type == 'expense') setFormData({ ...formData,credit: prevDebit, creditId: prevDebit?.id, debit: null, debitId: null })
-        if (type == 'transfer') setFormData({ ...formData, credit: prevDebit, creditId: prevDebit?.id, debit: null, debitId: null })
+        if (type == 'expense') setFormData({ ...formData, type, credit: formData.debit, creditId: formData.debit?.id, debit: null, debitId: null })
+        if (type == 'transfer') setFormData({ ...formData, type, credit: formData.debit, creditId: formData.debit?.id, debit: null, debitId: null })
         break
       case "expense":
-        if (type == 'income') setFormData({ ...formData, debit: prevCredit, debitId: prevCredit?.id, credit: null, creditId: null })
-        if (type == 'transfer') setFormData({ ...formData, debit: null, debitId: null })
+        if (type == 'income') setFormData({ ...formData, type, debit: formData.credit, debitId: formData.credit?.id, credit: null, creditId: null })
+        if (type == 'transfer') setFormData({ ...formData,type, debit: null, debitId: null })
         break
       case "transfer":
-        const availAcct = prevCredit || prevDebit
-        if (type == "income") setFormData({ ...formData, debit: availAcct, debitId: availAcct?.id , credit:null, creditId:null })
-        if (type == 'expense') setFormData({ ...formData, credit: availAcct, creditId: availAcct?.id }) 
+        //const availAcct = credit || debit
+        if (type == "income") setFormData({ ...formData, type, debit: formData.credit, debitId: formData.credit?.id , credit:null, creditId:null })
+        if (type == 'expense') setFormData({ ...formData, type, credit: formData.credit, creditId: formData.credit?.id, debit:null, debitId:null }) 
         break
 
 
     }
 
-    if(prevType!=type)view.setViewContext({ type: null, groupId: "892f20e5-b8dc-42b6-10c9-08dabb20ff77", onChange: () => { } })
-  }, [type])
+    if(formData.type!=type)view.setViewContext({ type: null, groupId: "892f20e5-b8dc-42b6-10c9-08dabb20ff77", onChange: () => { } })
+  }
 
   const submitTransaction =  () => {
     const newItem: Partial<Transaction> = {
-        id: uuid(), 
+        id: formData.id, 
         addByUserId: "1668b555-9788-40ed-a6e8-feeabe9538f6",
       creditId: formData.creditId,
       debitId: formData.debitId,
@@ -202,11 +225,18 @@ const NewRecordForm = (props) => {
 
     }
 
-    mutateTransaction.create(newItem)
-      .then(item => {
-        navigate("../records")
-      })
-
+    if (transId == "new") {
+      mutateTransaction.create(newItem)
+        .then(() => {
+          navigate("../records")
+        })
+    } else {
+      mutateTransaction.update(newItem)
+        .then(() => {
+          navigate("../records")
+        })
+    }
+    
 
   }
 
@@ -220,6 +250,13 @@ const NewRecordForm = (props) => {
       typeId:""
     }) 
 
+  const nextScheduledTrans = () => {
+    let sched = cron.parseExpression(formData.cronExpression, {
+        currentDate: moment(formData.date).toDate()
+      })//new Cron.CronJob(formData.cronExpression, () => { }, () => { }, false,"Asia/Manila")
+    //sched.setTime(new Cron.CronTime(moment(formData.date).toDate())) 
+    return moment(sched.next().toDate()).toISOString();
+  }
 
   return <>
     <List>
@@ -242,17 +279,84 @@ const NewRecordForm = (props) => {
           <FormLabel>Date/Time</FormLabel>
         </Grid>
         <Grid item xs={8}>
-          <DateTimePicker
-            renderInput={(params) => <TextField {...params} value={moment(params.value).toLocaleString()} fullWidth variant="standard" onClick={() => view.setViewContext({ type: null, groupId: "892f20e5-b8dc-42b6-10c9-08dabb20ff77", onChange: () => { } })} />}
-            value={formData.date}
+            <DateTimePicker
+              //renderInput={(params) => <TextField {...params} value={moment(params.value).toLocaleString()} fullWidth variant="standard" onClick={() => view.setViewContext({ type: null, groupId: "892f20e5-b8dc-42b6-10c9-08dabb20ff77", onChange: () => { } })} />}*/}
+              value={formData.date}
 
-            onChange={(newValue) => {
-              setFormData({...formData, date:newValue.toISOString()})
-            }}
-          />
+              onChange={(newValue: any) => {
+                const cronExpression = formData.cronExpression
+                  if(!!formData.cronId) moment(newValue).format(formData.cronId)
+
+                setFormData({ ...formData, date: newValue.toISOString(), cronExpression })
+              }}
+
+              renderInput={(params) => <TextField
+                {...params}
+                value={moment(params.value).toLocaleString()} fullWidth variant="standard" onClick={(evt) => {
+                  view.setViewContext({ type: null, groupId: "892f20e5-b8dc-42b6-10c9-08dabb20ff77", onChange: () => { } })
+                    if(params.onClick) params.onClick(evt)
+                  }
+                }
+                //ts-ignore
+                InputProps={{
+                  //ts-ignore
+                  endAdornment: <>
+                      {params.InputProps.endAdornment}
+                    <IconButton>
+                      <IcoRepeat onClick={() => {
+                        setRecurring(!recurring)
+                        if (!recurring) setFormData({ ...formData, cronId: '', cronExpression: '' }) // old value will be changed
+                      }} />
+                    </IconButton>
+                    </>
+                }} />
+
+              }
+            />
+              {/*
+
+              //ts-ignore
+              slots={{
+                textField: params => (
+                  <TextField
+                    {...params}
+                    InputProps={{
+                      ...params.InputProps,
+                      endAdornment: (...props) => {
+                        console.log()
+                        return params.InputProps.endAdornment(...props)
+                      }
+                    }}
+
+                  />
+                )
+              }}
+              */}
         </Grid>
       </Grid>
-    </ListItem>
+      </ListItem>
+      {recurring && <ListItem>
+        <Grid container>
+          <Grid item xs={4}>
+            <FormLabel>Schedule</FormLabel>
+          </Grid>
+          <Grid item xs={8}>
+            <DropdownSelect
+              options={cronOptions} getOptionValue={opt => opt.cron}
+              getOptionLabel={opt => opt.name}
+              fullWidth
+              size="small"
+              value={cronOptions.find(e => e.cron === formData.cronId)}
+              onChange={(value: { cron: string, name: string }) => {
+                setFormData({
+                  ...formData, cronId: value?.cron || "",
+                  cronExpression: value ? moment(formData.date).format(value.cron) : ""
+                })
+              }}
+            />
+          </Grid>
+        </Grid>
+      </ListItem>}
     <ListItem>
       <Grid container>
         <Grid item xs={4} alignItems="center">
@@ -260,7 +364,7 @@ const NewRecordForm = (props) => {
         </Grid>
         <Grid item xs={8}>
 
-                <TextField fullWidth autoComplete="off" variant="standard" 
+            <TextField fullWidth autoComplete="off" variant="standard" 
                   value={type == 'income' ? formData.debit?.name || "" : formData.credit?.name || ""}
                   onClick={() => setSelectProps({ ...selectAccountProps, show: true, dest: "source" })}
                 />
@@ -302,9 +406,9 @@ const NewRecordForm = (props) => {
         </Grid>
           <Grid item xs={8}>
             {/*@ts-ignore*/}
-            <TextField inputProps={{ min: 0, style: { textAlign: 'right' } }} fullWidth variant="standard" type="number" step="0.01"
-              value={formData.amount} onBlur={(e) => setFormData({ ...formData, amount: (Math.round(Number.parseFloat(e.target.value) * 100) / 100).toFixed(2) })}
-              onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
+            <NumberInput inputProps={{ min: 0, style: { textAlign: 'right' } }} fullWidth variant="standard" 
+              value={formData.amount}
+              onChange={(e) => setFormData({ ...formData, amount: e })}
               onClick={() => setSelectProps((prev) => ({ ...prev, dest: "amount" }))}
               InputProps={{
                 endAdornment: <IconButton onClick={() => setSelectProps(prev=>({ ...selectAccountProps, show: true, dest: "amount" }))} ><Calculate /></IconButton>
