@@ -16,6 +16,9 @@
 				public Vendor? Vendor { get; set; }
 				public DateTime Date { get; set; }
 				public DateTime DateAdded { get; set; } = DateTime.UtcNow;
+				public Guid? ScheduleId { get; set; }
+				public ScheduledTransactions? Schedule { get; set; }
+				public ScheduledTransactions? AsLastTransaction { get; set; }
 				public string Description { get; set; }
 		}
 }

@@ -12,6 +12,7 @@ using TypeLite.Net4;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Text.Json.Serialization;
+using FinanceProject.Utilities;
 
 var builder = WebApplication.CreateBuilder(args);
 var Configuration = builder.Configuration;
@@ -36,10 +37,15 @@ builder.Services.AddScoped<IAccountRepo,AccountRepo>();
 builder.Services.AddScoped<ITransactionRepo,TransactionRepo>();
 builder.Services.AddScoped<IAccountBalanceRepo,AccountBalanceRepo>();
 builder.Services.AddScoped<IVendorRepo,VendorRepo>();
+builder.Services.AddScoped<IScheduledTransactionRepo,ScheduledTransactionRepo>();
 builder.Services.AddControllersWithViews()
 
 		.AddJsonOptions(options =>
-				options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles)
+		{
+				options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+				options.JsonSerializerOptions.Converters.Add(new NullableDateTimeConverter());
+				options.JsonSerializerOptions.Converters.Add(new DateTimeConverter());
+		});
 ; var mapperConfig = new MapperConfiguration(mc =>
 {
 		//mc.SetGeneratePropertyMaps<Generate>()

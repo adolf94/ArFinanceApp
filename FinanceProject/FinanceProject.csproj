@@ -40,6 +40,7 @@
   <ItemGroup>
     <None Remove="ClientApp\src\common\file.tsx" />
     <None Remove="ClientApp\src\common\Select.ts" />
+    <None Remove="ClientApp\src\repositories\scheduledTasks.ts" />
   </ItemGroup>
 
 
@@ -66,6 +67,7 @@
   <ItemGroup>
     <TypeScriptCompile Include="ClientApp\src\common\file.tsx" />
     <TypeScriptCompile Include="ClientApp\src\common\Select.tsx" />
+    <TypeScriptCompile Include="ClientApp\src\repositories\scheduledTasks.ts" />
   </ItemGroup>
 
 

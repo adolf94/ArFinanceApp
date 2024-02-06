@@ -140,7 +140,6 @@ const ViewAccount = () => {
       <Grid item md={5} sx={{ display: { xs: 'none', md: 'block' } }}>
         Charts Here
       </Grid>
-      {isLoading?<>Loading</>:
       <Grid item md={7} xs={12}>
         <Paper sx={{ my: 1,p:2 }}>
           <Grid container sx={{ textAlign: 'center', justifyContent: 'space-around' }}>
@@ -209,7 +208,6 @@ const ViewAccount = () => {
         }
       </Grid>
 
-      }
 
     </Grid>
   </>

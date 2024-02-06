@@ -52,11 +52,15 @@ declare module 'FinanceApi' {
     }
 
     // ..\Models\ScheduledTransactions.cs
-    export interface ScheduledTransactions extends Transaction {
+    export interface ScheduledTransactions {
+        id: string;
         cronExpression: string;
         cronId: string;
         lastTransactionId?: string;
+        lastTransaction?: Transaction;
         endDate: string;
+        dateCreated: string;
+        enabled: boolean;
     }
 
     // ..\Models\Transaction.cs
@@ -74,6 +78,9 @@ declare module 'FinanceApi' {
         vendor?: Vendor;
         date: string;
         dateAdded: string;
+        scheduleId?: string;
+        schedule?: ScheduledTransactions;
+        asLastTransaction?: ScheduledTransactions;
         description: string;
     }
 

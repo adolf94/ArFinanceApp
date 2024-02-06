@@ -12,6 +12,7 @@ namespace FinanceProject.Data
 				public DbSet<User>? Users { get; set; }
 				public DbSet<Vendor>? Vendors { get; set; }
 				public DbSet<AccountBalance>? AccountBalances { get; set; }
+				public DbSet<ScheduledTransactions>? ScheduledTransactions { get; set; }
 
 				private readonly IConfiguration _configuration;
 				public AppDbContext(DbContextOptions<AppDbContext> options, IConfiguration config) : base(options)
@@ -63,6 +64,8 @@ namespace FinanceProject.Data
 						builder.Entity<Transaction>()
 								.HasOne(e => e.Vendor)	;
 
+						builder.Entity<Transaction>().HasOne(e => e.Schedule).WithMany(e => e.Transactions);
+						builder.Entity<ScheduledTransactions>().HasOne(e => e.LastTransaction).WithOne(e=>e.AsLastTransaction);
 						builder.Entity<WeeklyBalance>().HasKey(bal => new { bal.AccountId, bal.StartDate });
 						builder.Entity<AccountBalance>().HasKey(bal => new { bal.AccountId, bal.Month });
 

@@ -61,7 +61,7 @@ function Select<T>(props : SelectProps<T>){
     } else {
       newValue = [key]
     }
-    setSelected([...newValue])
+    //setSelected([...newValue])
 
 
 

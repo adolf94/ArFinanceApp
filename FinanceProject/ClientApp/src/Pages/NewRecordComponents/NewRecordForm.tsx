@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useContext, ReactNode } from 'react'
+﻿import React, { useState, useEffect, useContext, ReactNode, SetStateAction } from 'react'
 import { List, Grid, Button, TextField, ListItem, FormLabel, createStyles, Portal, Autocomplete, Box, createFilterOptions, useTheme, useMediaQuery, IconButton } from '@mui/material'
 import { SelectAccountContext } from "../NewRecord"
 //import { makeStyles } from '@mui/styles'
@@ -10,12 +10,13 @@ import { useQuery } from '@tanstack/react-query'
 import { v4 as uuid } from 'uuid'
 import { fetchVendors, useMutateVendor, VENDOR } from '../../repositories/vendors'
 import { Calculate, Repeat as IcoRepeat } from '@mui/icons-material'
-import { Transaction } from 'FinanceApi'
+import { ScheduledTransactions, Transaction } from 'FinanceApi'
 import { useMutateTransaction } from '../../repositories/transactions'
 import NumberInput from '../../common/NumberInput'
 import DropdownSelect from '../../common/Select'
 import usePrevious from 'use-previous'
 import cron from 'cron-parser'
+import { useMutateSchedule } from '../../repositories/scheduledTasks'
 
 
 //const usePlaceholderBlack = makeStyles((theme)=>({
@@ -29,8 +30,8 @@ import cron from 'cron-parser'
 const filter = createFilterOptions();
 
 const cronOptions = [
-  {name:"Monthly", cron: "0 0 DD *"},
-  { name: "Twice a month 15/30", cron: "0 0 15,30 *" },
+  {name:"Monthly", cron: "0 0 DD * *"},
+  { name: "Twice a month 15/30", cron: "0 0 15,[L] * *" },
 
   ]
 
@@ -146,23 +147,38 @@ const VendorTextField = (props) => {
   //  sx={{ input: { color: "black" }, "label": { color: "black" } }} 
 }
 
-const NewRecordForm = (props) => {
+
+interface NewRecordFormProps {
+  formData: Transaction;
+  setFormData: React.Dispatch<SetStateAction<Transaction>>;
+  selectPortal: Element;
+}
+
+
+
+const NewRecordForm = (props: NewRecordFormProps) => {
   const { formData,setFormData } = props
   const view = useContext<any>(SelectAccountContext)
   const mutateTransaction = useMutateTransaction()
+  const mutateSchedule = useMutateSchedule()
   const navigate = useNavigate()
-  const { transId } = useParams()
-  const prevCronId = usePrevious(formData.cronId)
+  const { transId } = useParams() 
   const type = props.formData.type
   const theme = useTheme();
   const sm = useMediaQuery(theme.breakpoints.down('lg'));
-  const [recurring, setRecurring] = useState(false)  
+  const [iteration,setIteration] = useState(12)
+  const [selectedIteration, setSelectedIteration] = useState<any>()
 
+  const [schedule, setSchedule] = useState<ScheduledTransactions>({
+    enabled: false,
+    cronId: '',
+    cronExpression: '',
+    endDate: moment().toISOString(),
+    dateCreated: moment().toISOString(),
+    id: uuid()
 
-  useEffect(() => {
-    if(formData.cronId == prevCronId) return
-    if(formData.cronId != "") setRecurring(true)
-  }, [formData.cronId])
+  })
+
 
   const actualData = () => {
     return formData
@@ -210,7 +226,7 @@ const NewRecordForm = (props) => {
     if(formData.type!=type)view.setViewContext({ type: null, groupId: "892f20e5-b8dc-42b6-10c9-08dabb20ff77", onChange: () => { } })
   }
 
-  const submitTransaction =  () => {
+  const submitTransaction =  async () => {
     const newItem: Partial<Transaction> = {
         id: formData.id, 
         addByUserId: "1668b555-9788-40ed-a6e8-feeabe9538f6",
@@ -221,12 +237,19 @@ const NewRecordForm = (props) => {
       date: moment(formData.date).toISOString(),
       dateAdded: moment().toISOString(),
       description: formData.description || "",
-      type:formData.type
+      type: formData.type,
+      scheduleId: formData.scheduleId
 
     }
 
     if (transId == "new") {
-      mutateTransaction.create(newItem)
+      let responseSched
+      if (schedule.enabled) {
+        responseSched = await mutateSchedule.create(schedule)
+          
+      }
+
+      mutateTransaction.create({ ...newItem, scheduleId: responseSched?.id })
         .then(() => {
           navigate("../records")
         })
@@ -241,6 +264,27 @@ const NewRecordForm = (props) => {
   }
 
 
+  const getCronIterations = (date? : string) => {
+    if (!schedule.cronExpression) return []
+    if(!date ) date = formData.date
+    let items = []
+    let isFuture = moment(formData.date).isAfter(moment().add(1, "day"));
+    let interval = cron.parseExpression(schedule.cronExpression, {
+      startDate: date
+    })
+    let i = 0
+    while (i < iteration) {
+      let x = interval.next()
+      i++
+      items.push({ date: moment(x.toDate()).toISOString(), iteration: i, label: `${i + (isFuture?0:1)} - ${moment(x.toDate()).format("yyyy-MM-DD")}`, isMore: false })
+      
+    }
+
+    items.push({i:0, label:'More Iterations', isMore:true})
+
+    return items
+  }
+
   const [selectAccountProps, setSelectProps] = useState({
       show: false,
       value: null,
@@ -251,7 +295,7 @@ const NewRecordForm = (props) => {
     }) 
 
   const nextScheduledTrans = () => {
-    let sched = cron.parseExpression(formData.cronExpression, {
+    let sched = cron.parseExpression(schedule.cronExpression, {
         currentDate: moment(formData.date).toDate()
       })//new Cron.CronJob(formData.cronExpression, () => { }, () => { }, false,"Asia/Manila")
     //sched.setTime(new Cron.CronTime(moment(formData.date).toDate())) 
@@ -284,10 +328,21 @@ const NewRecordForm = (props) => {
               value={formData.date}
 
               onChange={(newValue: any) => {
-                const cronExpression = formData.cronExpression
-                  if(!!formData.cronId) moment(newValue).format(formData.cronId)
+                
+                setFormData((prevData ) => {
+                  if (schedule.enabled) {
+                    schedule.cronExpression = moment(newValue).format(schedule.cronId)
 
-                setFormData({ ...formData, date: newValue.toISOString(), cronExpression })
+                    if (!!selectedIteration) {
+                      let newIteration = getCronIterations(newValue.toISOString()).find(e => e.iteration == selectedIteration.iteration) 
+                      schedule.endDate = newIteration.date 
+                      setSelectedIteration(newIteration)
+                    }
+                    setSchedule({ ...schedule })
+                  }
+
+                  return { ...prevData, date: newValue.toISOString()}
+                  })
               }}
 
               renderInput={(params) => <TextField
@@ -302,40 +357,28 @@ const NewRecordForm = (props) => {
                   //ts-ignore
                   endAdornment: <>
                       {params.InputProps.endAdornment}
-                    <IconButton>
-                      <IcoRepeat onClick={() => {
-                        setRecurring(!recurring)
-                        if (!recurring) setFormData({ ...formData, cronId: '', cronExpression: '' }) // old value will be changed
-                      }} />
+                    <IconButton onClick={() => {
+                      setSchedule(prev => {
+                        prev.enabled = !prev.enabled;
+                        if (!prev.enabled) {
+                          prev.cronId = ''
+                          prev.cronExpression = ""
+                        }
+                        return { ...prev }
+                      })
+                    }}  >
+                      <IcoRepeat  />
                     </IconButton>
                     </>
                 }} />
 
               }
             />
-              {/*
-
-              //ts-ignore
-              slots={{
-                textField: params => (
-                  <TextField
-                    {...params}
-                    InputProps={{
-                      ...params.InputProps,
-                      endAdornment: (...props) => {
-                        console.log()
-                        return params.InputProps.endAdornment(...props)
-                      }
-                    }}
-
-                  />
-                )
-              }}
-              */}
+              
         </Grid>
       </Grid>
       </ListItem>
-      {recurring && <ListItem>
+      {schedule.enabled && <><ListItem>
         <Grid container>
           <Grid item xs={4}>
             <FormLabel>Schedule</FormLabel>
@@ -346,17 +389,40 @@ const NewRecordForm = (props) => {
               getOptionLabel={opt => opt.name}
               fullWidth
               size="small"
-              value={cronOptions.find(e => e.cron === formData.cronId)}
+              value={cronOptions.find(e => e.cron === schedule.cronId)}
               onChange={(value: { cron: string, name: string }) => {
-                setFormData({
-                  ...formData, cronId: value?.cron || "",
-                  cronExpression: value ? moment(formData.date).format(value.cron) : ""
-                })
+                setSchedule({ ...schedule, cronId: value?.cron || "", cronExpression: value ? moment(formData.date).format(value.cron) : "" })
               }}
             />
           </Grid>
         </Grid>
-      </ListItem>}
+      </ListItem>
+      
+    <ListItem>
+      <Grid container>
+        <Grid item xs={4} alignItems="center">
+          <FormLabel>End Date</FormLabel>
+        </Grid>
+        <Grid item xs={8}>
+              <DropdownSelect
+                options={getCronIterations()} getOptionValue={opt => opt.iteration}
+                getOptionLabel={opt => opt.label}
+                fullWidth
+                size="small"
+                value={selectedIteration}
+                onChange={(value) => {
+                  if (value.isMore) {
+                    setIteration(iteration + 12)
+                    return
+                  } else {
+                    setSelectedIteration(value)
+                    setSchedule({...schedule, endDate: value.date})
+                  }
+                }}
+              />
+            </Grid>
+          </Grid>
+          </ListItem> </>}
     <ListItem>
       <Grid container>
         <Grid item xs={4} alignItems="center">

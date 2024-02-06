@@ -16,6 +16,7 @@ import { persistQueryClient } from '@tanstack/react-query-persist-client'
 import { createSyncStoragePersister } from '@tanstack/query-sync-storage-persister'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import {  createTheme, ThemeProvider } from '@mui/material/styles';
+import { PublicClientApplication } from "@azure/msal-browser";
 
 
 
@@ -47,16 +48,44 @@ persistQueryClient({
 })
 
 
+
+//@ts-ignore
 const TheApp = (props) => {
 
   const [dropdown, setDropdown] = useState(defaultData)
-
+  const [msalInitialized,setInitialized] = useState(false)
   const setDropdownValue = (name, values) => {
     setDropdown({ ...dropdown, [name]: values })
   }
 
   useEffect(() => {
+    (async () => {
+      await msalInstance.initialize()
+      setInitialized(true)
+      msalInstance.handleRedirectPromise().then((tokenResponse) => {
+        // Check if the tokenResponse is null
+        // If the tokenResponse !== null, then you are coming back from a successful authentication redirect.
+        // If the tokenResponse === null, you are not coming back from an auth redirect.
+        //@ts-ignore
 
+
+        let accounts = msalInstance.getAllAccounts();
+        if (accounts.length == 1) {
+          accounts.setActiveAccount(accounts[0])
+        } else {
+          msalInstance.loginRedirect({})
+        }
+      }).catch((error) => {
+
+
+        try {
+        } catch (err) {
+          console.log(err);
+        }
+
+        // handle error, either in the library or coming back from the server
+      });
+    })() 
   }, [])
 
 
@@ -71,10 +100,10 @@ const TheApp = (props) => {
 
   //@ts-ignore
   return <DropdownContext.Provider value={{ ...dropdown, set: setDropdownValue } } >
-  
-    <Routes>
-    {RouteMapper(AppRoutes)}
-    </Routes>
+    {msalInitialized && <Routes>
+      {RouteMapper(AppRoutes)}
+    </Routes>  }
+    
   </DropdownContext.Provider>
 }
 

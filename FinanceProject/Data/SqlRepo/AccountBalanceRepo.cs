@@ -15,23 +15,23 @@ namespace FinanceProject.Data.SqlRepo
 				public void CreateAccountBalances(DateTime date)
 				{
 
-						if(!_context.AccountBalances!.Any(e=>e.Month.Day == date.Day && e.Month.Month == date.Month))
+						if(!_context.AccountBalances!.Any(e=>e.Month.Year == date.Year && e.Month.Month == date.Month))
 						{
 
 								IEnumerable<AccountBalance> items = _context.Accounts!.ToArray().Select(acc =>
 								{
 										DateTime currentPeriod = new DateTime(date.Year, date.Month, acc.PeriodStartDay);
-										DateTime prevPeriod = new DateTime(date.Year, date.Month, acc.PeriodStartDay);
+										DateTime prevPeriod = new DateTime(date.Year, date.Month, acc.PeriodStartDay).AddMonths(-1);
 										AccountBalance? accBal = _context.AccountBalances!.Where(b => b.AccountId == acc.Id && prevPeriod == b.Month).FirstOrDefault();
 										if (accBal == null && !acc.ResetEndOfPeriod)
 										{
-												decimal prevTotal = _context.Transactions!.Where(t => (t.CreditId == acc.Id || t.DebitId == acc.Id) && t.Date < EF.Functions.DateFromParts(date.Year, date.Month, acc.PeriodStartDay))
+												decimal prevTotal = _context.Transactions!.Where(t => (t.CreditId == acc.Id || t.DebitId == acc.Id) && t.Date < currentPeriod)
 												.Select(t => (t.CreditId == acc.Id ? t.Amount : t.DebitId == acc.Id ? -t.Amount : 0)).Sum();
 
 												return new AccountBalance
 												{
 														AccountId = acc.Id,
-														Balance = prevTotal,
+														Balance = prevTotal,		
 														Month = new DateTime(date.Year, date.Month, acc.PeriodStartDay)
 												};
 										}
@@ -42,7 +42,7 @@ namespace FinanceProject.Data.SqlRepo
 														.Select(t => (t.CreditId == acc.Id ? t.Amount : t.DebitId == acc.Id ? -t.Amount : 0)).Sum();
 
 
-												return new AccountBalance
+														return new AccountBalance
 												{
 														AccountId = acc.Id,
 														Balance = (accBal == null ?0:accBal.Balance) + monthTotal,
