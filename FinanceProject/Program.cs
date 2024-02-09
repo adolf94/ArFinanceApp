@@ -2,6 +2,7 @@ using AutoMapper;
 using FinanceProject.Data;
 using FinanceProject.Data.SqlRepo;
 using FinanceProject.Models;
+
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -13,11 +14,20 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Text.Json.Serialization;
 using FinanceProject.Utilities;
+using Microsoft.Identity.Web;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 
 var builder = WebApplication.CreateBuilder(args);
 var Configuration = builder.Configuration;
 // Add services to the container.
 AppConfig config = builder.Configuration.GetSection("AppConfig").Get<AppConfig>();
+
+
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+						 .AddMicrosoftIdentityWebApi(Configuration, "AzureAd");
+
 
 builder.Services.AddCors(opt =>
 {
@@ -58,8 +68,20 @@ builder.Services.AddDbContext<AppDbContext>(opt =>
 {
 		opt.UseSqlServer(Configuration.GetConnectionString("AzureSql"));
 });
+
+
+builder.Services.AddAuthorization(e =>
+{
+		AuthorizationPolicy policy = new AuthorizationPolicyBuilder().RequireRole("Default_Access").Build();
+		e.DefaultPolicy = policy;
+});
+
+
 var app = builder.Build();
 TypeScript.Definitions().ForLoadedAssemblies();
+
+
+
 
 if (app.Environment.IsDevelopment())
 {
@@ -74,7 +96,9 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
+app.UseAuthentication();
 app.UseRouting();
+app.UseAuthorization();
 
 
 app.MapControllerRoute(

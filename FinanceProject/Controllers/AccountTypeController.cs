@@ -1,5 +1,6 @@
 ﻿using FinanceProject.Data;
 using FinanceProject.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
@@ -8,6 +9,7 @@ namespace FinanceProject.Controllers
 {
 		[Route("api")]
 		[ApiController]
+		[Authorize]
 		public class AccountTypeController : ControllerBase
 		{
 				private IAccountTypeRepo _repo;

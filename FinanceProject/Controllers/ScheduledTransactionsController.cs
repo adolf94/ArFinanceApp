@@ -1,5 +1,6 @@
 ﻿using FinanceProject.Data;
 using FinanceProject.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -7,6 +8,7 @@ namespace FinanceProject.Controllers
 {
 		[Route("api")]
 		[ApiController]
+		[Authorize]
 		public class ScheduledTransactionsController : ControllerBase
 		{
 				private readonly IScheduledTransactionRepo _repo;

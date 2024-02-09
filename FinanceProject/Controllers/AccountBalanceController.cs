@@ -1,4 +1,5 @@
 ﻿using FinanceProject.Data;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -6,6 +7,7 @@ namespace FinanceProject.Controllers
 {
 		[Route("api")]
 		[ApiController]
+		[Authorize]
 		public class AccountBalanceController : ControllerBase
 		{
 				private readonly IAccountBalanceRepo _repo;

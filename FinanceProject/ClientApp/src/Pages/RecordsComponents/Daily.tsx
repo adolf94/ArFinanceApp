@@ -1,8 +1,9 @@
 import { Box, Chip, Divider, Grid, List, ListItem, Paper, Typography } from "@mui/material"
 import { Transaction } from "FinanceApi"
 import moment from "moment"
-import React, { useEffect, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import { useNavigate } from "react-router"
+import { RecordsContext  } from "../Records"
 
 
 interface DailyViewProps {
@@ -22,52 +23,11 @@ interface RecordViewTransaction {
 
 const Daily = (props : DailyViewProps) => {
     
+  const { records , totals } = useContext(RecordsContext)
 
-  const [records, setRecords] = useState<RecordViewTransaction[]>([])
   const navigate = useNavigate()
-  const [totals, setTotals] = useState({
-      income: 0,
-      expense: 0,
-      total: 0
-    })
+  
 
-  useEffect(() => {
-    const totals = {
-      income: 0,
-      expense: 0,
-      total: 0
-    }
-    let rec = props.records.sort((a, b) => ((a.date > b.date) ? -1 : 1)).reduce<RecordViewTransaction[]>((prev, current, index) => {
-      let date = prev.find(e => (e.dateGroup == moment(current.date).format("yyyy-MM-DD")))
-      if (!date) {
-        date = {
-          dateGroup: moment(current.date).format("yyyy-MM-DD"),
-          day: moment(current.date).date(),
-          dayOfWeek: moment(current.date).format("ddd"),
-          items: [],
-          income: 0,
-          expenses:0
-        }
-        prev.push(date)
-      }
-      date.items.push(current)
-      switch (current.type) {
-        case "expense":
-          date.expenses += current.amount;
-          totals.expense += current.amount;
-          totals.total -= current.amount;
-          break;
-        case "income":
-          date.income += current.amount;
-          totals.income += current.amount;
-          totals.total += current.amount;
-          break;
-      }
-      return prev;
-    }, [])
-    setTotals(totals)
-    setRecords(rec)
-  }, [props.records])
 
 
   const fontColorOnType = (type) => {

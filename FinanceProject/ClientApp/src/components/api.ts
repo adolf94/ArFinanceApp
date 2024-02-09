@@ -10,7 +10,7 @@ import { BrowserAuthError, InteractionRequiredAuthError } from '@azure/msal-brow
 export const getToken = async () => {
 
   /*  ...loginrequest*/
-  return msalInstance.acquireTokenSilent({ account: msalInstance.getAllAccounts()[0], scopes:[] }).then((tokenResponse: { accessToken: any; }) => {
+  return msalInstance.acquireTokenSilent({ account: msalInstance.getAllAccounts()[0], scopes: (window as any).webConfig.msal.scopes }).then((tokenResponse: { accessToken: string; }) => {
     // User is not Logged in yet -- throw
     // User has logged in, but accessToken has expired - throw error
     // User has logged in, access Token is not expired 
@@ -18,9 +18,9 @@ export const getToken = async () => {
   }).catch((error: any) => {
     if (error instanceof InteractionRequiredAuthError) {
       // fallback to interaction when silent call fails
-      return msalInstance.acquireTokenRedirect({ scopes: [] })
+      return msalInstance.acquireTokenRedirect({ scopes: (window as any).webConfig.msal.scopes } )
     } else if (error instanceof BrowserAuthError) {
-      return msalInstance.acquireTokenRedirect({ scopes: [] })
+      return msalInstance.acquireTokenRedirect({ scopes: (window as any).webConfig.msal.scopes } )
     }
   })
 

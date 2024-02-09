@@ -2,15 +2,18 @@
 using FinanceProject.Data;
 using FinanceProject.Dto;
 using FinanceProject.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Immutable;
+using FinanceProject.Dto;
 using static FinanceProject.Dto.NewTransactionResponseDto;
 
 namespace FinanceProject.Controllers
 {
 		[Route("api")]
 		[ApiController]
+		[Authorize]
 		public class TransactionController : ControllerBase
 		{
 				private readonly ITransactionRepo _repo;
