@@ -87,7 +87,7 @@ function Select<T>(props : SelectProps<T>){
     </InputLabel>}
     <MuiSelect
       value={getValue()}
-      size={ props.size}
+      size={props.size}
       renderValue={() => {
         if (!props.multiple) return <Typography fontSize={ props.size }>{props.getOptionLabel(props.value as T)}</Typography>
 

@@ -149,8 +149,8 @@ const VendorTextField = (props) => {
 
 
 interface NewRecordFormProps {
-  formData: Transaction;
-  setFormData: React.Dispatch<SetStateAction<Transaction>>;
+  formData: Partial<Transaction>;
+  setFormData: React.Dispatch<Omit<SetStateAction<Transaction>,"id">>;
   selectPortal: Element;
 }
 
@@ -409,6 +409,7 @@ const NewRecordForm = (props: NewRecordFormProps) => {
                 getOptionLabel={opt => opt.label}
                 fullWidth
                 size="small"
+
                 value={selectedIteration}
                 onChange={(value) => {
                   if (value.isMore) {

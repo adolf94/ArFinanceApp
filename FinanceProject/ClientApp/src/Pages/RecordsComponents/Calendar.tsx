@@ -4,6 +4,7 @@ import moment from "moment"
 import React, { useContext, useState } from 'react'
 import { RecordsContext } from "../Records"
 import { useEffect } from "react"
+import numeral from "numeral"
 
 interface CalendarProps {
   records: Transaction[]
@@ -108,46 +109,32 @@ const Calendar = (props: CalendarProps) => {
   
   return <Box>
     <Paper sx={{ p: 1, my: 1 }}>
-      <Grid container columns={7} sx={{textAlign:'center', padding:1} }>
-        <Grid item xs={1} padding={ 1} >Sun</Grid>
-        <Grid item xs={1} padding={1} >Mon</Grid>
-        <Grid item xs={1} padding={1} >Tue</Grid>
-        <Grid item xs={1} padding={1} >Wed</Grid>
-        <Grid item xs={1} padding={1} >Thu</Grid>
-        <Grid item xs={1} padding={1} >Fri</Grid>
-        <Grid item xs={1} padding={1} >Sat</Grid>
+      <Grid container columns={7} sx={{ border: 1, borderStyle: 'solid',  borderColor:'gray', textAlign:'center'}}>
+        <Grid item xs={1} sx={{ borderRight: 1, borderStyleRight: 'solid', borderColorRight: 'gray', py: 2 }}>Sun</Grid>
+        <Grid item xs={1} sx={{ borderRight: 1, borderStyleRight: 'solid', borderColorRight: 'gray', py: 2 }} >Mon</Grid>
+        <Grid item xs={1} sx={{ borderRight: 1, borderStyleRight: 'solid', borderColorRight: 'gray', py: 2 }} >Tue</Grid>
+        <Grid item xs={1} sx={{ borderRight: 1, borderStyleRight: 'solid', borderColorRight: 'gray', py: 2 }} >Wed</Grid>
+        <Grid item xs={1} sx={{ borderRight: 1, borderStyleRight: 'solid', borderColorRight: 'gray', py: 2 }} >Thu</Grid>
+        <Grid item xs={1} sx={{ borderRight: 1, borderStyleRight: 'solid', borderColorRight: 'gray', py: 2 }} >Fri</Grid>
+        <Grid item xs={1} sx={{ borderRight: 1, borderStyleRight: 'solid', borderColorRight: 'gray', py: 2 }} >Sat</Grid>
       </Grid>
       {
-        view.map(week=><Grid container columns={7} sx={{ padding: 1 }}>
+        view.map(week=><Grid container columns={7} sx={{ border:1, borderStyle:'solid', borderColor:'gray'}}>
           {
-            week.map(day => <Grid item xs={1} >
+            week.map(day => <Grid item xs={1} sx={{ borderRight: 1, borderStyleRight: 'solid', borderColorRight: 'gray', padding:1 }}>
               <Box>
                 {day.dayOfMonth }
               </Box>
               {!day.isCurrentMonth ? <Box>
-                Test
-              </Box> : <>
-                  <Box>{day.income}</Box>
-                  <Box>{day.expense}</Box>
-                  <Box>{day.total}</Box>
-              </>}
+              </Box> : <Box sx={{ textAlign:'right', minHeight:'3.5em'}}>
+                  <Box>{day.hasRecord && numeral(day.totals?.income).format("0,0.00")}</Box>
+                  <Box>{day.hasRecord && numeral(day.totals?.expense).format("0,0.00")}</Box>
+                  <Box>{day.hasRecord && numeral(day.totals?.total).format("0,0.00")}</Box>
+              </Box>}
             </Grid>)
           }
         </Grid>)
       }
-
-      <Grid container columns={7} columnGap={3}>
-        <Grid item xs={1} >
-          <Box></Box>
-        </Grid>
-        <Grid item xs={1} >1</Grid>
-        <Grid item xs={1} >1</Grid>
-        <Grid item xs={1} >1</Grid>
-        <Grid item xs={1} >1</Grid>
-        <Grid item xs={1} >1</Grid>
-        <Grid item xs={1} >1</Grid>
-        <Grid item xs={1} >1</Grid>
-      </Grid>
     </Paper>
 
 
