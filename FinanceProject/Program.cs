@@ -64,9 +64,18 @@ builder.Services.AddControllersWithViews()
 
 IMapper mapper = mapperConfig.CreateMapper();
 builder.Services.AddSingleton(mapper);
+
+
+
+
+
 builder.Services.AddDbContext<AppDbContext>(opt =>
 {
-		opt.UseSqlServer(Configuration.GetConnectionString("AzureSql"));
+		var passkey = Environment.GetEnvironmentVariable("ENV_PASSKEY")!;
+		
+		var encrypted = Configuration.GetConnectionString("AzureSql")!;
+		var connection = AesOperation.DecryptString(passkey, encrypted);
+		opt.UseSqlServer(connection);	
 });
 
 

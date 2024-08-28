@@ -22,8 +22,8 @@ const Accounts = (props) => {
     <List onLoad={() => { } }>
       {
         (accountGroups || []).map(e => <>
-          <Divider textAlign="left">{e.name}</Divider>
-          {(accounts || []).filter(a => e.id == a.accountGroupId).map((a) => <ListItem button onClick={()=>navigate("/accounts/" + a.id)} secondaryAction={<span>{numeral(a.balance).format("0,0.00")}</span>}><ListItemText primary={a.name} /></ListItem>)}
+            <Divider textAlign="left" key={ e.id }>{e.name}</Divider>
+            {(accounts || []).filter(a => e.id == a.accountGroupId).map((a) => <ListItem button key={e.id}  onClick={()=>navigate("/accounts/" + a.id)} secondaryAction={<span>{numeral(a.balance).format("0,0.00")}</span>}><ListItemText primary={a.name} /></ListItem>)}
         </>)
       }
 

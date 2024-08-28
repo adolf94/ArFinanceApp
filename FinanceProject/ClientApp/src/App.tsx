@@ -28,7 +28,9 @@ export const queryClient = new QueryClient({
     queries: {
       //@ts-ignore
       cacheTime: 1000 * 60 * 60 * 24, // 24 hours
-    },
+        },
+
+        refetchOnWindowFocus: false,
   },
 })
 

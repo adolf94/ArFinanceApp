@@ -24,7 +24,7 @@ export const useMutateGroups = () => {
   const queryClient = useQueryClient()
 
   const create = useMutation({
-      onMutate: (data : Partial<AccountGroup>) : Promise<AccountGroup> => {
+      mutationFn: (data : Partial<AccountGroup>) : Promise<AccountGroup> => {
         return api.post("accountgroups", data)
           .then(e => e.data)
       },
