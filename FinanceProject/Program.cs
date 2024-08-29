@@ -17,6 +17,10 @@ using FinanceProject.Utilities;
 using Microsoft.Identity.Web;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using FinanceApp.Utilities;
+using Microsoft.Extensions.FileProviders;
+using System;
+using Microsoft.AspNetCore.Rewrite;
 
 var builder = WebApplication.CreateBuilder(args);
 var Configuration = builder.Configuration;
@@ -104,16 +108,46 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-app.UseStaticFiles();
+
+
 app.UseAuthentication();
 app.UseRouting();
-app.UseAuthorization();
 
+string[] apps = new []{ "/finance" };
+
+foreach (var item in apps)
+{
+	//app.UseWhen(ctx => !apps.Any(path => ctx.Request.Path.StartsWithSegments(path)), evt =>
+	//{
+		string physicalPath = Path.Combine(app.Environment.ContentRootPath, "wwwroot", item.TrimStart('/', '\\'));
+
+
+		IndexFallbackFileProvider provider = new IndexFallbackFileProvider(new PhysicalFileProvider(physicalPath));
+
+		//app.MapFallbackToFile("index.html"); ;
+		var staticFileOptions = new StaticFileOptions
+		{
+			FileProvider = provider,
+			ServeUnknownFileTypes = true,
+			RequestPath = item,
+		};
+
+		app.UseStaticFiles(staticFileOptions);
+
+	//});
+}
+
+
+
+
+app.UseAuthorization();
 
 app.MapControllerRoute(
 		name: "default",
 		pattern: "{controller}/{action=Index}/{id?}");
-
-app.MapFallbackToFile("index.html"); ;
-
+app.MapWhen(ctx => !apps.Any(path => ctx.Request.Path.StartsWithSegments(path)), evt =>
+{
+	evt.UseStaticFiles();
+	evt.UseEndpoints(e=>e.MapFallbackToFile("index.html"));
+});
 app.Run();

@@ -9,7 +9,7 @@ import reportWebVitals from './reportWebVitals';
 const baseUrl = document.getElementsByTagName('base')[0].getAttribute('href');
 const rootElement = document.getElementById('root');
 const root = createRoot(rootElement);
-
+console.log(import.meta)
 root.render(
   <BrowserRouter basename={baseUrl}>
     <App />

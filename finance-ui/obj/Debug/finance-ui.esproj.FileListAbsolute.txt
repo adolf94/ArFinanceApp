@@ -1,2 +1,0 @@
-C:\Users\adolf.rey.a.along\source\repos\FinanceProject\finance-ui\obj\Debug\finance-ui.esproj.SuggestedBindingRedirects.cache
-C:\Users\adolf.rey.a.along\source\repos\FinanceProject\finance-ui\obj\Debug\finance-ui.esproj.CoreCompileInputs.cache
