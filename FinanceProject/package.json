@@ -1,0 +1,13 @@
+{
+  "name": "financeproject",
+  "version": "0.1.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "docker": "node ./npm_scripts/run.js"
+
+
+  },
+  "author": "",
+  "license": "ISC"
+}

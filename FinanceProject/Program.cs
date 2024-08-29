@@ -111,14 +111,13 @@ app.UseHttpsRedirection();
 
 
 app.UseAuthentication();
-app.UseRouting();
 
 string[] apps = new []{ "/finance" };
 
 foreach (var item in apps)
 {
-	//app.UseWhen(ctx => !apps.Any(path => ctx.Request.Path.StartsWithSegments(path)), evt =>
-	//{
+	app.MapWhen(ctx => ctx.Request.Path.StartsWithSegments(item), evt =>
+	{
 		string physicalPath = Path.Combine(app.Environment.ContentRootPath, "wwwroot", item.TrimStart('/', '\\'));
 
 
@@ -131,13 +130,22 @@ foreach (var item in apps)
 			ServeUnknownFileTypes = true,
 			RequestPath = item,
 		};
+		evt.UseRouting();
 
-		app.UseStaticFiles(staticFileOptions);
+		evt.UseStaticFiles(staticFileOptions);
+		evt.UseEndpoints(e => e.MapFallbackToFile(item + "/index.html" ));
 
-	//});
+
+	});
 }
 
-
+app.MapWhen(ctx => !apps.Any(path => ctx.Request.Path.StartsWithSegments(path)), evt =>
+{
+    //Console.WriteLine(!apps.Any(path => evt.Request.Path.StartsWithSegments(path)));
+    evt.UseStaticFiles();
+    evt.UseRouting();
+    evt.UseEndpoints(e => e.MapFallbackToFile("index.html"));
+});
 
 
 app.UseAuthorization();
@@ -145,9 +153,5 @@ app.UseAuthorization();
 app.MapControllerRoute(
 		name: "default",
 		pattern: "{controller}/{action=Index}/{id?}");
-app.MapWhen(ctx => !apps.Any(path => ctx.Request.Path.StartsWithSegments(path)), evt =>
-{
-	evt.UseStaticFiles();
-	evt.UseEndpoints(e=>e.MapFallbackToFile("index.html"));
-});
+
 app.Run();

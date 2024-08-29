@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using FinanceProject.Data;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace FinanceProject.Controllers
 {
@@ -11,14 +13,37 @@ namespace FinanceProject.Controllers
 				"Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
 		};
 
-				private readonly ILogger<WeatherForecastController> _logger;
+		private readonly ILogger<WeatherForecastController> _logger;
+        private readonly AppDbContext _context;
 
-				public WeatherForecastController(ILogger<WeatherForecastController> logger)
-				{
-						_logger = logger;
-				}
+        public WeatherForecastController(ILogger<WeatherForecastController> logger, AppDbContext context)
+		{
+				_logger = logger;
+			_context = context;
+		}
 
-				[HttpGet]
+
+		[HttpGet]
+		public async Task<IActionResult> DbConnection()
+		{
+			try
+			{
+				_context.Database.ExecuteSqlRaw("Select 1");
+				return Ok("Db Success");
+
+			}
+			catch (Exception ex)
+			{
+                return await Task.FromResult(Ok("Db Failed"));
+
+            }
+
+
+
+        }
+
+
+                [HttpGet]
 				public IEnumerable<WeatherForecast> Get()
 				{
 						return Enumerable.Range(1, 5).Select(index => new WeatherForecast
