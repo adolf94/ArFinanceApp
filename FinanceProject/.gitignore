@@ -3,6 +3,8 @@
 
 *.Development.*
 wwwroot
+.env.development
+ClientApp/.env.development
 
 # User-specific files
 *.suo
