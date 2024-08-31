@@ -16,10 +16,11 @@ import { persistQueryClient } from '@tanstack/react-query-persist-client'
 import { createSyncStoragePersister } from '@tanstack/query-sync-storage-persister'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import {  createTheme, ThemeProvider } from '@mui/material/styles';
-import { PublicClientApplication } from "@azure/msal-browser";
+import { EventType, PublicClientApplication } from "@azure/msal-browser";
 import msalInstance from './common/msalInstance'; 
 import history, { NavigateSetter }  from './components/History';
 import { CustomNavigationClient } from './components/NavigationClient';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 
 
 
@@ -27,9 +28,10 @@ export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       //@ts-ignore
-      cacheTime: 1000 * 60 * 60 * 24, // 24 hours
+          cacheTime: 1000 * 60 * 60 * 24, // 24 hours
+            staleTime: 60000
         },
-
+        
         refetchOnWindowFocus: false,
   },
 })
@@ -56,19 +58,38 @@ persistQueryClient({
 //@ts-ignore
 const TheApp = (props) => {
 
-  const [dropdown, setDropdown] = useState(defaultData)
-  const [msalInitialized,setInitialized] = useState(false)
-  const setDropdownValue = (name, values) => {
-    setDropdown({ ...dropdown, [name]: values })
-  }
+    const [dropdown, setDropdown] = useState(defaultData)
+    const [msalInitialized, setInitialized] = useState(false)
+    const setDropdownValue = (name, values) => {
+        setDropdown({ ...dropdown, [name]: values })
+    }
 
+
+    const fetchUserInfo = () => {
+        api
+    }
 
   useEffect(() => {
     (async () => {
       await msalInstance.initialize()
 
+
       const navigationClient = new CustomNavigationClient(history);
-      msalInstance.setNavigationClient(navigationClient);
+        msalInstance.setNavigationClient(navigationClient);
+
+
+
+        msalInstance.addEventCallback((event) => {
+            if (event.eventType === EventType.LOGIN_SUCCESS && event.payload.account) {
+                //@ts-ignore
+                const account = event.payload.account;
+                msalInstance.setActiveAccount(account);
+            }
+            if (event.eventType === EventType.HANDLE_REDIRECT_END) {
+                //fetchUserInfo();
+            }
+        });
+
       msalInstance.handleRedirectPromise().then((tokenResponse) => {
         // Check if the tokenResponse is null
         // If the tokenResponse !== null, then you are coming back from a successful authentication redirect.
@@ -80,6 +101,7 @@ const TheApp = (props) => {
         if (accounts.length == 1) {
           setInitialized(true)
           msalInstance.setActiveAccount(accounts[0])
+
         } else {
           msalInstance.loginRedirect({scopes:[]})
         }
@@ -125,7 +147,8 @@ export default class App extends Component {
           <QueryClientProvider client={ queryClient} >
             <ThemeProvider theme={theme}>
               <TheApp />
-            </ThemeProvider>
+                    </ThemeProvider>
+                    <ReactQueryDevtools initialIsOpen={false} buttonPosition="button-left" />
           </QueryClientProvider>
         </LocalizationProvider>
       </Layout>

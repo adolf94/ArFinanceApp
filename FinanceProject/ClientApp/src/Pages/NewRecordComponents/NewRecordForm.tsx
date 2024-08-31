@@ -35,13 +35,6 @@ const cronOptions = [
 
   ]
 
-const CustomDateEndAdornment = (props : any) => {
-  console.log([props])
-  return <>
-    {props.testParams}
-
-  </>
-}
 
 
 const VendorTextField = (props) => {
@@ -87,7 +80,7 @@ const VendorTextField = (props) => {
         <Autocomplete
           disablePortal
           id="combo-box-demo"
-          options={vendors}
+          options={vendors || []}
           fullWidth
           getOptionLabel={e => e.name}
           getOptionKey={ e=>e.id}
@@ -122,7 +115,7 @@ const VendorTextField = (props) => {
         />
       </Box>
     <Box sx={{ display: {sx:'block', lg:'none'} } }>
-      <TextField fullWidth {...props} placeholder={(view.type == "vendor") ? (view.searchValue || props.value?.name) : (props.value?.name || "")}
+      <TextField fullWidth {...props} placeholder={(view.type === "vendor") ? (view.searchValue || props.value?.name) : (props.value?.name || "")}
       value={displayValue()} variant="standard"
       onFocus={() => {
         setFocused(true);
@@ -136,7 +129,7 @@ const VendorTextField = (props) => {
     </>
 
 
-  //return <TextField fullWidth {...props} placeholder={(view.type == "vendor") ? (view.searchValue || props.value?.name) : (props.value?.name || "")}
+  //return <TextField fullWidth {...props} placeholder={(view.type === "vendor") ? (view.searchValue || props.value?.name) : (props.value?.name || "")}
   //  value={displayValue()} variant="standard"
   //  onFocus={() => {
   //    setFocused(true);
@@ -173,16 +166,26 @@ const NewRecordForm = (props: NewRecordFormProps) => {
     enabled: false,
     cronId: '',
     cronExpression: '',
-    endDate: moment().toISOString(),
+    endDate: '',
     dateCreated: moment().toISOString(),
-    id: uuid()
-
+    id: uuid(),
+      lastTransactionDate: moment().toISOString()
   })
 
 
-  const actualData = () => {
-    return formData
-  }
+
+
+    const isSubmittable = () => {
+        const { creditId, debitId, vendorId } = formData;
+        if (!(creditId &&  debitId && vendorId)) return false;
+        if (schedule.enabled) {
+            const { cronExpression, endDate } = schedule
+            if(!(cronExpression && endDate)) return false
+        }
+        return true
+    }
+
+
   const getCallBack = (type, dataGetter) => {
 
     switch (type) {
@@ -207,17 +210,17 @@ const NewRecordForm = (props: NewRecordFormProps) => {
     switch (formData.type) {
 
       case "income":
-        if (type == 'expense') setFormData({ ...formData, type, credit: formData.debit, creditId: formData.debit?.id, debit: null, debitId: null })
-        if (type == 'transfer') setFormData({ ...formData, type, credit: formData.debit, creditId: formData.debit?.id, debit: null, debitId: null })
+        if (type === 'expense') setFormData({ ...formData, type, credit: formData.debit, creditId: formData.debit?.id, debit: null, debitId: null })
+        if (type === 'transfer') setFormData({ ...formData, type, credit: formData.debit, creditId: formData.debit?.id, debit: null, debitId: null })
         break
       case "expense":
-        if (type == 'income') setFormData({ ...formData, type, debit: formData.credit, debitId: formData.credit?.id, credit: null, creditId: null })
-        if (type == 'transfer') setFormData({ ...formData,type, debit: null, debitId: null })
+        if (type === 'income') setFormData({ ...formData, type, debit: formData.credit, debitId: formData.credit?.id, credit: null, creditId: null })
+        if (type === 'transfer') setFormData({ ...formData,type, debit: null, debitId: null })
         break
       case "transfer":
         //const availAcct = credit || debit
-        if (type == "income") setFormData({ ...formData, type, debit: formData.credit, debitId: formData.credit?.id , credit:null, creditId:null })
-        if (type == 'expense') setFormData({ ...formData, type, credit: formData.credit, creditId: formData.credit?.id, debit:null, debitId:null }) 
+        if (type === "income") setFormData({ ...formData, type, debit: formData.credit, debitId: formData.credit?.id , credit:null, creditId:null })
+        if (type === 'expense') setFormData({ ...formData, type, credit: formData.credit, creditId: formData.credit?.id, debit:null, debitId:null }) 
         break
 
 
@@ -242,14 +245,15 @@ const NewRecordForm = (props: NewRecordFormProps) => {
 
     }
 
-    if (transId == "new") {
+    if (transId === "new") {
       let responseSched
-      if (schedule.enabled) {
+        if (schedule.enabled) {
+
         responseSched = await mutateSchedule.create(schedule)
           
       }
 
-      mutateTransaction.create({ ...newItem, scheduleId: responseSched?.id })
+        mutateTransaction.create({ ...newItem, scheduleId: responseSched?.id })
         .then(() => {
           navigate("../records")
         })
@@ -302,18 +306,21 @@ const NewRecordForm = (props: NewRecordFormProps) => {
     return moment(sched.next().toDate()).toISOString();
   }
 
+
+
+
   return <>
     <List>
     <ListItem>
       <Grid container spacing={2}>
         <Grid item xs={4}>
-          <Button fullWidth variant={(type == "income" ? "contained" : "outlined")} onClick={() => setType("income")}>Income</Button>
+          <Button fullWidth variant={(type === "income" ? "contained" : "outlined")} onClick={() => setType("income")}>Income</Button>
         </Grid>
         <Grid item xs={4}>
-          <Button fullWidth variant={(type == "expense" ? "contained" : "outlined")} onClick={() => setType("expense")}>Expense</Button>
+          <Button fullWidth variant={(type === "expense" ? "contained" : "outlined")} onClick={() => setType("expense")}>Expense</Button>
         </Grid>
         <Grid item xs={4}>
-          <Button fullWidth variant={(type == "transfer" ? "contained" : "outlined")} onClick={() => setType("transfer")}>Transfer</Button>
+          <Button fullWidth variant={(type === "transfer" ? "contained" : "outlined")} onClick={() => setType("transfer")}>Transfer</Button>
         </Grid>
       </Grid>
     </ListItem>
@@ -328,19 +335,18 @@ const NewRecordForm = (props: NewRecordFormProps) => {
               value={formData.date}
 
               onChange={(newValue: any) => {
-                
                 setFormData((prevData ) => {
                   if (schedule.enabled) {
                     schedule.cronExpression = moment(newValue).format(schedule.cronId)
 
                     if (!!selectedIteration) {
-                      let newIteration = getCronIterations(newValue.toISOString()).find(e => e.iteration == selectedIteration.iteration) 
+                      let newIteration = getCronIterations(newValue.toISOString()).find(e => e.iteration === selectedIteration.iteration) 
                       schedule.endDate = newIteration.date 
                       setSelectedIteration(newIteration)
                     }
                     setSchedule({ ...schedule })
                   }
-
+                  
                   return { ...prevData, date: newValue.toISOString()}
                   })
               }}
@@ -364,7 +370,7 @@ const NewRecordForm = (props: NewRecordFormProps) => {
                           prev.cronId = ''
                           prev.cronExpression = ""
                         }
-                        return { ...prev }
+                        return { ...prev, lastTransactionDate:formData.date }
                       })
                     }}  >
                       <IcoRepeat  />
@@ -409,7 +415,6 @@ const NewRecordForm = (props: NewRecordFormProps) => {
                 getOptionLabel={opt => opt.label}
                 fullWidth
                 size="small"
-
                 value={selectedIteration}
                 onChange={(value) => {
                   if (value.isMore) {
@@ -432,7 +437,7 @@ const NewRecordForm = (props: NewRecordFormProps) => {
         <Grid item xs={8}>
 
             <TextField fullWidth autoComplete="off" variant="standard" 
-                  value={type == 'income' ? formData.debit?.name || "" : formData.credit?.name || ""}
+                  value={type === 'income' ? formData.debit?.name || "" : formData.credit?.name || ""}
                   onClick={() => setSelectProps({ ...selectAccountProps, show: true, dest: "source" })}
                 />
           </Grid>
@@ -458,7 +463,7 @@ const NewRecordForm = (props: NewRecordFormProps) => {
         </Grid>
         <Grid item xs={8}>
                  <TextField autoComplete="off" fullWidth variant="standard"
-                  value={type == 'income' ? formData.credit?.name || "" : formData.debit?.name || ""}
+                  value={type === 'income' ? formData.credit?.name || "" : formData.debit?.name || ""}
                   onClick={() => setSelectProps({ ...selectAccountProps, show: true, dest: "destination" })}
                 />
 
@@ -492,7 +497,7 @@ const NewRecordForm = (props: NewRecordFormProps) => {
     <ListItem>
       <Grid container spacing={2}>
         <Grid item xs={8}>
-          <Button fullWidth variant="contained" onClick={submitTransaction}>Confirm</Button>
+                      <Button fullWidth variant="contained" disabled={!isSubmittable()}  onClick={submitTransaction}>Confirm</Button>
         </Grid>
         <Grid item xs={4}>
           <Link to="/records">
@@ -502,14 +507,15 @@ const NewRecordForm = (props: NewRecordFormProps) => {
         </Grid>
       </Grid>
     </ListItem>
-    </List>
+      </List>
+
     <Portal container={props.selectPortal}>
 
-      <SelectAccount show={selectAccountProps.show && selectAccountProps.dest == "source"} onChange={(value) => {
+      <SelectAccount show={selectAccountProps.show && selectAccountProps.dest === "source"} onChange={(value) => {
           setFormData({
               ...formData,
-              [type == 'income' ? "debit" : "credit"]: value,
-              [type == 'income' ? "debitId" : "creditId"]: value.id
+              [type === 'income' ? "debit" : "credit"]: value,
+              [type === 'income' ? "debitId" : "creditId"]: value.id
             })
         }}
         onClose={() => setSelectProps({ ...selectAccountProps, show: false, dest: "" })}
@@ -518,7 +524,7 @@ const NewRecordForm = (props: NewRecordFormProps) => {
         internalKey="destination"
         typeId="892f20e5-b8dc-42b6-10c9-08dabb20ff77" />
 
-      <SelectAccount show={selectAccountProps.show && sm && selectAccountProps.dest == "vendor"} onChange={(value) => {
+      <SelectAccount show={selectAccountProps.show && sm && selectAccountProps.dest === "vendor"} onChange={(value) => {
         setFormData({
           ...formData,
           vendor: value,
@@ -531,23 +537,23 @@ const NewRecordForm = (props: NewRecordFormProps) => {
         internalKey="vendor"
         typeId="" />
 
-      <SelectAccount show={selectAccountProps.show && selectAccountProps.dest == "destination"} onChange={(value) => {
+      <SelectAccount show={selectAccountProps.show && selectAccountProps.dest === "destination"} onChange={(value) => {
         console.log(value)
         setFormData({
           ...formData,
-          [type == 'income' ? "credit" : "debit"]: value,
-          [type == 'income' ? "creditId" : "debitId"]: value.id
+          [type === 'income' ? "credit" : "debit"]: value,
+          [type === 'income' ? "creditId" : "debitId"]: value.id
         })
       }}
         onClose={() => setSelectProps({ ...selectAccountProps, show: false, dest: "" })}
-        value={type == "income" ? formData.credit : formData.debit}
+        value={type === "income" ? formData.credit : formData.debit}
         selectType='account'
         internalKey="destination"
-        typeId={type == "transfer" ? "892f20e5-b8dc-42b6-10c9-08dabb20ff77" :
-          (type == "expense" ? "a68ebd61-ce5d-4c99-10ca-08dabb20ff77" : "04c78118-1131-443f-2fa6-08dac49f6ad4")} />
+        typeId={type === "transfer" ? "892f20e5-b8dc-42b6-10c9-08dabb20ff77" :
+          (type === "expense" ? "a68ebd61-ce5d-4c99-10ca-08dabb20ff77" : "04c78118-1131-443f-2fa6-08dac49f6ad4")} />
 
       
-      <SelectAccount show={selectAccountProps.show && selectAccountProps.dest == "amount"} onChange={(value) => {
+      <SelectAccount show={selectAccountProps.show && selectAccountProps.dest === "amount"} onChange={(value) => {
         setFormData({
           ...formData,
           amount:value

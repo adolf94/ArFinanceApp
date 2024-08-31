@@ -1,15 +1,10 @@
-﻿using Microsoft.Extensions.Logging;
-using System;
-using System.Collections;
-using System.IO;
-using System.Security.Cryptography;
-using System.Security.Cryptography.Xml;
+﻿using System.Security.Cryptography;
 using System.Text;
 
 namespace FinanceProject.Utilities
 {
-    public class AesOperation
-    {
+		public class AesOperation
+		{
 
 				public static string EncryptString(string password, string secret)
 				{
@@ -52,51 +47,51 @@ namespace FinanceProject.Utilities
 
 				public static string DecryptString(string password, string encrypted)
 				{
-						
-                    try
-                    {
-                        byte[] encryptedBytes = Convert.FromBase64String(encrypted);
-                        byte[] pwBytes = Encoding.UTF8.GetBytes(password);
-                        byte[] salt = new byte[16];
-                        byte[] iv = new byte[16];
-                        byte[] encryptedSecret = new byte[encryptedBytes.Length - salt.Length - iv.Length];
-                        Buffer.BlockCopy(encryptedBytes, 0, salt, 0, salt.Length);
-                        Buffer.BlockCopy(encryptedBytes, salt.Length, iv, 0, iv.Length);
-                        Buffer.BlockCopy(encryptedBytes, salt.Length + iv.Length, encryptedSecret, 0, encryptedSecret.Length);
-                        using (var kdf = new Rfc2898DeriveBytes(pwBytes, salt, 100000, HashAlgorithmName.SHA256))
-                        {
-                            byte[] key = kdf.GetBytes(32);
-                            using (var aes = Aes.Create())
-                            {
-                                aes.Key = key;
-                                aes.IV = iv;
-                                using (var decryptor = aes.CreateDecryptor())
-                                {
-                                    using (var ms = new System.IO.MemoryStream(encryptedSecret))
-                                    {
-                                        using (var cs = new CryptoStream(ms, decryptor, CryptoStreamMode.Read))
-                                        {
-                                            using (var sr = new System.IO.StreamReader(cs))
-                                            {
-                                                return sr.ReadToEnd();
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    catch (Exception ex)
-                    {
 
-                        Console.WriteLine("Error decrypting " + encrypted, ex);
-                        throw;
-                    }
+						try
+						{
+								byte[] encryptedBytes = Convert.FromBase64String(encrypted);
+								byte[] pwBytes = Encoding.UTF8.GetBytes(password);
+								byte[] salt = new byte[16];
+								byte[] iv = new byte[16];
+								byte[] encryptedSecret = new byte[encryptedBytes.Length - salt.Length - iv.Length];
+								Buffer.BlockCopy(encryptedBytes, 0, salt, 0, salt.Length);
+								Buffer.BlockCopy(encryptedBytes, salt.Length, iv, 0, iv.Length);
+								Buffer.BlockCopy(encryptedBytes, salt.Length + iv.Length, encryptedSecret, 0, encryptedSecret.Length);
+								using (var kdf = new Rfc2898DeriveBytes(pwBytes, salt, 100000, HashAlgorithmName.SHA256))
+								{
+										byte[] key = kdf.GetBytes(32);
+										using (var aes = Aes.Create())
+										{
+												aes.Key = key;
+												aes.IV = iv;
+												using (var decryptor = aes.CreateDecryptor())
+												{
+														using (var ms = new System.IO.MemoryStream(encryptedSecret))
+														{
+																using (var cs = new CryptoStream(ms, decryptor, CryptoStreamMode.Read))
+																{
+																		using (var sr = new System.IO.StreamReader(cs))
+																		{
+																				return sr.ReadToEnd();
+																		}
+																}
+														}
+												}
+										}
+								}
+						}
+						catch (Exception ex)
+						{
 
-
-                }
+								Console.WriteLine("Error decrypting " + encrypted, ex);
+								throw;
+						}
 
 
+				}
 
-        }
+
+
+		}
 }

@@ -1,6 +1,5 @@
 ﻿using FinanceProject.Data;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FinanceProject.Controllers
@@ -33,7 +32,7 @@ namespace FinanceProject.Controllers
 						var result = _repo.GetByAccountWithDate(acctId, date);
 						if (result == null) return NotFound();
 
-						return await Task.FromResult( Ok(result));
+						return await Task.FromResult(Ok(result));
 
 				}
 

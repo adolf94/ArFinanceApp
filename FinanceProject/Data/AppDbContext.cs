@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace FinanceProject.Data
 {
-		public class AppDbContext:DbContext
+		public class AppDbContext : DbContext
 		{
 				public DbSet<Account>? Accounts { get; set; }
 				public DbSet<AccountGroup>? AccountGroups { get; set; }
@@ -57,17 +57,21 @@ namespace FinanceProject.Data
 
 						builder.Entity<Transaction>()
 								.HasOne(e => e.Debit)
-								.WithMany(e=>e.TransactionsAsDebit)
+								.WithMany(e => e.TransactionsAsDebit)
 								.OnDelete(DeleteBehavior.NoAction)
 								;
 
 						builder.Entity<Transaction>()
-								.HasOne(e => e.Vendor)	;
+								.HasOne(e => e.Vendor);
 
 						builder.Entity<Transaction>().HasOne(e => e.Schedule).WithMany(e => e.Transactions);
-						builder.Entity<ScheduledTransactions>().HasOne(e => e.LastTransaction).WithOne(e=>e.AsLastTransaction);
+						builder.Entity<ScheduledTransactions>().HasOne(e => e.LastTransaction).WithOne(e => e.AsLastTransaction);
+						builder.Entity<ScheduledTransactions>().HasIndex(e => e.LastTransactionDate).IsDescending();
+						builder.Entity<ScheduledTransactions>().HasIndex(e => e.NextTransactionDate).IsDescending();
 						builder.Entity<WeeklyBalance>().HasKey(bal => new { bal.AccountId, bal.StartDate });
 						builder.Entity<AccountBalance>().HasKey(bal => new { bal.AccountId, bal.Month });
+
+
 
 						base.OnModelCreating(builder);
 				}

@@ -1,5 +1,4 @@
 ﻿using FinanceProject.Models;
-using Microsoft.EntityFrameworkCore;
 
 namespace FinanceProject.Data.SqlRepo
 {

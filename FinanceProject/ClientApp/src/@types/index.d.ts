@@ -56,19 +56,23 @@ declare module 'FinanceApi' {
         id: string;
         cronExpression: string;
         cronId: string;
+        dateCreated: string;
+        totalOccurence: number;
+        endDate: string;
+        lastTransactionDate: string;
+        lastTransactionIndex: number;
+        nextTransactionDate: string;
+        enabled: boolean;
         lastTransactionId?: string;
         lastTransaction?: Transaction;
-        endDate: string;
-        dateCreated: string;
-        enabled: boolean;
     }
 
     // ..\Models\Transaction.cs
     export interface Transaction {
         id: string;
+        type: string;
         creditId: string;
         credit?: Account;
-        type: string;
         debitId: string;
         debit?: Account;
         amount: number;
@@ -89,6 +93,8 @@ declare module 'FinanceApi' {
         id: string;
         userName?: string;
         azureId?: string;
+        mobileNumber: string;
+        emailAddress: string;
     }
 
     // ..\Models\Vendor.cs

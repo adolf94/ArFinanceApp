@@ -53,25 +53,19 @@ const NewAccountGroup = (props : any) => {
   }
 
   return <>
-    <Dialog open={show} onClose={handleClose} >
+      <Dialog open={show} maxWidth="sm" fullWidth onClose={handleClose} >
       <DialogTitle>New Type</DialogTitle>
-      <DialogContent>
-        <Box sx={{ mt: 3 }}>
-          <div className="mt-2">
-            <FormControl sx={{ m: 1, minWidth: 200 }}>
-              <InputLabel id="demo-select-small">Account Type</InputLabel>
-              <Select value={form.accountType?.name} label="Account Type">
-                {(accountTypes||[]).map(d => <MenuItem key={d.id} value={d.name} onClick={() => setForm({ ...form, accountType: d, accountTypeId: d.id })}>{d.name}</MenuItem>)}
-              </Select>
-            </FormControl>
-          </div>
-          <div>
-            <FormControl sx={{ m: 1 }}>
-              <TextField label="Account Type Name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} variant="standard" />
-            </FormControl>
-          </div>
-        </Box>
-      </DialogContent>
+          <DialogContent sx={{pt:3}}>
+            <FormControl fullWidth sx={{ p: 1, mt:2 }} >
+                  <InputLabel id="demo-select-small">Account Type</InputLabel>
+                  <Select value={form.accountType?.name} label="Account Type">
+                      {(accountTypes || []).map(d => <MenuItem key={d.id} value={d.name} onClick={() => setForm({ ...form, accountType: d, accountTypeId: d.id })}>{d.name}</MenuItem>)}
+                  </Select>
+              </FormControl>
+              <FormControl fullWidth sx={{ p: 1 }}>
+                  <TextField  label="Account Type Name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} variant="standard" />
+              </FormControl>
+           </DialogContent>
       <DialogActions>
         <Button onClick={handleClose}>Cancel</Button>
         <Button onClick={createNewAccountGroup}>Create</Button>

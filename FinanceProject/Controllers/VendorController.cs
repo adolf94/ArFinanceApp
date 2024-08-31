@@ -1,7 +1,6 @@
 ﻿using FinanceProject.Data;
 using FinanceProject.Models;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FinanceProject.Controllers
@@ -29,7 +28,7 @@ namespace FinanceProject.Controllers
 				public async Task<IActionResult> GetOne(Guid id)
 				{
 						Vendor? vendor = _repo.GetOne(id);
-						if(vendor == null) return NotFound();
+						if (vendor == null) return NotFound();
 						return await Task.FromResult(Ok(vendor));
 				}
 
@@ -39,7 +38,7 @@ namespace FinanceProject.Controllers
 				{
 
 						bool result = _repo.CreateVendor(vendor);
-						return await Task.FromResult(CreatedAtAction("GetOne", new { id = vendor.Id} , vendor));
+						return await Task.FromResult(CreatedAtAction("GetOne", new { id = vendor.Id }, vendor));
 				}
 		}
 }

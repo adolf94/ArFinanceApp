@@ -19,7 +19,9 @@ namespace FinanceProject.Data.SqlRepo
 								_context.AccountTypes!.Add(accountType);
 								_context.SaveChanges();
 								return true;
-						}catch(Exception ex) {
+						}
+						catch (Exception ex)
+						{
 								_logger.LogError(ex, ex.Message, accountType);
 								throw;
 						}
@@ -30,8 +32,9 @@ namespace FinanceProject.Data.SqlRepo
 						try
 						{
 
-								return _context.AccountTypes!.Where(e => e.Enabled == true).ToArray();	
-						}catch(Exception ex)
+								return _context.AccountTypes!.Where(e => e.Enabled == true).ToArray();
+						}
+						catch (Exception ex)
 						{
 								_logger.LogError(ex, ex.Message);
 								throw;

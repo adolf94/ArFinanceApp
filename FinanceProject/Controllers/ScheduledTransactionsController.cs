@@ -1,7 +1,6 @@
 ﻿using FinanceProject.Data;
 using FinanceProject.Models;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FinanceProject.Controllers
@@ -20,10 +19,10 @@ namespace FinanceProject.Controllers
 
 
 				[HttpPost("scheduledtransactions")]
-				public async Task<IActionResult> Create([FromBody]ScheduledTransactions item)
+				public async Task<IActionResult> Create([FromBody] ScheduledTransactions item)
 				{
 
-								_repo.CreateSchedule(item);
+						_repo.CreateSchedule(item);
 
 						return await Task.FromResult(CreatedAtAction("GetOne", new { guid = item.Id }, item));
 
@@ -34,7 +33,7 @@ namespace FinanceProject.Controllers
 				public async Task<IActionResult> GetOne(Guid guid)
 				{
 						ScheduledTransactions? schedule = _repo.GetOne(guid);
-						if(schedule == null) return NotFound();
+						if (schedule == null) return NotFound();
 
 						return await Task.FromResult(Ok(schedule));
 				}
@@ -45,6 +44,6 @@ namespace FinanceProject.Controllers
 
 						return await Task.FromResult(Ok(_repo.GetAll()));
 				}
-				
+
 		}
 }

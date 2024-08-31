@@ -24,8 +24,8 @@ namespace FinanceProject.Data.SqlRepo
 										Balance = 0m,
 										Month = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1)
 								});
-								if(group.Balance != 0)
-								{		
+								if (group.Balance != 0)
+								{
 										_context.Transactions!.Add(new Transaction
 										{
 												DebitId = group.Id,
@@ -38,7 +38,8 @@ namespace FinanceProject.Data.SqlRepo
 								}
 								_context.SaveChanges();
 								return true;
-						}catch(Exception ex)
+						}
+						catch (Exception ex)
 						{
 								_logger.LogError(ex, ex.Message, group);
 								throw;
@@ -87,9 +88,10 @@ namespace FinanceProject.Data.SqlRepo
 								IQueryable<Account> query = _context.Accounts!;
 
 								if (!All) query = query.Where(e => e.Enabled == true);
-										
-										return query.ToArray();
-						}catch(Exception ex)
+
+								return query.ToArray();
+						}
+						catch (Exception ex)
 						{
 								_logger.LogError(ex, ex.Message);
 								return Array.Empty<Account>();

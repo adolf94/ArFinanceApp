@@ -1,11 +1,10 @@
 ﻿using AutoMapper;
+using FinanceApp.BgServices;
 using FinanceProject.Data;
 using FinanceProject.Dto;
 using FinanceProject.Models;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using System.Collections.Immutable;
 using static FinanceProject.Dto.NewTransactionResponseDto;
 
 namespace FinanceProject.Controllers
@@ -20,25 +19,29 @@ namespace FinanceProject.Controllers
 				private readonly IAccountBalanceRepo _bal;
 				private readonly AppDbContext _context;
 				private readonly IMapper _mapper;
+				private PersistentConfig _pConf;
 
-				public TransactionController(ITransactionRepo repo, IAccountRepo account, IAccountBalanceRepo bal, AppDbContext context, IMapper mapper)
+				public TransactionController(ITransactionRepo repo, IAccountRepo account, IAccountBalanceRepo bal, AppDbContext context,
+					PersistentConfig pConfig, IMapper mapper)
 				{
 						_repo = repo;
 						_account = account;
 						_bal = bal;
 						_context = context;
 						_mapper = mapper;
+						_pConf = pConfig;
+
 				}
 
 
 				[HttpGet]
 				[Route("transactions/{id}")]
-				public async Task<IActionResult> GetOne([FromRoute] Guid id) 
+				public async Task<IActionResult> GetOne([FromRoute] Guid id)
 				{
 						Transaction? transaction = _repo.GetOneTransaction(id);
-						if(transaction == null)	 return NotFound();
+						if (transaction == null) return NotFound();
 						return await Task.FromResult(Ok(transaction));
-				
+
 				}
 
 				[HttpPost("transactions")]
@@ -53,6 +56,8 @@ namespace FinanceProject.Controllers
 						using (var transaction = _context.Database.BeginTransaction())
 						{
 
+
+
 								accounts[dto.CreditId] = _account.UpdateCreditAcct(dto.CreditId, dto.Amount);
 								accounts[dto.DebitId] = _account.UpdateDebitAcct(dto.DebitId, dto.Amount);
 
@@ -66,13 +71,18 @@ namespace FinanceProject.Controllers
 
 								response.Accounts = accounts.Values.ToList();
 								response.Balances = balances.Values.ToList();
-								
+
 
 								Transaction result = _repo.CreateTransaction(dto);
-								if (result == null) return BadRequest();
+								if (result == null)
+								{
+										transaction.Rollback();
+										return BadRequest();
+								}
 								transaction.Commit();
 
 								response.Transaction = result;
+								_pConf.LastTransactionId = result.Id.ToString();
 						}
 
 
@@ -83,7 +93,7 @@ namespace FinanceProject.Controllers
 
 
 				[HttpPut("transactions/{id}")]
-				public async Task<IActionResult> UpdateOne([FromRoute] Guid id, [FromBody]CreateTransactionDto dto)
+				public async Task<IActionResult> UpdateOne([FromRoute] Guid id, [FromBody] CreateTransactionDto dto)
 				{
 
 
@@ -127,8 +137,10 @@ namespace FinanceProject.Controllers
 								response.Accounts = accounts.Values.ToList();
 								response.Balances = balances.Values.ToList();
 
+								transaction.DateAdded = DateTime.UtcNow;
 								Transaction result = _repo.UpdateTransaction(transaction);
 								if (result == null) return BadRequest();
+								_pConf.LastTransactionId = result.Id.ToString();
 								response.Transaction = result;
 								trans.Commit();
 						}
@@ -182,7 +194,7 @@ namespace FinanceProject.Controllers
 						//});
 						return await Task.FromResult(Forbid());
 
-						
+
 				}
 
 

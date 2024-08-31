@@ -5,7 +5,6 @@ using Microsoft.EntityFrameworkCore;
 namespace FinanceProject.Controllers
 {
 		[ApiController]
-		[Route("[controller]")]
 		public class WeatherForecastController : ControllerBase
 		{
 				private static readonly string[] Summaries = new[]
@@ -13,37 +12,37 @@ namespace FinanceProject.Controllers
 				"Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
 		};
 
-		private readonly ILogger<WeatherForecastController> _logger;
-        private readonly AppDbContext _context;
+				private readonly ILogger<WeatherForecastController> _logger;
+				private readonly AppDbContext _context;
 
-        public WeatherForecastController(ILogger<WeatherForecastController> logger, AppDbContext context)
-		{
-				_logger = logger;
-			_context = context;
-		}
-
-
-		[HttpGet]
-		public async Task<IActionResult> DbConnection()
-		{
-			try
-			{
-				_context.Database.ExecuteSqlRaw("Select 1");
-				return Ok("Db Success");
-
-			}
-			catch (Exception ex)
-			{
-                return await Task.FromResult(Ok("Db Failed"));
-
-            }
+				public WeatherForecastController(ILogger<WeatherForecastController> logger, AppDbContext context)
+				{
+						_logger = logger;
+						_context = context;
+				}
 
 
+				[HttpGet("ConnectDb")]
+				public async Task<IActionResult> DbConnection()
+				{
+						try
+						{
+								_context.Database.ExecuteSqlRaw("Select 1");
+								return Ok("Db Success");
 
-        }
+						}
+						catch (Exception ex)
+						{
+								return await Task.FromResult(Ok("Db Failed"));
+
+						}
 
 
-                [HttpGet]
+
+				}
+
+
+				[HttpGet("Weatherforecast")]
 				public IEnumerable<WeatherForecast> Get()
 				{
 						return Enumerable.Range(1, 5).Select(index => new WeatherForecast

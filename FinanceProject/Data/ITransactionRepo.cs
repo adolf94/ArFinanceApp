@@ -11,6 +11,7 @@ namespace FinanceProject.Data
 
 				public IEnumerable<Transaction> GetByMonth(int year, int month);
 				public Transaction? GetOneTransaction(Guid id);
+				public Transaction? GetLastTransactionByAdded();
 
 		}
 }

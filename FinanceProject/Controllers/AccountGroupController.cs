@@ -1,7 +1,6 @@
 ﻿using FinanceProject.Data;
 using FinanceProject.Models;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FinanceProject.Controllers
@@ -10,7 +9,7 @@ namespace FinanceProject.Controllers
 		[ApiController]
 		[Authorize]
 		public class AccountGroupController : ControllerBase
-		{ 
+		{
 				private readonly IAccountGroupRepo _repo;
 				public AccountGroupController(IAccountGroupRepo repo)
 				{

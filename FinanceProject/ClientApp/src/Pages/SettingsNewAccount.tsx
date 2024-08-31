@@ -41,12 +41,12 @@ const NewAccount = (props) => {
   }
 
   return <>
-    <Dialog open={show} onClose={handleClose} >
-      <DialogTitle>New Type</DialogTitle>
+      <Dialog open={show} maxWidth="sm" fullWidth onClose={handleClose} >
+      <DialogTitle>New Account</DialogTitle>
       <DialogContent>
         <Box sx={{ mt: 3 }}>
           <div className="mt-2">
-            <FormControl sx={{ m: 1, minWidth: 200 }}>
+            <FormControl fullWidth sx={{ m: 1, minWidth: 200 }}>
               <InputLabel id="demo-select-small">Account Type</InputLabel>
               <Select value={accountType?.id} label="Account Type">
                 {(accountTypes || []).map(d => <MenuItem key={d.id} value={d.id} onClick={() => {
@@ -58,7 +58,7 @@ const NewAccount = (props) => {
             </FormControl>
           </div>
           <div className="mt-2">
-            <FormControl sx={{ m: 1, minWidth: 200 }}>
+            <FormControl fullWidth sx={{ m: 1, minWidth: 200 }}>
               <InputLabel id="demo-select-small">Account Group</InputLabel>
               <Select value={form.accountGroupId || ''} label="Account Group">
                 {(accountGroups || []).filter(g => accountType?.id == g.accountTypeId).map(d => <MenuItem key={d.id} value={d.id} onClick={() => setForm({ ...form, accountGroup: d, accountGroupId: d.id })}>{d.name}</MenuItem>)}
@@ -66,14 +66,14 @@ const NewAccount = (props) => {
             </FormControl>
           </div>
           <div>
-            <FormControl sx={{ m: 1 }}>
+            <FormControl fullWidth sx={{ m: 1 }}>
               <TextField label="Account Type Name" fullWidth value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} variant="standard" />
             </FormControl>
           </div>
           <div>
-            <FormControl sx={{ m: 1 }}>
-              <TextField label="Balance" inputProps={{ inputMode: 'numeric', pattern: '[0-9\.]*' }} fullWidth value={form.balance} onChange={(e) => setForm({ ...form, balance: Number.parseFloat(e.target.value) })} variant="standard" />
-            </FormControl>
+                      <FormControl fullWidth sx={{ m: 1 }}>
+                          <TextField label="Balance" inputProps={{ inputMode: 'numeric', pattern: '[0-9\.]*' }} fullWidth value={form.balance} onChange={(e) => setForm({ ...form, balance: Number.parseFloat(e.target.value) })} variant="standard" />
+                        </FormControl>
           </div>
         </Box>
       </DialogContent>

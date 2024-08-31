@@ -1,6 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-
-namespace FinanceProject.Models
+﻿namespace FinanceProject.Models
 {
 		public class Vendor
 		{

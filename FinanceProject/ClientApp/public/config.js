@@ -1,4 +1,4 @@
-webConfig = {
+window.webConfig = {
   msal: {
       "auth": {
       "clientId": "7af7001b-6c58-421c-8999-853280293e4b",

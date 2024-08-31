@@ -1,31 +1,23 @@
 using AutoMapper;
+using FinanceApp.BgServices;
+using FinanceApp.Utilities;
 using FinanceProject.Data;
 using FinanceProject.Data.SqlRepo;
 using FinanceProject.Models;
-
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
-using System.Configuration;
-using TypeLite;
-using TypeLite.Net4;
-
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using System.Text.Json.Serialization;
 using FinanceProject.Utilities;
-using Microsoft.Identity.Web;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
-using FinanceApp.Utilities;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
-using System;
-using Microsoft.AspNetCore.Rewrite;
+using Microsoft.Identity.Web;
+using System.Text.Json.Serialization;
+using TypeLite;
+using TypeLite.Net4;
 
 var builder = WebApplication.CreateBuilder(args);
 var Configuration = builder.Configuration;
 // Add services to the container.
-AppConfig config = builder.Configuration.GetSection("AppConfig").Get<AppConfig>();
+AppConfig config = builder.Configuration.GetSection("AppConfig").Get<AppConfig>()!;
 
 
 
@@ -45,13 +37,13 @@ builder.Services.AddCors(opt =>
 });
 
 builder.Services.AddSingleton(config);
-builder.Services.AddScoped<IAccountTypeRepo,AccountTypeRepo>();
-builder.Services.AddScoped<IAccountGroupRepo,AccountGroupRepo>();
-builder.Services.AddScoped<IAccountRepo,AccountRepo>();
-builder.Services.AddScoped<ITransactionRepo,TransactionRepo>();
-builder.Services.AddScoped<IAccountBalanceRepo,AccountBalanceRepo>();
-builder.Services.AddScoped<IVendorRepo,VendorRepo>();
-builder.Services.AddScoped<IScheduledTransactionRepo,ScheduledTransactionRepo>();
+builder.Services.AddScoped<IAccountTypeRepo, AccountTypeRepo>();
+builder.Services.AddScoped<IAccountGroupRepo, AccountGroupRepo>();
+builder.Services.AddScoped<IAccountRepo, AccountRepo>();
+builder.Services.AddScoped<ITransactionRepo, TransactionRepo>();
+builder.Services.AddScoped<IAccountBalanceRepo, AccountBalanceRepo>();
+builder.Services.AddScoped<IVendorRepo, VendorRepo>();
+builder.Services.AddScoped<IScheduledTransactionRepo, ScheduledTransactionRepo>();
 builder.Services.AddControllersWithViews()
 
 		.AddJsonOptions(options =>
@@ -66,22 +58,25 @@ builder.Services.AddControllersWithViews()
 		mc.AddProfile(new FinanceProject.Dto.AppProfile());
 });
 
+
+PersistentConfig pConfig = new PersistentConfig();
+builder.Services.AddSingleton(pConfig);
+
+
 IMapper mapper = mapperConfig.CreateMapper();
 builder.Services.AddSingleton(mapper);
-
-
 
 
 
 builder.Services.AddDbContext<AppDbContext>(opt =>
 {
 		var passkey = Environment.GetEnvironmentVariable("ENV_PASSKEY")!;
-		
+
 		var encrypted = Configuration.GetConnectionString("AzureSql")!;
 		var connection = AesOperation.DecryptString(passkey, encrypted);
-		opt.UseSqlServer(connection);	
+		opt.UseSqlServer(connection);
 });
-
+builder.Services.AddHostedService<OnStartupBgSvc>();
 
 builder.Services.AddAuthorization(e =>
 {
@@ -90,19 +85,32 @@ builder.Services.AddAuthorization(e =>
 });
 
 
+
 var app = builder.Build();
 TypeScript.Definitions().ForLoadedAssemblies();
 
+app.Lifetime.ApplicationStopping.Register(() =>
+{
+
+		var scope = app.Services.CreateScope();
+
+		PersistentConfig conf = scope.ServiceProvider.GetRequiredService<PersistentConfig>();
 
 
+
+		string SchedFolder = Path.Combine(scope.ServiceProvider.GetRequiredService<IWebHostEnvironment>().ContentRootPath, "configs");
+		string SchedTaskFile = Path.Combine(SchedFolder, "scheduled.json");
+		if (!Directory.Exists(SchedFolder)) Directory.CreateDirectory(SchedFolder);
+
+		string newConfig = System.Text.Json.JsonSerializer.Serialize(conf);
+		File.WriteAllText(SchedTaskFile, newConfig);
+
+
+});
 
 if (app.Environment.IsDevelopment())
 {
 		app.UseCors("devCorsPolicy");
-}
-// Configure the HTTP request pipeline.
-if (!app.Environment.IsDevelopment())
-{
 		// The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
 		app.UseHsts();
 }
@@ -112,46 +120,51 @@ app.UseHttpsRedirection();
 
 app.UseAuthentication();
 
-string[] apps = new []{ "/finance" };
+string[] apps = new[] { "/finance" };
 
 foreach (var item in apps)
 {
-	app.MapWhen(ctx => ctx.Request.Path.StartsWithSegments(item), evt =>
-	{
-		string physicalPath = Path.Combine(app.Environment.ContentRootPath, "wwwroot", item.TrimStart('/', '\\'));
-
-
-		IndexFallbackFileProvider provider = new IndexFallbackFileProvider(new PhysicalFileProvider(physicalPath));
-
-		//app.MapFallbackToFile("index.html"); ;
-		var staticFileOptions = new StaticFileOptions
+		app.MapWhen(ctx => ctx.Request.Path.StartsWithSegments(item), evt =>
 		{
-			FileProvider = provider,
-			ServeUnknownFileTypes = true,
-			RequestPath = item,
-		};
-		evt.UseRouting();
-
-		evt.UseStaticFiles(staticFileOptions);
-		evt.UseEndpoints(e => e.MapFallbackToFile(item + "/index.html" ));
+				string physicalPath = Path.Combine(app.Environment.ContentRootPath, "wwwroot", item.TrimStart('/', '\\'));
 
 
-	});
+				IndexFallbackFileProvider provider = new IndexFallbackFileProvider(new PhysicalFileProvider(physicalPath));
+
+				//app.MapFallbackToFile("index.html"); ;
+				var staticFileOptions = new StaticFileOptions
+				{
+						FileProvider = provider,
+						ServeUnknownFileTypes = true,
+						RequestPath = item,
+				};
+				evt.UseRouting();
+				app.UseAuthorization();
+
+				evt.UseStaticFiles(staticFileOptions);
+				evt.UseEndpoints(e => e.MapFallbackToFile(item + "/index.html"));
+
+
+		});
 }
 
 app.MapWhen(ctx => !apps.Any(path => ctx.Request.Path.StartsWithSegments(path)), evt =>
 {
-    //Console.WriteLine(!apps.Any(path => evt.Request.Path.StartsWithSegments(path)));
-    evt.UseStaticFiles();
-    evt.UseRouting();
-    evt.UseEndpoints(e => e.MapFallbackToFile("index.html"));
+		//Console.WriteLine(!apps.Any(path => evt.Request.Path.StartsWithSegments(path)));
+		evt.UseStaticFiles();
+		evt.UseRouting();
+		app.UseAuthorization();
+		evt.UseEndpoints(e => e.MapFallbackToFile("index.html"));
 });
 
 
-app.UseAuthorization();
 
 app.MapControllerRoute(
 		name: "default",
 		pattern: "{controller}/{action=Index}/{id?}");
+
+
+
+
 
 app.Run();

@@ -86,6 +86,7 @@ function Select<T>(props : SelectProps<T>){
       <Typography sx={{ px: 1 }}> {props.label}</Typography>
     </InputLabel>}
     <MuiSelect
+       
       value={getValue()}
       size={props.size}
       renderValue={() => {

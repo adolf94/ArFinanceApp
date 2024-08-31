@@ -1,21 +1,27 @@
 ﻿using FinanceProject.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace FinanceProject.Data.SqlRepo
 {
 		public class AccountBalanceRepo : IAccountBalanceRepo
 		{
 				private readonly AppDbContext _context;
+				private readonly IMemoryCache _cache;
 
-				public AccountBalanceRepo(AppDbContext context)
+				public AccountBalanceRepo(AppDbContext context, IMemoryCache cache)
 				{
 						_context = context;
+						_cache = cache;
 				}
 
 				public void CreateAccountBalances(DateTime date)
 				{
+						string acc_bal_key = $"acc_bal_{date.Year}_{date.Month}";
+						string? nil;
+						if (_cache.TryGetValue(date, out nil)) return;
 
-						if(!_context.AccountBalances!.Any(e=>e.Month.Year == date.Year && e.Month.Month == date.Month))
+						if (!_context.AccountBalances!.Any(e => e.Month.Year == date.Year && e.Month.Month == date.Month))
 						{
 
 								IEnumerable<AccountBalance> items = _context.Accounts!.ToArray().Select(acc =>
@@ -31,7 +37,7 @@ namespace FinanceProject.Data.SqlRepo
 												return new AccountBalance
 												{
 														AccountId = acc.Id,
-														Balance = prevTotal,		
+														Balance = prevTotal,
 														Month = new DateTime(date.Year, date.Month, acc.PeriodStartDay)
 												};
 										}
@@ -42,10 +48,10 @@ namespace FinanceProject.Data.SqlRepo
 														.Select(t => (t.CreditId == acc.Id ? t.Amount : t.DebitId == acc.Id ? -t.Amount : 0)).Sum();
 
 
-														return new AccountBalance
+												return new AccountBalance
 												{
 														AccountId = acc.Id,
-														Balance = (accBal == null ?0:accBal.Balance) + monthTotal,
+														Balance = (accBal == null ? 0 : accBal.Balance) + monthTotal,
 														Month = new DateTime(date.Year, date.Month, acc.PeriodStartDay)
 												};
 
@@ -57,9 +63,10 @@ namespace FinanceProject.Data.SqlRepo
 
 
 
-								_context.AccountBalances!.AddRange(items);		
+								_context.AccountBalances!.AddRange(items);
 								_context.SaveChanges();
 						}
+						_cache.Set(acc_bal_key, "t");
 				}
 				public IEnumerable<AccountBalance> UpdateCreditAcct(Guid creditId, decimal amount, DateTime date)
 				{

@@ -1,9 +1,7 @@
 ﻿using FinanceProject.Data;
 using FinanceProject.Models;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using System.Threading.Tasks;
 
 namespace FinanceProject.Controllers
 {
@@ -42,7 +40,7 @@ namespace FinanceProject.Controllers
 				public async Task<IActionResult> Create(AccountType type)
 				{
 						_repo.Create(type);
-						return await Task.FromResult(CreatedAtAction("GetOne", new { id = type.Id }, type ));
+						return await Task.FromResult(CreatedAtAction("GetOne", new { id = type.Id }, type));
 
 				}
 		}

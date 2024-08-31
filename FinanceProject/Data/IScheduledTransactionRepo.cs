@@ -1,6 +1,4 @@
 ﻿using FinanceProject.Models;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
 
 namespace FinanceProject.Data
 {
@@ -9,6 +7,10 @@ namespace FinanceProject.Data
 				public bool CreateSchedule(ScheduledTransactions schedule);
 				public ScheduledTransactions? GetOne(Guid id);
 				public IEnumerable<ScheduledTransactions> GetAll();
+
+				public IEnumerable<ScheduledTransactions> ProcessScheduledTransactions();
+				public void SetNextTransaction();
+
 
 		}
 }

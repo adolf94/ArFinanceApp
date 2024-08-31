@@ -22,18 +22,18 @@ namespace FinanceProject.Data.SqlRepo
 						_context.Transactions!.Add(tran);
 						_context.SaveChanges();
 						return tran;
-						
+
 				}
-				
+
 				public Transaction? GetOneTransaction(Guid id)
 				{
-						return _context.Transactions!.Find(id);					
+						return _context.Transactions!.Find(id);
 				}
 
 
 				public IEnumerable<Transaction> GetByMonth(int year, int month)
 				{
-						return _context.Transactions!.Where(t=>t.Date.Month == month && t.Date.Year == year)
+						return _context.Transactions!.Where(t => t.Date.Month == month && t.Date.Year == year)
 								.ToList();
 				}
 
@@ -41,6 +41,11 @@ namespace FinanceProject.Data.SqlRepo
 				{
 						_context.SaveChanges();
 						return item;
+				}
+
+				public Transaction? GetLastTransactionByAdded()
+				{
+						throw new NotImplementedException();
 				}
 		}
 }
