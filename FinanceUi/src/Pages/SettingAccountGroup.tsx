@@ -1,7 +1,9 @@
 ﻿
 import {
   TextField, DialogActions, Dialog, Button, Select, DialogTitle,
-  DialogContent, MenuItem, FormControl, InputLabel, Box
+  DialogContent, MenuItem, FormControl, InputLabel, Box,
+  Checkbox,
+  FormControlLabel
 } from '@mui/material'
 import React from 'react'
 import { useEffect, useState } from 'react'
@@ -26,8 +28,8 @@ const NewAccountGroup = (props : any) => {
   const { accountGroups, set } = useDropdown()
   const [form, setForm] = useState<Partial<AccountGroup>>({
     name: "",
-    accountTypeId: null,
-    accountType: null,
+    accountTypeId: "",
+    isCredit: false,
     enabled: true
   })
 
@@ -37,16 +39,17 @@ const NewAccountGroup = (props : any) => {
 
      mutateGroups.createAsync({
       name: form.name,
-      accountTypeId: form.accountTypeId,
+         accountTypeId: form.accountTypeId,
+      isCredit:form.isCredit,
       enabled: true
      }).then(() => {
        handleClose()
 
        setForm({
-         name: "",
-         accountTypeId: null,
-         accountType: null,
-         enabled: true
+            name: "",
+            accountTypeId: "",
+            isCredit: false,
+            enabled: true
        })
      })
 
@@ -55,16 +58,21 @@ const NewAccountGroup = (props : any) => {
   return <>
       <Dialog open={show} maxWidth="sm" fullWidth onClose={handleClose} >
       <DialogTitle>New Type</DialogTitle>
-          <DialogContent sx={{pt:3}}>
-            <FormControl fullWidth sx={{ p: 1, mt:2 }} >
-                  <InputLabel id="demo-select-small">Account Type</InputLabel>
-                  <Select value={form.accountType?.name} label="Account Type">
-                      {(accountTypes || []).map(d => <MenuItem key={d.id} value={d.name} onClick={() => setForm({ ...form, accountType: d, accountTypeId: d.id })}>{d.name}</MenuItem>)}
-                  </Select>
-              </FormControl>
-              <FormControl fullWidth sx={{ p: 1 }}>
-                  <TextField  label="Account Type Name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} variant="standard" />
-              </FormControl>
+          <DialogContent sx={{ pt: 3 }}>
+              <Box sx={{ p: 1 }}>
+                <FormControl fullWidth >
+                    <InputLabel id="demo-select-small">Account Type</InputLabel>
+                      <Select label="Account Type" value={form.accountTypeId || ""}>
+                        {(accountTypes || []).map(d => <MenuItem key={d.id} value={d.id} onClick={() => setForm({ ...form, accountType: d, accountTypeId: d.id })}>{d.name}</MenuItem>)}
+                    </Select>
+                </FormControl>
+              </Box>
+              <Box sx={{ p: 1 }}>
+                  <TextField label="Account Type Name" fullWidth value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} variant="standard" />
+              </Box>
+              <Box sx={{ p: 1 }}>
+                  <FormControlLabel control={<Checkbox checked={form.isCredit} onChange={() => setForm({ ...form, isCredit: !form.isCredit })} />} label="Credit Cards" />
+              </Box>
            </DialogContent>
       <DialogActions>
         <Button onClick={handleClose}>Cancel</Button>

@@ -22,23 +22,35 @@ const NewAccount = (props) => {
 
   const [form, setForm] = useState<Partial<Account>>({
     name: "",
-    balance:0,
+    balance: 0,
+    accountGroup: null,
+      accountGroupId: '',
+    resetEndOfPeriod : false,
     enabled: true
   })
 
 
-  const createNewAccount = () => {
+    const createNewAccount = () => {
 
-    createAsync(form)
-      .then(() => {
-        setForm({
-          name: "",
-          balance: 0,
-          enabled: true
-        })
-        handleClose();
-      })
-  }
+        let item = {
+            ...form,
+            resetEndOfPeriod : form.accountGroup?.isCredit
+        }
+
+
+        createAsync(item)
+          .then(() => {
+              setForm({
+                  name: "",
+                  balance: 0,
+                  accountGroup: null,
+                  accountGroupId: '',
+                  resetEndOfPeriod: false,
+                  enabled: true
+              })
+            handleClose();
+          })
+    }
 
   return <>
       <Dialog open={show} maxWidth="sm" fullWidth onClose={handleClose} >
@@ -48,7 +60,7 @@ const NewAccount = (props) => {
           <div className="mt-2">
             <FormControl fullWidth sx={{ m: 1, minWidth: 200 }}>
               <InputLabel id="demo-select-small">Account Type</InputLabel>
-              <Select value={accountType?.id} label="Account Type">
+              <Select value={accountType?.id || ""} label="Account Type">
                 {(accountTypes || []).map(d => <MenuItem key={d.id} value={d.id} onClick={() => {
                     setAccountType(d)
                     setForm({...form, accountGroup:null, accountGroupId:""})

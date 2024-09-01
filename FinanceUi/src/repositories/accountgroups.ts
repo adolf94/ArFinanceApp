@@ -23,12 +23,15 @@ export const fetchGroupById = (id: string) => {
 export const useMutateGroups = () => {
   const queryClient = useQueryClient()
 
-  const create = useMutation({
-      mutationFn: (data : Partial<AccountGroup>) : Promise<AccountGroup> => {
-        return api.post("accountgroups", data)
-          .then(e => e.data)
-      },
-      onSuccess: (data : AccountGroup ) => queryClient.setQueryData([ACCOUNT_GROUP, { id: data.id }], data)
+    const create = useMutation({
+        mutationFn: (data: Partial<AccountGroup>): Promise<AccountGroup> => {
+            return api.post("accountgroups", data)
+                .then(e => e.data)
+        },
+        onSuccess: (data: AccountGroup) => {
+            queryClient.setQueryData([ACCOUNT_GROUP, { id: data.id }], data)
+            queryClient.setQueryData([ACCOUNT_GROUP], (prev) => ([...prev, data]))
+        }
   })
 
   return {createAsync:create.mutateAsync}

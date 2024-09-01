@@ -35,7 +35,8 @@ export const useMutateAccount = () => {
   const create = useMutation({
       mutationFn: (data: Partial<Account>) => {
         return api.post("accounts", {
-          accountGroupId: data.accountGroupId,
+            accountGroupId: data.accountGroupId,
+            resetEndOfPeriod: data.resetEndOfPeriod,
           balance: data.balance,
           name: data.name,
           enabled:true
