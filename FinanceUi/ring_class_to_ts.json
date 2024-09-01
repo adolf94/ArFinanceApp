@@ -1,8 +1,8 @@
 {
     "include": [
-        "../Models/*.cs",
-        "../Dto/*.cs",
-        "../QueryParams/*.cs"
+        "../FinanceProject/Models/*.cs",
+        "../FinanceProject/Dto/*.cs",
+        "../FinanceProject/QueryParams/*.cs"
 
     ],
     "exclude": [

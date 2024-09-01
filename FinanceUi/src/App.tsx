@@ -29,7 +29,7 @@ export const queryClient = new QueryClient({
     queries: {
       //@ts-ignore
           cacheTime: 1000 * 60 * 60 * 24, // 24 hours
-            staleTime: 60000
+            staleTime: 1000 * 60 * 60 * 24
         },
         
         refetchOnWindowFocus: false,
@@ -66,7 +66,8 @@ const TheApp = (props) => {
 
 
     const fetchUserInfo = () => {
-        api
+        api.get("/user/login")
+            
     }
 
   useEffect(() => {
@@ -86,7 +87,7 @@ const TheApp = (props) => {
                 msalInstance.setActiveAccount(account);
             }
             if (event.eventType === EventType.HANDLE_REDIRECT_END) {
-                //fetchUserInfo();
+                fetchUserInfo();
             }
         });
 

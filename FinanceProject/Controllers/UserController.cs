@@ -2,12 +2,15 @@
 using FinanceApp.Data;
 using FinanceProject.Data;
 using FinanceProject.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
-namespace FinanceApp.Controllers
+namespace FinanceProject.Controllers
 {
-		[Route("user")]
+		[ApiController]
+		[Authorize]
+		[Route("api")]
 		public class UserController : ControllerBase
 		{
 				private readonly IScheduledTransactionRepo _schedules;
@@ -21,7 +24,7 @@ namespace FinanceApp.Controllers
 						_users = users;
 				}
 
-				[HttpGet("login")]
+				[HttpGet("user/login")]
 				public async Task<IActionResult> Login()
 				{
 						if (_pConfig.NextScheduledTransactionDate < DateTime.UtcNow && !_pConfig.ScheduleHasErrors)

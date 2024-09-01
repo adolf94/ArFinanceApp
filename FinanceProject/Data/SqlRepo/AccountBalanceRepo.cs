@@ -121,6 +121,14 @@ namespace FinanceProject.Data.SqlRepo
 								AccountBalance? bal = _context.AccountBalances!.Where(e => e.AccountId == debitId && e.Month == EF.Functions.DateFromParts(nextPeriod.Year, nextPeriod.Month, acct.PeriodStartDay))
 								.FirstOrDefault();
 
+								//For Credit Cards
+								//Outstanding Balance (Despite, usual definition is total including Unbilled Installments, Our definition is to be paid at end of month)
+
+								//Outstanding Balance ==> Account balance based on table Accounts
+								//  How to include the Unbilled Installment for this month?? 
+								//  Include scheduled?? 
+								//Statement Balance ==> {Outstanding Balance } minus Account Balance from AccountBalance table (for ongoing month (+1)) 
+
 
 								if (bal != null) balance.Add(bal);
 						}
@@ -150,11 +158,18 @@ namespace FinanceProject.Data.SqlRepo
 
 
 
-				public IEnumerable<AccountBalance> GetByDate(DateTime date)
+				public IQueryable<AccountBalance> GetByDate(DateTime date)
 				{
-						return _context.AccountBalances!.Where(ab => ab.Month.Year == date.Year && ab.Month.Month == date.Month).ToArray();
+						return _context.AccountBalances!.Where(ab => !ab.Account!.ResetEndOfPeriod ? (ab.Month.Year == date.Year && ab.Month.Month == date.Month)
+																												: (EF.Functions.DateFromParts(ab.Month.Year, ab.Month.Month, ab.Account.PeriodStartDay) < date
+																														&& EF.Functions.DateFromParts(ab.Month.Year, ab.Month.Month + 1, ab.Account.PeriodStartDay) >= date));
+						//TODO -- logic for Credit cards 
 				}
 
-
+				public IQueryable<AccountBalance> GetByDateCredit(DateTime date)
+				{
+						return _context.AccountBalances!.Where(ab => ab.Account!.AccountGroup!.isCredit && (EF.Functions.DateFromParts(ab.Month.Year, ab.Month.Month, ab.Account.PeriodStartDay) < date
+																														&& EF.Functions.DateFromParts(ab.Month.Year, ab.Month.Month + 1, ab.Account.PeriodStartDay) >= date));
+				}
 		}
 }

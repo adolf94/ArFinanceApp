@@ -1,4 +1,5 @@
 ﻿using FinanceProject.Data;
+using FinanceProject.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -17,9 +18,17 @@ namespace FinanceProject.Controllers
 				}
 
 				[HttpGet("accountbalance/{date}")]
-				public async Task<IActionResult> GetByDate(DateTime date)
+				public async Task<IActionResult> GetByDate([FromRoute] DateTime date, [FromQuery] bool? credit = null)
 				{
-						var result = _repo.GetByDate(date);
+						IEnumerable<AccountBalance> result;
+						if (credit == true)
+						{
+								result = _repo.GetByDateCredit(date);
+						}
+						else
+						{
+								result = _repo.GetByDate(date);
+						}
 
 
 						return await Task.FromResult(Ok(result));

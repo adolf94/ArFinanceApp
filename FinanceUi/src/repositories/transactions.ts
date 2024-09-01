@@ -34,7 +34,7 @@ export const fetchTransactionsByMonth = (year: number, month: number) => {
           const from = moment({ year, month : month -1, day: account.periodStartDay })
 
           queryClient.setQueryData([TRANSACTION, { accountId: account.id, month, year }],
-            records.filter(e => (e.creditId == account.id || e.debitId == account.id) && moment(e.date).isAfter(from) && moment(e.date).isBefore(nextPeriodMonth)))
+            records.filter(e => (e.creditId === account.id || e.debitId === account.id) && moment(e.date).isAfter(from) && moment(e.date).isBefore(nextPeriodMonth)))
         })
 
         return records
@@ -44,22 +44,49 @@ export const fetchTransactionsByMonth = (year: number, month: number) => {
 }
 
 
-export const fetchByAcctMonth = (acctId : string, year: number, month: number) => {
+export const fetchByAcctMonth = (acctId: string, year: number, month: number) => {
+
+    let acctPromise = queryClient.ensureQueryData({ queryKey: [ACCOUNT, { id: acctId }], queryFn: () => fetchByAccountId(item.debitId) })
+        .then((acct: Account) => {
+
+            let currentMonth: Promise<Transaction[]> = queryClient.ensureQueryData({
+                queryKey: [TRANSACTION, { year, month }],
+                queryFn: () => fetchTransactionsByMonth(year, month)
+            })
+
+            let dateNextMonth = moment([year, month + 1, acct.periodStartDay]);
+            let nextMonth: Promise<Transaction[]> = (acct.periodStartDay === 1) ? new Promise((res)=>[]) : queryClient.ensureQueryData({
+                queryKey: [TRANSACTION, { year: dateNextMonth.year(), month: dateNextMonth.month() + 1 }],
+                queryFn: () => fetchTransactionsByMonth(year, month)
+            })
 
 
-  return api<Transaction[]>(`/accounts/${acctId}/transactions`, { params: { year, month } })
-    .then(e => {
-      return Promise.all(e.data.map(async item => {
+            return Promise.all([nextMonth, currentMonth]).then((result) => {
+                let dateCurrent = moment([year, month + 1, acct.periodStartDay])
 
-        item.vendor = item.vendorId && await queryClient.ensureQueryData({ queryKey: [VENDOR, { id: item.vendorId }], queryFn: () => fetchVendorById(item.vendorId) })
-        item.debit = await queryClient.ensureQueryData({ queryKey: [ACCOUNT, { id: item.debitId }], queryFn: () => fetchByAccountId(item.debitId) })
-        item.credit = await queryClient.ensureQueryData({ queryKey: [ACCOUNT, { id: item.creditId }], queryFn: () => fetchByAccountId(item.creditId) })
 
-        queryClient.setQueryData([TRANSACTION, { id: item.id }], item)
-        return item
-      })
-      )
-    })
+                return [...result[0], ...result[1]].filter((tr) => {
+                    return moment(tr.date).isBetween(dateCurrent, dateNextMonth) 
+                    && [tr.creditId,tr.debitId].includes(acctId) 
+                })
+            })
+        })
+
+        return acctPromise
+
+  //return api<Transaction[]>(`/accounts/${acctId}/transactions`, { params: { year, month } })
+  //  .then(e => {
+  //    return Promise.all(e.data.map(async item => {
+
+  //      item.vendor = item.vendorId && await queryClient.ensureQueryData({ queryKey: [VENDOR, { id: item.vendorId }], queryFn: () => fetchVendorById(item.vendorId) })
+  //      item.debit = await queryClient.ensureQueryData({ queryKey: [ACCOUNT, { id: item.debitId }], queryFn: () => fetchByAccountId(item.debitId) })
+  //      item.credit = await queryClient.ensureQueryData({ queryKey: [ACCOUNT, { id: item.creditId }], queryFn: () => fetchByAccountId(item.creditId) })
+
+  //      queryClient.setQueryData([TRANSACTION, { id: item.id }], item)
+  //      return item
+  //    })
+  //    )
+  //  })
 }
 
 

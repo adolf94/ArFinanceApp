@@ -47,7 +47,8 @@ namespace FinanceProject.Data.SqlRepo
 
 				public void SetNextTransaction()
 				{
-						DateTime next = _context.ScheduledTransactions!.Where(e => e.NextTransactionDate > DateTime.UtcNow).Select(e => e.NextTransactionDate).FirstOrDefault();
+						DateTime? next = _context.ScheduledTransactions!.Where(e => e.NextTransactionDate > DateTime.UtcNow).Select(e => e.NextTransactionDate).FirstOrDefault();
+
 						_conf.NextScheduledTransactionDate = next;
 				}
 

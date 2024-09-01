@@ -9,13 +9,11 @@ namespace FinanceApp.Middleware
 		public class AppMiddleware
 		{
 				private readonly RequestDelegate _next;
-				private readonly IUserRepo _users;
 				private readonly IMemoryCache _cache;
 
-				public AppMiddleware(RequestDelegate next, IUserRepo users, IMemoryCache cache)
+				public AppMiddleware(RequestDelegate next, IMemoryCache cache)
 				{
 						_next = next;
-						_users = users;
 						_cache = cache;
 				}
 
@@ -24,7 +22,9 @@ namespace FinanceApp.Middleware
 
 						string? sid = httpContext.User.FindFirstValue("sid");
 						string? cacheId = httpContext.Request.Headers["X-Client-Cache"];
-						string? upn = httpContext.User.FindFirstValue("upn");
+						string? upn = httpContext.User.FindFirstValue(ClaimTypes.Email);
+
+						IUserRepo _users = httpContext.RequestServices.GetRequiredService<IUserRepo>();
 
 						List<Claim>? cacheClaims = null;
 						if (!string.IsNullOrEmpty(sid) && !string.IsNullOrEmpty(sid)) cacheClaims = GetUserClaimsFromCache(httpContext);

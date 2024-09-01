@@ -60,7 +60,6 @@ const Records = () => {
   const { data: records } = useQuery({
     queryKey: [TRANSACTION, { month: month.get("month") + 1, year: month.get("year") }],
       queryFn: () => fetchTransactionsByMonth(month.get("year"), month.get("month") + 1),
-    staleTime:60000
   })
 
   const [dailies, setDailies] = useState([])

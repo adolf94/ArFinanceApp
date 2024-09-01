@@ -3,6 +3,7 @@
 
 *.Development.*
 wwwroot
+obj
 .env.development
 ClientApp/.env.development
 

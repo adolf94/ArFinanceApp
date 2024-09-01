@@ -1,5 +1,8 @@
 using AutoMapper;
 using FinanceApp.BgServices;
+using FinanceApp.Data;
+using FinanceApp.Data.SqlRepo;
+using FinanceApp.Middleware;
 using FinanceApp.Utilities;
 using FinanceProject.Data;
 using FinanceProject.Data.SqlRepo;
@@ -44,6 +47,7 @@ builder.Services.AddScoped<ITransactionRepo, TransactionRepo>();
 builder.Services.AddScoped<IAccountBalanceRepo, AccountBalanceRepo>();
 builder.Services.AddScoped<IVendorRepo, VendorRepo>();
 builder.Services.AddScoped<IScheduledTransactionRepo, ScheduledTransactionRepo>();
+builder.Services.AddScoped<IUserRepo, UserRepo>();
 builder.Services.AddControllersWithViews()
 
 		.AddJsonOptions(options =>
@@ -119,6 +123,7 @@ app.UseHttpsRedirection();
 
 
 app.UseAuthentication();
+app.UseMiddleware<AppMiddleware>();
 
 string[] apps = new[] { "/finance" };
 

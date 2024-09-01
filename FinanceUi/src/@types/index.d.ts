@@ -1,5 +1,5 @@
 declare module 'FinanceApi' {
-    // ..\Models\Account.cs
+    // ..\FinanceProject\Models\Account.cs
     export interface Account {
         id: string;
         name?: string;
@@ -13,14 +13,14 @@ declare module 'FinanceApi' {
         resetEndOfPeriod: boolean;
     }
 
-    // ..\Models\AccountBalance.cs
+    // ..\FinanceProject\Models\AccountBalance.cs
     export interface AccountBalance {
         accountId: string;
         month: string;
         balance: number;
     }
 
-    // ..\Models\AccountGroup.cs
+    // ..\FinanceProject\Models\AccountGroup.cs
     export interface AccountGroup {
         id: string;
         name?: string;
@@ -31,27 +31,27 @@ declare module 'FinanceApi' {
         accounts?: Account[];
     }
 
-    // ..\Models\AccountType.cs
+    // ..\FinanceProject\Models\AccountType.cs
     export interface AccountType {
         id: string;
         name?: string;
         enabled: boolean;
     }
 
-    // ..\Models\AppConfig.cs
+    // ..\FinanceProject\Models\AppConfig.cs
     export interface AppConfig {
         cosmosEndpoint: string;
         cosmosKey: string;
     }
 
-    // ..\Models\Currency.cs
+    // ..\FinanceProject\Models\Currency.cs
     export interface Currency {
         currencyId: number;
         currencyName: string;
         currencyCode: string;
     }
 
-    // ..\Models\ScheduledTransactions.cs
+    // ..\FinanceProject\Models\ScheduledTransactions.cs
     export interface ScheduledTransactions {
         id: string;
         cronExpression: string;
@@ -67,7 +67,7 @@ declare module 'FinanceApi' {
         lastTransaction?: Transaction;
     }
 
-    // ..\Models\Transaction.cs
+    // ..\FinanceProject\Models\Transaction.cs
     export interface Transaction {
         id: string;
         type: string;
@@ -88,7 +88,7 @@ declare module 'FinanceApi' {
         description: string;
     }
 
-    // ..\Models\User.cs
+    // ..\FinanceProject\Models\User.cs
     export interface User {
         id: string;
         userName?: string;
@@ -97,14 +97,14 @@ declare module 'FinanceApi' {
         emailAddress: string;
     }
 
-    // ..\Models\Vendor.cs
+    // ..\FinanceProject\Models\Vendor.cs
     export interface Vendor {
         id: string;
         name?: string;
         enabled: boolean;
     }
 
-    // ..\Models\WeeklyBalance.cs
+    // ..\FinanceProject\Models\WeeklyBalance.cs
     export interface WeeklyBalance {
         accountId: string;
         account?: Account;
@@ -113,11 +113,11 @@ declare module 'FinanceApi' {
         endBalance: number;
     }
 
-    // ..\Dto\AppProfile.cs
+    // ..\FinanceProject\Dto\AppProfile.cs
     export interface AppProfile extends Profile {
     }
 
-    // ..\Dto\CreateTransactionDto.cs
+    // ..\FinanceProject\Dto\CreateTransactionDto.cs
     export interface CreateTransactionDto {
         id: string;
         creditId: string;
@@ -129,7 +129,7 @@ declare module 'FinanceApi' {
         description: string;
     }
 
-    // ..\Dto\NewTransactionResponseDto.cs
+    // ..\FinanceProject\Dto\NewTransactionResponseDto.cs
     export interface NewTransactionResponseDto {
         transaction?: Transaction;
         accounts: Account[];

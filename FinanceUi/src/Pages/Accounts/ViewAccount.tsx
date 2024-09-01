@@ -3,7 +3,7 @@ import { AppBar, Chip, Divider, Grid, IconButton, List, ListItem, Paper, Toolbar
 import { useQuery } from "@tanstack/react-query"
 import moment from "moment"
 import React, { useMemo, useState } from "react"
-import { TRANSACTION, fetchTransactionsByMonth } from "../../repositories/transactions"
+import { TRANSACTION, fetchTransactionsByMonth, fetchByAcctMonth } from "../../repositories/transactions"
 import { useNavigate, useParams } from "react-router"
 import { AccountBalance, Transaction } from "FinanceApi"
 import { ACCOUNT, fetchByAccountId } from "../../repositories/accounts"
@@ -30,12 +30,12 @@ interface TransactionWithRunningBal extends Transaction{
 const ViewAccount = () => {
 
   
-  const [month, setMonth] = useState(moment())
-  const { data: records } = useQuery({
-    queryKey: [TRANSACTION, { month: month.month() + 1, year: month.year() }],
-    queryFn: ()=>fetchTransactionsByMonth(month.year(), month.month() + 1)
-  })
   const { acctId } = useParams()
+    const [month, setMonth] = useState(moment())
+  const { data: records } = useQuery({
+      queryKey: [TRANSACTION, { accountId: acctId,month: month.month() + 1, year: month.year() }],
+      queryFn: () => fetchByAcctMonth(acctId, month.year(), month.month() + 1)
+  })
   const { data: account } = useQuery({ queryKey: [ACCOUNT, { id: acctId }], queryFn: () => fetchByAccountId(acctId) })
   const { data: acctBalance, isLoading } = useQuery<AccountBalance>({ queryKey: [ACCOUNT_BALANCE, { accountId: acctId, date: month.format("yyyy-MM-01") }], queryFn: () => getBalancesByDate(month.format("yyyy-MM-01"), acctId) })
   const navigate = useNavigate()
@@ -66,8 +66,8 @@ const ViewAccount = () => {
     let rec = (records || []).filter(e => ([e.creditId, e.debitId].includes(acctId)))
       .sort((a, b) => ((a.date < b.date)?-1: (a.id < b.id) ? -1 : 1))
       .map((tr: TransactionWithRunningBal) => {
-        acctBalanceInternal.balance += (tr.creditId == acctId)?-(tr.amount):0 
-        acctBalanceInternal.balance += (tr.debitId == acctId) ? (tr.amount):0 
+        acctBalanceInternal.balance += (tr.creditId === acctId)?-(tr.amount):0 
+        acctBalanceInternal.balance += (tr.debitId === acctId) ? (tr.amount):0 
 
         tr.runningBalance = acctBalanceInternal.balance
 
