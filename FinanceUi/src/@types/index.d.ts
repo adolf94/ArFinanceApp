@@ -42,6 +42,8 @@ declare module 'FinanceApi' {
     export interface AppConfig {
         cosmosEndpoint: string;
         cosmosKey: string;
+        authConfig: GoogleConfig;
+        jwtConfig: AppJwtConfig;
     }
 
     // ..\FinanceProject\Models\Currency.cs
@@ -129,11 +131,27 @@ declare module 'FinanceApi' {
         description: string;
     }
 
+    // ..\FinanceProject\Dto\GoogleIdTokenClaims.cs
+    export interface GoogleIdTokenClaims {
+        email: string;
+        name: string;
+        audience: string;
+    }
+
     // ..\FinanceProject\Dto\NewTransactionResponseDto.cs
     export interface NewTransactionResponseDto {
         transaction?: Transaction;
         accounts: Account[];
         balances: AccountBalance[];
+    }
+
+    // ..\FinanceProject\Dto\UserWithClaims.cs
+    export interface GoogleClaimResponse {
+        accessToken: string;
+        refreshToken: string;
+        idToken: string;
+        expiresIn: number;
+        scope: string;
     }
 
 }

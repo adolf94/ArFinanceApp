@@ -70,53 +70,41 @@ const TheApp = (props) => {
             
     }
 
+
+
+    const handleGoogleRedirect = () => {
+
+        return new Promise((res, rej) => {
+            let str = window.location.search
+
+            if (str === "") return res("no query")
+
+            const hash2Obj: any = str.substring(1)
+                .split("&")
+                .map(v => v.split(`=`, 1).concat(v.split(`=`).slice(1).join(`=`)))
+                .reduce((pre, [key, value]) => ({ ...pre, [key]: value }), {});
+
+
+            if (!hash2Obj.state) return res("no_state");
+            let stateFromStorage = sessionStorage.getItem("googleLoginState");
+            if (decodeURIComponent(hash2Obj.state) !== stateFromStorage) {
+                console.debug("state did not match")
+                console.debug(stateFromStorage)
+                console.debug(decodeURIComponent(hash2Obj.state))
+                return rej("state_mismatch");
+            }
+            api.post("/google/auth", { code: hash2Obj.code }, { preventAuth: true })
+                .then((e) => {
+                    window.localStorage.setItem("refresh_token", e.data.refresh_token)
+                    res("got token")
+                })
+        })
+    }
+
+
   useEffect(() => {
-    (async () => {
-      await msalInstance.initialize()
-
-
-      const navigationClient = new CustomNavigationClient(history);
-        msalInstance.setNavigationClient(navigationClient);
-
-
-
-        msalInstance.addEventCallback((event) => {
-            if (event.eventType === EventType.LOGIN_SUCCESS && event.payload.account) {
-                //@ts-ignore
-                const account = event.payload.account;
-                msalInstance.setActiveAccount(account);
-            }
-            if (event.eventType === EventType.HANDLE_REDIRECT_END) {
-                fetchUserInfo();
-            }
-        });
-
-      msalInstance.handleRedirectPromise().then((tokenResponse) => {
-        // Check if the tokenResponse is null
-        // If the tokenResponse !== null, then you are coming back from a successful authentication redirect.
-        // If the tokenResponse === null, you are not coming back from an auth redirect.
-        //@ts-ignore
-
-
-        let accounts = msalInstance.getAllAccounts();
-        if (accounts.length == 1) {
-          setInitialized(true)
-          msalInstance.setActiveAccount(accounts[0])
-
-        } else {
-          msalInstance.loginRedirect({scopes:[]})
-        }
-      }).catch((error) => {
-
-
-        try {
-        } catch (err) {
-          console.log(err);
-        }
-
-        // handle error, either in the library or coming back from the server
-      });
-    })() 
+      handleGoogleRedirect()
+      .then(e=>setInitialized(true))
   }, [])
 
 
@@ -149,7 +137,7 @@ export default class App extends Component {
             <ThemeProvider theme={theme}>
               <TheApp />
                     </ThemeProvider>
-                    <ReactQueryDevtools initialIsOpen={false} buttonPosition="button-left" />
+                    <ReactQueryDevtools initialIsOpen={false} buttonPosition="bottom-left" />
           </QueryClientProvider>
         </LocalizationProvider>
       </Layout>

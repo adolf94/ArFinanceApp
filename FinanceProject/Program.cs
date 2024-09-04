@@ -9,10 +9,10 @@ using FinanceProject.Data.SqlRepo;
 using FinanceProject.Models;
 using FinanceProject.Utilities;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
-using Microsoft.Identity.Web;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 using System.Text.Json.Serialization;
 using TypeLite;
 using TypeLite.Net4;
@@ -25,8 +25,19 @@ AppConfig config = builder.Configuration.GetSection("AppConfig").Get<AppConfig>(
 
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-						 .AddMicrosoftIdentityWebApi(Configuration, "AzureAd");
-
+			.AddJwtBearer(options =>
+			{
+					options.TokenValidationParameters = new TokenValidationParameters
+					{
+							ValidateIssuer = true,
+							ValidateAudience = true,
+							ValidateLifetime = true,
+							ValidateIssuerSigningKey = true,
+							ValidIssuer = config.jwtConfig.issuer,
+							ValidAudience = config.jwtConfig.audience,
+							IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config.jwtConfig.secret_key)),
+					};
+			});
 
 builder.Services.AddCors(opt =>
 {
@@ -82,11 +93,7 @@ builder.Services.AddDbContext<AppDbContext>(opt =>
 });
 builder.Services.AddHostedService<OnStartupBgSvc>();
 
-builder.Services.AddAuthorization(e =>
-{
-		AuthorizationPolicy policy = new AuthorizationPolicyBuilder().RequireRole("Default_Access").Build();
-		e.DefaultPolicy = policy;
-});
+builder.Services.AddAuthorization();
 
 
 

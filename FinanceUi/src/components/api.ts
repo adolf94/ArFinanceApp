@@ -1,29 +1,42 @@
 ﻿import axios, { AxiosRequestConfig } from 'axios'
 import msalInstance from '../common/msalInstance';
 import { BrowserAuthError, InteractionRequiredAuthError } from '@azure/msal-browser';
+import moment from 'moment';
+import { oauthSignIn } from '../common/GoogleLogin';
+import { memoize as mm } from 'underscore'
+
+const getTokenFromApi = mm(() => {
+    let token = window.localStorage.getItem("refresh_token")
+
+
+
+    if (!token) oauthSignIn()
+    return axios.post(`${window.webConfig.api}/google/auth/refresh`, { refresh_token: token })
+        .then(e => {
+            window.sessionStorage.setItem("access_token", e.data.access_token)
+            return e.data.access_token
+        })
+        .catch(() => {
+            oauthSignIn()
+        })
+}, e => moment().format("yyyyMMddHHmm"));
 
 
 
 
+export const getToken = async (force) => {
 
 
-export const getToken = async () => {
+    let token = window.sessionStorage.getItem("access_token")
 
-  /*  ...loginrequest*/
-  return msalInstance.acquireTokenSilent({ account: msalInstance.getAllAccounts()[0], scopes: (window as any).webConfig.msal.scopes }).then((tokenResponse: { accessToken: string; }) => {
-    // User is not Logged in yet -- throw
-    // User has logged in, but accessToken has expired - throw error
-    // User has logged in, access Token is not expired 
-    return tokenResponse.accessToken
-  }).catch((error: any) => {
-    if (error instanceof InteractionRequiredAuthError) {
-      // fallback to interaction when silent call fails
-      return msalInstance.acquireTokenRedirect({ scopes: (window as any).webConfig.msal.scopes } )
-    } else if (error instanceof BrowserAuthError) {
-      return msalInstance.acquireTokenRedirect({ scopes: (window as any).webConfig.msal.scopes } )
-    }
-  })
+    if (!token || force) token = await getTokenFromApi()
 
+    let tokenJson = JSON.parse(window.atob(token.split(".")[1]))
+
+
+    if (moment().add(1, 'minute').isAfter(tokenJson.exp)) token = await getTokenFromApi()
+
+    return token
 
 
 }
@@ -35,9 +48,20 @@ const api = axios.create({
 })
 
 api.interceptors.request.use(async (config: AxiosRequestConfig) => {
-  let token = await getToken()
+    if (config.preventAuth) return config
+  let token = await getToken(config.retryGetToken)
   config.headers['Authorization'] = 'Bearer ' + (token);
   return config
+})
+
+
+api.interceptors.response.use(async (data) => data, (err) => {
+    if (err.response.status === 401 && !err.request.retryGetToken) {
+        console.debug("retry with getToken")
+        //return  api({ ...err.request, retryGetToken: true })
+
+    }
+    //return Promise.reject(err)
 })
 
 export default api
