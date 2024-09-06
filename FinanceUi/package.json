@@ -75,6 +75,8 @@
     "eslint-plugin-jsx-a11y": "^6.6.0",
     "eslint-plugin-react": "^7.30.1",
     "nan": "^2.16.0",
+    "onchange": "^7.1.0",
+    "prettier": "3.3.3",
     "typescript": "^4.7.4"
   },
   "overrides": {
@@ -89,6 +91,7 @@
     "build": "SET BASE_PATH=/finance/&& vite build",
     "prestart": "csharp-models-to-typescript --config=./ring_class_to_ts.json",
     "serve": "vite preview",
+    "prettier-watch": "onchange \"**/*\" -- prettier --write --ignore-unknown {{changed}}",
     "publish": "node ./run_script push"
   },
   "eslintConfig": {

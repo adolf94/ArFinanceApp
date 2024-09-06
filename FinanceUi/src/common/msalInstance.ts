@@ -3,4 +3,4 @@
 //@ts-ignore
 var msalInstance = new PublicClientApplication(window.webConfig.msal);
 
-export default msalInstance
+export default msalInstance;

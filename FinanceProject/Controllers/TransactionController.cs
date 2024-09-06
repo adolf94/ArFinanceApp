@@ -48,7 +48,6 @@ namespace FinanceProject.Controllers
 				public async Task<IActionResult> CreateOne(CreateTransactionDto dto)
 				{
 
-						_bal.CreateAccountBalances(dto.Date);
 
 						NewTransactionResponseDto response = new NewTransactionResponseDto();
 						Dictionary<Guid, Account> accounts = new Dictionary<Guid, Account>();
@@ -57,9 +56,11 @@ namespace FinanceProject.Controllers
 						{
 
 
+								var AcctCredit = _account.UpdateCreditAcct(dto.CreditId, dto.Amount);
+								accounts[dto.CreditId] = AcctCredit;
 
-								accounts[dto.CreditId] = _account.UpdateCreditAcct(dto.CreditId, dto.Amount);
-								accounts[dto.DebitId] = _account.UpdateDebitAcct(dto.DebitId, dto.Amount);
+								var accDebit = _account.UpdateDebitAcct(dto.DebitId, dto.Amount);
+								accounts[dto.DebitId] = accDebit;
 
 								_bal.UpdateCreditAcct(dto.CreditId, dto.Amount, dto.Date)
 											.ToList().ForEach(bal =>

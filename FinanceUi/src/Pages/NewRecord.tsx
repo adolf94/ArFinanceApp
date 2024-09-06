@@ -1,20 +1,42 @@
-﻿import { faArrowLeftLong } from "@fortawesome/free-solid-svg-icons"
-import React, { useState, createContext, useRef, useEffect } from 'react'
-import { AppBar, IconButton, Button, Toolbar, Typography, Grid, Dialog, List, ListItem, FormLabel, TextField, useTheme, useMediaQuery, Box } from '@mui/material'
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
-import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom"
+﻿import { faArrowLeftLong } from "@fortawesome/free-solid-svg-icons";
+import React, { useState, createContext, useRef, useEffect } from "react";
+import {
+  AppBar,
+  IconButton,
+  Button,
+  Toolbar,
+  Typography,
+  Grid,
+  Dialog,
+  List,
+  ListItem,
+  FormLabel,
+  TextField,
+  useTheme,
+  useMediaQuery,
+  Box,
+} from "@mui/material";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  Link,
+  useNavigate,
+  useParams,
+  useSearchParams,
+} from "react-router-dom";
 //import { makeStyles } from '@emotion/styles'
 
-import NewRecordForm from './NewRecordComponents/NewRecordForm'
-import moment from 'moment'
-import { ChevronLeft } from "@mui/icons-material"
-import { ScheduledTransactions, Transaction } from "FinanceApi"
-import { useQueryClient } from "@tanstack/react-query"
-import { TRANSACTION, fetchTransactionById } from "../repositories/transactions"
-import { ACCOUNT, fetchByAccountId } from "../repositories/accounts"
+import NewRecordForm from "./NewRecordComponents/NewRecordForm";
+import moment from "moment";
+import { ChevronLeft } from "@mui/icons-material";
+import { ScheduledTransactions, Transaction } from "FinanceApi";
+import { useQueryClient } from "@tanstack/react-query";
+import {
+  TRANSACTION,
+  fetchTransactionById,
+} from "../repositories/transactions";
+import { ACCOUNT, fetchByAccountId } from "../repositories/accounts";
 
-
-export const SelectAccountContext = createContext({})
+export const SelectAccountContext = createContext({});
 //const useStyles = makeStyles({
 
 //  dialogHalf: {
@@ -26,80 +48,101 @@ export const SelectAccountContext = createContext({})
 //});
 
 const defaultValue = {
-  type: 'expense',
+  type: "expense",
   date: moment().toISOString(),
   credit: null,
   debit: null,
   amount: null,
   vendor: null,
-  description: ''
-}
+  description: "",
+};
 const NewRecordPage = (props) => {
-  const [formData, setFormData] = useState<Partial<Transaction | ScheduledTransactions>>({ ...defaultValue })
+  const [formData, setFormData] = useState<
+    Partial<Transaction | ScheduledTransactions>
+  >({ ...defaultValue });
   const theme = useTheme();
-  const con = useRef()
-  const queryClient = useQueryClient()
-  const { transId } = useParams()
-  const [query, setQuery] = useSearchParams()
-  const navigate = useNavigate()
+  const con = useRef();
+  const queryClient = useQueryClient();
+  const { transId } = useParams();
+  const [query, setQuery] = useSearchParams();
+  const navigate = useNavigate();
 
   useEffect(() => {
     (async () => {
-      if (transId == "new" || (!!query.get("date") && moment(query.get("date")).isValid())) {
-        let date = query.get("date") ? moment(query.get("date")).hour(moment().hour()).minute(moment().minute()).toISOString() : moment().toISOString()
-        let credit = query.get("creditId") ?
-          await queryClient.ensureQueryData({ queryKey: [ACCOUNT, { id: query.get("creditId") }], queryFn: () => fetchByAccountId(query.get("creditId")) }) : null
-        setFormData({ ...defaultValue, date, credit, creditId: credit?.id })
+      if (
+        transId == "new" ||
+        (!!query.get("date") && moment(query.get("date")).isValid())
+      ) {
+        let date = query.get("date")
+          ? moment(query.get("date"))
+              .hour(moment().hour())
+              .minute(moment().minute())
+              .toISOString()
+          : moment().toISOString();
+        let credit = query.get("creditId")
+          ? await queryClient.ensureQueryData({
+              queryKey: [ACCOUNT, { id: query.get("creditId") }],
+              queryFn: () => fetchByAccountId(query.get("creditId")),
+            })
+          : null;
+        setFormData({ ...defaultValue, date, credit, creditId: credit?.id });
       } else {
-        queryClient.fetchQuery({
-          queryKey: [TRANSACTION, { id: transId }],
-          queryFn: () => fetchTransactionById(transId)
-        }).then(e => setFormData(e))
+        queryClient
+          .fetchQuery({
+            queryKey: [TRANSACTION, { id: transId }],
+            queryFn: () => fetchTransactionById(transId),
+          })
+          .then((e) => setFormData(e));
       }
-    })()
-  }, [transId])
-  
-
+    })();
+  }, [transId]);
 
   //const styles = useStyles();
-  const sm = useMediaQuery(theme.breakpoints.down('md'));
+  const sm = useMediaQuery(theme.breakpoints.down("md"));
 
   const [selectView, setSelectView] = useState({
-    groupId:null,
-    onChange: () => { },
+    groupId: null,
+    onChange: () => {},
     type: "",
-    searchValue: ""
-  })
+    searchValue: "",
+  });
 
   const setViewContext = (data) => {
-
     setSelectView({ ...selectView, ...data });
-  }
-  return <> <AppBar position="static">
-    <Toolbar>
-      <Link to="..." onClick={()=>navigate(-1)}>
-        <IconButton size="large" >
-          {/*<FontAwesomeIcon icon={faArrowLeftLong} />*/}
-          <ChevronLeft />
-        </IconButton>
-      </Link>
-      <Typography sx={{ flexGrow: 1 }} variant="h5" component="div">New</Typography>
-     
-    </Toolbar>
-  </AppBar>
-    <SelectAccountContext.Provider value={{ ...selectView, setViewContext }}>
-      <Grid container>
-        <Grid item xs={12} lg={6}>
-          <NewRecordForm formData={formData} selectPortal={con.current}  setFormData={setFormData}    />
-        </Grid>
+  };
+  return (
+    <>
+      {" "}
+      <AppBar position="static">
+        <Toolbar>
+          <Link to="..." onClick={() => navigate(-1)}>
+            <IconButton size="large">
+              {/*<FontAwesomeIcon icon={faArrowLeftLong} />*/}
+              <ChevronLeft />
+            </IconButton>
+          </Link>
+          <Typography sx={{ flexGrow: 1 }} variant="h5" component="div">
+            New
+          </Typography>
+        </Toolbar>
+      </AppBar>
+      <SelectAccountContext.Provider value={{ ...selectView, setViewContext }}>
+        <Grid container>
+          <Grid item xs={12} lg={6}>
+            <NewRecordForm
+              formData={formData}
+              selectPortal={con.current}
+              setFormData={setFormData}
+            />
+          </Grid>
 
-        <Grid item sm={6}>
-          <Box ref={con}></Box>
+          <Grid item sm={6}>
+            <Box ref={con}></Box>
+          </Grid>
         </Grid>
-       
-      </Grid>
-    </SelectAccountContext.Provider>
-  </>
-}
+      </SelectAccountContext.Provider>
+    </>
+  );
+};
 
-export default NewRecordPage
+export default NewRecordPage;

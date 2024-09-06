@@ -1,5 +1,7 @@
 declare global {
-  interface Window { webConfig: any; }
+  interface Window {
+    webConfig: any;
+  }
 }
 
 window.webConfig = window.webConfig || {};

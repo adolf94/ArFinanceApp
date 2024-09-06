@@ -8,58 +8,66 @@ namespace FinanceProject.Data.SqlRepo
 		{
 				private readonly AppDbContext _context;
 				private readonly IMemoryCache _cache;
+				private readonly ILogger<AccountBalanceRepo> _logger;
 
-				public AccountBalanceRepo(AppDbContext context, IMemoryCache cache)
+				public AccountBalanceRepo(AppDbContext context, IMemoryCache cache, ILogger<AccountBalanceRepo> logger)
 				{
 						_context = context;
 						_cache = cache;
+						_logger = logger;
 				}
 
 				public void CreateAccountBalances(DateTime date)
 				{
 						string acc_bal_key = $"acc_bal_{date.Year}_{date.Month}";
 						string? nil;
-						if (_cache.TryGetValue(date, out nil)) return;
-
+						_cache.TryGetValue(acc_bal_key, out nil);
+						if (nil != null) return;
+						_logger.LogDebug($"CreateAccountBalances {acc_bal_key} triggered");
 						if (!_context.AccountBalances!.Any(e => e.Month.Year == date.Year && e.Month.Month == date.Month))
 						{
 
-								IEnumerable<AccountBalance> items = _context.Accounts!.ToArray().Select(acc =>
+								List<AccountBalance> items = new List<AccountBalance>();
+								_context.Accounts!.ToList().ForEach(acc =>
+						{
+								DateTime currentPeriod = new DateTime(date.Year, date.Month, acc.PeriodStartDay);
+								DateTime prevPeriod = new DateTime(date.Year, date.Month, acc.PeriodStartDay).AddMonths(-1);
+								AccountBalance? accBal = _context.AccountBalances!.Where(b => b.AccountId == acc.Id && prevPeriod == b.Month).FirstOrDefault();
+								AccountBalance? currentBal = _context.AccountBalances!.Where(b => b.AccountId == acc.Id && currentPeriod == b.Month).FirstOrDefault();
+								if (currentBal != null) return;
+								if (accBal == null && !acc.ResetEndOfPeriod)
 								{
-										DateTime currentPeriod = new DateTime(date.Year, date.Month, acc.PeriodStartDay);
-										DateTime prevPeriod = new DateTime(date.Year, date.Month, acc.PeriodStartDay).AddMonths(-1);
-										AccountBalance? accBal = _context.AccountBalances!.Where(b => b.AccountId == acc.Id && prevPeriod == b.Month).FirstOrDefault();
-										if (accBal == null && !acc.ResetEndOfPeriod)
+										_logger.LogTrace($"accBal for {acc.Id} {prevPeriod.ToShortDateString()}");
+										decimal prevTotal = _context.Transactions!.Where(t => (t.CreditId == acc.Id || t.DebitId == acc.Id) && t.Date < currentPeriod)
+										.Select(t => (t.CreditId == acc.Id ? t.Amount : t.DebitId == acc.Id ? -t.Amount : 0)).Sum();
+
+										items.Add(new AccountBalance
 										{
-												decimal prevTotal = _context.Transactions!.Where(t => (t.CreditId == acc.Id || t.DebitId == acc.Id) && t.Date < currentPeriod)
+												AccountId = acc.Id,
+												Balance = prevTotal,
+												Month = new DateTime(date.Year, date.Month, acc.PeriodStartDay)
+										});
+								}
+								else
+								{
+										_logger.LogTrace($"accBal for {acc.Id} {prevPeriod.ToShortDateString()}");
+
+										decimal monthTotal = _context.Transactions!.Where(t => (t.CreditId == acc.Id || t.DebitId == acc.Id) && t.Date > prevPeriod && t.Date <= currentPeriod)
 												.Select(t => (t.CreditId == acc.Id ? t.Amount : t.DebitId == acc.Id ? -t.Amount : 0)).Sum();
 
-												return new AccountBalance
-												{
-														AccountId = acc.Id,
-														Balance = prevTotal,
-														Month = new DateTime(date.Year, date.Month, acc.PeriodStartDay)
-												};
-										}
-										else
+
+										items.Add(new AccountBalance
 										{
+												AccountId = acc.Id,
+												Balance = (accBal == null ? 0 : accBal.Balance) + monthTotal,
+												Month = new DateTime(date.Year, date.Month, acc.PeriodStartDay)
+										});
 
-												decimal monthTotal = _context.Transactions!.Where(t => (t.CreditId == acc.Id || t.DebitId == acc.Id) && t.Date > prevPeriod && t.Date <= currentPeriod)
-														.Select(t => (t.CreditId == acc.Id ? t.Amount : t.DebitId == acc.Id ? -t.Amount : 0)).Sum();
-
-
-												return new AccountBalance
-												{
-														AccountId = acc.Id,
-														Balance = (accBal == null ? 0 : accBal.Balance) + monthTotal,
-														Month = new DateTime(date.Year, date.Month, acc.PeriodStartDay)
-												};
-
-										}
+								}
 
 
 
-								}).ToList();
+						});
 
 
 
@@ -71,9 +79,9 @@ namespace FinanceProject.Data.SqlRepo
 				public IEnumerable<AccountBalance> UpdateCreditAcct(Guid creditId, decimal amount, DateTime date)
 				{
 
-
 						Account? acct = _context.Accounts!.Where(e => e.Id == creditId).FirstOrDefault();
 						if (acct == null) throw new Exception("Account not found");
+						CreateAccountBalances(date.AddDays(1 - acct.PeriodStartDay));
 						List<AccountBalance> balance = new List<AccountBalance>();
 						if (acct.ResetEndOfPeriod)
 						{
@@ -112,8 +120,8 @@ namespace FinanceProject.Data.SqlRepo
 
 						Account? acct = _context.Accounts!.Where(e => e.Id == debitId).FirstOrDefault();
 						if (acct == null) throw new Exception("Account not found");
+						CreateAccountBalances(date.AddDays(1 - acct.PeriodStartDay));
 						List<AccountBalance> balance = new List<AccountBalance>();
-
 
 						if (acct.ResetEndOfPeriod)
 						{

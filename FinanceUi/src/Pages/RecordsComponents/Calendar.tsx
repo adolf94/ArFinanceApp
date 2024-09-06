@@ -1,27 +1,27 @@
-import { Box, Grid, Paper } from "@mui/material"
-import { Transaction } from "FinanceApi"
-import moment from "moment"
-import React, { useContext, useState } from 'react'
-import { RecordsContext } from "../Records"
-import { useEffect } from "react"
-import numeral from "numeral"
+import { Box, Grid, Paper } from "@mui/material";
+import { Transaction } from "FinanceApi";
+import moment from "moment";
+import React, { useContext, useState } from "react";
+import { RecordsContext } from "../Records";
+import { useEffect } from "react";
+import numeral from "numeral";
 
 interface CalendarProps {
-  records: Transaction[]
+  records: Transaction[];
 }
 
 interface calendarViewData {
-  dayOfMonth: number,
-  date: Date,
-  dateISO: string,
-  dayOfWeek: number,
-  week: number,
-  isCurrentMonth: boolean,
-  hasRecord?: boolean,
-  totals?: {income: number, expense:number, total:number}
-} 
+  dayOfMonth: number;
+  date: Date;
+  dateISO: string;
+  dayOfWeek: number;
+  week: number;
+  isCurrentMonth: boolean;
+  hasRecord?: boolean;
+  totals?: { income: number; expense: number; total: number };
+}
 
-const generateCalendarArray = (month: Date)  => {
+const generateCalendarArray = (month: Date) => {
   let day = moment(month).date(1);
   let days: any[] = [];
   let NextOfMonth = moment(month).date(1).add(1, "month");
@@ -32,113 +32,215 @@ const generateCalendarArray = (month: Date)  => {
       dateISO: day.toISOString(),
       dayOfWeek: day.weekday(),
       week: day.week(),
-      isCurrentMonth: true
-    }
-    days.push(item)
-    day = day.clone().add(1, 'day')
+      isCurrentMonth: true,
+    };
+    days.push(item);
+    day = day.clone().add(1, "day");
   }
 
   return days.reduce((prev, item, index) => {
     if (!prev[item.week]) prev[item.week] = [];
-    let i = 0
+    let i = 0;
     while (item.dayOfWeek > i && moment(item.date).date() == 1) {
-      let thisDay = moment(item.date).clone().day(i)
+      let thisDay = moment(item.date).clone().day(i);
       prev[item.week].push({
         dayOfMonth: thisDay.date(),
         date: thisDay.toDate(),
         dateISO: thisDay.toISOString(),
         dayOfWeek: thisDay.weekday(),
         week: thisDay.week(),
-        isCurrentMonth: false
-      })
-      i++
+        isCurrentMonth: false,
+      });
+      i++;
     }
-    prev[item.week].push(item)
+    prev[item.week].push(item);
 
-    if (item.dayOfWeek < 6 && (index == days.length - 1)) {
-      let i = item.dayOfWeek + 1
+    if (item.dayOfWeek < 6 && index == days.length - 1) {
+      let i = item.dayOfWeek + 1;
       while (i < 7) {
-        let thisDay = moment(item.date).clone().day(i)
+        let thisDay = moment(item.date).clone().day(i);
         prev[item.week].push({
           dayOfMonth: thisDay.date(),
           date: thisDay.toDate(),
           dateISO: thisDay.toISOString(),
           dayOfWeek: thisDay.weekday(),
           week: thisDay.week(),
-          isCurrentMonth: false
-        })
-        i++
+          isCurrentMonth: false,
+        });
+        i++;
       }
     }
 
-
-    return prev as calendarViewData
-  }, {})
-
-
-}
+    return prev as calendarViewData;
+  }, {});
+};
 
 const Calendar = (props: CalendarProps) => {
-
-  const { records, totals, month } = useContext(RecordsContext)
-  const [view, setView] = useState([])
+  const { records, totals, month } = useContext(RecordsContext);
+  const [view, setView] = useState([]);
 
   useEffect(() => {
-    let data = generateCalendarArray(month.toDate())
+    let data = generateCalendarArray(month.toDate());
 
-    let dataArray = Object.keys(data).map(e => {
-      return data[e].map((day :calendarViewData) => {
-        let dayData = records.find(d => d.day == day.dayOfMonth)
+    let dataArray = Object.keys(data).map((e) => {
+      return data[e].map((day: calendarViewData) => {
+        let dayData = records.find((d) => d.day == day.dayOfMonth);
         if (!dayData) {
-            day.hasRecord = false
-            day.totals = { income: 0, expense: 0, total: 0 }
-          return day  
+          day.hasRecord = false;
+          day.totals = { income: 0, expense: 0, total: 0 };
+          return day;
         }
-        day.hasRecord = dayData.items.length > 0
-          let  { income,expenses } = dayData 
-        day.totals = {income, expense:expenses, total: income-expenses}
-        return day
-      })
-    })
+        day.hasRecord = dayData.items.length > 0;
+        let { income, expenses } = dayData;
+        day.totals = { income, expense: expenses, total: income - expenses };
+        return day;
+      });
+    });
 
     setView(dataArray);
+  }, [records]);
 
+  return (
+    <Box>
+      <Paper sx={{ p: 1, my: 1 }}>
+        <Grid
+          container
+          columns={7}
+          sx={{
+            border: 1,
+            borderStyle: "solid",
+            borderColor: "gray",
+            textAlign: "center",
+          }}
+        >
+          <Grid
+            item
+            xs={1}
+            sx={{
+              borderRight: 1,
+              borderStyleRight: "solid",
+              borderColorRight: "gray",
+              py: 2,
+            }}
+          >
+            Sun
+          </Grid>
+          <Grid
+            item
+            xs={1}
+            sx={{
+              borderRight: 1,
+              borderStyleRight: "solid",
+              borderColorRight: "gray",
+              py: 2,
+            }}
+          >
+            Mon
+          </Grid>
+          <Grid
+            item
+            xs={1}
+            sx={{
+              borderRight: 1,
+              borderStyleRight: "solid",
+              borderColorRight: "gray",
+              py: 2,
+            }}
+          >
+            Tue
+          </Grid>
+          <Grid
+            item
+            xs={1}
+            sx={{
+              borderRight: 1,
+              borderStyleRight: "solid",
+              borderColorRight: "gray",
+              py: 2,
+            }}
+          >
+            Wed
+          </Grid>
+          <Grid
+            item
+            xs={1}
+            sx={{
+              borderRight: 1,
+              borderStyleRight: "solid",
+              borderColorRight: "gray",
+              py: 2,
+            }}
+          >
+            Thu
+          </Grid>
+          <Grid
+            item
+            xs={1}
+            sx={{
+              borderRight: 1,
+              borderStyleRight: "solid",
+              borderColorRight: "gray",
+              py: 2,
+            }}
+          >
+            Fri
+          </Grid>
+          <Grid
+            item
+            xs={1}
+            sx={{
+              borderRight: 1,
+              borderStyleRight: "solid",
+              borderColorRight: "gray",
+              py: 2,
+            }}
+          >
+            Sat
+          </Grid>
+        </Grid>
+        {view.map((week) => (
+          <Grid
+            container
+            columns={7}
+            sx={{ border: 1, borderStyle: "solid", borderColor: "gray" }}
+          >
+            {week.map((day) => (
+              <Grid
+                item
+                xs={1}
+                sx={{
+                  borderRight: 1,
+                  borderStyleRight: "solid",
+                  borderColorRight: "gray",
+                  padding: 1,
+                }}
+              >
+                <Box>{day.dayOfMonth}</Box>
+                {!day.isCurrentMonth ? (
+                  <Box></Box>
+                ) : (
+                  <Box sx={{ textAlign: "right", minHeight: "3.5em" }}>
+                    <Box>
+                      {day.hasRecord &&
+                        numeral(day.totals?.income).format("0,0.00")}
+                    </Box>
+                    <Box>
+                      {day.hasRecord &&
+                        numeral(day.totals?.expense).format("0,0.00")}
+                    </Box>
+                    <Box>
+                      {day.hasRecord &&
+                        numeral(day.totals?.total).format("0,0.00")}
+                    </Box>
+                  </Box>
+                )}
+              </Grid>
+            ))}
+          </Grid>
+        ))}
+      </Paper>
+    </Box>
+  );
+};
 
-  },[records])
-
-  
-  return <Box>
-    <Paper sx={{ p: 1, my: 1 }}>
-      <Grid container columns={7} sx={{ border: 1, borderStyle: 'solid',  borderColor:'gray', textAlign:'center'}}>
-        <Grid item xs={1} sx={{ borderRight: 1, borderStyleRight: 'solid', borderColorRight: 'gray', py: 2 }}>Sun</Grid>
-        <Grid item xs={1} sx={{ borderRight: 1, borderStyleRight: 'solid', borderColorRight: 'gray', py: 2 }} >Mon</Grid>
-        <Grid item xs={1} sx={{ borderRight: 1, borderStyleRight: 'solid', borderColorRight: 'gray', py: 2 }} >Tue</Grid>
-        <Grid item xs={1} sx={{ borderRight: 1, borderStyleRight: 'solid', borderColorRight: 'gray', py: 2 }} >Wed</Grid>
-        <Grid item xs={1} sx={{ borderRight: 1, borderStyleRight: 'solid', borderColorRight: 'gray', py: 2 }} >Thu</Grid>
-        <Grid item xs={1} sx={{ borderRight: 1, borderStyleRight: 'solid', borderColorRight: 'gray', py: 2 }} >Fri</Grid>
-        <Grid item xs={1} sx={{ borderRight: 1, borderStyleRight: 'solid', borderColorRight: 'gray', py: 2 }} >Sat</Grid>
-      </Grid>
-      {
-        view.map(week=><Grid container columns={7} sx={{ border:1, borderStyle:'solid', borderColor:'gray'}}>
-          {
-            week.map(day => <Grid item xs={1} sx={{ borderRight: 1, borderStyleRight: 'solid', borderColorRight: 'gray', padding:1 }}>
-              <Box>
-                {day.dayOfMonth }
-              </Box>
-              {!day.isCurrentMonth ? <Box>
-              </Box> : <Box sx={{ textAlign:'right', minHeight:'3.5em'}}>
-                  <Box>{day.hasRecord && numeral(day.totals?.income).format("0,0.00")}</Box>
-                  <Box>{day.hasRecord && numeral(day.totals?.expense).format("0,0.00")}</Box>
-                  <Box>{day.hasRecord && numeral(day.totals?.total).format("0,0.00")}</Box>
-              </Box>}
-            </Grid>)
-          }
-        </Grid>)
-      }
-    </Paper>
-
-
-  </Box>
-}
-
-export default Calendar
+export default Calendar;

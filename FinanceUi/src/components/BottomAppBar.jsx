@@ -1,33 +1,51 @@
-﻿import AppBar from '@mui/material/AppBar'
-import React, { useState } from 'react'
-import BottomNavigation from '@mui/material/BottomNavigation'
-import BottomNavigationAction from '@mui/material/BottomNavigationAction'
-import Toolbar from '@mui/material/Toolbar'
-import IconButton from '@mui/material/IconButton'
-import { faBars, faBook, faBurger, faCalendar, faCog, faDatabase } from '@fortawesome/free-solid-svg-icons'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+﻿import AppBar from "@mui/material/AppBar";
+import React, { useState } from "react";
+import BottomNavigation from "@mui/material/BottomNavigation";
+import BottomNavigationAction from "@mui/material/BottomNavigationAction";
+import Toolbar from "@mui/material/Toolbar";
+import IconButton from "@mui/material/IconButton";
+import {
+  faBars,
+  faBook,
+  faBurger,
+  faCalendar,
+  faCog,
+  faDatabase,
+} from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useNavigate } from "react-router-dom";
 
-
 const BottomAppBar = (props) => {
-  const navigate = useNavigate()
-  const [value, setValue] = useState("Records")
+  const navigate = useNavigate();
+  const [value, setValue] = useState("Records");
 
   const onNav = (evt, value) => {
-    console.log(evt, value)
-    setValue(value)
-    navigate(value)
-  }
+    console.log(evt, value);
+    setValue(value);
+    navigate(value);
+  };
 
-  return <AppBar position="fixed" color="primary" sx={{ top: 'auto', bottom: 0 }}>
+  return (
+    <AppBar position="fixed" color="primary" sx={{ top: "auto", bottom: 0 }}>
+      <BottomNavigation showLabels value={value} onChange={onNav}>
+        <BottomNavigationAction
+          value="/records"
+          label={"Records"}
+          icon={<FontAwesomeIcon icon={faBook} />}
+        />
+        <BottomNavigationAction
+          value="/accounts"
+          label={"Accounts"}
+          icon={<FontAwesomeIcon icon={faDatabase} />}
+        />
+        <BottomNavigationAction
+          value="/settings"
+          label={"Settings"}
+          icon={<FontAwesomeIcon icon={faCog} />}
+        />
+      </BottomNavigation>
+    </AppBar>
+  );
+};
 
-    <BottomNavigation showLabels value={value} onChange={onNav}>
-      <BottomNavigationAction value="/records" label={"Records"} icon={<FontAwesomeIcon icon={faBook} />} />
-      <BottomNavigationAction value="/accounts" label={"Accounts"} icon={<FontAwesomeIcon icon={faDatabase} />} />
-      <BottomNavigationAction value="/settings" label={"Settings"} icon={<FontAwesomeIcon icon={faCog} />} />
-
-    </BottomNavigation>
-  </AppBar>
-}
-
-export default BottomAppBar
+export default BottomAppBar;

@@ -1,11 +1,7 @@
-﻿import React from 'react'
+﻿import React from "react";
 
 const SelectAccountNew = () => {
+  return <>asd</>;
+};
 
-
-  return <>
-    asd
-  </>
-}
-
-export default SelectAccountNew
+export default SelectAccountNew;
