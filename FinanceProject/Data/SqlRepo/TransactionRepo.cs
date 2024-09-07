@@ -45,7 +45,7 @@ namespace FinanceProject.Data.SqlRepo
 
 				public Transaction? GetLastTransactionByAdded()
 				{
-						throw new NotImplementedException();
+						return _context.Transactions!.OrderByDescending(e => e.DateAdded).FirstOrDefault();
 				}
 		}
 }
