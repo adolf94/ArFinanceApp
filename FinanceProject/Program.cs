@@ -81,6 +81,13 @@ builder.Services.AddSingleton(pConfig);
 IMapper mapper = mapperConfig.CreateMapper();
 builder.Services.AddSingleton(mapper);
 
+
+
+/// Config validation
+
+
+
+
 builder.Services.AddDbContext<AppDbContext>(opt =>
 {
 		var passkey = Environment.GetEnvironmentVariable("ENV_PASSKEY")!;
@@ -97,24 +104,42 @@ builder.Services.AddAuthorization();
 var app = builder.Build();
 TypeScript.Definitions().ForLoadedAssemblies();
 
-app.Lifetime.ApplicationStopping.Register(() =>
+
+
+using (var scope = app.Services.CreateScope())
 {
+		var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
 
-		var scope = app.Services.CreateScope();
+		logger.LogInformation($"authConfig.redirectUrl: {config.authConfig.redirect_uri}");
+		logger.LogInformation($"authConfig.clientId: {config.authConfig.client_id}");
+		logger.LogInformation($"authConfig.secret: " + config.authConfig.client_secret == "abcd" ? "" : "(basta hindi sya abcd)";
+		logger.LogInformation($"authConfig.scope: {config.authConfig.scope}");
+		logger.LogInformation($"jwtConfig.issuer: {config.jwtConfig.issuer}");
+		logger.LogInformation($"jwtConfig.audience: {config.jwtConfig.audience}");
+		logger.LogInformation($"jwtConfig.secret: " + config.jwtConfig.secret_key == "abcd" ? "" : "(basta hindi sya abcd)";
 
-		PersistentConfig conf = scope.ServiceProvider.GetRequiredService<PersistentConfig>();
-
-
-
-		string SchedFolder = Path.Combine(scope.ServiceProvider.GetRequiredService<IWebHostEnvironment>().ContentRootPath, "configs");
-		string SchedTaskFile = Path.Combine(SchedFolder, "scheduled.json");
-		if (!Directory.Exists(SchedFolder)) Directory.CreateDirectory(SchedFolder);
-
-		string newConfig = System.Text.Json.JsonSerializer.Serialize(conf);
-		File.WriteAllText(SchedTaskFile, newConfig);
+}
 
 
-});
+
+app.Lifetime.ApplicationStopping.Register(() =>
+		{
+
+				var scope = app.Services.CreateScope();
+
+				PersistentConfig conf = scope.ServiceProvider.GetRequiredService<PersistentConfig>();
+
+
+
+				string SchedFolder = Path.Combine(scope.ServiceProvider.GetRequiredService<IWebHostEnvironment>().ContentRootPath, "configs");
+				string SchedTaskFile = Path.Combine(SchedFolder, "scheduled.json");
+				if (!Directory.Exists(SchedFolder)) Directory.CreateDirectory(SchedFolder);
+
+				string newConfig = System.Text.Json.JsonSerializer.Serialize(conf);
+				File.WriteAllText(SchedTaskFile, newConfig);
+
+
+		});
 
 if (app.Environment.IsDevelopment())
 {

@@ -16,11 +16,13 @@ namespace FinanceApp.Controllers
 		{
 				private readonly AppConfig _config;
 				private readonly IUserRepo _user;
+				private readonly ILogger<GoogleController> _logger;
 
-				public GoogleController(AppConfig config, IUserRepo user)
+				public GoogleController(AppConfig config, IUserRepo user, ILogger<GoogleController> logger)
 				{
 						_config = config;
 						_user = user;
+						_logger = logger;
 				}
 
 				[HttpPost("auth")]
@@ -39,8 +41,39 @@ namespace FinanceApp.Controllers
 
 						FormUrlEncodedContent content = new FormUrlEncodedContent(data);
 						HttpResponseMessage resp = await client.PostAsync("https://oauth2.googleapis.com/token", content);
-						if (!resp.IsSuccessStatusCode) return Unauthorized();
 						string result = await resp.Content.ReadAsStringAsync();
+						if (!resp.IsSuccessStatusCode)
+						{
+								Dictionary<string, string> error = JsonSerializer.Deserialize<Dictionary<string, string>>(result);
+
+								if (error == null)
+								{
+										_logger.LogError("No Error result found for Google Auth");
+										return StatusCode(500, result);
+								}
+								if (!error.ContainsKey("error"))
+								{
+										_logger.LogError("No Error KEY found for Google Auth");
+										_logger.LogError(result);
+										return StatusCode(500, result);
+								}
+
+								switch (error["error"])
+								{
+										case "redirect_uri_mismatch":
+												_logger.LogError("Misconifguration : REDIRECT URL MISMATCH");
+												return StatusCode(500);
+										case "invalid_client":
+												_logger.LogError("Misconifguration : INVALID CLIENT");
+												return StatusCode(500);
+										case "invalid_grant":
+												HttpContext.Response.Headers["X-GLogin-Error"] = "Invalid Code Key";
+												return Unauthorized();
+										default:
+												_logger.LogError("Uncaught Error : " + error["error"]);
+												return StatusCode(500);
+								}
+						}
 						GoogleClaimResponse? currentToken = JsonSerializer.Deserialize<GoogleClaimResponse>(result);
 
 
