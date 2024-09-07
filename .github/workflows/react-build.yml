@@ -25,3 +25,11 @@ jobs:
     - name: Build React
       run: npm run build
       working-directory: FinanceUi
+
+    - uses: kheiakiyama/install-azcopy-action@v1
+      with:
+        version: 'v10'
+
+    - name: Upload to Azure Files
+      run: azcopy_v10 copy ./dist/* "https://financeappstore.file.core.windows.net/financeapp/wwwroot/finance?${{secret.STORAGE_KEY}}" --recursive
+      working-directory: FinanceUi
