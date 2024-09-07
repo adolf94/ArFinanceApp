@@ -31,5 +31,5 @@ jobs:
         version: 'v10'
 
     - name: Upload to Azure Files
-      run: azcopy_v10 copy ./dist/* "https://financeappstore.file.core.windows.net/financeapp/wwwroot/finance?${{secrets.STORAGE_KEY}}" --recursive=true
+      run: azcopy_v10 copy "./dist/*" "https://financeappstore.file.core.windows.net/financeapp/wwwroot/finance?${{secrets.STORAGE_KEY}}" --recursive=true
       working-directory: FinanceUi
