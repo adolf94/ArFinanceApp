@@ -81,8 +81,6 @@ builder.Services.AddSingleton(pConfig);
 IMapper mapper = mapperConfig.CreateMapper();
 builder.Services.AddSingleton(mapper);
 
-
-
 builder.Services.AddDbContext<AppDbContext>(opt =>
 {
 		var passkey = Environment.GetEnvironmentVariable("ENV_PASSKEY")!;
@@ -92,7 +90,6 @@ builder.Services.AddDbContext<AppDbContext>(opt =>
 		opt.UseSqlServer(connection);
 });
 builder.Services.AddHostedService<OnStartupBgSvc>();
-
 builder.Services.AddAuthorization();
 
 

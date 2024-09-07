@@ -45,6 +45,23 @@ switch (action) {
         proc = spawn("docker", ["run", "--rm", "-p", "3000:8080", "--mount", "type=bind,dst=/app/wwwroot,src=/D/Users/adolf/source/repos/ArFinanceApp/FinanceProject/wwwroot/,readonly", `financeapp:${args.ver}`])
         waitForExit()
 
+
+
+    case "runEnv":
+        proc = spawn("docker", ["run",  "-p", "5173:8080", "--mount", "type=bind,dst=/app/wwwroot,src=/D/Users/adolf/source/repos/ArFinanceApp/FinanceProject/wwwroot/,readonly", 
+            "-e", "AppConfig__authConfig__client_id=929828408348-sq488sibic3oquur1ov5ke3jos7sgfmv.apps.googleusercontent.com",
+            "-e", "AppConfig__authConfig__Audience=929828408348-sq488sibic3oquur1ov5ke3jos7sgfmv.apps.googleusercontent.com",
+            "-e", "AppConfig__authConfig__redirect_uri=https://test.graytree-42c0cd77.eastus.azurecontainerapps.io",
+            "-e", "AppConfig__jwtConfig__issuer=https://adolfrey.com",
+            "-e", `ENV_PASSKEY=${process.env.ENV_PASSKEY}`,
+            "-e", `ConnectionStrings__AzureSql=${process.env.AZURE_SQL}`,
+            "-e", `AppConfig__jwtConfig__secret_key=${process.env.JWT_SECRET}`,
+            "-e", `AppConfig__authConfig__client_secret=${process.env.GOOGLE_SECRET}`,
+            `financeapp:${args.ver}`,
+        ])
+        waitForExit()
+
+
         break;
     case "push":
         let thisProcess = new Promise((res, rej) => {

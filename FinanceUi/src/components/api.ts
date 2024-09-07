@@ -1,9 +1,4 @@
 ﻿import axios, { AxiosRequestConfig } from "axios";
-import msalInstance from "../common/msalInstance";
-import {
-  BrowserAuthError,
-  InteractionRequiredAuthError,
-} from "@azure/msal-browser";
 import moment from "moment";
 import { oauthSignIn } from "../common/GoogleLogin";
 import { memoize as mm } from "underscore";
@@ -28,12 +23,12 @@ const getTokenFromApi = mm(
   (e) => moment().format("yyyyMMddHHmm"),
 );
 
-export const getToken = async (force) => {
+export const getToken = async (force : boolean) => {
   let token = window.sessionStorage.getItem("access_token");
 
   if (!token || force) token = await getTokenFromApi();
 
-  let tokenJson = JSON.parse(window.atob(token.split(".")[1]));
+  let tokenJson = JSON.parse(window.atob(token!.split(".")[1]));
 
   if (moment().add(1, "minute").isAfter(tokenJson.exp))
     token = await getTokenFromApi();
@@ -49,7 +44,7 @@ const api = axios.create({
 api.interceptors.request.use(async (config: AxiosRequestConfig) => {
   if (config.preventAuth) return config;
   let token = await getToken(config.retryGetToken);
-  config.headers["Authorization"] = "Bearer " + token;
+  config.headers!.Authorization = "Bearer " + token;
   return config;
 });
 

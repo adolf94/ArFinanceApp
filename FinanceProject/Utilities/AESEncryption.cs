@@ -47,7 +47,6 @@ namespace FinanceProject.Utilities
 
 				public static string DecryptString(string password, string encrypted)
 				{
-
 						try
 						{
 								byte[] encryptedBytes = Convert.FromBase64String(encrypted);
@@ -58,7 +57,7 @@ namespace FinanceProject.Utilities
 								Buffer.BlockCopy(encryptedBytes, 0, salt, 0, salt.Length);
 								Buffer.BlockCopy(encryptedBytes, salt.Length, iv, 0, iv.Length);
 								Buffer.BlockCopy(encryptedBytes, salt.Length + iv.Length, encryptedSecret, 0, encryptedSecret.Length);
-								using (var kdf = new Rfc2898DeriveBytes(pwBytes, salt, 100000, HashAlgorithmName.SHA256))
+								using (var kdf = new Rfc2898DeriveBytes(password, salt, 100000, HashAlgorithmName.SHA256))
 								{
 										byte[] key = kdf.GetBytes(32);
 										using (var aes = Aes.Create())

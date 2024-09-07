@@ -19,14 +19,13 @@ export const oauthSignIn = () => {
 
   // Parameters to pass to OAuth 2.0 endpoint.
   var params = {
-    client_id:
-      "929828408348-sq488sibic3oquur1ov5ke3jos7sgfmv.apps.googleusercontent.com",
+      client_id: window.webConfig.clientId,
     response_type: "code",
     scope: "openid",
     access_type: "offline",
     include_granted_scopes: "true",
     state: base64State,
-    redirect_uri: "https://localhost:5173/finance",
+    redirect_uri: window.webConfig.redirectUri,
     prompt: "login",
   };
 
