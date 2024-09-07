@@ -26,6 +26,17 @@ jobs:
       run: npm run build
       working-directory: FinanceUi
 
+    - name: Substitute JSON 
+      uses: restackio/update-json-values-action@v1.0.0
+      with:
+        file: FinanceUi/dist/config.json
+        # values to replace. example: {'TEMPLATE_VALUE_HERE': 'value_to_replace_with', 'ANOTHER_TEMPLATE_VALUE': 'another_value_to_replace_with'}
+        values: "{'api':`https://test.graytree-42c0cd77.eastus.azurecontainerapps.io/api/'}" 
+    - name: Move/Rename config.json to js
+      run: |
+            echo window.webConfig: >> config.js
+            cat config.json >> config.js
+
     - uses: kheiakiyama/install-azcopy-action@v1
       with:
         version: 'v10'
