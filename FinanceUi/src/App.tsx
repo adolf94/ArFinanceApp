@@ -1,5 +1,5 @@
 import React, { Component, useState, useEffect } from "react";
-import { Route, Routes } from "react-router-dom";
+import { Route, Routes, useNavigate } from "react-router-dom";
 import AppRoutes from "./AppRoute";
 import { DropdownContext, defaultData } from "./components/useDropdown";
 import { Layout } from "./components/Layout";
@@ -21,6 +21,7 @@ import msalInstance from "./common/msalInstance";
 import history, { NavigateSetter } from "./components/History";
 import { CustomNavigationClient } from "./components/NavigationClient";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import { oauthSignIn } from "./common/GoogleLogin";
 
 export const queryClient = new QueryClient({
   defaultOptions: {
@@ -55,21 +56,24 @@ persistQueryClient({
 
 //@ts-ignore
 const TheApp = (props) => {
-  const [dropdown, setDropdown] = useState(defaultData);
-  const [msalInitialized, setInitialized] = useState(false);
-  const setDropdownValue = (name, values) => {
-    setDropdown({ ...dropdown, [name]: values });
-  };
+    const [dropdown, setDropdown] = useState(defaultData);
+    const [msalInitialized, setInitialized] = useState(false);
+    const setDropdownValue = (name, values) => {
+        setDropdown({ ...dropdown, [name]: values });
+    };
+    const navigate = useNavigate()
 
-  const fetchUserInfo = () => {
-    api.get("/user/login");
-  };
+
+
 
   const handleGoogleRedirect = () => {
     return new Promise((res, rej) => {
       let str = window.location.search;
 
-      if (str === "") return res("no query");
+        if (str === "") {
+            setInitialized(true)
+            res("")
+        };
 
       const hash2Obj: any = str
         .substring(1)
@@ -81,21 +85,30 @@ const TheApp = (props) => {
       let stateFromStorage = sessionStorage.getItem("googleLoginState");
       if (decodeURIComponent(hash2Obj.state) !== stateFromStorage) {
         console.debug("state did not match");
-        console.debug(stateFromStorage);
-        console.debug(decodeURIComponent(hash2Obj.state));
         return rej("state_mismatch");
       }
-      api
-        .post("/google/auth", { code: hash2Obj.code }, { preventAuth: true })
+      api.post("/google/auth", { code: decodeURIComponent(hash2Obj.code) }, { preventAuth: true })
         .then((e) => {
-          window.localStorage.setItem("refresh_token", e.data.refresh_token);
+            window.localStorage.setItem("refresh_token", e.data.refresh_token);
+            setInitialized(true)
+
           res("got token");
+        }).catch(err => {
+            if (err.response.status === 401 && !!err.response.headers["X-GLogin-Error"]) {
+                console.log("INVALID CODE")
+                oauthSignIn();
+            }
         });
     });
   };
 
   useEffect(() => {
-    handleGoogleRedirect().then((e) => setInitialized(true));
+      handleGoogleRedirect().then((e) => {
+          if (e === "") return e;
+        let stateFromStorage = sessionStorage.getItem("googleLoginState");
+          let state = JSON.parse(atob(stateFromStorage!))
+          navigate(state.currentPath.replace("/finance",""))
+      });
   }, []);
 
   const RouteMapper = (routes) => {

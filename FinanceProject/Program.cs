@@ -112,11 +112,11 @@ using (var scope = app.Services.CreateScope())
 
 		logger.LogInformation($"authConfig.redirectUrl: {config.authConfig.redirect_uri}");
 		logger.LogInformation($"authConfig.clientId: {config.authConfig.client_id}");
-		logger.LogInformation($"authConfig.secret: " + config.authConfig.client_secret == "abcd" ? "" : "(basta hindi sya abcd)");
+		logger.LogInformation($"authConfig.secret: " + (config.authConfig.client_secret == "abcd" ? "" : "(basta hindi sya abcd)"));
 		logger.LogInformation($"authConfig.scope: {config.authConfig.scope}");
 		logger.LogInformation($"jwtConfig.issuer: {config.jwtConfig.issuer}");
 		logger.LogInformation($"jwtConfig.audience: {config.jwtConfig.audience}");
-		logger.LogInformation($"jwtConfig.secret: " + config.jwtConfig.secret_key == "abcd" ? "" : "(basta hindi sya abcd)");
+		logger.LogInformation($"jwtConfig.secret: " + (config.jwtConfig.secret_key == "abcd" ? "" : "(basta hindi sya abcd)"));
 
 }
 

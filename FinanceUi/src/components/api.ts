@@ -7,7 +7,7 @@ const getTokenFromApi = mm(
   () => {
     let token = window.localStorage.getItem("refresh_token");
 
-    if (!token) oauthSignIn();
+    if (!token) return oauthSignIn();
     return axios
       .post(`${window.webConfig.api}/google/auth/refresh`, {
         refresh_token: token,
@@ -49,12 +49,13 @@ api.interceptors.request.use(async (config: AxiosRequestConfig) => {
 });
 
 api.interceptors.response.use(
-  async (data) => data,
-  (err) => {
-    if (err.response.status === 401 && !err.request.retryGetToken) {
-      console.debug("retry with getToken");
-      //return  api({ ...err.request, retryGetToken: true })
-    }
+    async (data) => data,
+    (err) => {
+   
+      if (err.response.status === 401 && !err.request.retryGetToken) {
+          console.debug("retry with getToken");
+          return api({ ...err.request, retryGetToken: true })
+      }
     //return Promise.reject(err)
   },
 );
