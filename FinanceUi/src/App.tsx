@@ -86,16 +86,25 @@ const TheApp = (props) => {
       if (decodeURIComponent(hash2Obj.state) !== stateFromStorage) {
         console.debug("state did not match");
         return rej("state_mismatch");
-      }
+        }
+
+        if (!!hash2Obj?.error && hash2Obj.error === "interaction_required") {
+            console.debug("interaction_required")
+            oauthSignIn("consent");
+            return;
+        }
+
+
       api.post("/google/auth", { code: decodeURIComponent(hash2Obj.code) }, { preventAuth: true })
         .then((e) => {
             window.localStorage.setItem("refresh_token", e.data.refresh_token);
+            window.sessionStorage.setItem("access_token", e.data.access_token);
             setInitialized(true)
 
           res("got token");
         }).catch(err => {
             if (err.response.status === 401 && !!err.response.headers["X-GLogin-Error"]) {
-                console.log("INVALID CODE")
+                console.debug("INVALID CODE")
                 oauthSignIn();
             }
         });

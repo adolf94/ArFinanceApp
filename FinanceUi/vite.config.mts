@@ -7,5 +7,6 @@ dotenv.config();
 console.log(process.env.VITE_BASE_PATH)
 export default defineConfig({
     base: process.env?.VITE_BASE_PATH || "/",
+    build: { sourcemap:true},
   plugins: [react(), mkcert()],
 });

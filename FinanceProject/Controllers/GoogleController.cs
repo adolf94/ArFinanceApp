@@ -74,8 +74,13 @@ namespace FinanceApp.Controllers
 												return StatusCode(500);
 								}
 						}
+						int tokenLifetime = 5;
 						GoogleClaimResponse? currentToken = JsonSerializer.Deserialize<GoogleClaimResponse>(result);
-
+						if (string.IsNullOrEmpty(currentToken!.refresh_token))
+						{
+								_logger.LogWarning("No refresh token was received!");
+								tokenLifetime = 30;
+						}
 
 						//byte[] byteData = Convert.FromBase64String(currentToken!.id_token.Split(".")[1]);
 
@@ -103,7 +108,7 @@ namespace FinanceApp.Controllers
 						var tokenDescriptor = new SecurityTokenDescriptor
 						{
 								Subject = new ClaimsIdentity(idToken.Claims.Where(e => e.Type != "aud")),
-								Expires = DateTime.UtcNow.AddMinutes(5),
+								Expires = DateTime.UtcNow.AddMinutes(tokenLifetime),
 								Issuer = _config.jwtConfig.issuer,
 								Audience = _config.jwtConfig.audience,
 								SigningCredentials = new SigningCredentials
@@ -142,6 +147,13 @@ namespace FinanceApp.Controllers
 
 						GoogleClaimResponse? currentToken = JsonSerializer.Deserialize<GoogleClaimResponse>(result);
 
+						int tokenLifetime = 5;
+						if (string.IsNullOrEmpty(currentToken!.refresh_token))
+						{
+								_logger.LogWarning("No refresh token was received!");
+								tokenLifetime = 30;
+
+						}
 
 						//byte[] byteData = Convert.FromBase64String(currentToken!.id_token.Split(".")[1]);
 
@@ -170,7 +182,7 @@ namespace FinanceApp.Controllers
 						var tokenDescriptor = new SecurityTokenDescriptor
 						{
 								Subject = new ClaimsIdentity(idToken.Claims.Where(e => e.Type != "aud")),
-								Expires = DateTime.UtcNow.AddMinutes(5),
+								Expires = DateTime.UtcNow.AddMinutes(tokenLifetime),
 								Issuer = _config.jwtConfig.issuer,
 								Audience = _config.jwtConfig.audience,
 

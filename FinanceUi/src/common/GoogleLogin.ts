@@ -1,6 +1,6 @@
 import { v4 } from "uuid";
 
-export const oauthSignIn = () => {
+export const oauthSignIn = (promptType? : string) => {
   // Google's OAuth 2.0 endpoint for requesting an access token
   var oauth2Endpoint = "https://accounts.google.com/o/oauth2/v2/auth";
   const { protocal, host, pathname, search } = window.location;
@@ -24,9 +24,9 @@ export const oauthSignIn = () => {
     scope: "openid",
     access_type: "offline",
     include_granted_scopes: "true",
-    state: base64State,
+      state: base64State,
     redirect_uri: window.webConfig.redirectUri,
-    prompt: "login",
+      prompt: promptType || "none",
   };
 
   // Add form parameters as hidden input values.
