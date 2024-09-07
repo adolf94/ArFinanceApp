@@ -33,8 +33,9 @@ jobs:
         values: "{\"api\":\"https://test.graytree-42c0cd77.eastus.azurecontainerapps.io/api/\"}" 
     - name: Move/Rename config.json to js
       run: |
-            echo window.webConfig: >> config.js
+            echo window.webConfig: > config.js
             cat config.json >> config.js
+      working-directory: FinanceUi/dist
 
     - uses: kheiakiyama/install-azcopy-action@v1
       with:
