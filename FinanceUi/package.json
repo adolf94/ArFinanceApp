@@ -88,7 +88,7 @@
   },
   "scripts": {
     "start": "vite",
-    "build": "SET BASE_PATH=/finance/&& vite build",
+    "build": "vite build",
     "prestart": "csharp-models-to-typescript --config=./ring_class_to_ts.json",
     "serve": "vite preview",
     "prettier-watch": "onchange \"**/*\" -- prettier --write --ignore-unknown {{changed}}",
