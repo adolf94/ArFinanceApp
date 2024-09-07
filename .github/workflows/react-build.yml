@@ -27,13 +27,14 @@ jobs:
       working-directory: FinanceUi
 
     - name: Substitute JSON 
-      uses: restackio/update-json-values-action@v1.0.0
+      uses: restackio/update-json-file-action@2.1
       with:
         file: FinanceUi/dist/config.json
-        values: "{\"api\":\"https://test.graytree-42c0cd77.eastus.azurecontainerapps.io/api/\"}" 
+        fields: "{\"api\":\"https://test.graytree-42c0cd77.eastus.azurecontainerapps.io/api/\"}" 
+        
     - name: Move/Rename config.json to js
       run: |
-            echo window.webConfig: > config.js
+            echo window.webConfig= > config.js
             cat config.json >> config.js
       working-directory: FinanceUi/dist
 
