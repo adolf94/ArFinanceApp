@@ -1,0 +1,26 @@
+name: Build React App
+
+on:
+  workflow_dispatch:
+
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    environment: GITHUB_TOKEN
+    steps:
+    - uses: actions/checkout@v4
+    
+    - uses: actions/setup-node@v4
+      name: Cache Dependency modules
+      with:
+        node-version: 20
+        cache: 'npm'
+
+    - name: Install Dependencies
+      run: npm install
+      working-directory: FinanceUi
+      
+    - name: Build React
+      run: npm run build
+      working-directory: FinanceUi
