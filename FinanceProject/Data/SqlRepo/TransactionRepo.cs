@@ -2,6 +2,7 @@
 using FinanceApp.Data.SqlRepo;
 using FinanceProject.Dto;
 using FinanceProject.Models;
+using Microsoft.EntityFrameworkCore.Storage;
 
 namespace FinanceProject.Data.SqlRepo
 {
@@ -47,6 +48,16 @@ namespace FinanceProject.Data.SqlRepo
 				public Transaction? GetLastTransactionByAdded()
 				{
 						return _context.Transactions!.OrderByDescending(e => e.DateAdded).FirstOrDefault();
+				}
+
+				public Task SaveChangesAsync(CancellationToken token = default)
+				{
+						return _context.Database.BeginTransactionAsync();
+				}
+
+				public Task<IDbContextTransaction> CreateTransactionAsync()
+				{
+						return _context.Database.BeginTransactionAsync();
 				}
 		}
 }

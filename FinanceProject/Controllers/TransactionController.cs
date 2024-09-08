@@ -1,6 +1,5 @@
 ﻿using AutoMapper;
 using FinanceApp.BgServices;
-using FinanceApp.Data.SqlRepo;
 using FinanceProject.Data;
 using FinanceProject.Dto;
 using FinanceProject.Models;
@@ -21,13 +20,12 @@ namespace FinanceProject.Controllers
 				private readonly IMapper _mapper;
 				private PersistentConfig _pConf;
 
-				public TransactionController(ITransactionRepo repo, IAccountRepo account, IAccountBalanceRepo bal, AppDbContext context,
+				public TransactionController(ITransactionRepo repo, IAccountRepo account, IAccountBalanceRepo bal,
 					PersistentConfig pConfig, IMapper mapper)
 				{
 						_repo = repo;
 						_account = account;
 						_bal = bal;
-						_context = context;
 						_mapper = mapper;
 						_pConf = pConfig;
 
@@ -52,7 +50,7 @@ namespace FinanceProject.Controllers
 						NewTransactionResponseDto response = new NewTransactionResponseDto();
 						Dictionary<Guid, Account> accounts = new Dictionary<Guid, Account>();
 						Dictionary<AccountBalanceKey, AccountBalance> balances = new Dictionary<AccountBalanceKey, AccountBalance>();
-						using (var transaction = _context.Database.BeginTransaction())
+						using (var transaction = await _repo.CreateTransactionAsync())
 						{
 
 
@@ -107,7 +105,7 @@ namespace FinanceProject.Controllers
 						Dictionary<AccountBalanceKey, AccountBalance> balances = new Dictionary<AccountBalanceKey, AccountBalance>();
 						await _bal.CreateAccountBalances(dto.Date);
 
-						using (var trans = _repo.CreateTrasaction())
+						using (var trans = await _repo.CreateTransactionAsync())
 						{
 
 								try
