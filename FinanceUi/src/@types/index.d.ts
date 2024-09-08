@@ -17,6 +17,7 @@ declare module 'FinanceApi' {
     export interface AccountBalance {
         accountId: string;
         month: string;
+        month: string;
         balance: number;
     }
 
@@ -42,6 +43,7 @@ declare module 'FinanceApi' {
     export interface AppConfig {
         cosmosEndpoint: string;
         cosmosKey: string;
+        dataImplementation: string;
         authConfig: GoogleConfig;
         jwtConfig: AppJwtConfig;
     }
