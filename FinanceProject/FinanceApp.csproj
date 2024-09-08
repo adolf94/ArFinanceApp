@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net9.0</TargetFramework>
     <Nullable>enable</Nullable>
     <TypeScriptCompileBlocked>true</TypeScriptCompileBlocked>
     <TypeScriptToolsVersion>Latest</TypeScriptToolsVersion>
@@ -19,7 +19,8 @@
   <ItemGroup>
     <PackageReference Include="AutoMapper.Collection.EntityFrameworkCore" Version="9.0.0" />
     <PackageReference Include="Google.Apis.Auth.AspNetCore3" Version="1.68.0" />
-    <PackageReference Include="Microsoft.AspNetCore.SpaProxy" Version="8.0.8" />
+    <PackageReference Include="Microsoft.AspNetCore.SpaProxy" Version="9.0.0-preview.7.24406.2" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Cosmos" Version="9.0.0-preview.7.24405.3" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.8" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.8">
       <PrivateAssets>all</PrivateAssets>
@@ -33,7 +34,7 @@
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.17.0" />
     <PackageReference Include="NCrontab" Version="3.3.3" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-    <PackageReference Include="System.Text.Json" Version="8.0.4" />
+    <PackageReference Include="System.Text.Json" Version="9.0.0-preview.7.24405.7" />
     <PackageReference Include="TypeLite" Version="1.8.4" />
   </ItemGroup>
 
@@ -46,18 +47,12 @@
 
   <ItemGroup>
     <Compile Remove="ClientApp\src\Pages\AccountsPage.cs" />
-    <Compile Remove="Data\AppDbContextCosmos.cs" />
   </ItemGroup>
 
   <ItemGroup>
     <None Remove="ClientApp\src\common\file.tsx" />
     <None Remove="ClientApp\src\common\Select.ts" />
     <None Remove="ClientApp\src\repositories\scheduledTasks.ts" />
-  </ItemGroup>
-
-
-  <ItemGroup>
-    <None Include="Data\AppDbContextCosmos.cs" />
   </ItemGroup>
 
   <ItemGroup>

@@ -1,9 +1,10 @@
-﻿using FinanceApp.Data.SqlRepo;
+﻿using FinanceProject.Data;
 using FinanceProject.Models;
+using Microsoft.EntityFrameworkCore;
 
-namespace FinanceProject.Data.SqlRepo
+namespace FinanceApp.Data.CosmosRepo
 {
-    public class AccountRepo : IAccountRepo
+		public class AccountRepo : IAccountRepo
 		{
 				private readonly AppDbContext _context;
 				private readonly ILogger<AccountRepo> _logger;
@@ -17,26 +18,26 @@ namespace FinanceProject.Data.SqlRepo
 				{
 						try
 						{
-								_context.Accounts!.Add(group);
-								_context.SaveChanges();
-								_context.AccountBalances!.Add(new AccountBalance
+								_context.Accounts!.AddAsync(group).AsTask().Wait();
+								_context.SaveChangesAsync().Wait();
+								_context.AccountBalances!.AddAsync(new AccountBalance
 								{
 										AccountId = group.Id,
 										Balance = 0m,
 										Month = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1)
-								});
+								}).AsTask().Wait();
 								if (group.PeriodStartDay > 1)
 								{
-										_context.AccountBalances!.Add(new AccountBalance
+										_context.AccountBalances!.AddAsync(new AccountBalance
 										{
 												AccountId = group.Id,
 												Balance = 0m,
 												Month = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1).AddMonths(-1)
-										});
+										}).AsTask().Wait();
 								}
 								if (group.Balance != 0)
 								{
-										_context.Transactions!.Add(new Transaction
+										_context.Transactions!.AddAsync(new Transaction
 										{
 												DebitId = group.Id,
 												CreditId = new Guid("747b7bd2-1a50-4e7c-8b27-01e5fa8fd6a4"),
@@ -44,9 +45,9 @@ namespace FinanceProject.Data.SqlRepo
 												Description = "Modified Balance",
 												Date = DateTime.Now,
 												DateAdded = DateTime.Now
-										});
+										}).AsTask().Wait();
 								}
-								_context.SaveChanges();
+								_context.SaveChangesAsync().Wait();
 								return true;
 						}
 						catch (Exception ex)
@@ -60,7 +61,9 @@ namespace FinanceProject.Data.SqlRepo
 
 				public Account UpdateDebitAcct(Guid debitId, decimal amount)
 				{
-						Account? debit = _context.Accounts!.Find(debitId);
+						var debitTask = _context.Accounts!.Where(e => e.Id == debitId).FirstOrDefaultAsync();
+						debitTask.Wait();
+						var debit = debitTask.Result;
 						if (debit == null)
 						{
 								throw new InvalidOperationException("Account was not found");
@@ -76,7 +79,9 @@ namespace FinanceProject.Data.SqlRepo
 
 				public Account UpdateCreditAcct(Guid creditId, decimal amount)
 				{
-						Account? credit = _context.Accounts!.Find(creditId);
+						var creditTask = _context.Accounts!.Where(e => e.Id == creditId).FirstOrDefaultAsync();
+						creditTask.Wait();
+						var credit = creditTask.Result;
 						if (credit == null)
 						{
 								throw new InvalidOperationException("Account was not found");
@@ -98,8 +103,9 @@ namespace FinanceProject.Data.SqlRepo
 								IQueryable<Account> query = _context.Accounts!;
 
 								if (!All) query = query.Where(e => e.Enabled == true);
-
-								return query.ToArray();
+								var queryTask = query.ToArrayAsync();
+								queryTask.Wait();
+								return queryTask.Result;
 						}
 						catch (Exception ex)
 						{
@@ -110,7 +116,9 @@ namespace FinanceProject.Data.SqlRepo
 
 				public Account? GetOne(Guid id)
 				{
-						return _context.Accounts!.Where(e => e.Id == id).FirstOrDefault();
+						var task = _context.Accounts!.Where(e => e.Id == id).FirstOrDefaultAsync();
+						task.Wait();
+						return task.Result;
 				}
 		}
 }

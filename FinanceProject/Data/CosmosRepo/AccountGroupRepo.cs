@@ -1,9 +1,10 @@
-﻿using FinanceApp.Data.SqlRepo;
+﻿using FinanceProject.Data;
 using FinanceProject.Models;
+using Microsoft.EntityFrameworkCore;
 
-namespace FinanceProject.Data.SqlRepo
+namespace FinanceApp.Data.CosmosRepo
 {
-    public class AccountGroupRepo : IAccountGroupRepo
+		public class AccountGroupRepo : IAccountGroupRepo
 		{
 				private readonly AppDbContext _context;
 				private readonly ILogger<AccountGroupRepo> _logger;
@@ -17,8 +18,8 @@ namespace FinanceProject.Data.SqlRepo
 				{
 						try
 						{
-								_context.AccountGroups!.Add(group);
-								_context.SaveChanges();
+								_context.AccountGroups!.AddAsync(group);
+								_context.SaveChangesAsync().Wait();
 								return true;
 						}
 						catch (Exception ex)
@@ -32,7 +33,9 @@ namespace FinanceProject.Data.SqlRepo
 				{
 						try
 						{
-								return _context.AccountGroups!.Where(e => e.Enabled == true).ToArray();
+								var task = _context.AccountGroups!.Where(e => e.Enabled == true).ToArrayAsync();
+								task.Wait();
+								return task.Result;
 						}
 						catch (Exception ex)
 						{
@@ -43,8 +46,10 @@ namespace FinanceProject.Data.SqlRepo
 
 				public ICollection<AccountGroup> GetByType(Guid id)
 				{
+						var task = _context.AccountGroups!.Where(f => f.AccountTypeId == id).ToArrayAsync();
+						task.Wait();
 
-						return _context.AccountGroups!.Where(f => f.AccountTypeId == id).ToArray();
+						return task.Result;
 
 				}
 				public AccountGroup? GetOne(Guid id)

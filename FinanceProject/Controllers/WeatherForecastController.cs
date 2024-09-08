@@ -1,4 +1,4 @@
-﻿using FinanceProject.Data;
+﻿using FinanceApp.Data.SqlRepo;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 

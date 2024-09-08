@@ -6,6 +6,6 @@ namespace FinanceProject.Data
 		{
 				public ICollection<AccountType> GetAllType();
 				public AccountType? GetOne(Guid id);
-				public bool Create(AccountType accountType);
+				public Task<bool> Create(AccountType accountType);
 		}
 }

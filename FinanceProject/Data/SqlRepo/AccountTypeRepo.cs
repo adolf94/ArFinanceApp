@@ -1,4 +1,5 @@
-﻿using FinanceProject.Models;
+﻿using FinanceApp.Data.SqlRepo;
+using FinanceProject.Models;
 
 namespace FinanceProject.Data.SqlRepo
 {
@@ -12,12 +13,12 @@ namespace FinanceProject.Data.SqlRepo
 						_context = context;
 						_logger = logger;
 				}
-				public bool Create(AccountType accountType)
+				public async Task<bool> Create(AccountType accountType)
 				{
 						try
 						{
-								_context.AccountTypes!.Add(accountType);
-								_context.SaveChanges();
+								await _context.AccountTypes!.AddAsync(accountType);
+								await _context.SaveChangesAsync();
 								return true;
 						}
 						catch (Exception ex)

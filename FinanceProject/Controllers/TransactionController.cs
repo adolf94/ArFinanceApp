@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using FinanceApp.BgServices;
+using FinanceApp.Data.SqlRepo;
 using FinanceProject.Data;
 using FinanceProject.Dto;
 using FinanceProject.Models;
@@ -105,7 +106,7 @@ namespace FinanceProject.Controllers
 						NewTransactionResponseDto response = new NewTransactionResponseDto();
 						Dictionary<Guid, Account> accounts = new Dictionary<Guid, Account>();
 						Dictionary<AccountBalanceKey, AccountBalance> balances = new Dictionary<AccountBalanceKey, AccountBalance>();
-						_bal.CreateAccountBalances(dto.Date);
+						await _bal.CreateAccountBalances(dto.Date);
 
 						using (var trans = _context.Database.BeginTransaction())
 						{

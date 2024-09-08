@@ -1,9 +1,10 @@
-﻿using FinanceApp.Data.SqlRepo;
+﻿using FinanceProject.Data;
 using FinanceProject.Models;
+using Microsoft.EntityFrameworkCore;
 
-namespace FinanceProject.Data.SqlRepo
+namespace FinanceApp.Data.CosmosRepo
 {
-    public class VendorRepo : IVendorRepo
+		public class VendorRepo : IVendorRepo
 		{
 				private AppDbContext _context;
 				private ILogger<VendorRepo> _logger;
@@ -18,8 +19,8 @@ namespace FinanceProject.Data.SqlRepo
 				{
 						try
 						{
-								_context.Vendors!.Add(vendor);
-								_context.SaveChanges();
+								_context.Vendors!.AddAsync(vendor).AsTask().Wait();
+								_context.SaveChangesAsync().Wait();
 								return true;
 						}
 						catch (Exception ex)
@@ -33,7 +34,9 @@ namespace FinanceProject.Data.SqlRepo
 				{
 						try
 						{
-								return _context.Vendors!.ToArray();
+								var task = _context.Vendors!.ToArrayAsync();
+								task.Wait();
+								return task.Result;
 						}
 						catch (Exception ex)
 						{
@@ -44,7 +47,9 @@ namespace FinanceProject.Data.SqlRepo
 
 				public Vendor? GetOne(Guid id)
 				{
-						return _context.Vendors!.Find(id);
+						var task = _context.Vendors!.Where(e => e.Id == id).FirstOrDefaultAsync();
+						task.Wait();
+						return task.Result;
 				}
 		}
 }

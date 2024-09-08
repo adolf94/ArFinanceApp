@@ -1,9 +1,9 @@
 ﻿using FinanceProject.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace FinanceApp.Data.SqlRepo
+namespace FinanceApp.Data.CosmosRepo
 {
-    public class UserRepo : IUserRepo
+		public class UserRepo : IUserRepo
 		{
 				private readonly AppDbContext _context;
 

@@ -1,15 +1,12 @@
 using AutoMapper;
 using FinanceApp.BgServices;
-using FinanceApp.Data;
+using FinanceApp.Data.CosmosRepo;
 using FinanceApp.Data.SqlRepo;
 using FinanceApp.Middleware;
 using FinanceApp.Utilities;
-using FinanceProject.Data;
-using FinanceProject.Data.SqlRepo;
 using FinanceProject.Models;
 using FinanceProject.Utilities;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
@@ -50,15 +47,16 @@ builder.Services.AddCors(opt =>
 		});
 });
 
+if (config.DataImplementation.ToLower() == "sql")
+{
+		builder.Services.AddSqlContext(Configuration);
+}
+else if (config.DataImplementation.ToLower() == "cosmos")
+{
+		builder.Services.AddCosmosContext(Configuration);
+}
+
 builder.Services.AddSingleton(config);
-builder.Services.AddScoped<IAccountTypeRepo, AccountTypeRepo>();
-builder.Services.AddScoped<IAccountGroupRepo, AccountGroupRepo>();
-builder.Services.AddScoped<IAccountRepo, AccountRepo>();
-builder.Services.AddScoped<ITransactionRepo, TransactionRepo>();
-builder.Services.AddScoped<IAccountBalanceRepo, AccountBalanceRepo>();
-builder.Services.AddScoped<IVendorRepo, VendorRepo>();
-builder.Services.AddScoped<IScheduledTransactionRepo, ScheduledTransactionRepo>();
-builder.Services.AddScoped<IUserRepo, UserRepo>();
 builder.Services.AddControllersWithViews()
 
 		.AddJsonOptions(options =>
@@ -87,15 +85,6 @@ builder.Services.AddSingleton(mapper);
 
 
 
-
-builder.Services.AddDbContext<AppDbContext>(opt =>
-{
-		var passkey = Environment.GetEnvironmentVariable("ENV_PASSKEY")!;
-
-		var encrypted = Configuration.GetConnectionString("AzureSql")!;
-		var connection = AesOperation.DecryptString(passkey, encrypted);
-		opt.UseSqlServer(connection);
-});
 builder.Services.AddHostedService<OnStartupBgSvc>();
 builder.Services.AddAuthorization();
 

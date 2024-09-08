@@ -1,9 +1,10 @@
 ﻿using AutoMapper;
-using FinanceApp.Data.SqlRepo;
+using FinanceProject.Data;
 using FinanceProject.Dto;
 using FinanceProject.Models;
+using Microsoft.EntityFrameworkCore;
 
-namespace FinanceProject.Data.SqlRepo
+namespace FinanceApp.Data.CosmosRepo
 {
 		public class TransactionRepo : ITransactionRepo
 		{
@@ -15,38 +16,46 @@ namespace FinanceProject.Data.SqlRepo
 						_context = context;
 						_mapper = mapper;
 				}
+
+
 				public Transaction CreateTransaction(CreateTransactionDto item)
 				{
 
 
 						Transaction tran = _mapper.Map<Transaction>(item);
-						_context.Transactions!.Add(tran);
-						_context.SaveChanges();
+						_context.Transactions!.AddAsync(tran).AsTask().Wait();
+						_context.SaveChangesAsync().Wait();
 						return tran;
 
 				}
 
 				public Transaction? GetOneTransaction(Guid id)
 				{
-						return _context.Transactions!.Find(id);
+						var task = _context.Transactions!.Where(e => e.Id == id).FirstOrDefaultAsync();
+						task.Wait();
+						return task.Result;
 				}
 
 
 				public IEnumerable<Transaction> GetByMonth(int year, int month)
 				{
-						return _context.Transactions!.Where(t => t.Date.Month == month && t.Date.Year == year)
-								.ToList();
+						var task = _context.Transactions!.Where(t => t.Date.Month == month && t.Date.Year == year)
+								.ToListAsync();
+						task.Wait();
+						return task.Result;
 				}
 
 				public Transaction UpdateTransaction(Transaction item)
 				{
-						_context.SaveChanges();
+						_context.SaveChangesAsync().Wait();
 						return item;
 				}
 
 				public Transaction? GetLastTransactionByAdded()
 				{
-						return _context.Transactions!.OrderByDescending(e => e.DateAdded).FirstOrDefault();
+						var task = _context.Transactions!.OrderByDescending(e => e.DateAdded).FirstOrDefaultAsync();
+						task.Wait();
+						return task.Result;
 				}
 		}
 }

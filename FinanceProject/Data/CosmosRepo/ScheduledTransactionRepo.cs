@@ -2,10 +2,9 @@
 using FinanceProject.Data;
 using FinanceProject.Dto;
 using FinanceProject.Models;
-using Microsoft.EntityFrameworkCore;
 using NCrontab;
 
-namespace FinanceApp.Data.SqlRepo
+namespace FinanceApp.Data.CosmosRepo
 {
 		public class ScheduledTransactionRepo : IScheduledTransactionRepo
 		{
@@ -26,39 +25,32 @@ namespace FinanceApp.Data.SqlRepo
 
 				public bool CreateSchedule(ScheduledTransactions schedule)
 				{
-						_context.ScheduledTransactions!.AddAsync(schedule).AsTask().Wait();
-						_context.SaveChangesAsync().Wait();
+						_context.ScheduledTransactions!.Add(schedule);
+						_context.SaveChanges();
 						return true;
 
 				}
 
 				public ScheduledTransactions? GetOne(Guid id)
 				{
-						var task = _context.ScheduledTransactions!.Where(e => e.Id == id).FirstOrDefaultAsync();
-						task.Wait();
-						return task.Result;
+						return _context.ScheduledTransactions!.Find(id);
 				}
 
 				public IEnumerable<ScheduledTransactions> GetAll()
 				{
-						var task = _context.ScheduledTransactions!.Where(e => e.Enabled == true).ToArrayAsync();
-						task.Wait();
-						return task.Result;
+						return _context.ScheduledTransactions!.ToArray();
 				}
 
 				public ScheduledTransactions? GetNextTransaction()
 				{
-						var task = _context.ScheduledTransactions!.Where(e => e.NextTransactionDate > DateTime.UtcNow).FirstOrDefaultAsync();
-						task.Wait();
-						return task.Result;
+						return _context.ScheduledTransactions!.Where(e => e.NextTransactionDate > DateTime.UtcNow).FirstOrDefault();
 				}
 
 				public void SetNextTransaction()
 				{
-						var next = _context.ScheduledTransactions!.Where(e => e.NextTransactionDate > DateTime.UtcNow).Select(e => e.NextTransactionDate).FirstOrDefaultAsync();
-						next.Wait();
+						DateTime? next = _context.ScheduledTransactions!.Where(e => e.NextTransactionDate > DateTime.UtcNow).Select(e => e.NextTransactionDate).FirstOrDefault();
 
-						_conf.NextScheduledTransactionDate = next.Result;
+						_conf.NextScheduledTransactionDate = next;
 				}
 
 

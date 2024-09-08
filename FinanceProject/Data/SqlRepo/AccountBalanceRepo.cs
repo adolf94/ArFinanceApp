@@ -1,4 +1,5 @@
-﻿using FinanceProject.Models;
+﻿using FinanceApp.Data.SqlRepo;
+using FinanceProject.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 
@@ -17,12 +18,12 @@ namespace FinanceProject.Data.SqlRepo
 						_logger = logger;
 				}
 
-				public void CreateAccountBalances(DateTime date)
+				public Task CreateAccountBalances(DateTime date)
 				{
 						string acc_bal_key = $"acc_bal_{date.Year}_{date.Month}";
 						string? nil;
 						_cache.TryGetValue(acc_bal_key, out nil);
-						if (nil != null) return;
+						if (nil != null) return Task.CompletedTask;
 						_logger.LogDebug($"CreateAccountBalances {acc_bal_key} triggered");
 						if (!_context.AccountBalances!.Any(e => e.Month.Year == date.Year && e.Month.Month == date.Month))
 						{
@@ -75,6 +76,7 @@ namespace FinanceProject.Data.SqlRepo
 								_context.SaveChanges();
 						}
 						_cache.Set(acc_bal_key, "t");
+						return Task.CompletedTask;
 				}
 				public IEnumerable<AccountBalance> UpdateCreditAcct(Guid creditId, decimal amount, DateTime date)
 				{

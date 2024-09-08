@@ -4,7 +4,7 @@
 		{
 				public string CosmosEndpoint { get; set; } = string.Empty;
 				public string CosmosKey { get; set; } = string.Empty;
-
+				public string DataImplementation { get; set; } = "";
 				public GoogleConfig authConfig { get; set; } = new();
 				public AppJwtConfig jwtConfig { get; set; } = new();
 
