@@ -2,10 +2,12 @@ name: Build and Push Docker
 
 on:
   workflow_dispatch:
-  pull_request:
-    branches: [ "main" ]
-
-  
+    inputs:
+      version:
+        description: 'input version tag'
+        required: true
+        type: string
+        
 jobs:
 
   build:
