@@ -18,7 +18,6 @@ namespace FinanceProject.Controllers
 				private readonly ITransactionRepo _repo;
 				private readonly IAccountRepo _account;
 				private readonly IAccountBalanceRepo _bal;
-				private readonly AppDbContext _context;
 				private readonly IMapper _mapper;
 				private PersistentConfig _pConf;
 
@@ -108,7 +107,7 @@ namespace FinanceProject.Controllers
 						Dictionary<AccountBalanceKey, AccountBalance> balances = new Dictionary<AccountBalanceKey, AccountBalance>();
 						await _bal.CreateAccountBalances(dto.Date);
 
-						using (var trans = _context.Database.BeginTransaction())
+						using (var trans = _repo.CreateTrasaction())
 						{
 
 								try

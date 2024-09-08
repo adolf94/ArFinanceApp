@@ -3,6 +3,7 @@ using FinanceProject.Data;
 using FinanceProject.Dto;
 using FinanceProject.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 
 namespace FinanceApp.Data.CosmosRepo
 {
@@ -49,6 +50,15 @@ namespace FinanceApp.Data.CosmosRepo
 				{
 						_context.SaveChangesAsync().Wait();
 						return item;
+				}
+
+				public Task SaveChangesAsync(CancellationToken token = default)
+				{
+						return _context.SaveChangesAsync(token);
+				}
+				public async Task<IDbContextTransaction> CreateTransactionAsync()
+				{
+						return await _context.Database.BeginTransactionAsync();
 				}
 
 				public Transaction? GetLastTransactionByAdded()
