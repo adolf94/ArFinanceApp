@@ -1,7 +1,6 @@
 using AutoMapper;
 using FinanceApp.BgServices;
 using FinanceApp.Data.CosmosRepo;
-using FinanceApp.Data.SqlRepo;
 using FinanceApp.Middleware;
 using FinanceApp.Utilities;
 using FinanceProject.Models;
@@ -49,11 +48,12 @@ builder.Services.AddCors(opt =>
 
 if (config.DataImplementation.ToLower() == "sql")
 {
-		builder.Services.AddSqlContext(Configuration);
+		//builder.Services.AddSqlContext(Configuration);
 }
 else if (config.DataImplementation.ToLower() == "cosmos")
 {
 		builder.Services.AddCosmosContext(Configuration);
+
 }
 
 builder.Services.AddSingleton(config);
@@ -69,6 +69,10 @@ builder.Services.AddControllersWithViews()
 {
 		//mc.SetGeneratePropertyMaps<Generate>()
 		mc.AddProfile(new FinanceProject.Dto.AppProfile());
+		if (config.DataImplementation.ToLower() == "cosmos")
+		{
+				mc.AddCosmosMapper();
+		}
 });
 
 
@@ -149,7 +153,7 @@ foreach (var item in apps)
 {
 		app.MapWhen(ctx => ctx.Request.Path.StartsWithSegments(item), evt =>
 		{
-				string physicalPath = Path.Combine(app.Environment.ContentRootPath, "wwwroot", item.TrimStart('/', '\\'));
+				string physicalPath = Path.Combine(app.Environment.ContentRootPath, "wwwroot", item.TrimStart(new char[] { '/', '\\' }));
 
 
 				IndexFallbackFileProvider provider = new IndexFallbackFileProvider(new PhysicalFileProvider(physicalPath));
@@ -176,7 +180,10 @@ app.MapWhen(ctx => !apps.Any(path => ctx.Request.Path.StartsWithSegments(path)),
 		//Console.WriteLine(!apps.Any(path => evt.Request.Path.StartsWithSegments(path)));
 		evt.UseStaticFiles();
 		evt.UseRouting();
+		// Added multiple MapWhen
+#pragma warning disable ASP0001 // Authorization middleware is incorrectly configured
 		app.UseAuthorization();
+#pragma warning restore ASP0001 // Authorization middleware is incorrectly configured
 		evt.UseEndpoints(e => e.MapFallbackToFile("index.html"));
 });
 

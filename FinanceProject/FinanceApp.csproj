@@ -41,7 +41,9 @@
   <ItemGroup>
     <!-- Don't publish the SPA source files, but do show them in the project files list -->
     <Content Remove="$(SpaRoot)**" />
+    <Content Remove="Data\SqlRepo\**" />
     <None Remove="$(SpaRoot)**" />
+    <None Remove="Data\SqlRepo\**" />
     <None Include="$(SpaRoot)**" Exclude="$(SpaRoot)node_modules\**" />
   </ItemGroup>
 
@@ -49,11 +51,6 @@
     <Compile Remove="ClientApp\src\Pages\AccountsPage.cs" />
   </ItemGroup>
 
-  <ItemGroup>
-    <None Remove="ClientApp\src\common\file.tsx" />
-    <None Remove="ClientApp\src\common\Select.ts" />
-    <None Remove="ClientApp\src\repositories\scheduledTasks.ts" />
-  </ItemGroup>
 
   <ItemGroup>
     <None Update="TypeLite.d.ts">
@@ -71,11 +68,6 @@
     <Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
   </ItemGroup>
 
-  <ItemGroup>
-    <TypeScriptCompile Include="ClientApp\src\common\file.tsx" />
-    <TypeScriptCompile Include="ClientApp\src\common\Select.tsx" />
-    <TypeScriptCompile Include="ClientApp\src\repositories\scheduledTasks.ts" />
-  </ItemGroup>
   <!--<Target Name="PublishRunWebpack" AfterTargets="ComputeFilesToPublish">
     --><!-- As part of publishing, ensure the JS resources are freshly built in production mode --><!--
     <Exec WorkingDirectory="$(SpaRoot)" Command="npm install" />

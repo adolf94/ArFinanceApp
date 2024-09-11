@@ -19,7 +19,6 @@ namespace FinanceApp.Data.SqlRepo
 
 
 
-				private readonly IConfiguration _configuration;
 				public AppDbContext(DbContextOptions<AppDbContext> options, IConfiguration config) : base(options)
 
 				{

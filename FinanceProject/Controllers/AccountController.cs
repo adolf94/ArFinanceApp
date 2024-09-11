@@ -33,6 +33,10 @@ namespace FinanceProject.Controllers
 				[HttpPost("accounts")]
 				public async Task<IActionResult> Create(Account type)
 				{
+						//
+
+
+
 						_repo.Create(type);
 						return await Task.FromResult(CreatedAtAction("GetOne", new { id = type.Id }, type));
 

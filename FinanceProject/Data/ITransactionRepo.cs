@@ -15,6 +15,8 @@ namespace FinanceProject.Data
 				public Transaction? GetLastTransactionByAdded();
 				public Task SaveChangesAsync(CancellationToken token = default);
 				public Task<IDbContextTransaction> CreateTransactionAsync();
+				//public Task<IDbContextTransaction> Rollback();
+				//public Task<IDbContextTransaction> Commit();
 
 		}
 }

@@ -1,9 +1,11 @@
 ﻿using AutoMapper;
+using FinanceApp.Utilities;
 using FinanceProject.Data;
+using FinanceProject.Data.CosmosRepo.Models;
 using FinanceProject.Dto;
-using FinanceProject.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
+using Models = FinanceProject.Models;
 
 namespace FinanceApp.Data.CosmosRepo
 {
@@ -19,34 +21,38 @@ namespace FinanceApp.Data.CosmosRepo
 				}
 
 
-				public Transaction CreateTransaction(CreateTransactionDto item)
+				public Models.Transaction CreateTransaction(CreateTransactionDto item)
 				{
 
 
-						Transaction tran = _mapper.Map<Transaction>(item);
+						Models.Transaction apiTran = _mapper.Map<Models.Transaction>(item);
+						Transaction tran = _mapper.Map<Transaction>(apiTran);
+
 						_context.Transactions!.AddAsync(tran).AsTask().Wait();
 						_context.SaveChangesAsync().Wait();
-						return tran;
+						return apiTran;
 
 				}
 
-				public Transaction? GetOneTransaction(Guid id)
+				public Models.Transaction? GetOneTransaction(Guid id)
 				{
-						var task = _context.Transactions!.Where(e => e.Id == id).FirstOrDefaultAsync();
+						Task<Transaction?> task = _context.Transactions!.Where(e => e.Id == id).FirstOrDefaultAsync();
 						task.Wait();
-						return task.Result;
+						return _mapper.Map<Models.Transaction>(task.Result);
 				}
 
 
-				public IEnumerable<Transaction> GetByMonth(int year, int month)
+				public IEnumerable<Models.Transaction> GetByMonth(int year, int month)
 				{
-						var task = _context.Transactions!.Where(t => t.Date.Month == month && t.Date.Year == year)
+						long EpochDate = new DateTime(year, month, 1).ToEpoch();
+						long nextMonth = new DateTime(year, month, 1).AddMonths(1).ToEpoch();
+						var task = _context.Transactions!.Where(t => t.Date > EpochDate && t.Date < nextMonth)
 								.ToListAsync();
 						task.Wait();
-						return task.Result;
+						return task.Result.Select(e => _mapper.Map<Models.Transaction>(e));
 				}
 
-				public Transaction UpdateTransaction(Transaction item)
+				public Models.Transaction UpdateTransaction(Models.Transaction item)
 				{
 						_context.SaveChangesAsync().Wait();
 						return item;
@@ -61,11 +67,11 @@ namespace FinanceApp.Data.CosmosRepo
 						return await _context.Database.BeginTransactionAsync();
 				}
 
-				public Transaction? GetLastTransactionByAdded()
+				public Models.Transaction? GetLastTransactionByAdded()
 				{
 						var task = _context.Transactions!.OrderByDescending(e => e.DateAdded).FirstOrDefaultAsync();
 						task.Wait();
-						return task.Result;
+						return _mapper.Map<Models.Transaction>(task.Result);
 				}
 		}
 }
