@@ -32,7 +32,7 @@ const NewAccount = (props) => {
     queryKey: [ACCOUNT_GROUP],
     queryFn: fetchGroups,
   });
-  const [accountType, setAccountType] = useState<AccountGroup>(null);
+  const [accountType, setAccountType] = useState<AccountType>(null);
 
   const { createAsync } = useMutateAccount();
 
@@ -44,12 +44,13 @@ const NewAccount = (props) => {
     periodStartDay: 1,
     resetEndOfPeriod: false,
     enabled: true,
+
   });
 
   const createNewAccount = () => {
     let item = {
-      ...form,
-      resetEndOfPeriod: form.accountGroup?.isCredit,
+        ...form,
+        resetEndOfPeriod: accountType.shouldResetPeriodically
     };
 
     createAsync(item).then(() => {
