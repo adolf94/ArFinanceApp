@@ -40,7 +40,9 @@ namespace FinanceApp.Data.CosmosRepo
 
 				public IEnumerable<Transaction> GetByMonth(int year, int month)
 				{
-						var task = _context.Transactions!.Where(t => t.Date.Month == month && t.Date.Year == year)
+						var dateStart = new DateTime(year, month, 1);
+						var dateEnd = dateStart.AddMonths(1);
+						var task = _context.Transactions!.Where(t => t.Date > dateStart && t.Date < dateEnd)
 								.ToListAsync();
 						task.Wait();
 						return task.Result;

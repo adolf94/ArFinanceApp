@@ -24,7 +24,7 @@ export const useMutateGroups = () => {
     },
     onSuccess: (data: AccountGroup) => {
       queryClient.setQueryData([ACCOUNT_GROUP, { id: data.id }], data);
-      queryClient.setQueryData([ACCOUNT_GROUP], (prev) => [...prev, data]);
+      queryClient.setQueryData([ACCOUNT_GROUP], (prev : AccountGroup[]) => [...prev, data]);
     },
   });
 

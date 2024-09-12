@@ -96,7 +96,13 @@ namespace FinanceApp.Controllers
 						List<Claim> claims = new List<Claim>();
 						string[] claimsToCopy = new[] { "sub", "email", "nane", "azp" };
 						claims = idToken.Claims.Where(e => claimsToCopy.Contains(e.Type)).ToList();
-
+						Claim? emailClaim = claims.FirstOrDefault(e => e.Type == "email");
+						User? user = await _user.GetByEmailAsync(emailClaim!.Value)!;
+						if (user == null)
+						{
+								_logger.LogInformation($"{emailClaim!.Value} has no linked user");
+								return Forbid();
+						}
 						User? user = await _user.GetByEmailAsync(claims.FirstOrDefault(e => e.Type == "email").Value!)!;
 
 						claims.Add(new Claim("userId", user!.Id.ToString()));
@@ -169,7 +175,13 @@ namespace FinanceApp.Controllers
 						List<Claim> claims = new List<Claim>();
 						string[] claimsToCopy = new[] { "sub", "email", "nane", "azp" };
 						claims = idToken.Claims.Where(e => claimsToCopy.Contains(e.Type)).ToList();
-
+						Claim? emailClaim = claims.FirstOrDefault(e => e.Type == "email");
+						User? user = await _user.GetByEmailAsync(emailClaim!.Value)!;
+						if (user == null)
+						{
+								_logger.LogInformation($"{emailClaim!.Value} has no linked user");
+								return Forbid();
+						}
 						User? user = await _user.GetByEmailAsync(claims.FirstOrDefault(e => e.Type == "email").Value!)!;
 
 						claims.Add(new Claim("userId", user!.Id.ToString()));

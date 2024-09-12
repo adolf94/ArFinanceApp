@@ -2,6 +2,7 @@
 using FinanceProject.Data;
 using FinanceProject.Dto;
 using FinanceProject.Models;
+using Microsoft.EntityFrameworkCore;
 using NCrontab;
 
 namespace FinanceApp.Data.CosmosRepo
@@ -25,39 +26,47 @@ namespace FinanceApp.Data.CosmosRepo
 
 				public bool CreateSchedule(ScheduledTransactions schedule)
 				{
-						_context.ScheduledTransactions!.Add(schedule);
-						_context.SaveChanges();
+						_context.ScheduledTransactions!.AddAsync(schedule).AsTask().Wait();
+						_context.SaveChangesAsync().Wait();
 						return true;
 
 				}
 
 				public ScheduledTransactions? GetOne(Guid id)
 				{
-						return _context.ScheduledTransactions!.Find(id);
+						var task = _context.ScheduledTransactions!.FindAsync(id);
+						task.AsTask();
+						return task.Result;
 				}
 
 				public IEnumerable<ScheduledTransactions> GetAll()
 				{
-						return _context.ScheduledTransactions!.ToArray();
+						var task = _context.ScheduledTransactions!.ToArrayAsync();
+						task.Wait();
+						return task.Result;
 				}
 
 				public ScheduledTransactions? GetNextTransaction()
 				{
-						return _context.ScheduledTransactions!.Where(e => e.NextTransactionDate > DateTime.UtcNow).FirstOrDefault();
+						var task = _context.ScheduledTransactions!.Where(e => e.NextTransactionDate > DateTime.Now).FirstOrDefaultAsync();
+						task.Wait();
+						return task.Result;
 				}
 
 				public void SetNextTransaction()
 				{
-						DateTime? next = _context.ScheduledTransactions!.Where(e => e.NextTransactionDate > DateTime.UtcNow).Select(e => e.NextTransactionDate).FirstOrDefault();
+						var task = _context.ScheduledTransactions!.Where(e => e.NextTransactionDate > DateTime.Now).Select(e => e.NextTransactionDate)
+								.FirstOrDefaultAsync();
+						task.Wait();
 
-						_conf.NextScheduledTransactionDate = next;
+						_conf.NextScheduledTransactionDate = task.Result;
 				}
 
 
 
 				public IEnumerable<ScheduledTransactions> ProcessScheduledTransactions()
 				{
-						List<ScheduledTransactions> items = _context.ScheduledTransactions!.Where(e => e.NextTransactionDate < DateTime.UtcNow).ToList();
+						List<ScheduledTransactions> items = _context.ScheduledTransactions!.Where(e => e.NextTransactionDate < DateTime.Now).ToList();
 						if (!items.Any()) return items;
 
 						bool errorOccured = false;

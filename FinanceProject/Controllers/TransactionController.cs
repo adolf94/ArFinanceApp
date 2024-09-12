@@ -19,16 +19,17 @@ namespace FinanceProject.Controllers
 				private readonly IAccountBalanceRepo _bal;
 				private readonly IMapper _mapper;
 				private PersistentConfig _pConf;
+				private readonly ILogger<TransactionController> _logger;
 
 				public TransactionController(ITransactionRepo repo, IAccountRepo account, IAccountBalanceRepo bal,
-					PersistentConfig pConfig, IMapper mapper)
+					PersistentConfig pConfig, IMapper mapper, ILogger<TransactionController> logger)
 				{
 						_repo = repo;
 						_account = account;
 						_bal = bal;
 						_mapper = mapper;
 						_pConf = pConfig;
-
+						_logger = logger;
 				}
 
 
@@ -50,39 +51,39 @@ namespace FinanceProject.Controllers
 						NewTransactionResponseDto response = new NewTransactionResponseDto();
 						Dictionary<Guid, Account> accounts = new Dictionary<Guid, Account>();
 						Dictionary<AccountBalanceKey, AccountBalance> balances = new Dictionary<AccountBalanceKey, AccountBalance>();
-						using (var transaction = await _repo.CreateTransactionAsync())
+						//using (var transaction = await _repo.CreateTransactionAsync())
+						//{
+
+
+						var AcctCredit = _account.UpdateCreditAcct(dto.CreditId, dto.Amount);
+						accounts[dto.CreditId] = AcctCredit;
+
+						var accDebit = _account.UpdateDebitAcct(dto.DebitId, dto.Amount);
+						accounts[dto.DebitId] = accDebit;
+
+						_bal.UpdateCreditAcct(dto.CreditId, dto.Amount, dto.Date)
+									.ToList().ForEach(bal =>
+												balances[new AccountBalanceKey(bal.AccountId, bal.Month)] = bal);
+						_bal.UpdateDebitAcct(dto.DebitId, dto.Amount, dto.Date)
+									.ToList().ForEach(bal =>
+												balances[new AccountBalanceKey(bal.AccountId, bal.Month)] = bal);
+
+
+						response.Accounts = accounts.Values.ToList();
+						response.Balances = balances.Values.ToList();
+
+
+						Transaction result = _repo.CreateTransaction(dto);
+						if (result == null)
 						{
-
-
-								var AcctCredit = _account.UpdateCreditAcct(dto.CreditId, dto.Amount);
-								accounts[dto.CreditId] = AcctCredit;
-
-								var accDebit = _account.UpdateDebitAcct(dto.DebitId, dto.Amount);
-								accounts[dto.DebitId] = accDebit;
-
-								_bal.UpdateCreditAcct(dto.CreditId, dto.Amount, dto.Date)
-											.ToList().ForEach(bal =>
-														balances[new AccountBalanceKey(bal.AccountId, bal.Month)] = bal);
-								_bal.UpdateDebitAcct(dto.DebitId, dto.Amount, dto.Date)
-											.ToList().ForEach(bal =>
-														balances[new AccountBalanceKey(bal.AccountId, bal.Month)] = bal);
-
-
-								response.Accounts = accounts.Values.ToList();
-								response.Balances = balances.Values.ToList();
-
-
-								Transaction result = _repo.CreateTransaction(dto);
-								if (result == null)
-								{
-										transaction.Rollback();
-										return BadRequest();
-								}
-								transaction.Commit();
-
-								response.Transaction = result;
-								_pConf.LastTransactionId = result.Id.ToString();
+								//transaction.Rollback();
+								return BadRequest();
 						}
+						//transaction.Commit();
+
+						response.Transaction = result;
+						_pConf.LastTransactionId = result.Id.ToString();
+						//}
 
 
 
@@ -105,56 +106,56 @@ namespace FinanceProject.Controllers
 						Dictionary<AccountBalanceKey, AccountBalance> balances = new Dictionary<AccountBalanceKey, AccountBalance>();
 						await _bal.CreateAccountBalances(dto.Date);
 
-						using (var trans = await _repo.CreateTransactionAsync())
+						//using (var trans = await _repo.CreateTransactionAsync())
+						//{
+
+						//try
+						//{
+						//Reverse the transactions
+						accounts[transaction.CreditId] = _account.UpdateCreditAcct(transaction.CreditId, -transaction.Amount);
+						accounts[transaction.DebitId] = _account.UpdateDebitAcct(transaction.DebitId, -transaction.Amount);
+						_bal.UpdateCreditAcct(transaction.CreditId, -transaction.Amount, transaction.Date)
+									.ToList().ForEach(bal =>
+												balances[new AccountBalanceKey(bal.AccountId, bal.Month)] = bal);
+						_bal.UpdateDebitAcct(transaction.DebitId, -transaction.Amount, transaction.Date)
+									.ToList().ForEach(bal =>
+												balances[new AccountBalanceKey(bal.AccountId, bal.Month)] = bal);
+
+
+
+						accounts[dto.CreditId] = _account.UpdateCreditAcct(dto.CreditId, dto.Amount);
+						accounts[dto.DebitId] = _account.UpdateDebitAcct(dto.DebitId, dto.Amount);
+						_bal.UpdateCreditAcct(dto.CreditId, dto.Amount, dto.Date)
+									.ToList().ForEach(bal =>
+												balances[new AccountBalanceKey(bal.AccountId, bal.Month)] = bal);
+						_bal.UpdateDebitAcct(dto.DebitId, dto.Amount, dto.Date)
+									.ToList().ForEach(bal =>
+												balances[new AccountBalanceKey(bal.AccountId, bal.Month)] = bal);
+
+
+
+						_mapper.Map(dto, transaction);
+
+						response.Accounts = accounts.Values.ToList();
+						response.Balances = balances.Values.ToList();
+
+						transaction.DateAdded = DateTime.UtcNow;
+						Transaction result = _repo.UpdateTransaction(transaction);
+						if (result == null)
 						{
-
-								try
-								{
-										//Reverse the transactions
-										accounts[transaction.CreditId] = _account.UpdateCreditAcct(transaction.CreditId, -transaction.Amount);
-										accounts[transaction.DebitId] = _account.UpdateDebitAcct(transaction.DebitId, -transaction.Amount);
-										_bal.UpdateCreditAcct(transaction.CreditId, -transaction.Amount, transaction.Date)
-													.ToList().ForEach(bal =>
-																balances[new AccountBalanceKey(bal.AccountId, bal.Month)] = bal);
-										_bal.UpdateDebitAcct(transaction.DebitId, -transaction.Amount, transaction.Date)
-													.ToList().ForEach(bal =>
-																balances[new AccountBalanceKey(bal.AccountId, bal.Month)] = bal);
-
-
-
-										accounts[dto.CreditId] = _account.UpdateCreditAcct(dto.CreditId, dto.Amount);
-										accounts[dto.DebitId] = _account.UpdateDebitAcct(dto.DebitId, dto.Amount);
-										_bal.UpdateCreditAcct(dto.CreditId, dto.Amount, dto.Date)
-													.ToList().ForEach(bal =>
-																balances[new AccountBalanceKey(bal.AccountId, bal.Month)] = bal);
-										_bal.UpdateDebitAcct(dto.DebitId, dto.Amount, dto.Date)
-													.ToList().ForEach(bal =>
-																balances[new AccountBalanceKey(bal.AccountId, bal.Month)] = bal);
-
-
-
-										_mapper.Map(dto, transaction);
-
-										response.Accounts = accounts.Values.ToList();
-										response.Balances = balances.Values.ToList();
-
-										transaction.DateAdded = DateTime.UtcNow;
-										Transaction result = _repo.UpdateTransaction(transaction);
-										if (result == null)
-										{
-												trans.Rollback();
-												return BadRequest();
-										}
-										_pConf.LastTransactionId = result.Id.ToString();
-										response.Transaction = result;
-										trans.Commit();
-								}
-								catch (Exception ex)
-								{
-										trans.Rollback();
-										return BadRequest();
-								}
+								//trans.Rollback();
+								return BadRequest();
 						}
+						_pConf.LastTransactionId = result.Id.ToString();
+						response.Transaction = result;
+						//trans.Commit();
+						//}
+						//catch (Exception ex)
+						//{
+						//		trans.Rollback();
+						//		return BadRequest();
+						//}
+						//}
 
 
 

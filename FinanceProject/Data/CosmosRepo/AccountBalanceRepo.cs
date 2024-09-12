@@ -24,9 +24,10 @@ namespace FinanceApp.Data.CosmosRepo
 						string? nil;
 						_cache.TryGetValue(acc_bal_key, out nil);
 						if (nil != null) return;
+						DateTime dateIn = new DateTime(date.Year, date.Month, 1);
 						_logger.LogDebug($"CreateAccountBalances {acc_bal_key} triggered");
-						bool any = await _context.AccountBalances!.AnyAsync(e => e.Month.Year == date.Year && e.Month.Month == date.Month);
-						if (!any)
+						var anyIten = await _context.AccountBalances!.Where(e => e.Month == date).FirstOrDefaultAsync();
+						if (anyIten == null)
 						{
 
 								List<AccountBalance> items = new List<AccountBalance>();
@@ -92,7 +93,8 @@ namespace FinanceApp.Data.CosmosRepo
 						if (acct.PeriodStartDay != 1)
 						{
 								DateTime nextPeriod = date.AddMonths(1);
-								Task<AccountBalance?> balTask = _context.AccountBalances!.Where(e => e.AccountId == creditId && e.Month == EF.Functions.DateFromParts(nextPeriod.Year, nextPeriod.Month, acct.PeriodStartDay))
+								var nextPeriodMonth = new DateTime(nextPeriod.Year, nextPeriod.Month, acct.PeriodStartDay)
+								Task<AccountBalance?> balTask = _context.AccountBalances!.Where(e => e.AccountId == creditId && e.Month == nextPeriodMonth)
 								.FirstOrDefaultAsync();
 
 								balTask.Wait();
@@ -132,8 +134,12 @@ namespace FinanceApp.Data.CosmosRepo
 
 						if (acct.ResetEndOfPeriod)
 						{
+
 								DateTime nextPeriod = date.AddMonths(1);
-								Task<AccountBalance?> balTask = _context.AccountBalances!.Where(e => e.AccountId == debitId && e.Month == EF.Functions.DateFromParts(nextPeriod.Year, nextPeriod.Month, acct.PeriodStartDay))
+								var nextPeriodMonth = new DateTime(nextPeriod.Year, nextPeriod.Month, acct.PeriodStartDay)
+
+
+								Task<AccountBalance?> balTask = _context.AccountBalances!.Where(e => e.AccountId == debitId && e.Month == nextPeriodMonth)
 								.FirstOrDefaultAsync();
 
 								//For Credit Cards
@@ -168,6 +174,7 @@ namespace FinanceApp.Data.CosmosRepo
 
 				public AccountBalance? GetByAccountWithDate(Guid account, DateTime date)
 				{
+						DateTime compareDate = new DateTime(date.Year, date.Month, 1);
 						var result = _context.AccountBalances!.Where(ab => ab.AccountId == account && ab.Month.Year == date.Year && ab.Month.Month == date.Month).FirstOrDefaultAsync();
 						result.Wait();
 
