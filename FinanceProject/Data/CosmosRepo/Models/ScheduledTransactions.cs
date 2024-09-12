@@ -1,5 +1,4 @@
 ﻿using FinanceApp.Utilities;
-using Newtonsoft.Json;
 
 
 namespace FinanceProject.Data.CosmosRepo.Models
@@ -53,7 +52,5 @@ namespace FinanceProject.Data.CosmosRepo.Models
 
 
 				public new Transaction? LastTransaction { get; set; }
-				[JsonIgnore]
-				public new IEnumerable<Transaction>? Transactions { get; set; }
 		}
 }

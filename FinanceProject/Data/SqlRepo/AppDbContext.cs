@@ -55,20 +55,18 @@ namespace FinanceApp.Data.SqlRepo
 
 
 						builder.Entity<Transaction>()
-										.HasOne(e => e.Credit).WithMany(e => e.TransactionsAsCredit)
-										.OnDelete(DeleteBehavior.NoAction);
+										.HasOne(e => e.Credit);//.WithMany(e => e.TransactionsAsCredit)
 
 
 						builder.Entity<Transaction>()
-										.HasOne(e => e.Debit)
-										.WithMany(e => e.TransactionsAsDebit)
-										.OnDelete(DeleteBehavior.NoAction)
-										;
+										.HasOne(e => e.Debit);
+						//.WithMany(e => e.TransactionsAsDebit)
+						;
 
 						builder.Entity<Transaction>()
 										.HasOne(e => e.Vendor);
 
-						builder.Entity<Transaction>().HasOne(e => e.Schedule).WithMany(e => e.Transactions);
+						builder.Entity<Transaction>().HasOne(e => e.Schedule);//.WithMany(e => e.Transactions);
 						builder.Entity<ScheduledTransactions>().HasOne(e => e.LastTransaction).WithOne(e => e.AsLastTransaction);
 						builder.Entity<ScheduledTransactions>().HasIndex(e => e.LastTransactionDate).IsDescending();
 						builder.Entity<ScheduledTransactions>().HasIndex(e => e.NextTransactionDate).IsDescending();

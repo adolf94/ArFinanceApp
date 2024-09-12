@@ -17,15 +17,21 @@ namespace FinanceApp.Data.CosmosRepo
 
 
 						CreateMap<Transaction, ModelCosmos.Transaction>()
+								.ForMember(e => e.Id, opt => opt.MapFrom(e => e.Id))
 								.ForMember(e => e.Date, opt => opt.MapFrom(e => e.Date.ToEpoch()))
 								.ForMember(e => e.DateAdded, opt => opt.MapFrom(e => e.DateAdded.ToEpoch()))
 								.ReverseMap()
+								.ForMember(e => e.Id, opt => opt.MapFrom(e => e.Id))
 								.ForMember(e => e.Date, opt => opt.MapFrom(e => DateTime.UnixEpoch.AddSeconds(e.Date)))
 								.ForMember(e => e.DateAdded, opt => opt.MapFrom(e => DateTime.UnixEpoch.AddSeconds(e.DateAdded)));
 
 
 
-						CreateMap<Account, ModelCosmos.Account>();
+						CreateMap<Account, ModelCosmos.Account>()
+								.ForMember(e => e.Id, opt => opt.MapFrom(e => e.Id))
+								.ReverseMap()
+								.ForMember(e => e.Id, opt => opt.MapFrom(e => e.Id));
+
 						//.ForMember(e => e.Date, opt => opt.MapFrom(e => e.Date.ToEpoch()))
 						//.ForMember(e => e.DateAdded, opt => opt.MapFrom(e => e.DateAdded.ToEpoch()))
 						//.ReverseMap()

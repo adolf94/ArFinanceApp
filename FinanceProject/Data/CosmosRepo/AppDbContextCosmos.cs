@@ -47,15 +47,9 @@ namespace FinanceApp.Data.CosmosRepo
 
 						builder.Entity<ModelsCosmos.AccountBalance>()
 										.ToContainer("AccountBalance")
+										.HasPartitionKey(e => e.Month)
 										.HasKey(e => new { e.AccountId, e.Month });
 
-
-						builder.Entity<AccountBalance>()
-										.Property(e => e.Month)
-										.HasConversion<string>(
-												d => d.ToString("yyyy-MM-dd"),
-												s => DateTime.Parse(s)
-										);
 
 
 
@@ -64,24 +58,24 @@ namespace FinanceApp.Data.CosmosRepo
 						.ToContainer("AccountGroup")
 						.HasPartitionKey(e => e.Id);
 
-						builder.Entity<Account>()
+						builder.Entity<ModelsCosmos.Account>()
 										.ToContainer("Account").HasPartitionKey(e => e.Id)
 										.HasOne(e => e.AccountGroup);
 
 
-						builder.Entity<ScheduledTransactions>()
+						builder.Entity<ModelsCosmos.ScheduledTransactions>()
 										.ToContainer("ScheduledTransactions").HasPartitionKey(e => e.Id)
 										.Ignore(e => e.LastTransaction);
 
 
 
-						builder.Entity<Transaction>()
+						builder.Entity<ModelsCosmos.Transaction>()
 										.ToContainer("Transaction").HasPartitionKey(e => e.Id)
-										.HasOne(e => e.Credit).WithMany(e => e.TransactionsAsCredit);
+										.HasOne(e => e.Credit);//.WithMany(e => e.TransactionsAsCredit);
 
 
-						builder.Entity<Transaction>().HasPartitionKey(e => e.Id)
-								.Ignore(e => e.Debit).Ignore(e => e.Credit).Ignore(e => e.AsLastTransaction).Ignore(e => e.Vendor);
+						builder.Entity<ModelsCosmos.Transaction>().HasPartitionKey(e => e.Id)
+								.Ignore(e => e.Debit).Ignore(e => e.Credit).Ignore(e => e.Vendor);
 
 
 						builder.Entity<Vendor>().HasPartitionKey(e => e.Id)

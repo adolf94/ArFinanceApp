@@ -112,7 +112,8 @@ namespace FinanceApp.Data.CosmosRepo
 								if (!All) query = query.Where(e => e.Enabled == true);
 								var queryTask = query.ToArrayAsync();
 								queryTask.Wait();
-								return queryTask.Result.Select(e => _mapper.Map<Models.Account>(e)).ToList();
+								var preaccts = queryTask.Result;
+								return preaccts.Select(e => _mapper.Map<Models.Account>(e)).ToList();
 						}
 						catch (Exception ex)
 						{

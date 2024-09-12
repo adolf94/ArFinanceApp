@@ -1,5 +1,6 @@
 ﻿using FinanceApp.Utilities;
 using FinanceProject.Models;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace FinanceProject.Data.CosmosRepo.Models
 {
@@ -36,8 +37,8 @@ namespace FinanceProject.Data.CosmosRepo.Models
 				}
 				public long DateAdded { get; set; }
 				public Guid? ScheduleId { get; set; }
+				[NotMapped]
 				public ScheduledTransactions? Schedule { get; set; }
-				public ScheduledTransactions? AsLastTransaction { get; set; }
 				public string Description { get; set; } = "";
 		}
 }

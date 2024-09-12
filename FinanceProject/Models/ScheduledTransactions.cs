@@ -1,5 +1,4 @@
-﻿using Newtonsoft.Json;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace FinanceProject.Models
 {
@@ -23,7 +22,5 @@ namespace FinanceProject.Models
 
 				public Guid? LastTransactionId { get; set; }
 				public Transaction? LastTransaction { get; set; }
-				[JsonIgnore]
-				public IEnumerable<Transaction>? Transactions { get; set; }
 		}
 }
