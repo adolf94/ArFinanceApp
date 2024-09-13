@@ -48,7 +48,7 @@ interface TransactionWithRunningBal extends Transaction {
 
 const ViewAccount = () => {
   const { acctId } = useParams();
-  const [month, setMonth] = useState(moment([2024, 7, 1]));
+  const [month, setMonth] = useState(moment());
   const { data: records } = useQuery({
     queryKey: [
       TRANSACTION,

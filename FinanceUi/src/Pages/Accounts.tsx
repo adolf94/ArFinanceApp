@@ -101,7 +101,7 @@ const Accounts = (props) => {
               .map((a: Account) => (
                 <ListItem key={a.id}>
                   <Grid container sx={{ pt: 1 }}>
-                    <Grid item xs={a.resetEndOfPeriod ? 6 : 9}>
+                    <Grid item xs={a.periodStartDay===1 ? 9:6}>
                       <Grid
                         key={e.id}
                         onClick={() => navigate("/accounts/" + a.id)}
@@ -109,7 +109,7 @@ const Accounts = (props) => {
                         {a.name}
                       </Grid>
                     </Grid>
-                    {a.resetEndOfPeriod && (
+                   {a.periodStartDay !== 1 && (
                       <CreditStatementBalance
                         account={a}
                         date={moment().toDate()}

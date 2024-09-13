@@ -13,14 +13,14 @@
   Grid,
 } from "@mui/material";
 import react, { useEffect, useState } from "react";
-import api from "../components/api";
+import api from "../../components/api";
 import React from "react";
-import db from "../components/LocalDb";
-import { ACCOUNT_TYPE, fetchTypes } from "../repositories/accountTypes";
+import db from "../../components/LocalDb";
+import { ACCOUNT_TYPE, fetchTypes } from "../../repositories/accountTypes";
 import { useQuery } from "@tanstack/react-query";
-import { ACCOUNT_GROUP, fetchGroups } from "../repositories/accountgroups";
+import { ACCOUNT_GROUP, fetchGroups } from "../../repositories/accountgroups";
 import { Account, AccountGroup, AccountType } from "FinanceApi";
-import { useMutateAccount } from "../repositories/accounts";
+import { useMutateAccount } from "../../repositories/accounts";
 
 const NewAccount = (props) => {
   const { show, handleClose } = props;

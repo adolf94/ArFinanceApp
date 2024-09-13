@@ -15,12 +15,12 @@
 } from "@mui/material";
 import React from "react";
 import { useEffect, useState } from "react";
-import api from "../components/api";
-import useDropdown from "../components/useDropdown";
-import db from "../components/LocalDb";
-import { ACCOUNT_TYPE, fetchTypes } from "../repositories/accountTypes";
+import api from "../../components/api";
+import useDropdown from "../../components/useDropdown";
+import db from "../../components/LocalDb";
+import { ACCOUNT_TYPE, fetchTypes } from "../../repositories/accountTypes";
 import { useQuery } from "@tanstack/react-query";
-import { useMutateGroups } from "../repositories/accountgroups";
+import { useMutateGroups } from "../../repositories/accountgroups";
 import { AccountGroup } from "FinanceApi";
 
 const NewAccountGroup = (props: any) => {

@@ -15,6 +15,7 @@ declare module 'FinanceApi' {
 
     // ..\FinanceProject\Models\AccountBalance.cs
     export interface AccountBalance {
+        id: string;
         accountId: string;
         month: string;
         month: string;
@@ -37,6 +38,7 @@ declare module 'FinanceApi' {
         id: string;
         name?: string;
         enabled: boolean;
+        shouldResetPeriodically: boolean;
     }
 
     // ..\FinanceProject\Models\AppConfig.cs

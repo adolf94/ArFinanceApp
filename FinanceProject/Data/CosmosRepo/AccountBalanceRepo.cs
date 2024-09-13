@@ -37,17 +37,20 @@ namespace FinanceApp.Data.CosmosRepo
 								{
 										DateTime currentPeriod = new DateTime(date.Year, date.Month, acc.PeriodStartDay);
 										DateTime prevPeriod = new DateTime(date.Year, date.Month, acc.PeriodStartDay).AddMonths(-1);
-										var currentBalTask = _context.AccountBalances!.Where(b => b.AccountId == acc.Id && currentPeriod == b.Month).FirstOrDefaultAsync();
+										var currentBalTask = _context.AccountBalances!.Where(b => b.AccountId == acc.Id && b.Year == date.Year && b.Month == date.Month).FirstOrDefaultAsync();
 										currentBalTask.Wait();
 										AccountBalance? currentBal = currentBalTask.Result;
 										if (currentBal != null) return;
-										var accBalTask = _context.AccountBalances!.Where(b => b.AccountId == acc.Id && prevPeriod == b.Month).FirstOrDefaultAsync();
-										accBalTask.Wait();
-										AccountBalance? accBal = accBalTask.Result;
+										var prevAccBalTask = _context.AccountBalances!.Where(b => b.AccountId == acc.Id && b.Month == prevPeriod.Month && b.Year == prevPeriod.Year).FirstOrDefaultAsync();
+										prevAccBalTask.Wait();
+										AccountBalance? accBal = prevAccBalTask.Result;
 										if (accBal == null && !acc.ResetEndOfPeriod)
+										//if the account has no previous data, wala kasing pag babasan ng balance
+										//reset end of period == FALSE in case na meron pa before
 										{
 												_logger.LogTrace($"accBal for {acc.Id} {prevPeriod.ToShortDateString()}");
 												var prevTotalTask = _context.Transactions!.Where(t => (t.CreditId == acc.Id || t.DebitId == acc.Id) && t.Date < currentPeriod)
+												// less than Current period kasi we just need the current month start
 												.Select(t => (t.CreditId == acc.Id ? t.Amount : t.DebitId == acc.Id ? -t.Amount : 0)).SumAsync();
 												prevTotalTask.Wait();
 												decimal prevTotal = prevTotalTask.Result;
@@ -55,22 +58,32 @@ namespace FinanceApp.Data.CosmosRepo
 												{
 														AccountId = acc.Id,
 														Balance = prevTotal,
-														Month = new DateTime(date.Year, date.Month, acc.PeriodStartDay)
+														Year = date.Year,
+														Month = date.Month,
+														DateStart = new DateTime(date.Year, date.Month, acc.PeriodStartDay)
 												});
 										}
 										else
+										//if may previos balance na OR nagrereset -- kukunin lang natin yung previous month
+										//
 										{
 												_logger.LogTrace($"accBal for {acc.Id} {prevPeriod.ToShortDateString()}");
 
-												var MonthTotalTask = _context.Transactions!.Where(t => (t.CreditId == acc.Id || t.DebitId == acc.Id) && t.Date > prevPeriod && t.Date <= currentPeriod)
+												var MonthTotalTask = _context.Transactions!.Where(t => (t.CreditId == acc.Id || t.DebitId == acc.Id) && t.Date > accBal.DateStart && t.Date <= currentPeriod)
 														.Select(t => (t.CreditId == acc.Id ? t.Amount : t.DebitId == acc.Id ? -t.Amount : 0)).SumAsync();
 												MonthTotalTask.Wait();
 												decimal monthTotal = MonthTotalTask.Result;
+												decimal balanceLastMonth = accBal == null ? 0 : accBal.Balance;
+												decimal balanceToSave = monthTotal;
+												//add natin if d naman magrereset (save natin running balance)
+												if (!acc.ResetEndOfPeriod) balanceToSave = balanceLastMonth + monthTotal;
 												items.Add(new AccountBalance
 												{
 														AccountId = acc.Id,
-														Balance = (accBal == null ? 0 : accBal.Balance) + monthTotal,
-														Month = new DateTime(date.Year, date.Month, acc.PeriodStartDay)
+														Balance = balanceToSave,
+														Year = date.Year,
+														Month = date.Month,
+														DateStart = new DateTime(date.Year, date.Month, acc.PeriodStartDay)
 												});
 
 										}
@@ -95,10 +108,11 @@ namespace FinanceApp.Data.CosmosRepo
 						if (acct == null) throw new Exception("Account not found");
 						CreateAccountBalances(date.AddDays(1 - acct.PeriodStartDay)).Wait();
 						List<AccountBalance> balance = new List<AccountBalance>();
-						if (acct.PeriodStartDay != 1)
+						if (acct.ResetEndOfPeriod)
 						{
+								//This part is for Expense and Income
 								DateTime nextPeriod = date.AddMonths(1);
-								var nextPeriodMonth = new DateTime(nextPeriod.Year, nextPeriod.Month, acct.PeriodStartDay);
+								var nextPeriodMonth = new DateTime(nextPeriod.Year, nextPeriod.Month, 1);
 								Task<AccountBalance?> balTask = _context.AccountBalances!.Where(e => e.AccountId == creditId && e.Month == nextPeriodMonth)
 								.FirstOrDefaultAsync();
 
@@ -108,9 +122,11 @@ namespace FinanceApp.Data.CosmosRepo
 						}
 						else
 						{
-
-								var balanceTask = _context.AccountBalances!.Where(e => e.AccountId == creditId && e.Month > date)
+								//Assets and Liabilities
+								//Update the next periods balance
+								var balanceTask = _context.AccountBalances!.Where(e => e.AccountId == creditId && e.DateStart > date)
 										.ToListAsync();
+								balanceTask.Wait();
 								balance = balanceTask.Result;
 						}
 
@@ -141,28 +157,20 @@ namespace FinanceApp.Data.CosmosRepo
 
 						if (acct.ResetEndOfPeriod)
 						{
-
+								//for expense and income
 								DateTime nextPeriod = date.AddMonths(1);
 								var nextPeriodMonth = new DateTime(nextPeriod.Year, nextPeriod.Month, acct.PeriodStartDay);
 
 
 								Task<AccountBalance?> balTask = _context.AccountBalances!.Where(e => e.AccountId == debitId && e.Month == nextPeriodMonth)
 								.FirstOrDefaultAsync();
-
-								//For Credit Cards
-								//Outstanding Balance (Despite, usual definition is total including Unbilled Installments, Our definition is to be paid at end of month)
-
-								//Outstanding Balance ==> Account balance based on table Accounts
-								//  How to include the Unbilled Installment for this month?? 
-								//  Include scheduled?? 
-								//Statement Balance ==> {Outstanding Balance } minus Account Balance from AccountBalance table (for ongoing month (+1)) 
 								balTask.Wait();
 
 								if (balTask.Result != null) balance.Add(balTask.Result);
 						}
 						else
 						{
-
+								//for assets and liabilities
 								var taskBalance = _context.AccountBalances!.Where(e => e.AccountId == debitId && e.Month > date)
 										.ToListAsync();
 								taskBalance.Wait();

@@ -28,15 +28,13 @@ namespace FinanceApp.Data.CosmosRepo
 				protected override void OnModelCreating(ModelBuilder builder)
 				{
 
-
 						builder.Entity<AccountType>()
 														.HasData(
-																new { Id = new Guid("892f20e5-b8dc-42b6-10c9-08dabb20ff77"), Name = "Assets-Main", Enabled = true },
-																new { Id = new Guid("a68ebd61-ce5d-4c99-10ca-08dabb20ff77"), Name = "Expenses-Main", Enabled = true },
-																new { Id = new Guid("04c78118-1131-443f-2fa6-08dac49f6ad4"), Name = "Income-Main", Enabled = true },
-																new { Id = new Guid("5b106232-530c-42d7-8d55-b4be282e8297"), Name = "Others-Main", Enabled = false }
+																new { Id = new Guid("892f20e5-b8dc-42b6-10c9-08dabb20ff77"), Name = "Assets-Main", Enabled = true, ShouldResetPeriodically = false },
+																new { Id = new Guid("a68ebd61-ce5d-4c99-10ca-08dabb20ff77"), Name = "Expenses-Main", Enabled = true, ShouldResetPeriodically = true },
+																new { Id = new Guid("04c78118-1131-443f-2fa6-08dac49f6ad4"), Name = "Income-Main", Enabled = true, ShouldResetPeriodically = true },
+																new { Id = new Guid("5b106232-530c-42d7-8d55-b4be282e8297"), Name = "Others-Main", Enabled = false, ShouldResetPeriodically = false }
 														);
-
 
 						builder.Entity<AccountType>()
 										.ToContainer("AccountType")
@@ -45,8 +43,15 @@ namespace FinanceApp.Data.CosmosRepo
 
 						builder.Entity<AccountBalance>()
 										.ToContainer("AccountBalance")
-										.HasPartitionKey(e => new { e._month })
-										.HasKey(e => new { e.AccountId, e._month });
+										.HasPartitionKey(e => new { e.Year, e.Month, e.AccountId })
+										.HasKey(e => e.Id);
+
+						//builder.Entity<AccountBalance>()
+						//				.ToContainer("AccountBalance")
+						//				.HasIndex(e => e.AccountId);
+						//builder.Entity<AccountBalance>()
+						//				.ToContainer("AccountBalance")
+						//				.HasIndex(e => e.Month);
 
 
 

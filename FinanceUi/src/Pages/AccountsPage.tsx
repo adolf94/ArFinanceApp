@@ -8,10 +8,12 @@ import {
   faChevronLeft,
   faChevronRight,
   faEllipsisV,
+
 } from "@fortawesome/free-solid-svg-icons";
-import SettingsAccountType from "./SettingAccountsType";
-import NewAccountGroup from "./SettingAccountGroup";
-import NewAccount from "./SettingsNewAccount";
+import SettingsAccountType from "./Accounts/SettingAccountsType";
+import NewAccountGroup from "./Accounts/SettingAccountGroup";
+import NewAccount from "./Accounts/SettingsNewAccount";
+import { AddCircleRounded } from "@mui/icons-material";
 
 const AccountsPage = (props) => {
   const [showType, setShowType] = useState(false);
@@ -65,10 +67,13 @@ const AccountsPage = (props) => {
           sx={{ pt: 3 }}
           direction="row-reverse"
           justifyContent="flex-start"
-        >
-          <Button variant="outlined" onClick={() => setShowGroup(true)}>
-            Add Group
-          </Button>
+              >
+            <Button variant="outlined" onClick={() => setShowGroup(true)}>
+                      <AddCircleRounded /> Group
+            </Button>
+                  <Button variant="outlined" onClick={() => setShowAccount(true)}>
+                      <AddCircleRounded /> Account
+            </Button>
         </Grid>
         <Grid container>
           <Accounts></Accounts>

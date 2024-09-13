@@ -7,11 +7,10 @@
   DialogContent,
 } from "@mui/material";
 import react, { useEffect, useState } from "react";
-import api from "../components/api";
-import useDropdown from "../components/useDropdown";
+import api from "../../components/api";
+import useDropdown from "../../components/useDropdown";
 
-import db from "../components/LocalDb";
-import { useMutateType } from "../repositories/accountTypes";
+import { useMutateType } from "../../repositories/accountTypes";
 
 const NewAccountType = (props) => {
   const { show, handleClose } = props;
