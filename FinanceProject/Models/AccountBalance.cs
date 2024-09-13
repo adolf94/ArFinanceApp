@@ -1,5 +1,4 @@
 ﻿using Newtonsoft.Json;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace FinanceProject.Models
 {
@@ -11,7 +10,6 @@ namespace FinanceProject.Models
 
 				public string _month { get; set; } = "";
 
-				[NotMapped]
 				public DateTime Month
 				{
 						get
@@ -20,7 +18,7 @@ namespace FinanceProject.Models
 						}
 						set
 						{
-								_month = value.ToString("yyyy-mm-01");
+								_month = value.ToString("yyyy-MM-01");
 						}
 				}
 				public decimal Balance { get; set; }

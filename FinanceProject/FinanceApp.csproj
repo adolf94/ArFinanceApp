@@ -50,6 +50,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Content Remove="configs\scheduled.json" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Remove="ClientApp\src\common\file.tsx" />
     <None Remove="ClientApp\src\common\Select.ts" />
     <None Remove="ClientApp\src\repositories\scheduledTasks.ts" />
@@ -71,10 +75,9 @@
     <Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
   </ItemGroup>
 
+
   <ItemGroup>
-    <TypeScriptCompile Include="ClientApp\src\common\file.tsx" />
-    <TypeScriptCompile Include="ClientApp\src\common\Select.tsx" />
-    <TypeScriptCompile Include="ClientApp\src\repositories\scheduledTasks.ts" />
+    <None Include="configs\scheduled.json" />
   </ItemGroup>
   <!--<Target Name="PublishRunWebpack" AfterTargets="ComputeFilesToPublish">
     --><!-- As part of publishing, ensure the JS resources are freshly built in production mode --><!--

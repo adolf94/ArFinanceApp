@@ -250,13 +250,18 @@ export const useMutateTransaction = () => {
               queryFn: () => fetchVendorById(item.vendorId),
             }));
 
+            let accounts = e.data.accounts;
+            accounts.forEach(e => {
+                queryClient.setQueryData([ACCOUNT, { id: e.id }], e);
+            })
+
+
+            item.credit = queryClient.getQueryData([ACCOUNT, { id: item.creditId}])
+            item.debit = queryClient.getQueryData([ACCOUNT, { id: item.debitId }])
+
+
           queryClient.setQueryData([TRANSACTION, { id: item.id }], item);
 
-          queryClient.setQueryData(
-            [ACCOUNT, { id: item.creditId }],
-            item.credit,
-          );
-          queryClient.setQueryData([ACCOUNT, { id: item.debitId }], item.debit);
 
           queryClient.setQueryData([ACCOUNT], (prev) => {
             if (!prev || !Array.isArray(prev)) return undefined;

@@ -96,7 +96,8 @@ const Accounts = (props) => {
               {e.name}
             </Divider>
             {(accounts || [])
-              .filter((a) => e.id === a.accountGroupId)
+              .filter((a) => e.id === a.accountGroupId && !a.resetEndOfPeriod)
+              
               .map((a: Account) => (
                 <ListItem key={a.id}>
                   <Grid container sx={{ pt: 1 }}>

@@ -37,7 +37,6 @@ declare module 'FinanceApi' {
         id: string;
         name?: string;
         enabled: boolean;
-        shouldResetPeriodically: boolean;
     }
 
     // ..\FinanceProject\Models\AppConfig.cs
@@ -127,7 +126,6 @@ declare module 'FinanceApi' {
         id: string;
         creditId: string;
         vendorId?: string;
-        vendor: Vendor;
         debitId: string;
         amount: number;
         date: string;

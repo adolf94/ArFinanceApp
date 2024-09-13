@@ -103,7 +103,6 @@ namespace FinanceApp.Controllers
 								_logger.LogInformation($"{emailClaim!.Value} has no linked user");
 								return Forbid();
 						}
-						User? user = await _user.GetByEmailAsync(claims.FirstOrDefault(e => e.Type == "email").Value!)!;
 
 						claims.Add(new Claim("userId", user!.Id.ToString()));
 						claims.Add(new Claim(ClaimTypes.Role, "Default_Access"));
@@ -182,7 +181,6 @@ namespace FinanceApp.Controllers
 								_logger.LogInformation($"{emailClaim!.Value} has no linked user");
 								return Forbid();
 						}
-						User? user = await _user.GetByEmailAsync(claims.FirstOrDefault(e => e.Type == "email").Value!)!;
 
 						claims.Add(new Claim("userId", user!.Id.ToString()));
 						claims.Add(new Claim(ClaimTypes.Role, "Default_Access"));

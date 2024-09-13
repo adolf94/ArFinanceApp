@@ -33,19 +33,24 @@ namespace FinanceApp.Data.CosmosRepo
 								List<AccountBalance> items = new List<AccountBalance>();
 								List<Account> accounts = await _context.Accounts!.ToListAsync();
 
-								accounts.ForEach(async acc =>
+								accounts.ForEach(acc =>
 								{
 										DateTime currentPeriod = new DateTime(date.Year, date.Month, acc.PeriodStartDay);
 										DateTime prevPeriod = new DateTime(date.Year, date.Month, acc.PeriodStartDay).AddMonths(-1);
-										AccountBalance? currentBal = await _context.AccountBalances!.Where(b => b.AccountId == acc.Id && currentPeriod == b.Month).FirstOrDefaultAsync();
+										var currentBalTask = _context.AccountBalances!.Where(b => b.AccountId == acc.Id && currentPeriod == b.Month).FirstOrDefaultAsync();
+										currentBalTask.Wait();
+										AccountBalance? currentBal = currentBalTask.Result;
 										if (currentBal != null) return;
-										AccountBalance? accBal = await _context.AccountBalances!.Where(b => b.AccountId == acc.Id && prevPeriod == b.Month).FirstOrDefaultAsync();
+										var accBalTask = _context.AccountBalances!.Where(b => b.AccountId == acc.Id && prevPeriod == b.Month).FirstOrDefaultAsync();
+										accBalTask.Wait();
+										AccountBalance? accBal = accBalTask.Result;
 										if (accBal == null && !acc.ResetEndOfPeriod)
 										{
 												_logger.LogTrace($"accBal for {acc.Id} {prevPeriod.ToShortDateString()}");
-												decimal prevTotal = await _context.Transactions!.Where(t => (t.CreditId == acc.Id || t.DebitId == acc.Id) && t.Date < currentPeriod)
+												var prevTotalTask = _context.Transactions!.Where(t => (t.CreditId == acc.Id || t.DebitId == acc.Id) && t.Date < currentPeriod)
 												.Select(t => (t.CreditId == acc.Id ? t.Amount : t.DebitId == acc.Id ? -t.Amount : 0)).SumAsync();
-
+												prevTotalTask.Wait();
+												decimal prevTotal = prevTotalTask.Result;
 												items.Add(new AccountBalance
 												{
 														AccountId = acc.Id,
@@ -57,10 +62,10 @@ namespace FinanceApp.Data.CosmosRepo
 										{
 												_logger.LogTrace($"accBal for {acc.Id} {prevPeriod.ToShortDateString()}");
 
-												decimal monthTotal = await _context.Transactions!.Where(t => (t.CreditId == acc.Id || t.DebitId == acc.Id) && t.Date > prevPeriod && t.Date <= currentPeriod)
+												var MonthTotalTask = _context.Transactions!.Where(t => (t.CreditId == acc.Id || t.DebitId == acc.Id) && t.Date > prevPeriod && t.Date <= currentPeriod)
 														.Select(t => (t.CreditId == acc.Id ? t.Amount : t.DebitId == acc.Id ? -t.Amount : 0)).SumAsync();
-
-
+												MonthTotalTask.Wait();
+												decimal monthTotal = MonthTotalTask.Result;
 												items.Add(new AccountBalance
 												{
 														AccountId = acc.Id,
@@ -93,7 +98,7 @@ namespace FinanceApp.Data.CosmosRepo
 						if (acct.PeriodStartDay != 1)
 						{
 								DateTime nextPeriod = date.AddMonths(1);
-								var nextPeriodMonth = new DateTime(nextPeriod.Year, nextPeriod.Month, acct.PeriodStartDay)
+								var nextPeriodMonth = new DateTime(nextPeriod.Year, nextPeriod.Month, acct.PeriodStartDay);
 								Task<AccountBalance?> balTask = _context.AccountBalances!.Where(e => e.AccountId == creditId && e.Month == nextPeriodMonth)
 								.FirstOrDefaultAsync();
 
@@ -127,7 +132,9 @@ namespace FinanceApp.Data.CosmosRepo
 
 
 
-						Account? acct = _context.Accounts!.Where(e => e.Id == debitId).FirstOrDefault();
+						var acctTask = _context.Accounts!.Where(e => e.Id == debitId).FirstOrDefaultAsync();
+						acctTask.Wait();
+						Account? acct = acctTask.Result;
 						if (acct == null) throw new Exception("Account not found");
 						CreateAccountBalances(date.AddDays(1 - acct.PeriodStartDay)).Wait();
 						List<AccountBalance> balance = new List<AccountBalance>();
@@ -136,7 +143,7 @@ namespace FinanceApp.Data.CosmosRepo
 						{
 
 								DateTime nextPeriod = date.AddMonths(1);
-								var nextPeriodMonth = new DateTime(nextPeriod.Year, nextPeriod.Month, acct.PeriodStartDay)
+								var nextPeriodMonth = new DateTime(nextPeriod.Year, nextPeriod.Month, acct.PeriodStartDay);
 
 
 								Task<AccountBalance?> balTask = _context.AccountBalances!.Where(e => e.AccountId == debitId && e.Month == nextPeriodMonth)
@@ -158,6 +165,7 @@ namespace FinanceApp.Data.CosmosRepo
 
 								var taskBalance = _context.AccountBalances!.Where(e => e.AccountId == debitId && e.Month > date)
 										.ToListAsync();
+								taskBalance.Wait();
 								balance = taskBalance.Result;
 						}
 
@@ -166,7 +174,7 @@ namespace FinanceApp.Data.CosmosRepo
 								bal.Balance -= amount;
 						});
 
-						_context.SaveChanges();
+						_context.SaveChangesAsync().Wait();
 						return balance;
 
 				}
