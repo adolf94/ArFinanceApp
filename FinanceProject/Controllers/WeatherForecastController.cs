@@ -1,6 +1,5 @@
-﻿using FinanceApp.Data.SqlRepo;
+﻿//using FinanceApp.Data.SqlRepo;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace FinanceProject.Controllers
 {
@@ -13,12 +12,13 @@ namespace FinanceProject.Controllers
 		};
 
 				private readonly ILogger<WeatherForecastController> _logger;
-				private readonly AppDbContext _context;
+				//private readonly AppDbContext _context;
 
-				public WeatherForecastController(ILogger<WeatherForecastController> logger, AppDbContext context)
+				public WeatherForecastController(ILogger<WeatherForecastController> logger)
+				//, AppDbContext context)
 				{
 						_logger = logger;
-						_context = context;
+						//_context = context;
 				}
 
 
@@ -27,7 +27,7 @@ namespace FinanceProject.Controllers
 				{
 						try
 						{
-								_context.Database.ExecuteSqlRaw("Select 1");
+								//_context.Database.ExecuteSqlRaw("Select 1");
 								return Ok("Db Success");
 
 						}
@@ -41,6 +41,18 @@ namespace FinanceProject.Controllers
 
 				}
 
+				[HttpGet("time")]
+				public async Task<IActionResult> GetDateTIME()
+				{
+
+
+						return await Task.FromResult(Ok(new
+						{
+								time = DateTime.Now,
+								timeZone = TimeZoneInfo.Local
+						}));
+
+				}
 
 				[HttpGet("Weatherforecast")]
 				public IEnumerable<WeatherForecast> Get()

@@ -5,6 +5,7 @@ import {
   CreateTransactionDto,
   NewTransactionResponseDto,
   Transaction,
+  Vendor,
 } from "FinanceApi";
 import { queryClient } from "../App";
 import moment from "moment";
@@ -51,7 +52,7 @@ const addToTransactions = (item: Transaction, replace: boolean) => {
     .then((query) => {
       if (!query.some((trans) => item.id == trans.id)) {
         queryClient.setQueryData(
-          [TRANSACTION, { accountId: debit.id, ...key }],
+          [TRANSACTION, dKey],
           (prev: Transaction[]) => [...prev, item],
         );
       } else if (replace) {
@@ -70,10 +71,10 @@ const addToTransactions = (item: Transaction, replace: boolean) => {
       Transaction[]
     >({ queryKey: [TRANSACTION, cKey], queryFn: () => fetchTransactionsByMonth(key.year, key.month) })
     .then((query) => {
-      if (!query.some((trans) => item.id == trans.id)) {
+      if (!query.some((trans) => item.id === trans.id)) {
         queryClient.setQueryData(
-          [TRANSACTION, { accountId: debit.id, ...key }],
-          (prev: Transaction[]) => [...prev, item],
+          [TRANSACTION, cKey],
+          (prev: Transaction[]) => [...(prev ||[]), item],
         );
       } else if (replace) {
         queryClient.setQueryData([TRANSACTION, cKey], (prev: Transaction[]) => {
@@ -123,7 +124,7 @@ export const fetchTransactionsByMonth = (year: number, month: number) => {
         ]);
 
         accounts.forEach((account) => {
-          if (!nextMonth || account.periodStartDay != 1) return;
+          if (!nextMonth || account.periodStartDay !== 1) return;
           const from = moment({
             year,
             month: month,
@@ -241,14 +242,14 @@ export const useMutateTransaction = () => {
       return api
         .post<NewTransactionResponseDto>("transactions", data)
         .then(async (e: AxiosResponse<NewTransactionResponseDto>) => {
-          let item = e.data.transaction;
+          let item  = e.data.transaction;
 
           item.vendor =
-            item.vendorId &&
-            (await queryClient.ensureQueryData({
-              queryKey: [VENDOR, { id: item.vendorId }],
-              queryFn: () => fetchVendorById(item.vendorId),
-            }));
+            item.vendorId ?
+            (await queryClient.ensureQueryData<Vendor>({
+              queryKey: [VENDOR, { id: item!.vendorId }],
+              queryFn: () => fetchVendorById(item!.vendorId!),
+            })) : null;
 
             let accounts = e.data.accounts;
             accounts.forEach(e => {

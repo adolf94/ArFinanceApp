@@ -17,8 +17,9 @@ declare module 'FinanceApi' {
     export interface AccountBalance {
         id: string;
         accountId: string;
-        month: string;
-        month: string;
+        year: number;
+        month: number;
+        dateStart: string;
         balance: number;
     }
 
@@ -144,7 +145,7 @@ declare module 'FinanceApi' {
 
     // ..\FinanceProject\Dto\NewTransactionResponseDto.cs
     export interface NewTransactionResponseDto {
-        transaction?: Transaction;
+        transaction: Transaction;
         accounts: Account[];
         balances: AccountBalance[];
     }

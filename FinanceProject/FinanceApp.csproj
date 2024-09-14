@@ -47,6 +47,36 @@
 
   <ItemGroup>
     <Compile Remove="ClientApp\src\Pages\AccountsPage.cs" />
+    <Compile Remove="Data\SqlRepo\AccountBalanceRepo.cs" />
+    <Compile Remove="Data\SqlRepo\AccountGroupRepo.cs" />
+    <Compile Remove="Data\SqlRepo\AccountRepo.cs" />
+    <Compile Remove="Data\SqlRepo\AccountTypeRepo.cs" />
+    <Compile Remove="Data\SqlRepo\AppDbContext.cs" />
+    <Compile Remove="Data\SqlRepo\ScheduledTransactionRepo.cs" />
+    <Compile Remove="Data\SqlRepo\TransactionRepo.cs" />
+    <Compile Remove="Data\SqlRepo\UserRepo.cs" />
+    <Compile Remove="Data\SqlRepo\VendorRepo.cs" />
+    <Compile Remove="Migrations\20230505181011_Initial.cs" />
+    <Compile Remove="Migrations\20230505181011_Initial.Designer.cs" />
+    <Compile Remove="Migrations\20230603123356_addIsCredit.cs" />
+    <Compile Remove="Migrations\20230603123356_addIsCredit.Designer.cs" />
+    <Compile Remove="Migrations\20240120150516_Removed_AccountType.cs" />
+    <Compile Remove="Migrations\20240120150516_Removed_AccountType.Designer.cs" />
+    <Compile Remove="Migrations\20240121115835_UpdateUser.cs" />
+    <Compile Remove="Migrations\20240121115835_UpdateUser.Designer.cs" />
+    <Compile Remove="Migrations\20240122030308_UpdateTransaction.cs" />
+    <Compile Remove="Migrations\20240122030308_UpdateTransaction.Designer.cs" />
+    <Compile Remove="Migrations\20240123053747_ForModifiedBalance.cs" />
+    <Compile Remove="Migrations\20240123053747_ForModifiedBalance.Designer.cs" />
+    <Compile Remove="Migrations\20240127031821_ChangeToDate.cs" />
+    <Compile Remove="Migrations\20240127031821_ChangeToDate.Designer.cs" />
+    <Compile Remove="Migrations\20240128065730_StartPeriodDate.cs" />
+    <Compile Remove="Migrations\20240128065730_StartPeriodDate.Designer.cs" />
+    <Compile Remove="Migrations\20240203114112_ScheduleTransactions.cs" />
+    <Compile Remove="Migrations\20240203114112_ScheduleTransactions.Designer.cs" />
+    <Compile Remove="Migrations\20240831072308_AddUserInfoAndConfigs.cs" />
+    <Compile Remove="Migrations\20240831072308_AddUserInfoAndConfigs.Designer.cs" />
+    <Compile Remove="Migrations\AppDbContextModelSnapshot.cs" />
   </ItemGroup>
 
   <ItemGroup>
@@ -78,6 +108,36 @@
 
   <ItemGroup>
     <None Include="configs\scheduled.json" />
+    <None Include="Data\SqlRepo\AccountBalanceRepo.cs" />
+    <None Include="Data\SqlRepo\AccountGroupRepo.cs" />
+    <None Include="Data\SqlRepo\AccountRepo.cs" />
+    <None Include="Data\SqlRepo\AccountTypeRepo.cs" />
+    <None Include="Data\SqlRepo\AppDbContext.cs" />
+    <None Include="Data\SqlRepo\ScheduledTransactionRepo.cs" />
+    <None Include="Data\SqlRepo\TransactionRepo.cs" />
+    <None Include="Data\SqlRepo\UserRepo.cs" />
+    <None Include="Data\SqlRepo\VendorRepo.cs" />
+    <None Include="Migrations\20230505181011_Initial.cs" />
+    <None Include="Migrations\20230505181011_Initial.Designer.cs" />
+    <None Include="Migrations\20230603123356_addIsCredit.cs" />
+    <None Include="Migrations\20230603123356_addIsCredit.Designer.cs" />
+    <None Include="Migrations\20240120150516_Removed_AccountType.cs" />
+    <None Include="Migrations\20240120150516_Removed_AccountType.Designer.cs" />
+    <None Include="Migrations\20240121115835_UpdateUser.cs" />
+    <None Include="Migrations\20240121115835_UpdateUser.Designer.cs" />
+    <None Include="Migrations\20240122030308_UpdateTransaction.cs" />
+    <None Include="Migrations\20240122030308_UpdateTransaction.Designer.cs" />
+    <None Include="Migrations\20240123053747_ForModifiedBalance.cs" />
+    <None Include="Migrations\20240123053747_ForModifiedBalance.Designer.cs" />
+    <None Include="Migrations\20240127031821_ChangeToDate.cs" />
+    <None Include="Migrations\20240127031821_ChangeToDate.Designer.cs" />
+    <None Include="Migrations\20240128065730_StartPeriodDate.cs" />
+    <None Include="Migrations\20240128065730_StartPeriodDate.Designer.cs" />
+    <None Include="Migrations\20240203114112_ScheduleTransactions.cs" />
+    <None Include="Migrations\20240203114112_ScheduleTransactions.Designer.cs" />
+    <None Include="Migrations\20240831072308_AddUserInfoAndConfigs.cs" />
+    <None Include="Migrations\20240831072308_AddUserInfoAndConfigs.Designer.cs" />
+    <None Include="Migrations\AppDbContextModelSnapshot.cs" />
   </ItemGroup>
   <!--<Target Name="PublishRunWebpack" AfterTargets="ComputeFilesToPublish">
     --><!-- As part of publishing, ensure the JS resources are freshly built in production mode --><!--

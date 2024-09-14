@@ -11,10 +11,12 @@ namespace FinanceProject.Controllers
 		public class AccountBalanceController : ControllerBase
 		{
 				private readonly IAccountBalanceRepo _repo;
+				private readonly IAccountRepo _acct;
 
-				public AccountBalanceController(IAccountBalanceRepo repo)
+				public AccountBalanceController(IAccountBalanceRepo repo, IAccountRepo acct)
 				{
 						_repo = repo;
+						_acct = acct;
 				}
 
 				[HttpGet("accountbalance/{date}")]
@@ -39,7 +41,11 @@ namespace FinanceProject.Controllers
 				public async Task<IActionResult> GetAccountByDate(DateTime date, Guid acctId)
 				{
 						_repo.CreateAccountBalances(date).Wait();
-						var result = _repo.GetByAccountWithDate(acctId, date);
+						Account? acct = _acct.GetOne(acctId);
+
+						if (acct == null) return NotFound();
+
+						var result = await _repo.CreateAccountBalanceOne(date, acct, true);
 						if (result == null) return NotFound();
 
 						return await Task.FromResult(Ok(result));

@@ -12,13 +12,15 @@ namespace FinanceProject.Dto
 
 				public class AccountBalanceKey
 				{
-						public AccountBalanceKey(Guid accountId, DateTime month)
+						public AccountBalanceKey(Guid accountId, int year, int month)
 						{
 								AccountId = accountId;
 								Month = month;
+								Year = year;
 						}
 						public Guid AccountId { get; set; }
-						public DateTime Month { get; set; }
+						public int Month { get; set; }
+						public int Year { get; set; }
 				}
 		}
 }

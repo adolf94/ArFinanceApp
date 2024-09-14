@@ -10,7 +10,7 @@ namespace FinanceProject.Models
 				{
 						get
 						{
-								return $"{_month}/{AccountId}";
+								return $"{Year}/{Month}/{AccountId}";
 						}
 						set
 						{
@@ -26,17 +26,7 @@ namespace FinanceProject.Models
 				//Date Start kasi we can get the end of month by adding Balance + total ng current month.
 				// Technically DateStart is DateEnd of last period
 				// Note for credit card balance : adjust the view to NEXT month (checked na? NO)
-				public DateTime DateStart
-				{
-						get
-						{
-								return DateTime.Parse(_month);
-						}
-						set
-						{
-								_month = value.ToString("yyyy-MM-01");
-						}
-				}
+				public DateTime DateStart { get; set; }
 				public decimal Balance { get; set; }
 		}
 }

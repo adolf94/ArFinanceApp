@@ -1,9 +1,6 @@
-﻿using FinanceApp.Data.SqlRepo;
-using FinanceProject.Models;
-
-namespace FinanceProject.Data.SqlRepo
+﻿namespace FinanceProject.Data.SqlRepo
 {
-    public class VendorRepo : IVendorRepo
+		public class VendorRepo : IVendorRepo
 		{
 				private AppDbContext _context;
 				private ILogger<VendorRepo> _logger;

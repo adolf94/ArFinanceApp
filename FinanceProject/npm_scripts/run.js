@@ -10,9 +10,9 @@ let action = cmdArgs[2]
 let args = {}
 
 cmdArgs.filter(e => e.substring(0, 2) == "--").forEach((e) => {
-    let spl = e.split("=");
-    let p = spl[0].substring(2);
-    args[p] = spl[1].replaceAll(RegExp("^\"|\"$", "g"), "");
+    let spl = e.indexOf("=");
+    let p = e.substring(2,spl);
+    args[p] = e.substring(spl+1).replaceAll(RegExp("^\"|\"$", "g"), "");
 });
 
 
@@ -48,15 +48,16 @@ switch (action) {
 
 
     case "runEnv":
-        proc = spawn("docker", ["run",  "-p", "5173:8080", "--mount", "type=bind,dst=/app/wwwroot,src=/D/Users/adolf/source/repos/ArFinanceApp/FinanceProject/wwwroot/,readonly", 
+        proc = spawn("docker", ["run",  "--rm", "-p", "5173:8080", "--mount", "type=bind,dst=/app/wwwroot,src=/D/Users/adolf/source/repos/ArFinanceApp/FinanceProject/wwwroot/,readonly", 
             "-e", "AppConfig__authConfig__client_id=929828408348-sq488sibic3oquur1ov5ke3jos7sgfmv.apps.googleusercontent.com",
             "-e", "AppConfig__authConfig__Audience=929828408348-sq488sibic3oquur1ov5ke3jos7sgfmv.apps.googleusercontent.com",
             "-e", "AppConfig__authConfig__redirect_uri=https://test.graytree-42c0cd77.eastus.azurecontainerapps.io",
             "-e", "AppConfig__jwtConfig__issuer=https://adolfrey.com",
             "-e", `ENV_PASSKEY=${process.env.ENV_PASSKEY}`,
-            "-e", `ConnectionStrings__AzureSql=${process.env.AZURE_SQL}`,
+            "-e", `ConnectionStrings__CosmosDb=${process.env.COSMOS_DB||args.cosmos }`,
             "-e", `AppConfig__jwtConfig__secret_key=${process.env.JWT_SECRET}`,
             "-e", `AppConfig__authConfig__client_secret=${process.env.GOOGLE_SECRET}`,
+            
             `financeapp:${args.ver}`,
         ])
         waitForExit()

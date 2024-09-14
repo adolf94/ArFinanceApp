@@ -24,7 +24,6 @@ namespace FinanceApp.Middleware
 						string? cacheId = httpContext.Request.Headers["X-Client-Cache"];
 						string? upn = httpContext.User.FindFirstValue(ClaimTypes.Email);
 
-						IUserRepo _users = httpContext.RequestServices.GetRequiredService<IUserRepo>();
 
 						List<Claim>? cacheClaims = null;
 						if (!string.IsNullOrEmpty(sid) && !string.IsNullOrEmpty(sid)) cacheClaims = GetUserClaimsFromCache(httpContext);
@@ -39,6 +38,7 @@ namespace FinanceApp.Middleware
 
 						if (!string.IsNullOrEmpty(upn))
 						{
+								IUserRepo _users = httpContext.RequestServices.GetRequiredService<IUserRepo>();
 								cacheClaims = new List<Claim>();
 								User? user = await _users.GetByEmailAsync(upn);
 								if (user != null)

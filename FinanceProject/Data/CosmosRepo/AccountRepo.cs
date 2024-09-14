@@ -20,21 +20,15 @@ namespace FinanceApp.Data.CosmosRepo
 						{
 								_context.Accounts!.AddAsync(group).AsTask().Wait();
 								_context.SaveChangesAsync().Wait();
+
 								_context.AccountBalances!.AddAsync(new AccountBalance
 								{
 										AccountId = group.Id,
 										Balance = 0m,
-										Month = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1)
+										DateStart = new DateTime(DateTime.Now.Year, DateTime.Now.Month, group.PeriodStartDay),
+										Year = DateTime.Now.Year,
+										Month = DateTime.Now.Month,
 								}).AsTask().Wait();
-								if (group.PeriodStartDay > 1)
-								{
-										_context.AccountBalances!.AddAsync(new AccountBalance
-										{
-												AccountId = group.Id,
-												Balance = 0m,
-												Month = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1).AddMonths(-1)
-										}).AsTask().Wait();
-								}
 								if (group.Balance != 0)
 								{
 										_context.Transactions!.AddAsync(new Transaction

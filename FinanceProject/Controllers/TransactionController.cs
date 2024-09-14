@@ -63,10 +63,10 @@ namespace FinanceProject.Controllers
 
 						_bal.UpdateCreditAcct(dto.CreditId, dto.Amount, dto.Date)
 									.ToList().ForEach(bal =>
-												balances[new AccountBalanceKey(bal.AccountId, bal.Month)] = bal);
+												balances[new AccountBalanceKey(bal.AccountId, bal.Year, bal.Month)] = bal);
 						_bal.UpdateDebitAcct(dto.DebitId, dto.Amount, dto.Date)
 									.ToList().ForEach(bal =>
-												balances[new AccountBalanceKey(bal.AccountId, bal.Month)] = bal);
+												balances[new AccountBalanceKey(bal.AccountId, bal.Year, bal.Month)] = bal);
 
 
 						response.Accounts = accounts.Values.ToList();
@@ -116,10 +116,10 @@ namespace FinanceProject.Controllers
 						accounts[transaction.DebitId] = _account.UpdateDebitAcct(transaction.DebitId, -transaction.Amount);
 						_bal.UpdateCreditAcct(transaction.CreditId, -transaction.Amount, transaction.Date)
 									.ToList().ForEach(bal =>
-												balances[new AccountBalanceKey(bal.AccountId, bal.Month)] = bal);
+												balances[new AccountBalanceKey(bal.AccountId, bal.Year, bal.Month)] = bal);
 						_bal.UpdateDebitAcct(transaction.DebitId, -transaction.Amount, transaction.Date)
 									.ToList().ForEach(bal =>
-												balances[new AccountBalanceKey(bal.AccountId, bal.Month)] = bal);
+												balances[new AccountBalanceKey(bal.AccountId, bal.Year, bal.Month)] = bal);
 
 
 
@@ -127,10 +127,10 @@ namespace FinanceProject.Controllers
 						accounts[dto.DebitId] = _account.UpdateDebitAcct(dto.DebitId, dto.Amount);
 						_bal.UpdateCreditAcct(dto.CreditId, dto.Amount, dto.Date)
 									.ToList().ForEach(bal =>
-												balances[new AccountBalanceKey(bal.AccountId, bal.Month)] = bal);
+												balances[new AccountBalanceKey(bal.AccountId, bal.Year, bal.Month)] = bal);
 						_bal.UpdateDebitAcct(dto.DebitId, dto.Amount, dto.Date)
 									.ToList().ForEach(bal =>
-												balances[new AccountBalanceKey(bal.AccountId, bal.Month)] = bal);
+												balances[new AccountBalanceKey(bal.AccountId, bal.Year, bal.Month)] = bal);
 
 
 

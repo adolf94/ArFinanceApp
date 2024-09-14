@@ -1,7 +1,7 @@
 using AutoMapper;
 using FinanceApp.BgServices;
 using FinanceApp.Data.CosmosRepo;
-using FinanceApp.Data.SqlRepo;
+//using FinanceApp.Data.SqlRepo;
 using FinanceApp.Middleware;
 using FinanceApp.Utilities;
 using FinanceProject.Models;
@@ -49,7 +49,7 @@ builder.Services.AddCors(opt =>
 
 if (config.DataImplementation.ToLower() == "sql")
 {
-		builder.Services.AddSqlContext(Configuration);
+		//builder.Services.AddSqlContext(Configuration);
 }
 else if (config.DataImplementation.ToLower() == "cosmos")
 {
@@ -98,11 +98,13 @@ TypeScript.Definitions().ForLoadedAssemblies();
 using (var scope = app.Services.CreateScope())
 {
 		var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+		logger.LogInformation($"Connection: " + (Configuration.GetConnectionString("CosmosDb") == "abcd" ? "" : "(basta hindi sya abcd)"));
 
 		logger.LogInformation($"authConfig.redirectUrl: {config.authConfig.redirect_uri}");
 		logger.LogInformation($"authConfig.clientId: {config.authConfig.client_id}");
 		logger.LogInformation($"authConfig.secret: " + (config.authConfig.client_secret == "abcd" ? "" : "(basta hindi sya abcd)"));
 		logger.LogInformation($"authConfig.scope: {config.authConfig.scope}");
+		logger.LogInformation($"authConfig.secret: " + (Environment.GetEnvironmentVariable("ENV_PASSKEY") == "abcd" ? "" : "(basta hindi sya abcd)"));
 		logger.LogInformation($"jwtConfig.issuer: {config.jwtConfig.issuer}");
 		logger.LogInformation($"jwtConfig.audience: {config.jwtConfig.audience}");
 		logger.LogInformation($"jwtConfig.secret: " + (config.jwtConfig.secret_key == "abcd" ? "" : "(basta hindi sya abcd)"));
@@ -149,7 +151,7 @@ foreach (var item in apps)
 {
 		app.MapWhen(ctx => ctx.Request.Path.StartsWithSegments(item), evt =>
 		{
-				string physicalPath = Path.Combine(app.Environment.ContentRootPath, "wwwroot", item.TrimStart('/', '\\'));
+				string physicalPath = Path.Combine(app.Environment.ContentRootPath, "wwwroot", item.TrimStart(new[] { '/', '\\' }));
 
 
 				IndexFallbackFileProvider provider = new IndexFallbackFileProvider(new PhysicalFileProvider(physicalPath));
