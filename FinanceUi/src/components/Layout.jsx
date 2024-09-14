@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { Container } from "reactstrap";
+import { Grid } from "@mui/material";
 import { NavMenu } from "./NavMenu";
 import BottomAppBar from "./BottomAppBar";
 
@@ -9,7 +9,7 @@ export class Layout extends Component {
   render() {
     return (
       <div>
-        <Container>{this.props.children}</Container>
+        <Grid container>{this.props.children}</Grid>
         <BottomAppBar />
       </div>
     );

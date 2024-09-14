@@ -12,6 +12,7 @@
   Box,
   Checkbox,
   FormControlLabel,
+  CircularProgress,
 } from "@mui/material";
 import React from "react";
 import { useEffect, useState } from "react";
@@ -107,7 +108,9 @@ const NewAccountGroup = (props: any) => {
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose}>Cancel</Button>
-          <Button onClick={createNewAccountGroup}>Create</Button>
+                  <Button onClick={createNewAccountGroup} disabled={mutateGroups.createExt.isPending}>
+                      {mutateGroups.createExt.isPending ? <CircularProgress size="small" /> : "Confirm" }
+                  </Button>
         </DialogActions>
       </Dialog>
     </>

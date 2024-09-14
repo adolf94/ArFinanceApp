@@ -32,7 +32,6 @@ const AccountsPage = (props) => {
 
   return (
     <>
-      {" "}
       <AppBar position="static">
         <Toolbar>
           <Typography sx={{ flexGrow: 1 }} variant="h5" component="div">

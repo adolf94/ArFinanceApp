@@ -4,7 +4,8 @@
   Dialog,
   Button,
   DialogTitle,
-  DialogContent,
+    DialogContent,
+  CircularProgress
 } from "@mui/material";
 import react, { useEffect, useState } from "react";
 import api from "../../components/api";
@@ -16,7 +17,7 @@ const NewAccountType = (props) => {
   const { show, handleClose } = props;
   const [value, setValue] = useState("");
   const { accountTypes, set } = useDropdown();
-  const mutateType = useMutateType();
+    const mutateType = useMutateType();
 
   const createNewAccountType = () => {
     mutateType
@@ -44,7 +45,10 @@ const NewAccountType = (props) => {
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose}>Cancel</Button>
-          <Button onClick={createNewAccountType}>Create</Button>
+                  <Button onClick={createNewAccountType} disabled={mutateType.createExt.isPending}>
+                      {mutateType.createExt.isPending ? <CircularProgress size="small" /> : "Create" }
+
+                  </Button>
         </DialogActions>
       </Dialog>
     </>

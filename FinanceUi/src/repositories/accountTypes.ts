@@ -19,5 +19,5 @@ export const useMutateType = () => {
       queryClient.setQueryData([ACCOUNT_TYPE, { id: data.id }], data),
   });
 
-  return { create: create.mutate };
+  return { create: create.mutate, createExt:create };
 };

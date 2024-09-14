@@ -17,6 +17,7 @@ import {
   useTheme,
   useMediaQuery,
   IconButton,
+  CircularProgress,
 } from "@mui/material";
 import { SelectAccountContext } from "../NewRecord";
 //import { makeStyles } from '@mui/styles'
@@ -529,10 +530,12 @@ const NewRecordForm = (props: NewRecordFormProps) => {
               <Button
                 fullWidth
                 variant="contained"
-                disabled={!isSubmittable()}
+                disabled={mutateTransaction.createExt.isPending || mutateTransaction.updateExt.isPending || !isSubmittable()}
                 onClick={submitTransaction}
+
               >
-                Confirm
+                {mutateTransaction.createExt.isPending || mutateTransaction.updateExt.isPending ? <CircularProgress /> 
+                : "Confirm"}
               </Button>
             </Grid>
             <Grid item xs={4}>

@@ -11,6 +11,7 @@ import AccountsPage from "./Pages/AccountsPage";
 import NewRecordPage from "./Pages/NewRecord";
 import Records from "./Pages/Records";
 import ViewAccount from "./Pages/Accounts/ViewAccount";
+import Settings from "./Pages/Settings";
 
 const AppRoutes: (PathRouteProps | IndexRouteProps | LayoutRouteProps)[] = [
   {
@@ -42,8 +43,8 @@ const AppRoutes: (PathRouteProps | IndexRouteProps | LayoutRouteProps)[] = [
     element: <AccountsPage />,
   },
   {
-    path: "/fetch-data",
-    element: <FetchData />,
+    path: "/settings",
+      element: <Settings />,
   },
 ];
 

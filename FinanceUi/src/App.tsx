@@ -4,6 +4,8 @@ import AppRoutes from "./AppRoute";
 import { DropdownContext, defaultData } from "./components/useDropdown";
 import { Layout } from "./components/Layout";
 import db from "./components/LocalDb";
+import { ConfirmProvider } from "material-ui-confirm";
+
 import api from "./components/api";
 import "./custom.css";
 import "@fontsource/roboto/300.css";
@@ -145,7 +147,8 @@ export default class App extends Component {
 
   render() {
     return (
-      <Layout>
+    <Layout>
+        <ConfirmProvider >
         <LocalizationProvider dateAdapter={AdapterMoment}>
           <QueryClientProvider client={queryClient}>
             <ThemeProvider theme={theme}>
@@ -156,7 +159,8 @@ export default class App extends Component {
               buttonPosition="bottom-left"
             />
           </QueryClientProvider>
-        </LocalizationProvider>
+                </LocalizationProvider>
+        </ConfirmProvider>
       </Layout>
     );
   }

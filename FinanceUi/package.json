@@ -30,6 +30,7 @@
     "dexie-react-hooks": "^1.1.1",
     "http-proxy-middleware": "^2.0.6",
     "jquery": "^3.6.0",
+    "material-ui-confirm": "^3.0.16",
     "mathjs": "^12.3.0",
     "merge": "^2.1.1",
     "moment": "^2.29.4",

@@ -11,6 +11,7 @@
   InputLabel,
   Box,
   Grid,
+  CircularProgress,
 } from "@mui/material";
 import react, { useEffect, useState } from "react";
 import api from "../../components/api";
@@ -34,7 +35,7 @@ const NewAccount = (props) => {
   });
   const [accountType, setAccountType] = useState<AccountType>(null);
 
-  const { createAsync } = useMutateAccount();
+  const { createAsync, createExt } = useMutateAccount();
 
   const [form, setForm] = useState<Partial<Account>>({
     name: "",
@@ -181,7 +182,8 @@ const NewAccount = (props) => {
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose}>Cancel</Button>
-          <Button onClick={createNewAccount}>Create</Button>
+                  <Button onClick={createNewAccount} disabled={createExt.isPending}>
+                      {createExt.isPending ? <CircularProgress size="small"/> : "Create"}     </Button>
         </DialogActions>
       </Dialog>
     </>
