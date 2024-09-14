@@ -1,0 +1,42 @@
+[
+    {
+        "Container": "__EfMigrations",
+        "PartitionKeyPath": "/Id"
+    },
+    {
+        "Container": "Account",
+        "PartitionKeyPath": "/Id"
+    },
+    {
+        "Container": "AccountBalance",
+        "PartitionKeyPaths": [
+            "/Year",
+            "/Month",
+            "/AccountId"
+        ]
+    },
+    {
+        "Container": "AccountGroup",
+        "PartitionKeyPath": "/Id"
+    },
+    {
+        "Container": "AccountType",
+        "PartitionKeyPath": "/Id"
+    },
+    {
+    "Container":"ScheduledTransactions",
+    "PartitionKeyPath":"/Id"
+    },
+    {
+        "Container":"Transaction",
+        "PartitionKeyPath":"/Id"
+      },
+      {
+        "Container":"User",
+        "PartitionKeyPath":"/Id"
+      },
+      {
+        "Container":"Vendor",
+        "PartitionKeyPath":"/Id"
+      }
+]

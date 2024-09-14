@@ -1,0 +1,5 @@
+.env.local
+autoBackup
+output
+node_modules
+tmpSettings.json
