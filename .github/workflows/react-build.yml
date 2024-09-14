@@ -30,7 +30,7 @@ jobs:
       uses: restackio/update-json-file-action@2.1
       with:
         file: FinanceUi/dist/config.json
-        fields: '{"api":"${{ vars.API }}", "redirect_uri":"${{ vars.REDIRECT_URI }}"}'
+        fields: '{"api":"${{ vars.API }}", "redirectUri":"${{ vars.REDIRECT_URI }}"}'
         
     - name: Move/Rename config.json to js
       run: |
