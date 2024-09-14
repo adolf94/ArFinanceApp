@@ -45,6 +45,10 @@ builder.Services.AddCors(opt =>
 				//builder.SetIsOriginAllowed(origin => new Uri(origin).Host == "localhost");
 				//builder.SetIsOriginAllowed(origin => true);
 		});
+		opt.AddDefaultPolicy(builder =>
+		{
+				builder.WithOrigins(["https://*.adolfrey.com", "https://adolfrey.com"]).SetIsOriginAllowedToAllowWildcardSubdomains();
+		});
 });
 
 if (config.DataImplementation.ToLower() == "sql")
