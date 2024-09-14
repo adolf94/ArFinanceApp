@@ -36,6 +36,15 @@ namespace FinanceApp.Data.CosmosRepo
 																new { Id = new Guid("5b106232-530c-42d7-8d55-b4be282e8297"), Name = "Others-Main", Enabled = false, ShouldResetPeriodically = false }
 														);
 
+						builder.Entity<AccountGroup>()
+										.HasData(
+																		new { Id = new Guid("9750a38b-057b-4ab8-9eea-d196041c55cb"), AccountTypeId = new Guid("a68ebd61-ce5d-4c99-10ca-08dabb20ff77"), Name = "Adjustments", Enabled = false, isCredit = false }
+																		);
+
+						builder.Entity<Account>()
+										.HasData(
+																		new Account { Id = new Guid("747b7bd2-1a50-4e7c-8b27-01e5fa8fd6a4"), AccountGroupId = new Guid("9750a38b-057b-4ab8-9eea-d196041c55cb"), Name = "Adjustments", ResetEndOfPeriod = true, ForeignExchange = 0, PeriodStartDay = 1, CurrBalance = 0, Enabled = false, Balance = 0.00m }
+																		);
 						builder.Entity<AccountType>()
 										.ToContainer("AccountType")
 										.HasPartitionKey(e => e.Id);

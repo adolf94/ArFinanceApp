@@ -183,7 +183,7 @@ const NewAccount = (props) => {
         <DialogActions>
           <Button onClick={handleClose}>Cancel</Button>
                   <Button onClick={createNewAccount} disabled={createExt.isPending}>
-                      {createExt.isPending ? <CircularProgress size="small"/> : "Create"}     </Button>
+                      {createExt.isPending ? <CircularProgress color="primary" size="small"/> : "Create"}     </Button>
         </DialogActions>
       </Dialog>
     </>
