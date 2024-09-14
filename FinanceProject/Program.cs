@@ -40,14 +40,16 @@ builder.Services.AddCors(opt =>
 {
 		opt.AddPolicy("devCorsPolicy", builder =>
 		{
-				//builder.WithOrigins("http://localhost:800").AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
+				//builder.SetIsOriginAllowedToAllowWildcardSubdomains().WithOrigins(["https://*.adolfrey.com/"]).AllowAnyHeader();
 				builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
 				//builder.SetIsOriginAllowed(origin => new Uri(origin).Host == "localhost");
 				//builder.SetIsOriginAllowed(origin => true);
 		});
 		opt.AddDefaultPolicy(builder =>
 		{
-				builder.WithOrigins(["https://*.adolfrey.com", "https://adolfrey.com"]).SetIsOriginAllowedToAllowWildcardSubdomains();
+				builder.SetIsOriginAllowedToAllowWildcardSubdomains()
+				.WithOrigins(["https://*.adolfrey.com/", "https://adolfrey.com"])
+				.WithExposedHeaders(["X-GLogin-Error"]);
 		});
 });
 
@@ -142,10 +144,14 @@ if (app.Environment.IsDevelopment())
 		// The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
 		app.UseHsts();
 }
+else
+{
+		app.UseCors();
+
+}
+
 
 app.UseHttpsRedirection();
-
-
 app.UseAuthentication();
 app.UseMiddleware<AppMiddleware>();
 

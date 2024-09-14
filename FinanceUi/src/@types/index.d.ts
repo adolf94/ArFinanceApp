@@ -145,7 +145,7 @@ declare module 'FinanceApi' {
 
     // ..\FinanceProject\Dto\NewTransactionResponseDto.cs
     export interface NewTransactionResponseDto {
-        transaction: Transaction;
+        transaction?: Transaction;
         accounts: Account[];
         balances: AccountBalance[];
     }
