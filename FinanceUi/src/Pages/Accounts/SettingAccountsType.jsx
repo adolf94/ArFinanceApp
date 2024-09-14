@@ -5,6 +5,7 @@
   Button,
   DialogTitle,
     DialogContent,
+    Box,
   CircularProgress
 } from "@mui/material";
 import react, { useEffect, useState } from "react";
@@ -45,10 +46,19 @@ const NewAccountType = (props) => {
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose}>Cancel</Button>
-                  <Button onClick={createNewAccountType} disabled={mutateType.createExt.isPending}>
-                      {mutateType.createExt.isPending ? <CircularProgress size="small" /> : "Create" }
+            <Box sx={{ position: 'relative' }}>
 
-                  </Button>
+                <Button onClick={createNewAccountType} disabled={mutateType.createExt.isPending}>Create</Button>
+                {mutateType.createExt.isPending && <CircularProgress
+                    size={24}
+                    sx={{
+                        position: 'absolute',
+                        top: '50%',
+                        left: '50%',
+                        marginTop: '-12px',
+                        marginLeft: '-12px',
+                    }} />}
+            </Box>
         </DialogActions>
       </Dialog>
     </>

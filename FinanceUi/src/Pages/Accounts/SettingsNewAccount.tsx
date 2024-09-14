@@ -22,6 +22,7 @@ import { useQuery } from "@tanstack/react-query";
 import { ACCOUNT_GROUP, fetchGroups } from "../../repositories/accountgroups";
 import { Account, AccountGroup, AccountType } from "FinanceApi";
 import { useMutateAccount } from "../../repositories/accounts";
+import { green } from "@mui/material/colors";
 
 const NewAccount = (props) => {
   const { show, handleClose } = props;
@@ -181,9 +182,19 @@ const NewAccount = (props) => {
           </Box>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleClose}>Cancel</Button>
-                  <Button onClick={createNewAccount} disabled={createExt.isPending}>
-                      {createExt.isPending ? <CircularProgress color="primary" size="small"/> : "Create"}     </Button>
+                  <Button onClick={handleClose}>Cancel</Button>
+                  <Box sx={{position: 'relative' }}>
+                      <Button onClick={createNewAccount} disabled={createExt.isPending}> Create </Button>
+                      {createExt.isPending && <CircularProgress
+                          size={24}
+                          sx={{
+                              position: 'absolute',
+                              top: '50%',
+                              left: '50%',
+                              marginTop: '-12px',
+                              marginLeft: '-12px',
+                          }} />}
+                  </Box>
         </DialogActions>
       </Dialog>
     </>

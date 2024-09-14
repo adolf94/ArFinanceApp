@@ -18,7 +18,7 @@ const NumberInput = (props: any) => {
 
   const onChange = (evt) => {
     if (
-      !/([0-9,]*\.[0-9]{0,2})*/.test(evt.target.value) &&
+      !/([-0-9,]*\.[0-9]{0,2})*/.test(evt.target.value) &&
       /\.{2,}/.test(evt.target.value)
     ) {
       evt.preventDefault();
@@ -41,15 +41,19 @@ const NumberInput = (props: any) => {
       //}}
       {...props}
       onKeyPress={(event) => {
-        if (!/[0-9\.,]/.test(event.key)) {
+        if (!/[-0-9.,]/.test(event.key)) {
           event.preventDefault();
         }
-        if ((value + event.key).split("").filter((e) => e == ".").length > 1)
+        if ((value + event.key).split("").filter((e) => e === ".").length > 1)
           event.preventDefault();
       }}
-      onBlur={() => {
-        props.onChange(numeral(value.replace(",", "")).value());
+      onBlur={(evt) => {
+          props.onChange(numeral(value.replace(",", "")).value());
+        if(evt.target.value==="") setValue("0.00")
       }}
+          onFocus={() => {
+              if (Number.parseFloat(value) === 0) setValue("");
+        }}
       value={value}
       onChange={onChange}
       //value={numeral(formData.amount).format("0,0.00")} onBlur={(e) => setFormData({ ...formData, amount: numeral(e.target.value).value() })}

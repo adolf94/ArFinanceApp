@@ -107,10 +107,20 @@ const NewAccountGroup = (props: any) => {
           </Box>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleClose}>Cancel</Button>
-                  <Button onClick={createNewAccountGroup} disabled={mutateGroups.createExt.isPending}>
-                      {mutateGroups.createExt.isPending ? <CircularProgress size="small" /> : "Confirm" }
-                  </Button>
+            <Button onClick={handleClose}>Cancel</Button>
+            <Box sx={{ position: 'relative' }}>
+                      <Button onClick={createNewAccountGroup} disabled={mutateGroups.createExt.isPending}>Confirm</Button>
+                      {mutateGroups.createExt.isPending && <CircularProgress
+                          size={24}
+                          sx={{
+                              position: 'absolute',
+                              top: '50%',
+                              left: '50%',
+                              marginTop: '-12px',
+                              marginLeft: '-12px',
+                          }} />}
+
+            </Box>
         </DialogActions>
       </Dialog>
     </>

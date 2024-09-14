@@ -9,6 +9,7 @@ import {
   ListItemButton,
   Stack,
   Box,
+  CircularProgress,
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { useQuery } from "@tanstack/react-query";
@@ -78,17 +79,20 @@ const Accounts = (props) => {
   const isXs = useMediaQuery(theme.breakpoints.up("xs"));
   const isMd = useMediaQuery(theme.breakpoints.up("md"));
   const navigate = useNavigate();
-  const { data: accountGroups } = useQuery({
+  const { data: accountGroups, isLoading : loadingGroups } = useQuery({
     queryKey: [ACCOUNT_GROUP],
     queryFn: fetchGroups,
   });
-  const { data: accounts } = useQuery({
+  const { data: accounts, isLoading:loadingAccts } = useQuery({
     queryKey: [ACCOUNT],
     queryFn: fetchAccounts,
   });
 
   return (
-    <Grid item xs={12}>
+  <Grid item xs={12}>
+        {(loadingGroups || loadingAccts) && <Box sx={{ textAlign: "center" }}>
+        <CircularProgress />
+        </Box>}
       <List onLoad={() => {}}>
         {(accountGroups || []).map((e) => (
           <React.Fragment key={e.id}>
