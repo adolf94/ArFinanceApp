@@ -49,6 +49,7 @@ builder.Services.AddCors(opt =>
 		{
 				builder.SetIsOriginAllowedToAllowWildcardSubdomains()
 				.WithOrigins(["https://*.adolfrey.com/", "https://adolfrey.com"])
+																.AllowAnyHeader()
 				.WithExposedHeaders(["X-GLogin-Error"]);
 		});
 });
