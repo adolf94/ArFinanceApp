@@ -84,12 +84,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Remove="ClientApp\src\common\file.tsx" />
-    <None Remove="ClientApp\src\common\Select.ts" />
-    <None Remove="ClientApp\src\repositories\scheduledTasks.ts" />
-  </ItemGroup>
-
-  <ItemGroup>
     <None Update="TypeLite.d.ts">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>

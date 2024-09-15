@@ -292,7 +292,7 @@ const NewRecordForm = (props: NewRecordFormProps) => {
                 renderInput={(params) => (
                   <TextField
                     {...params}
-                    value={moment(params.value).toLocaleString()}
+                    //value={moment(params.value).toLocaleString()}
                     fullWidth
                     variant="standard"
                     onClick={(evt) => {

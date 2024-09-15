@@ -66,16 +66,6 @@ export const Home = () => {
   useEffect(() => {}, []);
 
   const redirectLogin = () => {
-    const { host, pathname, search } = window.location;
-    var state = {
-      currentPath: `${pathname}${search}`,
-      uid: v4(),
-    };
-    var base64State = btoa(JSON.stringify(state));
-    //setLoginState(base64State)
-    sessionStorage.set("googleLoginState", base64State);
-
-    window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?scope=email+openid&access_type=offline&include_granted_scopes=true&response_type=code&state=${encodeURIComponent(base64State)}&redirect_uri=https://localhost:5173/finance&client_id=929828408348-sq488sibic3oquur1ov5ke3jos7sgfmv.apps.googleusercontent.com`;
   };
 
   return (
@@ -85,13 +75,7 @@ export const Home = () => {
           "929828408348-sq488sibic3oquur1ov5ke3jos7sgfmv.apps.googleusercontent.com"
         }
       >
-        <Button variant="container" onClick={oauthSignIn}>
-          Login
-        </Button>
-        <Button variant="container" onClick={getToken}>
-          Login
-        </Button>
-        <LoginButton />
+       
       </GoogleOAuthProvider>
     </>
   );

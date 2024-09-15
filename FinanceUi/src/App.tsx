@@ -1,5 +1,5 @@
 import React, { Component, useState, useEffect } from "react";
-import { Route, Routes, useNavigate } from "react-router-dom";
+import { Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import AppRoutes from "./AppRoute";
 import { DropdownContext, defaultData } from "./components/useDropdown";
 import { Layout } from "./components/Layout";
@@ -64,6 +64,7 @@ const TheApp = (props) => {
         setDropdown({ ...dropdown, [name]: values });
     };
     const navigate = useNavigate()
+    const location = useLocation()
 
 
 
@@ -71,8 +72,9 @@ const TheApp = (props) => {
   const handleGoogleRedirect = () => {
     return new Promise((res, rej) => {
       let str = window.location.search;
-
+        console.log(location);
         if (str === "") {
+
             setInitialized(true)
             res("")
         };

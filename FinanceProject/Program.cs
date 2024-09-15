@@ -126,6 +126,7 @@ app.Lifetime.ApplicationStopping.Register(() =>
 				var scope = app.Services.CreateScope();
 
 				PersistentConfig conf = scope.ServiceProvider.GetRequiredService<PersistentConfig>();
+				ILogger<IHostApplicationLifetime> logger = scope.ServiceProvider.GetRequiredService<ILogger<IHostApplicationLifetime>>();
 
 
 
@@ -135,7 +136,7 @@ app.Lifetime.ApplicationStopping.Register(() =>
 
 				string newConfig = System.Text.Json.JsonSerializer.Serialize(conf);
 				File.WriteAllText(SchedTaskFile, newConfig);
-
+				logger.LogInformation("schedTask file was written successfully");
 
 		});
 

@@ -19,10 +19,6 @@ const AppRoutes: (PathRouteProps | IndexRouteProps | LayoutRouteProps)[] = [
     element: <Home />,
   },
   {
-    path: "/counter",
-    element: <Counter />,
-  },
-  {
     path: "/records/:view",
     element: <Records />,
   },
