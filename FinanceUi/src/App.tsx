@@ -129,7 +129,7 @@ const TheApp = (props) => {
       const { element, children, ...rest } = route;
       return (
         <Route key={index} {...rest} element={element}>
-          {children != undefined && RouteMapper(children)}
+          {children !== undefined && RouteMapper(children)}
         </Route>
       );
     });

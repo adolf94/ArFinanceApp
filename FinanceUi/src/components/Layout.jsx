@@ -9,7 +9,7 @@ export class Layout extends Component {
   render() {
     return (
       <div>
-        <Grid container>{this.props.children}</Grid>
+            <Grid container sx={{pb:'56px'} }>{this.props.children}</Grid>
         <BottomAppBar />
       </div>
     );

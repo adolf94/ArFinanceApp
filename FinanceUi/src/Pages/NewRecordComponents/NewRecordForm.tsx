@@ -173,7 +173,7 @@ const NewRecordForm = (props: NewRecordFormProps) => {
       mutateTransaction
         .create({ ...newItem, scheduleId: responseSched?.id })
         .then(() => {
-          navigate("../records");
+            navigate(`../records/${moment(newItem.date).format("YYYY-MM")}/daily`);
         });
     } else {
       mutateTransaction.update(newItem).then(() => {

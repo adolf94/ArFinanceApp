@@ -1,42 +1,35 @@
 ﻿import {
-  Chip,
-  Divider,
-  Fab,
-  ListItem,
-  Toolbar,
-  Typography,
-  colors,
-} from "@mui/material";
-import React, { createContext, useState } from "react";
-import {
-  IconButton,
-  AppBar,
-  List,
-  Grid,
-  Paper,
-  Box,
-  Tab,
-  Tabs,
-} from "@mui/material";
+    faChevronLeft,
+    faChevronRight
+} from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faChevronLeft,
-  faChevronRight,
-  faPlus,
-} from "@fortawesome/free-solid-svg-icons";
+    AppBar,
+    Box,
+    Fab,
+    Grid,
+    IconButton,
+    Paper,
+    Tab,
+    Tabs,
+    Toolbar,
+    colors
+} from "@mui/material";
+import { createContext, useState } from "react";
 import AccountsPage from "./Accounts";
 
-import { Link, useMatch, useNavigate, useParams } from "react-router-dom";
+import { Add } from "@mui/icons-material";
+import { useQuery } from "@tanstack/react-query";
+import { Transaction } from "FinanceApi";
 import moment from "moment";
 import { useEffect } from "react";
-import Daily from "./RecordsComponents/Daily";
-import { useQuery } from "@tanstack/react-query";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import {
-  TRANSACTION,
-  fetchTransactionsByMonth,
+    TRANSACTION,
+    fetchTransactionsByMonth,
 } from "../repositories/transactions";
 import Calendar from "./RecordsComponents/Calendar";
-import { Transaction } from "FinanceApi";
+import Daily from "./RecordsComponents/Daily";
 
 interface RecordViewTransaction {
   dateGroup: string;
@@ -72,9 +65,8 @@ const fabGreenStyle = {
 };
 
 const Records = () => {
-  const [value, setValue] = useState("daily");
-  const [month, setMonth] = useState(moment());
-  const { view } = useParams();
+  const { view, monthStr } = useParams();
+  const month = moment(monthStr);
   const navigate = useNavigate();
   const { data: records } = useQuery({
     queryKey: [
@@ -93,9 +85,14 @@ const Records = () => {
     total: 0,
   });
 
+    const setMonth = (newDate) => {
+        navigate(`../records/${moment(newDate).format("YYYY-MM")}/${view}`)
+
+    }
+
   const handleChange = (event, newValue) => {
     //setValue(newValue);
-    navigate("../records/" + newValue);
+      navigate(`../records/${monthStr}/${newValue}`)
   };
 
   useEffect(() => {
@@ -140,9 +137,11 @@ const Records = () => {
     setDailies(rec);
   }, [records]);
 
-  useEffect(() => {
-    if (!view) navigate("daily");
-  }, [view]);
+    useEffect(() => {
+        let goToView = view || "daily";
+        let goToMonthStr = monthStr || moment().format("YYYY-MM")
+        if (!view || !monthStr) navigate(`${goToMonthStr}/${goToView}`)
+    }, [view,monthStr]);
 
   return (
     <>
@@ -198,7 +197,7 @@ const Records = () => {
       </Grid>
       <Link to="/transactions/new">
         <Fab color="primary" sx={fabGreenStyle}>
-          <FontAwesomeIcon color="inherit" icon={faPlus} size="xl" />
+            <Add fontSize="large"/> 
         </Fab>
       </Link>
     </>

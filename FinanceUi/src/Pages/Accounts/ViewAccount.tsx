@@ -1,4 +1,5 @@
 import {
+    Add,
   ArrowLeft,
   ArrowLeftOutlined,
   ChevronLeft as IcoChevronLeft,
@@ -7,7 +8,9 @@ import {
 import {
   AppBar,
   Chip,
+  colors,
   Divider,
+  Fab,
   Grid,
   IconButton,
   List,
@@ -25,6 +28,7 @@ import {
   fetchByAcctMonth,
 } from "../../repositories/transactions";
 import { useNavigate, useParams } from "react-router";
+import { Link } from 'react-router-dom'
 import { AccountBalance, Transaction } from "FinanceApi";
 import { ACCOUNT, fetchByAccountId } from "../../repositories/accounts";
 import {
@@ -32,6 +36,18 @@ import {
   getBalancesByDate,
 } from "../../repositories/accountBalance";
 import numeral from "numeral";
+
+
+const fabGreenStyle = {
+    position: "absolute",
+    bottom: 72,
+    right: 16,
+    color: "common.white",
+    bgcolor: colors.green[500],
+    "&:hover": {
+        bgcolor: colors.green[600],
+    },
+};
 
 interface RecordViewTransaction {
   dateGroup: string;
@@ -330,6 +346,12 @@ const ViewAccount = () => {
           ))}
         </Grid>
       </Grid>
+      <Link to="/transactions/new">
+              <Fab color="primary" sx={fabGreenStyle}>
+        <Add fontSize="large"/> 
+          {/*<FontAwesomeIcon color="inherit" icon={faPlus} size="xl" />*/}
+        </Fab>
+      </Link>
     </>
   );
 };

@@ -77,10 +77,12 @@ function SelectAccount(props: SelectAccountProps<any>) {
   const filteredGroups = (accountGroups || []).filter(
     (e) => e.accountTypeId == props.typeId,
   );
-  const setValue = (value) => {
-    setAcct(value);
-    props.onChange({ ...value });
-  };
+    const setValue = (value) => {
+
+        setAcct(value);
+        props.onChange({ ...value });
+        if(acct !==null && acct?.id === value?.id) props.onClose()
+    };
 
   useEffect(() => {
     if (!props.value) return;
