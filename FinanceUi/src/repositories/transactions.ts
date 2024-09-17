@@ -48,9 +48,9 @@ const addToTransactions = (item: Transaction, replace: boolean) => {
   queryClient
     .ensureQueryData<
       Transaction[]
-    >({ queryKey: [TRANSACTION, dKey], queryFn: () => fetchTransactionsByMonth(key.year, key.month) })
+      >({ queryKey: [TRANSACTION, dKey], queryFn: () => fetchByAcctMonth(dKey.accountId, dKey.year, dKey.month) })
     .then((query) => {
-      if (!query.some((trans) => item.id == trans.id)) {
+      if (!query.some((trans) => item.id === trans.id)) {
         queryClient.setQueryData(
           [TRANSACTION, dKey],
           (prev: Transaction[]) => [...prev, item],
@@ -69,7 +69,7 @@ const addToTransactions = (item: Transaction, replace: boolean) => {
   queryClient
     .ensureQueryData<
       Transaction[]
-    >({ queryKey: [TRANSACTION, cKey], queryFn: () => fetchTransactionsByMonth(key.year, key.month) })
+      >({ queryKey: [TRANSACTION, cKey], queryFn: () => fetchByAcctMonth(cKey.accountId, cKey.year, cKey.month) })
     .then((query) => {
       if (!query.some((trans) => item.id === trans.id)) {
         queryClient.setQueryData(
