@@ -177,7 +177,7 @@ const NewRecordForm = (props: NewRecordFormProps) => {
         });
     } else {
       mutateTransaction.update(newItem).then(() => {
-        navigate("../records");
+            navigate(`../records/${moment(newItem.date).format("YYYY-MM")}/daily`);
       });
     }
   };

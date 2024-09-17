@@ -5,7 +5,7 @@ import { DropdownContext, defaultData } from "./components/useDropdown";
 import { Layout } from "./components/Layout";
 import db from "./components/LocalDb";
 import { ConfirmProvider } from "material-ui-confirm";
-
+import { SnackbarProvider } from 'notistack'
 import api from "./components/api";
 import "./custom.css";
 import "@fontsource/roboto/300.css";
@@ -18,10 +18,7 @@ import { persistQueryClient } from "@tanstack/react-query-persist-client";
 import { createSyncStoragePersister } from "@tanstack/query-sync-storage-persister";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
-import { EventType, PublicClientApplication } from "@azure/msal-browser";
-import msalInstance from "./common/msalInstance";
 import history, { NavigateSetter } from "./components/History";
-import { CustomNavigationClient } from "./components/NavigationClient";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { oauthSignIn } from "./common/GoogleLogin";
 
@@ -111,6 +108,10 @@ const TheApp = (props) => {
                 console.debug("INVALID CODE")
                 oauthSignIn();
             }
+            if (err.response.status === 403) {
+                navigate("/errors/403")
+            }
+            if (!err.response?.status) navigate("/errors/Down")
         });
     });
   };
@@ -119,7 +120,7 @@ const TheApp = (props) => {
       handleGoogleRedirect().then((e) => {
           if (e === "") return e;
         let stateFromStorage = sessionStorage.getItem("googleLoginState");
-          let state = JSON.parse(atob(stateFromStorage!))
+          let state = JSON.parse(window.atob(stateFromStorage!))
           navigate(state.currentPath.replace("/finance",""))
       });
   }, []);
@@ -138,9 +139,12 @@ const TheApp = (props) => {
   //@ts-ignore
   return (
     <DropdownContext.Provider value={{ ...dropdown, set: setDropdownValue }}>
-      {msalInitialized && <Routes>{RouteMapper(AppRoutes)}</Routes>}
-      <NavigateSetter />
-    </DropdownContext.Provider>
+          <SnackbarProvider autoHideDuration={1000} >
+              {msalInitialized && <Routes>{RouteMapper(AppRoutes)}</Routes>}
+          </SnackbarProvider>
+          <NavigateSetter />
+      </DropdownContext.Provider>
+
   );
 };
 
@@ -161,7 +165,7 @@ export default class App extends Component {
               buttonPosition="bottom-left"
             />
           </QueryClientProvider>
-                </LocalizationProvider>
+           </LocalizationProvider>
         </ConfirmProvider>
       </Layout>
     );

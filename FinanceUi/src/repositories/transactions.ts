@@ -13,6 +13,8 @@ import { VENDOR, fetchVendorById } from "./vendors";
 import { ACCOUNT, fetchAccounts, fetchByAccountId } from "./accounts";
 import { AxiosResponse } from "axios";
 import replaceById from "../common/replaceById";
+import { enqueueSnackbar } from "notistack";
+import { useNavigate } from "react-router-dom";
 
 export const TRANSACTION = "transaction";
 
@@ -41,8 +43,8 @@ const addToTransactions = (item: Transaction, replace: boolean) => {
     });
   let dKey = {
     accountId: credit.id,
-    year: moment(item.date).add(-debit.periodStartDay, "day").year(),
-    month: moment(item.date).add(-debit.periodStartDay, "day").month() + 1,
+    year: moment(item.date).add(-debit.periodStartDay + 1, "day").year(),
+    month: moment(item.date).add(-debit.periodStartDay + 1, "day").month() + 1,
   };
 
   queryClient
@@ -63,8 +65,8 @@ const addToTransactions = (item: Transaction, replace: boolean) => {
     });
   let cKey = {
     accountId: credit.id,
-    year: moment(item.date).add(-credit.periodStartDay, "day").year(),
-    month: moment(item.date).add(-credit.periodStartDay, "day").month() + 1,
+    year: moment(item.date).add(-credit.periodStartDay + 1, "day").year(),
+    month: moment(item.date).add(-credit.periodStartDay + 1, "day").month() + 1,
   };
   queryClient
     .ensureQueryData<
@@ -237,49 +239,53 @@ export const fetchTransactionById = (transId) => {
 };
 
 export const useMutateTransaction = () => {
+const navigate = useNavigate()
   const create = useMutation({
-    mutationFn: (data: Partial<Transaction>) => {
-      return api
-        .post<NewTransactionResponseDto>("transactions", data)
-        .then(async (e: AxiosResponse<NewTransactionResponseDto>) => {
-          let item  = e.data.transaction;
+      mutationFn: (data: Partial<Transaction>) => {
+      navigate(`../records/${moment(data.date).format("YYYY-MM")}/daily`);
+          return api
+            .post<NewTransactionResponseDto>("transactions", data)
+            .then(async (e: AxiosResponse<NewTransactionResponseDto>) => {
+              let item  = e.data.transaction;
 
-          item.vendor =
-            item.vendorId ?
-            (await queryClient.ensureQueryData<Vendor>({
-              queryKey: [VENDOR, { id: item!.vendorId }],
-              queryFn: () => fetchVendorById(item!.vendorId!),
-            })) : null;
+              item.vendor =
+                item.vendorId ?
+                (await queryClient.ensureQueryData<Vendor>({
+                  queryKey: [VENDOR, { id: item!.vendorId }],
+                  queryFn: () => fetchVendorById(item!.vendorId!),
+                })) : null;
 
-            let accounts = e.data.accounts;
-            accounts.forEach(e => {
-                queryClient.setQueryData([ACCOUNT, { id: e.id }], e);
-            })
-
-
-            item.credit = queryClient.getQueryData([ACCOUNT, { id: item.creditId}])
-            item.debit = queryClient.getQueryData([ACCOUNT, { id: item.debitId }])
+                let accounts = e.data.accounts;
+                accounts.forEach(e => {
+                    queryClient.setQueryData([ACCOUNT, { id: e.id }], e);
+                })
 
 
-          queryClient.setQueryData([TRANSACTION, { id: item.id }], item);
+                item.credit = queryClient.getQueryData([ACCOUNT, { id: item.creditId}])
+                item.debit = queryClient.getQueryData([ACCOUNT, { id: item.debitId }])
 
 
-          queryClient.setQueryData([ACCOUNT], (prev) => {
-            if (!prev || !Array.isArray(prev)) return undefined;
-            return replaceById(e.data.accounts, prev);
-          });
+              queryClient.setQueryData([TRANSACTION, { id: item.id }], item);
 
-          return item;
-        });
+
+              queryClient.setQueryData([ACCOUNT], (prev) => {
+                if (!prev || !Array.isArray(prev)) return undefined;
+                return replaceById(e.data.accounts, prev);
+              });
+
+              return item;
+            });
     },
     onSuccess: async (item: Transaction) => {
+     enqueueSnackbar("Saved!", {variant : 'info'})  
       addToTransactions(item, false);
     },
   });
 
   const update = useMutation({
     mutationFn: (data: Partial<Transaction>) => {
-      return api
+      navigate(`../records/${moment(data.date).format("YYYY-MM")}/daily`);
+          return api
         .put<NewTransactionResponseDto>("transactions/" + data.id, data)
         .then(async (e: AxiosResponse<NewTransactionResponseDto>) => {
           let item = e.data.transaction;
@@ -330,11 +336,15 @@ export const useMutateTransaction = () => {
             return replaceById(e.data.accounts, prev);
           });
 
-          addToTransactions(item, true);
 
           return item;
-        });
+        })
     },
+    onSuccess: (item) => {
+        enqueueSnackbar("Saved!", { variant: 'info' })
+        addToTransactions(item, true);
+
+    }
   });
 
   return { create: create.mutateAsync, createExt : create, update: update.mutateAsync, updateExt:update };
