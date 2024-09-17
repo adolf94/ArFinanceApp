@@ -211,15 +211,17 @@ const Calendar = (props: CalendarProps) => {
                 sx={{
                   borderRight: 1,
                   borderStyleRight: "solid",
-                  borderColorRight: "gray",
-                  padding: 1,
+                    borderColorRight: "gray",
+                  paddingRight:'4px',
+                    paddingBottom: 1,
+                  fontSize:'x-small'
                 }}
               >
                 <Box>{day.dayOfMonth}</Box>
                 {!day.isCurrentMonth ? (
                   <Box></Box>
                 ) : (
-                  <Box sx={{ textAlign: "right", minHeight: "3.5em" }}>
+                  <Box sx={{ textAlign: "right", minHeight: "3em" }}>
                     <Box>
                       {day.hasRecord &&
                         numeral(day.totals?.income).format("0,0.00")}

@@ -9,8 +9,7 @@ import {
   Typography,
 } from "@mui/material";
 import { Transaction } from "FinanceApi";
-import moment from "moment";
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext } from "react";
 import { useNavigate } from "react-router";
 import { RecordsContext } from "../Records";
 
@@ -173,11 +172,11 @@ const Daily = (props: DailyViewProps) => {
             {data.items.map((item) => (
               <ListItem onClick={() => navigate("../transactions/" + item.id)}>
                 <Grid container>
-                  <Grid item xs={3}>
+                  <Grid item xs={4} sm={3}>
                     <Typography sx={{ px: 1 }} variant="body1">
-                      {item.type == "transfer"
+                      {item.type === "transfer"
                         ? "Transfer"
-                        : item.type == "expense"
+                        : item.type === "expense"
                           ? item.debit.name
                           : item.credit.name}
                     </Typography>
@@ -185,13 +184,13 @@ const Daily = (props: DailyViewProps) => {
                       {item.vendor?.name}
                     </Typography>
                   </Grid>
-                  <Grid item xs={5}>
+                        <Grid item xs={4} sm={5 }>
                     <Typography sx={{ fontWeight: 600 }} variant="body1">
                       {item.description || ""}
                     </Typography>
-                    {item.type == "transfer"
+                    {item.type === "transfer"
                       ? item.credit.name + " => " + item.debit.name
-                      : item.type == "expense"
+                      : item.type === "expense"
                         ? item.credit.name
                         : item.debit.name}
                   </Grid>
