@@ -10,6 +10,7 @@ import {
   Stack,
   Box,
   CircularProgress,
+  Skeleton,
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { useQuery } from "@tanstack/react-query";
@@ -33,7 +34,7 @@ interface CreditStatementBalanceProps {
 const CreditStatementBalance = (props: CreditStatementBalanceProps) => {
   const [date, setDate] = useState(props.date);
 
-  const { data: transactions } = useQuery({
+  const { data: transactions, isLoading :loading } = useQuery({
     queryKey: [
       TRANSACTION,
       {
@@ -68,8 +69,8 @@ const CreditStatementBalance = (props: CreditStatementBalanceProps) => {
   }, [transactions, props.account]);
 
   return (
-    <Grid item xs={3} sx={{ alignContent: "center", textAlign: "end" }}>
-      {numeral(total).format("0,0.00")}
+      <Grid item xs={3} sx={{ alignContent: "center", textAlign: "end" }}>
+          {loading ? <Skeleton variant="text" /> : numeral(total).format("0,0.00")}
     </Grid>
   );
 };

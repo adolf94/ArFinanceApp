@@ -25,65 +25,46 @@ const addToTransactions = (item: Transaction, replace: boolean) => {
     month: moment(item.date).get("month") + 1,
   };
 
-  queryClient
-    .ensureQueryData<
-      Transaction[]
-    >({ queryKey: [TRANSACTION, key], queryFn: () => fetchTransactionsByMonth(key.year, key.month) })
-    .then((query) => {
-      if (!query.some((trans) => item.id === trans.id)) {
-        queryClient.setQueryData([TRANSACTION, key], (prev: Transaction[]) => [
-          ...prev,
-          item,
-        ]);
-      } else if (replace) {
+
+    let mData = queryClient.getQueryData<Transaction[]>([TRANSACTION, key])
+    if (mData) {
+
         queryClient.setQueryData([TRANSACTION, key], (prev: Transaction[]) => {
-          replaceById(item, prev);
+            return replaceById(item, dData);
         });
-      }
-    });
+    }
+
+
+
   let dKey = {
     accountId: credit.id,
     year: moment(item.date).add(-debit.periodStartDay + 1, "day").year(),
     month: moment(item.date).add(-debit.periodStartDay + 1, "day").month() + 1,
   };
 
-  queryClient
-    .ensureQueryData<
-      Transaction[]
-      >({ queryKey: [TRANSACTION, dKey], queryFn: () => fetchByAcctMonth(dKey.accountId, dKey.year, dKey.month) })
-    .then((query) => {
-      if (!query.some((trans) => item.id === trans.id)) {
-        queryClient.setQueryData(
-          [TRANSACTION, dKey],
-          (prev: Transaction[]) => [...prev, item],
-        );
-      } else if (replace) {
+
+    let dData = queryClient.getQueryData<Transaction[]>([TRANSACTION, dKey])
+    if (dData) {
+
         queryClient.setQueryData([TRANSACTION, dKey], (prev: Transaction[]) => {
-          replaceById(item, prev);
+            return replaceById(item, dData);
         });
-      }
-    });
+    }
+
   let cKey = {
     accountId: credit.id,
     year: moment(item.date).add(-credit.periodStartDay + 1, "day").year(),
     month: moment(item.date).add(-credit.periodStartDay + 1, "day").month() + 1,
-  };
-  queryClient
-    .ensureQueryData<
-      Transaction[]
-      >({ queryKey: [TRANSACTION, cKey], queryFn: () => fetchByAcctMonth(cKey.accountId, cKey.year, cKey.month) })
-    .then((query) => {
-      if (!query.some((trans) => item.id === trans.id)) {
-        queryClient.setQueryData(
-          [TRANSACTION, cKey],
-          (prev: Transaction[]) => [...(prev ||[]), item],
-        );
-      } else if (replace) {
+    };
+
+    let cData = queryClient.getQueryData<Transaction[]>([TRANSACTION, cKey])
+    if (cData) {
+
         queryClient.setQueryData([TRANSACTION, cKey], (prev: Transaction[]) => {
-          replaceById(item, prev);
+            return replaceById(item, cData);
         });
-      }
-    });
+    }
+
 };
 
 export const fetchTransactionsByMonth = (year: number, month: number) => {

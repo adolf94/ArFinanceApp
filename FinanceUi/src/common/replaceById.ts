@@ -7,13 +7,17 @@ export default function replaceById<T>(
 ): T[] {
   if (!array) array = [];
   if (!item) return array;
-  let index = array.findIndex((e) => (e[prop] === item[prop]));
+
   if (Array.isArray(item)) {
     return item.reduce((prev, cur) => {
       return replaceById(cur, prev, prop);
     }, array);
   } else {
-    array[index] = item;
+      let index = array.findIndex((e) => (e[prop] === item[prop]));
+      if (index === -1) {
+          return [...array, item]
+      }
+      array[index] = item;
   }
 
   return [...array];

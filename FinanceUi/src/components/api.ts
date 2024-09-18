@@ -51,12 +51,13 @@ api.interceptors.request.use(async (config: AxiosRequestConfig) => {
 api.interceptors.response.use(
     async (data) => data,
     (err) => {
-   
-      if (err.response.status === 401 && !err.request.retryGetToken) {
-          console.debug("retry with getToken");
-          return api({ ...err.request, retryGetToken: true })
-      }
-    //return Promise.reject(err)
+        if (!!err?.response) {
+            if (err.response.status === 401 && !err.request.retryGetToken) {
+                console.debug("retry with getToken");
+                return api({ ...err.request, retryGetToken: true })
+            }
+        }
+    return Promise.reject(err)
   },
 );
 

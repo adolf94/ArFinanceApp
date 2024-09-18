@@ -247,7 +247,7 @@ const ViewAccount = () => {
             </Grid>
           </Paper>
           {data.dates.map((data) => (
-            <Paper sx={{ my: 1 }}>
+              <Paper key={data.dateGroup} sx={{ my: 1 }}>
               <List>
                 <ListItem
                   dense
@@ -302,8 +302,9 @@ const ViewAccount = () => {
                   </Grid>
                 </ListItem>
                 <Divider />
-                {data.items.map((item) => (
-                  <ListItem
+                      {data.items.map((item) => (
+                <ListItem
+                    key={ item.id }
                     onClick={() => navigate("../../transactions/" + item.id)}
                   >
                     <Grid container>

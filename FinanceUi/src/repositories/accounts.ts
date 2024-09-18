@@ -18,7 +18,8 @@ export const fetchAccounts = () => {
   });
 };
 
-export const fetchByAccountId = (id: string) => {
+export const fetchByAccountId = async (id: string) => {
+
   //[ACCOUNT, { id: acct.id }]
   return api.get("accounts/" + id).then((e) => {
     return e.data;

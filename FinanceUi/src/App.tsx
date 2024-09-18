@@ -104,6 +104,7 @@ const TheApp = (props) => {
 
           res("got token");
         }).catch(err => {
+            if (!err.response?.status) navigate("/errors/Down")
             if (err.response.status === 401 && !!err.response.headers["X-GLogin-Error"]) {
                 console.debug("INVALID CODE")
                 oauthSignIn();
@@ -111,7 +112,6 @@ const TheApp = (props) => {
             if (err.response.status === 403) {
                 navigate("/errors/403")
             }
-            if (!err.response?.status) navigate("/errors/Down")
         });
     });
   };
