@@ -10,13 +10,13 @@ import { queryClient } from "../App";
 export const ACCOUNT = "account";
 
 export const fetchAccounts = () => {
-  return api.get("accounts").then((e) => {
-    e.data.forEach((acct) => {
+  return api.get("accounts").then((res) => {
+    res.data.forEach((acct) => {
       queryClient.setQueryData([ACCOUNT, { id: acct.id }], acct);
     });
       let last = localStorage.getItem("last_transaction");
-      if(!last) localStorage.setItem("last_transaction", e.headers["X-Last-Trans"])
-    return e.data;
+      if(!last) localStorage.setItem("last_transaction", res.headers["x-last-trans"])
+    return res.data;
   });
 };
 

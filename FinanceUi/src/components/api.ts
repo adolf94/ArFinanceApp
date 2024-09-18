@@ -57,7 +57,7 @@ api.interceptors.response.use(
         const lastTransId = localStorage.getItem("last_transaction");
 
 
-        if (lastTransId && data.headers["X-Last-Trans"] !== lastTransId) {
+        if (lastTransId && data.headers["x-last-trans"] !== lastTransId) {
             //Do fetch new data
             queryClient.prefetchQuery({ queryKey: [TRANSACTION, { after: lastTransId }], queryFn: () => getAfterTransaction(lastTransId) })
         }
