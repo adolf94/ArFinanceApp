@@ -2,6 +2,10 @@
 import moment from "moment";
 import { oauthSignIn } from "../common/GoogleLogin";
 import { memoize as mm } from "underscore";
+import { queryClient } from "../App";
+import { getAfterTransaction, TRANSACTION } from "../repositories/transactions";
+
+
 
 const getTokenFromApi = mm(
   () => {
@@ -49,7 +53,22 @@ api.interceptors.request.use(async (config: AxiosRequestConfig) => {
 });
 
 api.interceptors.response.use(
-    async (data) => data,
+    async (data) => {
+        const lastTransId = localStorage.getItem("last_transaction");
+
+
+        if (lastTransId && data.headers["X-Last-Trans"] !== lastTransId) {
+            //Do fetch new data
+            queryClient.prefetchQuery({ queryKey: [TRANSACTION, { after: lastTransId }], queryFn: () => getAfterTransaction(lastTransId) })
+        }
+            
+
+        //queryClient
+
+
+        
+        return data;
+    },
     (err) => {
         if (!!err?.response) {
             if (err.response.status === 401 && !err.request.retryGetToken) {

@@ -165,9 +165,19 @@ namespace FinanceProject.Controllers
 
 
 				[HttpGet("transactions")]
-				public async Task<IActionResult> GetByMonth([FromQuery] int Year, [FromQuery] int Month)
+				public async Task<IActionResult> GetByMonth([FromQuery] GetTransactionsQueryParams @params)
 				{
-						IEnumerable<Transaction> transactions = _repo.GetByMonth(Year, Month);
+						IEnumerable<Transaction> transactions = Array.Empty<Transaction>();
+						if (@params.Year.HasValue && @params.Month.HasValue)
+						{
+								transactions = _repo.GetByMonth(@params.Year.Value, @params.Month.Value);
+						}
+						else if (@params.After.HasValue)
+						{
+								transactions = await _repo.GetTransactionsAfter(@params.After.Value);
+						}
+
+
 
 						return await Task.FromResult(Ok(transactions));
 				}
@@ -210,5 +220,11 @@ namespace FinanceProject.Controllers
 				}
 
 
+		}
+		public class GetTransactionsQueryParams
+		{
+				public Guid? After { get; set; }
+				public int? Month { get; set; }
+				public int? Year { get; set; }
 		}
 }

@@ -14,6 +14,8 @@ export const fetchAccounts = () => {
     e.data.forEach((acct) => {
       queryClient.setQueryData([ACCOUNT, { id: acct.id }], acct);
     });
+      let last = localStorage.getItem("last_transaction");
+      if(!last) localStorage.setItem("last_transaction", e.headers["X-Last-Trans"])
     return e.data;
   });
 };

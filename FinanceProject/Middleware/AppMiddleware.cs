@@ -1,4 +1,5 @@
-﻿using FinanceApp.Data;
+﻿using FinanceApp.BgServices;
+using FinanceApp.Data;
 using FinanceProject.Models;
 using Microsoft.Extensions.Caching.Memory;
 using System.Security.Claims;
@@ -50,8 +51,23 @@ namespace FinanceApp.Middleware
 								httpContext.User.AddIdentity(appIdentity);
 						}
 
+						httpContext.Response.OnStarting(state =>
+						{
+								var httpContext = (HttpContext)state;
+
+								if (httpContext.Response.StatusCode >= 200 && httpContext.Response.StatusCode < 300)
+								{
+
+										var conf = httpContext.RequestServices.GetRequiredService<PersistentConfig>();
+
+										httpContext.Response.Headers.Add("X-Last-Trans", conf.LastTransactionId);
+								}
+								return Task.CompletedTask;
+						}, httpContext);
 
 						await _next(httpContext);
+
+
 				}
 
 

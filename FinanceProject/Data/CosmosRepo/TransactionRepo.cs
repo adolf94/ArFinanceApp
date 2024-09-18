@@ -54,6 +54,8 @@ namespace FinanceApp.Data.CosmosRepo
 						return item;
 				}
 
+
+
 				public Task SaveChangesAsync(CancellationToken token = default)
 				{
 						return _context.SaveChangesAsync(token);
@@ -68,6 +70,17 @@ namespace FinanceApp.Data.CosmosRepo
 						var task = _context.Transactions!.OrderByDescending(e => e.DateAdded).FirstOrDefaultAsync();
 						task.Wait();
 						return task.Result;
+				}
+
+				public async Task<IEnumerable<Transaction>> GetTransactionsAfter(Guid id)
+				{
+
+						Transaction? afterDate = await _context.Transactions!.FindAsync(id);
+						if (afterDate == null) return Array.Empty<Transaction>();
+
+						var items = await _context.Transactions.Where(e => e.DateAdded > afterDate.DateAdded).ToArrayAsync();
+						return items;
+
 				}
 		}
 }

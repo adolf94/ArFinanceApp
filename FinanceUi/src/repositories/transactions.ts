@@ -71,7 +71,10 @@ export const fetchTransactionsByMonth = (year: number, month: number) => {
   console.debug("fetchTransactionsByMonth", { year, month });
 
   return api<Transaction[]>("transactions", { params: { year, month } }).then(
-    (e) => {
+      (e) => {
+
+        const lastTransId = localStorage.getItem("last_transaction");
+
       return Promise.all(
         e.data.map(async (item) => {
           item.vendor =
@@ -88,7 +91,7 @@ export const fetchTransactionsByMonth = (year: number, month: number) => {
             queryKey: [ACCOUNT, { id: item.creditId }],
             queryFn: () => fetchByAccountId(item.creditId),
           });
-
+            if (!lastTransId && e.headers['X-Last-Trans'] === item.id) localStorage.setItem('last_transaction', item.id)
           queryClient.setQueryData([TRANSACTION, { id: item.id }], item);
           return item;
         }),
@@ -182,19 +185,6 @@ export const fetchByAcctMonth = (
     });
 };
 
-//return api<Transaction[]>(`/accounts/${acctId}/transactions`, { params: { year, month } })
-//  .then(e => {
-//    return Promise.all(e.data.map(async item => {
-
-//      item.vendor = item.vendorId && await queryClient.ensureQueryData({ queryKey: [VENDOR, { id: item.vendorId }], queryFn: () => fetchVendorById(item.vendorId) })
-//      item.debit = await queryClient.ensureQueryData({ queryKey: [ACCOUNT, { id: item.debitId }], queryFn: () => fetchByAccountId(item.debitId) })
-//      item.credit = await queryClient.ensureQueryData({ queryKey: [ACCOUNT, { id: item.creditId }], queryFn: () => fetchByAccountId(item.creditId) })
-
-//      queryClient.setQueryData([TRANSACTION, { id: item.id }], item)
-//      return item
-//    })
-//    )
-//  })
 
 export const fetchTransactionById = (transId) => {
   return api<Transaction>("transactions/" + transId).then(async (e) => {
@@ -330,3 +320,28 @@ const navigate = useNavigate()
 
   return { create: create.mutateAsync, createExt : create, update: update.mutateAsync, updateExt:update };
 };
+
+
+export const getAfterTransaction = (id : string ) => {
+    return api.get("transactions", {
+        params: {
+            after:id
+        }
+    }).then(resp => {
+        resp.data.map(item => addToTransactions(item, false))
+        let acctsToRefetch = resp.data.reduce((prev, item, i) => {
+            if(!prev.includes(item.creditId)) prev.push(prev.creditId)
+            if (!prev.includes(item.debitId)) prev.push(prev.debitId)
+            return prev
+        }, [])
+        acctsToRefetch.forEach(e => {
+            queryClient.prefetchQuery({ queryKey: [ACCOUNT, { id: e }], staleTime: 100, queryFn: () => fetchByAccountId(e) })
+        })
+
+        console.debug("added new transactions");
+        let lastId = resp.headers["X-Last-Trans"]
+        localStorage.setItem("last_transaction", lastId)
+
+        return resp.data
+    })
+}

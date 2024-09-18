@@ -51,7 +51,7 @@ builder.Services.AddCors(opt =>
 				.WithOrigins(["https://*.adolfrey.com/", "https://adolfrey.com"])
 																.AllowAnyHeader()
 																.WithMethods(["GET", "POST", "PUT"])
-				.WithExposedHeaders(["X-GLogin-Error"]);
+				.WithExposedHeaders(["X-GLogin-Error", "X-Last-Trans"]);
 		});
 });
 
@@ -160,6 +160,7 @@ app.UseMiddleware<AppMiddleware>();
 
 string[] apps = new[] { "/finance" };
 
+
 foreach (var item in apps)
 {
 		app.MapWhen(ctx => ctx.Request.Path.StartsWithSegments(item), evt =>
@@ -192,6 +193,14 @@ app.MapWhen(ctx => !apps.Any(path => ctx.Request.Path.StartsWithSegments(path)),
 		evt.UseStaticFiles();
 		evt.UseRouting();
 		app.UseAuthorization();
+
+
+		app.Use((ctx, next) =>
+		{
+
+				return next(ctx);
+		});
+
 		evt.UseEndpoints(e => e.MapFallbackToFile("index.html"));
 });
 
@@ -200,7 +209,6 @@ app.MapWhen(ctx => !apps.Any(path => ctx.Request.Path.StartsWithSegments(path)),
 app.MapControllerRoute(
 		name: "default",
 		pattern: "{controller}/{action=Index}/{id?}");
-
 
 
 
