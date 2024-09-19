@@ -41,7 +41,8 @@ builder.Services.AddCors(opt =>
 		opt.AddPolicy("devCorsPolicy", builder =>
 		{
 				//builder.SetIsOriginAllowedToAllowWildcardSubdomains().WithOrigins(["https://*.adolfrey.com/"]).AllowAnyHeader();
-				builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
+				builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader()
+				.WithExposedHeaders(["X-GLogin-Error", "X-Last-Trans"]);
 				//builder.SetIsOriginAllowed(origin => new Uri(origin).Host == "localhost");
 				//builder.SetIsOriginAllowed(origin => true);
 		});

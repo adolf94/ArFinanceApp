@@ -30,7 +30,7 @@ const addToTransactions = (item: Transaction, replace: boolean) => {
     if (mData) {
 
         queryClient.setQueryData([TRANSACTION, key], (prev: Transaction[]) => {
-            return replaceById(item, dData);
+            return replaceById(item, mData);
         });
     }
 
