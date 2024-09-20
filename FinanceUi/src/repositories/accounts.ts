@@ -6,6 +6,7 @@
 import { Account } from "FinanceApi";
 import api from "../components/api";
 import { queryClient } from "../App";
+import replaceById from "../common/replaceById";
 
 export const ACCOUNT = "account";
 
@@ -23,9 +24,19 @@ export const fetchAccounts = () => {
 export const fetchByAccountId = async (id: string) => {
 
   //[ACCOUNT, { id: acct.id }]
-  return api.get("accounts/" + id).then((e) => {
-    return e.data;
-  });
+
+    let accountCache = await queryClient.getQueryData<Account[]>([ACCOUNT])
+    if (!accountCache) accountCache = await queryClient.ensureQueryData<Account[]>({
+        queryKey: [ACCOUNT], queryFn: fetchAccounts
+    })
+    let account = accountCache.find(e=>e.id === id)
+
+    if(!!account) return account
+
+    return api.get("accounts/" + id).then((e) => {
+        queryClient.setQueryData([ACCOUNT] , replaceById(account,accountCache))
+        return e.data;
+      });
 };
 
 export const useMutateAccount = () => {
