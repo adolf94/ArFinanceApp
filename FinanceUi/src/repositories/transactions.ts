@@ -209,6 +209,27 @@ export const fetchTransactionById = (transId) => {
   });
 };
 
+
+const ensureTransactionAcctData = async (item) => {
+
+
+
+    item.vendor =
+        item.vendorId ?
+            (await queryClient.ensureQueryData<Vendor>({
+                queryKey: [VENDOR, { id: item!.vendorId }],
+                queryFn: () => fetchVendorById(item!.vendorId!),
+            })) : null;
+
+
+    item.credit = queryClient.getQueryData([ACCOUNT, { id: item.creditId }])
+    item.debit = queryClient.getQueryData([ACCOUNT, { id: item.debitId }])
+
+    return item;
+
+}
+
+
 export const useMutateTransaction = () => {
 const navigate = useNavigate()
   const create = useMutation({
@@ -219,23 +240,12 @@ const navigate = useNavigate()
             .then(async (e: AxiosResponse<NewTransactionResponseDto>) => {
               let item  = e.data.transaction;
 
-              item.vendor =
-                item.vendorId ?
-                (await queryClient.ensureQueryData<Vendor>({
-                  queryKey: [VENDOR, { id: item!.vendorId }],
-                  queryFn: () => fetchVendorById(item!.vendorId!),
-                })) : null;
-
                 let accounts = e.data.accounts;
                 accounts.forEach(e => {
                     queryClient.setQueryData([ACCOUNT, { id: e.id }], e);
                 })
 
-
-                item.credit = queryClient.getQueryData([ACCOUNT, { id: item.creditId}])
-                item.debit = queryClient.getQueryData([ACCOUNT, { id: item.debitId }])
-
-
+                item = await ensureTransactionAcctData(item);
               queryClient.setQueryData([TRANSACTION, { id: item.id }], item);
 
 
@@ -260,21 +270,7 @@ const navigate = useNavigate()
         .put<NewTransactionResponseDto>("transactions/" + data.id, data)
         .then(async (e: AxiosResponse<NewTransactionResponseDto>) => {
           let item = e.data.transaction;
-
-          item.vendor =
-            item.vendorId &&
-            (await queryClient.ensureQueryData({
-              queryKey: [VENDOR, { id: item.vendorId }],
-              queryFn: () => fetchVendorById(item.vendorId),
-            }));
-          item.debit = await queryClient.ensureQueryData({
-            queryKey: [ACCOUNT, { id: item.debitId }],
-            queryFn: () => fetchByAccountId(item.debitId),
-          });
-          item.credit = await queryClient.ensureQueryData({
-            queryKey: [ACCOUNT, { id: item.creditId }],
-            queryFn: () => fetchByAccountId(item.creditId),
-          });
+            item = await ensureTransactionAcctData(item);
 
           const oldItem = await queryClient.getQueryData<Transaction>([
             TRANSACTION,
@@ -328,7 +324,10 @@ export const getAfterTransaction = (id : string ) => {
             after:id
         }
     }).then(resp => {
-        resp.data.map(item => addToTransactions(item, false))
+
+        resp.data.map(item => ensureTransactionAcctData(item))
+            .forEach(item => addToTransactions(item, false))
+
         let acctsToRefetch = resp.data.reduce((prev, item, i) => {
             if(!prev.includes(item.creditId)) prev.push(prev.creditId)
             if (!prev.includes(item.debitId)) prev.push(prev.debitId)

@@ -5,7 +5,6 @@ using FinanceProject.Dto;
 using FinanceProject.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using static FinanceProject.Dto.NewTransactionResponseDto;
 
 namespace FinanceProject.Controllers
 {
@@ -50,7 +49,7 @@ namespace FinanceProject.Controllers
 
 						NewTransactionResponseDto response = new NewTransactionResponseDto();
 						Dictionary<Guid, Account> accounts = new Dictionary<Guid, Account>();
-						Dictionary<AccountBalanceKey, AccountBalance> balances = new Dictionary<AccountBalanceKey, AccountBalance>();
+						Dictionary<string, AccountBalance> balances = new Dictionary<string, AccountBalance>();
 						//using (var transaction = await _repo.CreateTransactionAsync())
 						//{
 
@@ -63,10 +62,10 @@ namespace FinanceProject.Controllers
 
 						_bal.UpdateCreditAcct(dto.CreditId, dto.Amount, dto.Date)
 									.ToList().ForEach(bal =>
-												balances[new AccountBalanceKey(bal.AccountId, bal.Year, bal.Month)] = bal);
+												balances[bal.Id] = bal);
 						_bal.UpdateDebitAcct(dto.DebitId, dto.Amount, dto.Date)
 									.ToList().ForEach(bal =>
-												balances[new AccountBalanceKey(bal.AccountId, bal.Year, bal.Month)] = bal);
+												balances[bal.Id] = bal);
 
 
 						response.Accounts = accounts.Values.ToList();
@@ -103,7 +102,7 @@ namespace FinanceProject.Controllers
 
 						NewTransactionResponseDto response = new NewTransactionResponseDto();
 						Dictionary<Guid, Account> accounts = new Dictionary<Guid, Account>();
-						Dictionary<AccountBalanceKey, AccountBalance> balances = new Dictionary<AccountBalanceKey, AccountBalance>();
+						Dictionary<string, AccountBalance> balances = new Dictionary<string, AccountBalance>();
 						await _bal.CreateAccountBalances(dto.Date);
 
 						//using (var trans = await _repo.CreateTransactionAsync())
@@ -116,10 +115,10 @@ namespace FinanceProject.Controllers
 						accounts[transaction.DebitId] = _account.UpdateDebitAcct(transaction.DebitId, -transaction.Amount);
 						_bal.UpdateCreditAcct(transaction.CreditId, -transaction.Amount, transaction.Date)
 									.ToList().ForEach(bal =>
-												balances[new AccountBalanceKey(bal.AccountId, bal.Year, bal.Month)] = bal);
+												balances[bal.Id] = bal);
 						_bal.UpdateDebitAcct(transaction.DebitId, -transaction.Amount, transaction.Date)
 									.ToList().ForEach(bal =>
-												balances[new AccountBalanceKey(bal.AccountId, bal.Year, bal.Month)] = bal);
+												balances[bal.Id] = bal);
 
 
 
@@ -127,10 +126,10 @@ namespace FinanceProject.Controllers
 						accounts[dto.DebitId] = _account.UpdateDebitAcct(dto.DebitId, dto.Amount);
 						_bal.UpdateCreditAcct(dto.CreditId, dto.Amount, dto.Date)
 									.ToList().ForEach(bal =>
-												balances[new AccountBalanceKey(bal.AccountId, bal.Year, bal.Month)] = bal);
+												balances[bal.Id] = bal);
 						_bal.UpdateDebitAcct(dto.DebitId, dto.Amount, dto.Date)
 									.ToList().ForEach(bal =>
-												balances[new AccountBalanceKey(bal.AccountId, bal.Year, bal.Month)] = bal);
+												balances[bal.Id] = bal);
 
 
 
