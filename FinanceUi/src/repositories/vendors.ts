@@ -2,6 +2,7 @@
 import api from "../components/api";
 import { Vendor } from "FinanceApi";
 import { queryClient } from "../App";
+import { sortBy } from 'lodash'
 
 export const VENDOR = "vendor";
 export const fetchVendors = () => {
@@ -9,12 +10,13 @@ export const fetchVendors = () => {
     e.data.forEach((vendor) => {
       queryClient.setQueryData([VENDOR, { id: vendor.id }], vendor);
     });
-    return e.data;
+      return sortBy(e.data,"name");
   });
 };
 export const fetchVendorById = (id: string) => {
   return api("vendors/" + id).then((e) => {
-    return e.data;
+      return e.data;
+        
   });
 };
 
@@ -26,10 +28,10 @@ export const useMutateVendor = () => {
       return api.post("vendors", data).then((e) => e.data);
     },
     onSuccess: (data: Vendor) => {
-      queryClient.setQueryData<Vendor[]>([VENDOR], (prev) => [
+      queryClient.setQueryData<Vendor[]>([VENDOR], (prev) => sortBy([
         ...(prev || []),
         data,
-      ]);
+      ], "name"));
       queryClient.setQueryData([VENDOR, { id: data.id }], data);
     },
   });

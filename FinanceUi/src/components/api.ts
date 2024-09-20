@@ -54,12 +54,14 @@ api.interceptors.request.use(async (config: AxiosRequestConfig) => {
 
 api.interceptors.response.use(
     async (data) => {
-        const lastTransId = localStorage.getItem("last_transaction");
+        if (!data.config?.noLastTrans) {
+            const lastTransId = localStorage.getItem("last_transaction");
 
 
-        if (lastTransId && data.headers["x-last-trans"] !== lastTransId) {
-            //Do fetch new data
-            queryClient.prefetchQuery({ queryKey: [TRANSACTION, { after: lastTransId }], queryFn: () => getAfterTransaction(lastTransId) })
+            if (lastTransId && data.headers["x-last-trans"] !== lastTransId) {
+                //Do fetch new data
+                queryClient.prefetchQuery({ queryKey: [TRANSACTION, { after: lastTransId }], queryFn: () => getAfterTransaction(lastTransId) })
+            }
         }
             
 

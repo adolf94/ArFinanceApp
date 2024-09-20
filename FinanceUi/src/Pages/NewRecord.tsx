@@ -24,6 +24,7 @@ import moment from "moment";
 import { ChevronLeft } from "@mui/icons-material";
 import { ScheduledTransactions, Transaction } from "FinanceApi";
 import { useQueryClient } from "@tanstack/react-query";
+import { v4 } from 'uuid'
 import {
   TRANSACTION,
   fetchTransactionById,
@@ -53,7 +54,7 @@ const defaultValue = {
 const NewRecordPage = (props) => {
   const [formData, setFormData] = useState<
     Partial<Transaction | ScheduledTransactions>
-  >({ ...defaultValue });
+      >({ ...defaultValue, id: v4() });
   const theme = useTheme();
   const con = useRef();
   const queryClient = useQueryClient();

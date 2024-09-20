@@ -21,15 +21,17 @@ export const fetchAccounts = () => {
   });
 };
 
-export const fetchByAccountId = async (id: string) => {
+export const fetchByAccountId = async (id: string, force: boolean = false) => {
 
-  //[ACCOUNT, { id: acct.id }]
-
+    //[ACCOUNT, { id: acct.id }]
+    let account = null
     let accountCache = await queryClient.getQueryData<Account[]>([ACCOUNT])
-    if (!accountCache) accountCache = await queryClient.ensureQueryData<Account[]>({
-        queryKey: [ACCOUNT], queryFn: fetchAccounts
-    })
-    let account = accountCache.find(e=>e.id === id)
+    if (!force) {
+        if (!accountCache) accountCache = await queryClient.ensureQueryData<Account[]>({
+            queryKey: [ACCOUNT], queryFn: fetchAccounts
+        })
+        account = accountCache.find(e => e.id === id)
+    }
 
     if(!!account) return account
 

@@ -77,20 +77,7 @@ export const fetchTransactionsByMonth = (year: number, month: number) => {
 
       return Promise.all(
         e.data.map(async (item) => {
-          item.vendor =
-            item.vendorId &&
-            (await queryClient.ensureQueryData({
-              queryKey: [VENDOR, { id: item.vendorId }],
-              queryFn: () => fetchVendorById(item.vendorId),
-            }));
-          item.debit = await queryClient.ensureQueryData({
-            queryKey: [ACCOUNT, { id: item.debitId }],
-            queryFn: () => fetchByAccountId(item.debitId),
-          });
-          item.credit = await queryClient.ensureQueryData({
-            queryKey: [ACCOUNT, { id: item.creditId }],
-            queryFn: () => fetchByAccountId(item.creditId),
-          });
+            item = await ensureTransactionAcctData(item)
             if (!lastTransId && e.headers['X-Last-Trans'] === item.id) localStorage.setItem('last_transaction', item.id)
           queryClient.setQueryData([TRANSACTION, { id: item.id }], item);
           return item;
@@ -236,7 +223,7 @@ const navigate = useNavigate()
       mutationFn: (data: Partial<Transaction>) => {
       navigate(`../records/${moment(data.date).format("YYYY-MM")}/daily`);
           return api
-            .post<NewTransactionResponseDto>("transactions", data)
+              .post<NewTransactionResponseDto>("transactions", data, { noLastTrans:true})
             .then(async (e: AxiosResponse<NewTransactionResponseDto>) => {
               let item  = e.data.transaction;
 
@@ -331,8 +318,8 @@ export const getAfterTransaction = (id : string ) => {
         transactions.forEach(item => addToTransactions(item, false))
 
         let acctsToRefetch = resp.data.reduce((prev, item, i) => {
-            if(!prev.includes(item.creditId)) prev.push(prev.creditId)
-            if (!prev.includes(item.debitId)) prev.push(prev.debitId)
+            if(!prev.includes(item.creditId)) prev.push(item.creditId)
+            if (!prev.includes(item.debitId)) prev.push(item.debitId)
             return prev
         }, [])
         acctsToRefetch.forEach(e => {
@@ -340,8 +327,9 @@ export const getAfterTransaction = (id : string ) => {
         })
 
         console.debug("added new transactions");
-        let lastId = resp.headers["X-Last-Trans"]
-        localStorage.setItem("last_transaction", lastId)
+        let lastId = resp.headers["x-last-trans"]
+        if (lastId) localStorage.setItem("last_transaction", lastId)
+        
 
         return resp.data
     })

@@ -117,7 +117,7 @@ function SelectAccount(props: SelectAccountProps<any>) {
   };
 
   const filteredVendors = (vendors || []).filter(
-    (f) => f.name.indexOf(searchQuery) > -1,
+    (f) => f.name.indexOf(searchQuery.toLowerCase()) > -1,
   );
 
   return (
