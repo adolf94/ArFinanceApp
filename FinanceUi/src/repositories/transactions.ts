@@ -323,10 +323,12 @@ export const getAfterTransaction = (id : string ) => {
         params: {
             after:id
         }
-    }).then(resp => {
+    }).then( async resp => {
 
-        resp.data.map(item => ensureTransactionAcctData(item))
-            .forEach(item => addToTransactions(item, false))
+        let transactions = await Promise.all(
+            resp.data.map(async item => await ensureTransactionAcctData(item))
+        )
+        transactions.forEach(item => addToTransactions(item, false))
 
         let acctsToRefetch = resp.data.reduce((prev, item, i) => {
             if(!prev.includes(item.creditId)) prev.push(prev.creditId)
