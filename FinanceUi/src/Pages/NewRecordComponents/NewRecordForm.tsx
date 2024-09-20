@@ -168,17 +168,18 @@ const NewRecordForm = (props: NewRecordFormProps) => {
       let responseSched;
       if (schedule.enabled) {
         responseSched = await mutateSchedule.create(schedule);
-      }
+        }
+
+
+      localStorage.setItem("stg_transaction", formData.id)
 
       mutateTransaction
         .create({ ...newItem, scheduleId: responseSched?.id })
-        .then(() => {
-            navigate(`../records/${moment(newItem.date).format("YYYY-MM")}/daily`);
-        });
+        
+        navigate(`../records/${moment(newItem.date).format("YYYY-MM")}/daily`);
     } else {
-      mutateTransaction.update(newItem).then(() => {
-            navigate(`../records/${moment(newItem.date).format("YYYY-MM")}/daily`);
-      });
+      mutateTransaction.update(newItem)
+        navigate(`../records/${moment(newItem.date).format("YYYY-MM")}/daily`);
     }
   };
 

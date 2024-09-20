@@ -55,6 +55,7 @@ const NewRecordPage = (props) => {
   const [formData, setFormData] = useState<
     Partial<Transaction | ScheduledTransactions>
       >({ ...defaultValue, id: v4() });
+    console.log(formData.id);
   const theme = useTheme();
   const con = useRef();
   const queryClient = useQueryClient();
@@ -80,7 +81,7 @@ const NewRecordPage = (props) => {
               queryFn: () => fetchByAccountId(query.get("creditId")),
             })
           : null;
-        setFormData({ ...defaultValue, date, credit, creditId: credit?.id });
+          setFormData({ ...defaultValue, id: v4(), date, credit, creditId: credit?.id });
       } else {
         queryClient
           .fetchQuery({

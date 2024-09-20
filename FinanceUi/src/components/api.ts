@@ -56,11 +56,11 @@ api.interceptors.response.use(
     async (data) => {
         if (!data.config?.noLastTrans) {
             const lastTransId = localStorage.getItem("last_transaction");
-
-
-            if (lastTransId && data.headers["x-last-trans"] !== lastTransId) {
+            const stgTransId = localStorage.getItem("stg_transaction");
+            const headerTransId = data.headers["x-last-trans"];
+            if (lastTransId && headerTransId !== lastTransId && stgTransId !== headerTransId) {
                 //Do fetch new data
-                queryClient.prefetchQuery({ queryKey: [TRANSACTION, { after: lastTransId }], queryFn: () => getAfterTransaction(lastTransId) })
+                    queryClient.prefetchQuery({ queryKey: [TRANSACTION, { after: lastTransId }], queryFn: () => getAfterTransaction(lastTransId) })
             }
         }
             

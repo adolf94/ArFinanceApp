@@ -67,7 +67,7 @@ const fabGreenStyle = {
 const Records = () => {
   const { view, monthStr } = useParams();
   const month = moment(monthStr);
-  const navigate = useNavigate();
+    const navigate = useNavigate();
   const { data: records } = useQuery({
     queryKey: [
       TRANSACTION,

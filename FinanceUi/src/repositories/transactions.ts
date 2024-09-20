@@ -67,10 +67,10 @@ const addToTransactions = (item: Transaction, replace: boolean) => {
 
 };
 
-export const fetchTransactionsByMonth = (year: number, month: number) => {
+export const fetchTransactionsByMonth = (year: number, month: number, persistLast? : string ) => {
   console.debug("fetchTransactionsByMonth", { year, month });
 
-  return api<Transaction[]>("transactions", { params: { year, month } }).then(
+    return api<Transaction[]>("transactions", { params: { year, month }, noLastTrans: persistLast }).then(
       (e) => {
 
         const lastTransId = localStorage.getItem("last_transaction");
@@ -221,11 +221,12 @@ export const useMutateTransaction = () => {
 const navigate = useNavigate()
   const create = useMutation({
       mutationFn: (data: Partial<Transaction>) => {
-      navigate(`../records/${moment(data.date).format("YYYY-MM")}/daily`);
           return api
               .post<NewTransactionResponseDto>("transactions", data, { noLastTrans:true})
             .then(async (e: AxiosResponse<NewTransactionResponseDto>) => {
               let item  = e.data.transaction;
+
+              localStorage.setItem("last_transaction", item.id)
 
                 let accounts = e.data.accounts;
                 accounts.forEach(e => {
@@ -252,7 +253,6 @@ const navigate = useNavigate()
 
   const update = useMutation({
     mutationFn: (data: Partial<Transaction>) => {
-      navigate(`../records/${moment(data.date).format("YYYY-MM")}/daily`);
           return api
         .put<NewTransactionResponseDto>("transactions/" + data.id, data)
         .then(async (e: AxiosResponse<NewTransactionResponseDto>) => {
