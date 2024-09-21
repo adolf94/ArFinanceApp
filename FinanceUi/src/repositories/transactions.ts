@@ -30,6 +30,7 @@ const addToTransactions = (item: Transaction, replace: boolean) => {
     if (mData) {
 
         queryClient.setQueryData([TRANSACTION, key], (prev: Transaction[]) => {
+            console.debug(`transaction ${item.id} added to ${key.year}-${key.month}`)
             return replaceById(item, mData);
         });
     }
@@ -37,7 +38,7 @@ const addToTransactions = (item: Transaction, replace: boolean) => {
 
 
   let dKey = {
-    accountId: credit.id,
+    accountId: debit.id,
     year: moment(item.date).add(-debit.periodStartDay + 1, "day").year(),
     month: moment(item.date).add(-debit.periodStartDay + 1, "day").month() + 1,
   };
@@ -47,6 +48,7 @@ const addToTransactions = (item: Transaction, replace: boolean) => {
     if (dData) {
 
         queryClient.setQueryData([TRANSACTION, dKey], (prev: Transaction[]) => {
+            console.debug(`transaction ${item.id} added to ${dKey.accountId}-${dKey.year}-${dKey.month}`)
             return replaceById(item, dData);
         });
     }
@@ -61,6 +63,7 @@ const addToTransactions = (item: Transaction, replace: boolean) => {
     if (cData) {
 
         queryClient.setQueryData([TRANSACTION, cKey], (prev: Transaction[]) => {
+            console.debug(`transaction ${item.id} added to ${cKey.accountId}-${cKey.year}-${cKey.month}`)
             return replaceById(item, cData);
         });
     }
@@ -162,8 +165,15 @@ export const fetchByAcctMonth = (
             }),
       ]);
     })
-    .then((result) => {
+      .then((result) => {
+      
+
+
+
       return [...result[0], ...result[1]].filter((tr) => {
+
+
+
         return (
           moment(tr.date).isBetween(dateCurrent, dateNextMonth) &&
           [tr.creditId, tr.debitId].includes(acctId)
