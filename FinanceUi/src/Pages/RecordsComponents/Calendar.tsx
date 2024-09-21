@@ -198,16 +198,18 @@ const Calendar = (props: CalendarProps) => {
             Sat
           </Grid>
         </Grid>
-        {view.map((week) => (
+        {view.map((week,index) => (
           <Grid
             container
             columns={7}
+            key={index}
             sx={{ border: 1, borderStyle: "solid", borderColor: "gray" }}
           >
             {week.map((day) => (
               <Grid
                 item
-                xs={1}
+                    xs={1}
+                    key={day.dateISO }
                 sx={{
                   borderRight: 1,
                   borderStyleRight: "solid",

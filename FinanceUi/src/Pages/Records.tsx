@@ -147,17 +147,17 @@ const Records = () => {
     <>
       <AppBar position="static">
         <Toolbar>
-          <IconButton>
+          <IconButton onClick={() => setMonth(month.clone().add(-1, "month"))}>
             <FontAwesomeIcon
               icon={faChevronLeft}
-              onClick={() => setMonth(month.clone().add(-1, "month"))}
+              
             />
           </IconButton>
           <span className="my-1">{month.format("MMM yyyy")}</span>
-          <IconButton>
+          <IconButton onClick={() => setMonth(month.clone().add(1, "month"))}>
             <FontAwesomeIcon
               icon={faChevronRight}
-              onClick={() => setMonth(month.clone().add(1, "month"))}
+              
             />
           </IconButton>
         </Toolbar>

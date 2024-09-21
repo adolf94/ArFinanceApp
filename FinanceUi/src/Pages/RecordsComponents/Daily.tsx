@@ -181,7 +181,7 @@ const Daily = (props: DailyViewProps) => {
         </Grid>
       </Paper>
       {records.map((data) => (
-        <Paper sx={{ my: 1 }}>
+          <Paper sx={{ my: 1 }} key={data.dateGroup}>
           <List>
             <ListItem
               dense
@@ -236,9 +236,9 @@ const Daily = (props: DailyViewProps) => {
             </ListItem>
             <Divider />
             {data.items.map((item) => (
-                <ErrorBoundary FallbackComponent={FallbackListItem} onError={(data) => {
-                    console.debug(data)
-                    enqueueSnackbar("Something happened on the listItem Record", {variant:'warning'})
+            <ErrorBoundary FallbackComponent={FallbackListItem} key={item.id}  onError={(data) => {
+                console.debug(data)
+                enqueueSnackbar("Something happened on the listItem Record", {variant:'warning'})
                 }} >
               <ListItem onClick={() => navigate("../transactions/" + item.id)}>
                 <Grid container>

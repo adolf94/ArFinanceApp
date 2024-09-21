@@ -310,9 +310,9 @@ const ViewAccount = () => {
                     <Grid container>
                       <Grid item xs={3}>
                         <Typography sx={{ px: 1 }} variant="body1">
-                          {item.type == "transfer"
+                          {item.type === "transfer"
                             ? "Transfer"
-                            : item.type == "expense"
+                            : item.type === "expense"
                               ? item.debit.name
                               : item.credit.name}
                         </Typography>
@@ -347,7 +347,7 @@ const ViewAccount = () => {
           ))}
         </Grid>
       </Grid>
-      <Link to="/transactions/new">
+          <Link to="/transactions/new" state={{credit:account} }>
               <Fab color="primary" sx={fabGreenStyle}>
         <Add fontSize="large"/> 
           {/*<FontAwesomeIcon color="inherit" icon={faPlus} size="xl" />*/}

@@ -13,6 +13,7 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   Link,
+  useLocation,
   useNavigate,
   useParams,
   useSearchParams,
@@ -62,6 +63,7 @@ const NewRecordPage = (props) => {
   const { transId } = useParams();
   const [query, setQuery] = useSearchParams();
   const navigate = useNavigate();
+    const { state } = useLocation() as { state: any };
 
   useEffect(() => {
     (async () => {
@@ -95,6 +97,13 @@ const NewRecordPage = (props) => {
 
   //const styles = useStyles();
   const sm = useMediaQuery(theme.breakpoints.down("md"));
+
+useEffect(() => {
+    if (!!state?.credit) {
+        setFormData(prev => ({ ...prev, credit: state.credit, creditId: state.credit?.id }))
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+}, [state?.credit, setFormData])
 
   const [selectView, setSelectView] = useState({
     groupId: null,

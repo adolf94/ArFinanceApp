@@ -2,6 +2,7 @@
   useState,
   useContext,
   SetStateAction,
+  useEffect,
 } from "react";
 import {
   List,
@@ -22,7 +23,7 @@ import {
 import { SelectAccountContext } from "../NewRecord";
 //import { makeStyles } from '@mui/styles'
 import { DateTimePicker } from "@mui/x-date-pickers";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import moment from "moment";
 import SelectAccount from "./SelectAccount";
 import { useQuery } from "@tanstack/react-query";
@@ -53,7 +54,7 @@ const NewRecordForm = (props: NewRecordFormProps) => {
   const view = useContext<any>(SelectAccountContext);
   const mutateTransaction = useMutateTransaction();
   const mutateSchedule = useMutateSchedule();
-  const navigate = useNavigate();
+    const navigate = useNavigate();
   const { transId } = useParams();
   const type = props.formData.type;
   const theme = useTheme();
@@ -79,7 +80,7 @@ const NewRecordForm = (props: NewRecordFormProps) => {
       if (!(cronExpression && endDate)) return false;
     }
     return true;
-  };
+    };
 
 
   const setType = (type) => {
