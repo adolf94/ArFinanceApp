@@ -183,13 +183,13 @@ const Records = () => {
             </Tabs>
           </Box>
           <RecordsContext.Provider value={{ records: dailies, totals, month }}>
-            <div role="tabpanel" hidden={view != "daily"}>
+            <div role="tabpanel" hidden={view !== "daily"}>
               <Daily records={records || []} />
             </div>
-            <div role="tabpanel" hidden={view != "calendar"}>
+            <div role="tabpanel" hidden={view !== "calendar"}>
               <Calendar records={records || []} />
             </div>
-            <div role="tabpanel" hidden={view != ""}>
+            <div role="tabpanel" hidden={view !== ""}>
               3
             </div>
           </RecordsContext.Provider>

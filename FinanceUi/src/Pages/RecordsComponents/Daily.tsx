@@ -1,4 +1,5 @@
 import {
+    Alert,
   Box,
   Chip,
   Divider,
@@ -13,6 +14,8 @@ import React, { useContext } from "react";
 import { useNavigate } from "react-router";
 import { RecordsContext } from "../Records";
 
+import { ErrorBoundary } from "react-error-boundary";
+import { enqueueSnackbar } from "notistack";
 interface DailyViewProps {
   records: Transaction[];
 }
@@ -25,6 +28,69 @@ interface RecordViewTransaction {
   expenses: number;
   income: number;
 }
+
+
+const FallbackListItem = ({error, resetErrorBoundary }) => {
+
+
+    return <ListItem>
+        <Alert color="warning" variant="outlined">
+
+            <Typography sx={{ px: 1, color:'red', fontWeight:'red' }} variant="body1"> Something went wrong here </Typography>
+        
+        </Alert>
+    </ListItem>
+
+
+}
+
+const RecordListItem = ({ item }) => {
+    const navigate = useNavigate()
+
+
+    
+
+
+    return <ListItem onClick={() => navigate("../transactions/" + item.id)}>
+        <Grid container>
+            <Grid item xs={4} sm={3}>
+                <Typography sx={{ px: 1 }} variant="body1">
+                    {item.type === "transfer"
+                        ? "Transfer"
+                        : item.type === "expense"
+                            ? item.debit.name
+                            : item.credit.name}
+                </Typography>
+                <Typography sx={{ px: 1 }} variant="body1">
+                    {item.vendor?.name}
+                </Typography>
+            </Grid>
+            <Grid item xs={4} sm={5}>
+                <Typography sx={{ fontWeight: 600 }} variant="body1">
+                    {item.description || ""}
+                </Typography>
+                {item.type === "transfer"
+                    ? item.credit.name + " => " + item.debit.name
+                    : item.type === "expense"
+                        ? item.credit.name
+                        : item.debit.name}
+            </Grid>
+            <Grid item xs={4} sx={{ textAlign: "right" }}>
+                <Typography
+                    color={fontColorOnType(item.type)}
+                    sx={{ px: 1, fontWeight: 600 }}
+                    variant="body1"
+                >
+                    P{" "}
+                    {item.amount.toLocaleString("en-US", {
+                        minimumFractionDigits: 2,
+                    })}
+                </Typography>
+            </Grid>
+        </Grid>
+    </ListItem>
+}
+
 
 const Daily = (props: DailyViewProps) => {
   const { records, totals } = useContext(RecordsContext);
@@ -170,6 +236,10 @@ const Daily = (props: DailyViewProps) => {
             </ListItem>
             <Divider />
             {data.items.map((item) => (
+                <ErrorBoundary FallbackComponent={FallbackListItem} onError={(data) => {
+                    console.debug(data)
+                    enqueueSnackbar("Something happened on the listItem Record", {variant:'warning'})
+                }} >
               <ListItem onClick={() => navigate("../transactions/" + item.id)}>
                 <Grid container>
                   <Grid item xs={4} sm={3}>
@@ -207,7 +277,8 @@ const Daily = (props: DailyViewProps) => {
                     </Typography>
                   </Grid>
                 </Grid>
-              </ListItem>
+                    </ListItem>
+                </ErrorBoundary>
             ))}
           </List>
         </Paper>

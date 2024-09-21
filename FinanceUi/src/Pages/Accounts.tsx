@@ -63,6 +63,7 @@ const CreditStatementBalance = (props: CreditStatementBalanceProps) => {
 
   useEffect(() => {
     let internalTotal = [...(transactions || [])].reduce((prev, cur, i) => {
+        if (cur.debitId === cur.creditId) return prev;
       return prev + (props.account.id === cur.debitId ? -1 : 1) * cur.amount;
     }, props.account.balance);
     setTotal(internalTotal);
