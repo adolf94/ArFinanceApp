@@ -13,11 +13,23 @@ export const fetchVendors = () => {
       return sortBy(e.data,"name");
   });
 };
-export const fetchVendorById = (id: string) => {
-  return api("vendors/" + id).then((e) => {
-      return e.data;
+export const fetchVendorById = async (id: string, force?:boolean) => {
+
+    let vendor = null;
+
+
+
+    let vendors = queryClient.getQueryData<Vendor[]>([VENDOR]);
+    if (!force) {
+        if (!vendors) queryClient.ensureQueryData({ queryKey: [VENDOR], queryFn: () => fetchVendors() })
+        vendor = vendors.find(e=>e.id === id)
+    }
+    if(!!vendor) return vendor
+
+    return api("vendors/" + id).then((e) => {
+        return e.data;
         
-  });
+    });
 };
 
 export const useMutateVendor = () => {

@@ -18,7 +18,7 @@ import { useNavigate } from "react-router-dom";
 
 export const TRANSACTION = "transaction";
 
-const addToTransactions = (item: Transaction, replace: boolean) => {
+export const addToTransactions = (item: Transaction, replace: boolean) => {
   const { debit, credit } = item;
   const key = {
     year: moment(item.date).get("year"),
@@ -187,27 +187,12 @@ export const fetchTransactionById = (transId) => {
   return api<Transaction>("transactions/" + transId).then(async (e) => {
     let item = e.data;
 
-    item.vendor =
-      item.vendorId &&
-      (await queryClient.ensureQueryData({
-        queryKey: [VENDOR, { id: item.vendorId }],
-        queryFn: () => fetchVendorById(item.vendorId),
-      }));
-    item.debit = await queryClient.ensureQueryData({
-      queryKey: [ACCOUNT, { id: item.debitId }],
-      queryFn: () => fetchByAccountId(item.debitId),
-    });
-    item.credit = await queryClient.ensureQueryData({
-      queryKey: [ACCOUNT, { id: item.creditId }],
-      queryFn: () => fetchByAccountId(item.creditId),
-    });
-
-    return item;
+      return ensureTransactionAcctData(item);
   });
 };
 
 
-const ensureTransactionAcctData = async (item) => {
+export const ensureTransactionAcctData = async (item) => {
 
 
 
@@ -219,8 +204,14 @@ const ensureTransactionAcctData = async (item) => {
             })) : null;
 
 
-    item.credit = queryClient.getQueryData([ACCOUNT, { id: item.creditId }])
-    item.debit = queryClient.getQueryData([ACCOUNT, { id: item.debitId }])
+    item.credit = await queryClient.ensureQueryData({
+        queryKey: [ACCOUNT, { id: item.creditId }],
+        queryFn: () => fetchByAccountId(item.creditId)
+    })
+    item.debit = await queryClient.ensureQueryData({
+        queryKey: [ACCOUNT, { id: item.debitId }],
+        queryFn: () => fetchByAccountId(item.debitId)
+    })
 
     return item;
 
@@ -228,7 +219,6 @@ const ensureTransactionAcctData = async (item) => {
 
 
 export const useMutateTransaction = () => {
-const navigate = useNavigate()
   const create = useMutation({
       mutationFn: (data: Partial<Transaction>) => {
           return api

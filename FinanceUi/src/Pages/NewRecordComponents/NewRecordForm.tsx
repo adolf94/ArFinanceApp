@@ -62,14 +62,14 @@ const NewRecordForm = (props: NewRecordFormProps) => {
   const [iteration, setIteration] = useState(12);
   const [selectedIteration, setSelectedIteration] = useState<any>();
 
-  const [schedule, setSchedule] = useState<ScheduledTransactions>({
+  const [schedule, setSchedule] = useState<Partial<ScheduledTransactions>>({
     enabled: false,
     cronId: "",
     cronExpression: "",
     endDate: "",
     dateCreated: moment().toISOString(),
     id: uuid(),
-    lastTransactionDate: moment().toISOString(),
+      lastTransactionDate: moment().toISOString(),
   });
 
   const isSubmittable = () => {

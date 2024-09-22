@@ -55,6 +55,7 @@ const VendorTextField = (props) => {
                     fullWidth
                     getOptionLabel={(e) => e.name}
                     getOptionKey={(e) => e.id}
+                    isOptionEqualToValue={(opt,v)=>opt.id === v.id}
                     value={props.value}
                     filterOptions={(options, params) => {
                         const filtered = filter(options, params);
