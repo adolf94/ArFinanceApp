@@ -12,6 +12,13 @@ namespace FinanceApp.Data.CosmosRepo
 						_context = context;
 				}
 
+				public async Task<User> CreateUser(User user)
+				{
+						_context.Users!.Add(user);
+						await _context.SaveChangesAsync();
+						return user;
+				}
+
 				public async Task<User?> GetByEmailAsync(string email)
 				{
 						return await _context.Users!.Where(e => e.EmailAddress == email).FirstOrDefaultAsync();

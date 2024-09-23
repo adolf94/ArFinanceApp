@@ -58,6 +58,11 @@ declare module 'FinanceApi' {
         currencyCode: string;
     }
 
+    // ..\FinanceProject\Models\Role.cs
+    export interface Role {
+        roleName: string;
+    }
+
     // ..\FinanceProject\Models\ScheduledTransactions.cs
     export interface ScheduledTransactions {
         id: string;
@@ -102,6 +107,7 @@ declare module 'FinanceApi' {
         azureId?: string;
         mobileNumber: string;
         emailAddress: string;
+        roles: Role[];
     }
 
     // ..\FinanceProject\Models\Vendor.cs

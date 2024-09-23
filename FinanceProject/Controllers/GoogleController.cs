@@ -156,7 +156,7 @@ namespace FinanceApp.Controllers
 						if (string.IsNullOrEmpty(currentToken!.refresh_token))
 						{
 								_logger.LogWarning("No refresh token was received!");
-								tokenLifetime = 30;
+								tokenLifetime = 60;
 
 						}
 
@@ -183,7 +183,10 @@ namespace FinanceApp.Controllers
 						}
 
 						claims.Add(new Claim("userId", user!.Id.ToString()));
-						claims.Add(new Claim(ClaimTypes.Role, "Default_Access"));
+						user.Roles.ForEach(e =>
+						{
+								claims.Add(new Claim(ClaimTypes.Role, e.RoleName));
+						});
 						//foreach (var item in gClaims!)
 						//{
 						//		claims.Add(new Claim(item.Key, item.Value));

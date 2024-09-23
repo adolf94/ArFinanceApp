@@ -9,7 +9,7 @@ using System.Security.Claims;
 namespace FinanceProject.Controllers
 {
 		[ApiController]
-		[Authorize]
+		//[Authorize]
 		[Route("api")]
 		public class UserController : ControllerBase
 		{
@@ -24,7 +24,15 @@ namespace FinanceProject.Controllers
 						_users = users;
 				}
 
+				[HttpPost("user")]
+				public async Task<IActionResult> CreateUser(User user)
+				{
+						await _users.CreateUser(user);
+						return await Task.FromResult(Ok(user));
+				}
+
 				[HttpGet("user/login")]
+				[AllowAnonymous]
 				public async Task<IActionResult> Login()
 				{
 						if (_pConfig.NextScheduledTransactionDate < DateTime.UtcNow && !_pConfig.ScheduleHasErrors)
@@ -36,9 +44,9 @@ namespace FinanceProject.Controllers
 
 
 						User? user = await _users.GetById(userId!);
-
 						return Ok(user);
 				}
+
 
 		}
 }

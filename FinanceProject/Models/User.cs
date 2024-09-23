@@ -13,7 +13,9 @@ namespace FinanceProject.Models
 
 				public string EmailAddress { get; set; } = string.Empty;
 
-				[JsonIgnore]
+				public List<Role> Roles { get; set; } = new List<Role>();
+
+        [JsonIgnore]
 				public ICollection<Transaction>? Transactions { get; set; }
 		}
 }
