@@ -108,9 +108,9 @@ namespace FinanceApp.Controllers
 						{
 								claims.Add(new Claim("userId", user!.Id.ToString()));
 								claims.Add(new Claim(ClaimTypes.Role, "Registered"));
-								user.Roles.ForEach(e =>
+								user.Roles.ToList().ForEach(e =>
 								{
-										claims.Add(new Claim(ClaimTypes.Role, e.RoleName));
+										claims.Add(new Claim(ClaimTypes.Role, e));
 								});
 						}
 						else
@@ -197,7 +197,7 @@ namespace FinanceApp.Controllers
 						{
 								claims.Add(new Claim("userId", user!.Id.ToString()));
 								claims.Add(new Claim(ClaimTypes.Role, "Registered"));
-								user.Roles.ForEach(e =>
+								user.Roles.ToList().ForEach(e =>
 								{
 										claims.Add(new Claim(ClaimTypes.Role, e));
 								});
