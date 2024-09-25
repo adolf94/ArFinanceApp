@@ -1,4 +1,4 @@
-import { Alert, Grid, ListItem, Typography } from "@mui/material";
+import { Alert, Grid, ListItem, Skeleton, Typography } from "@mui/material";
 import { enqueueSnackbar } from "notistack";
 import { ErrorBoundary } from "react-error-boundary";
 import { useNavigate } from "react-router-dom";
@@ -19,6 +19,30 @@ const fontColorOnType = (type) => {
     }
 };
 
+
+const LoadingListItem = () => {
+
+    return <ListItem>
+        <Grid container>
+            <Grid item xs={4} sm={3}>
+                <Typography sx={{ px: 1 }} variant="body1">
+                    <Skeleton variant="text" width="4rem" />
+                </Typography>
+                <Typography sx={{ px: 1 }} variant="body1">
+                    <Skeleton variant="text" width="7rem" />
+                </Typography>
+            </Grid>
+            <Grid item xs={4} sm={5}>
+                <Skeleton variant="text" width="7rem" />
+            </Grid>
+            <Grid item xs={4} sx={{ alignItems: "end" }}>
+                    <Skeleton variant="text" width="4rem" />
+
+            </Grid>
+        </Grid>
+    </ListItem>
+
+}
 
 const RenderListItem = ({ item }) => {
     const navigate = useNavigate();
@@ -94,7 +118,7 @@ const FallbackListItem = (itemId) => {
     return Render;
 }
 
-const TransactionListItem = ({ item : extItem } : any) => {
+const TransactionListItem = ({ item : extItem, loading } : any) => {
     const [item, setItem] = useState(extItem)
 
     useEffect(() => {
@@ -108,7 +132,7 @@ const TransactionListItem = ({ item : extItem } : any) => {
     }} onReset={(trans) => {
             setItem(trans.args[0])
     }}>
-        <RenderListItem item={item} />
+        {loading ? <LoadingListItem /> : <RenderListItem item={item} />}
     </ErrorBoundary>
 }
 

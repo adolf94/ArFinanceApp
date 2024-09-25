@@ -68,7 +68,7 @@ const Records = () => {
   const { view, monthStr } = useParams();
   const month = moment(monthStr);
     const navigate = useNavigate();
-  const { data: records } = useQuery({
+    const { data: records, isLoading: loadingRecords  } = useQuery({
     queryKey: [
       TRANSACTION,
       { month: month.get("month") + 1, year: month.get("year") },
@@ -184,7 +184,7 @@ const Records = () => {
           </Box>
           <RecordsContext.Provider value={{ records: dailies, totals, month }}>
             <div role="tabpanel" hidden={view !== "daily"}>
-              <Daily records={records || []} />
+                          <Daily records={records} loading={loadingRecords} />
             </div>
             <div role="tabpanel" hidden={view !== "calendar"}>
               <Calendar records={records || []} />

@@ -142,6 +142,14 @@ declare module 'FinanceApi' {
         description: string;
     }
 
+    // ..\FinanceProject\Dto\CreateUserDto.cs
+    export interface CreateUserDto {
+        id: string;
+        userName?: string;
+        mobileNumber: string;
+        emailAddress: string;
+    }
+
     // ..\FinanceProject\Dto\GoogleIdTokenClaims.cs
     export interface GoogleIdTokenClaims {
         email: string;

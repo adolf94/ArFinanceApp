@@ -18,8 +18,79 @@ import { useNavigate } from "react-router-dom";
 
 export const TRANSACTION = "transaction";
 
+
+export const temporaryAddTransaction = async (item) => {
+
+    const key = {
+        year: moment(item.date).get("year"),
+        month: moment(item.date).get("month") + 1,
+    };
+    let mData = queryClient.getQueryData<Transaction[]>([TRANSACTION, key])
+    
+    //get prevItem if it was previously Fetched 
+    let prevItem = queryClient.getQueryData<Transaction>([TRANSACTION, { id: item.id }])
+    item = await ensureTransactionAcctData(item)
+    if (prevItem && moment(prevItem.date).format("YYYY-MM") !== moment(item.date).format("YYYY-MM")) {
+
+        let prevKey = {
+            year: moment(item.date).get("year"),
+            month: moment(item.date).get("month") + 1,
+        };
+        queryClient.setQueryData([TRANSACTION, prevKey], (prev: Transaction[]) => {
+            return prev.filter(e => e.id === item.id)
+        });
+    }
+
+    if (mData) {
+
+        queryClient.setQueryData([TRANSACTION, key], (prev: Transaction[]) => {
+            console.debug(`transaction ${item.id} added to ${key.year}-${key.month}`)
+            return replaceById(item, mData);
+        });
+    }
+
+    const doRollback = () => {
+        //if it did not exist
+        //if it was not previously fetch, no need to remove. wala eh
+        if (!prevItem) {
+            queryClient.setQueryData([TRANSACTION, key], (prev: Transaction[]) => {
+                return prev.filter(e=>e.id===item.id)
+            });
+        }else{
+            //if exist before;
+
+            //if prevItem was in a different month
+            
+            if (moment(prevItem.date).format("YYYY-MM") !== moment(item.date).format("YYYY-MM")) {
+                queryClient.setQueryData([TRANSACTION, key], (prev: Transaction[]) => {
+                    return prev.filter(e => e.id === item.id)
+                });
+            } 
+
+            let prevKey = {
+                year: moment(item.date).get("year"),
+                month: moment(item.date).get("month") + 1,
+            };
+            queryClient.setQueryData([TRANSACTION, prevKey], (prev: Transaction[]) => {
+                return replaceById(prevItem, prev);
+            });
+
+        }
+    }
+
+    return {prevItem, didExist:!!prevItem, doRollback};
+    
+}
+
 export const addToTransactions = (item: Transaction, replace: boolean) => {
-  const { debit, credit } = item;
+    const { debit, credit } = item;
+
+
+
+    queryClient.setQueryData([TRANSACTION, {id: item.id}], item);
+
+
+
   const key = {
     year: moment(item.date).get("year"),
     month: moment(item.date).get("month") + 1,
@@ -241,14 +312,22 @@ export const useMutateTransaction = () => {
                 if (!prev || !Array.isArray(prev)) return undefined;
                 return replaceById(e.data.accounts, prev);
               });
+                return item;
 
-              return item;
             });
-    },
-    onSuccess: async (item: Transaction) => {
-     enqueueSnackbar("Saved!", {variant : 'info'})  
-      addToTransactions(item, false);
-    },
+
+      },
+      onMutate: (item) => {
+          let ctx = temporaryAddTransaction(item);
+          return ctx;
+      },
+        onSuccess: async (item: Transaction, vars, ctx) => {
+         enqueueSnackbar("Saved!", {variant : 'info'})  
+          addToTransactions(item, true);
+      },
+      onError: (err, newTodo, context) => {
+         context.doRollback()
+      },
   });
 
   const update = useMutation({
@@ -293,12 +372,18 @@ export const useMutateTransaction = () => {
 
           return item;
         })
-    },
-    onSuccess: (item) => {
-        enqueueSnackbar("Saved!", { variant: 'info' })
-        addToTransactions(item, true);
-
-    }
+      },
+      onMutate: (item) => {
+          let ctx = temporaryAddTransaction(item);
+          return ctx;
+      },
+      onSuccess: async (item: Transaction, vars, ctx) => {
+          enqueueSnackbar("Saved!", { variant: 'info' })
+          addToTransactions(item, true);
+      },
+      onError: (err, newTodo, context) => {
+          context.doRollback()
+      },
   });
 
   return { create: create.mutateAsync, createExt : create, update: update.mutateAsync, updateExt:update };

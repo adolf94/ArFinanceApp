@@ -87,7 +87,7 @@ function SelectAccount(props: SelectAccountProps<any>) {
   useEffect(() => {
     if (!props.value) return;
     const value = props.value;
-    if (props.selectType == "account") {
+    if (props.selectType === "account") {
       if (value.accountGroup == null)
         value.accountGroup = (accountGroups || []).find(
           (e) => e.id === value.accountGroupId,
@@ -95,20 +95,23 @@ function SelectAccount(props: SelectAccountProps<any>) {
       setAcctGroup(value.accountGroup);
       setAcct(value);
     }
-  }, [props.value]);
+  }, [props.value, accountGroups, props.selectType]);
 
-  const createNewVendor = () => {
-    mutateVendor
-      .create({
-        id: uuid(),
-        name: searchQuery,
-        enabled: true,
-      })
-      .then((e) => {
-        props.onChange(e);
+    const createNewVendor = () => {
+        if(mutateVendor.loading) return
+        let newVendor = {
+            id: uuid(),
+            name: searchQuery,
+            enabled: true,
+        }
+        props.onChange(newVendor);
         setSearchQuery("");
         props.onClose();
-      });
+        mutateVendor
+          .create(newVendor)
+          .then((e) => {
+            props.onChange(e);
+          }).catch(e=>props.onChange(null));
   };
 
   const onClose = () => {
@@ -146,12 +149,12 @@ function SelectAccount(props: SelectAccountProps<any>) {
           </Grid>
         </Grid>
       </Grid>
-      {props.selectType == "account" && !groupLoading && (
+      {props.selectType === "account" && !groupLoading && (
         <>
           <Grid item xs={6}>
             <List>
               {(accountGroups || [])
-                .filter((e) => e.accountTypeId == props.typeId)
+                .filter((e) => e.accountTypeId === props.typeId)
                 .map((e, i) => {
                   return (
                     <ListItemButton
@@ -182,12 +185,12 @@ function SelectAccount(props: SelectAccountProps<any>) {
           </Grid>
         </>
       )}
-      {props.selectType == "vendor" && (
+      {props.selectType === "vendor" && (
         <Grid item xs={8}>
           <List>
             {(filteredVendors || []).map((e, i) => (
               <ListItemButton
-                selected={e.id == acct?.id}
+                selected={e.id === acct?.id}
                 onClick={() => setValue(e)}
                 key={i}
               >

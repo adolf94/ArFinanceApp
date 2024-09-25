@@ -7,6 +7,7 @@ import {
   List,
   ListItem,
   Paper,
+  Skeleton,
   Typography,
 } from "@mui/material";
 import { Transaction } from "FinanceApi";
@@ -17,7 +18,8 @@ import { RecordsContext } from "../Records";
 import { useQueryClient } from "@tanstack/react-query";
 import TransactionListItem from "./TransactionListItem";
 interface DailyViewProps {
-  records: Transaction[];
+    records: Transaction[];
+    loading: boolean;
 }
 
 interface RecordViewTransaction {
@@ -166,6 +168,57 @@ const Daily = (props: DailyViewProps) => {
           </List>
         </Paper>
       ))}
+          {props.loading && <Paper sx={{ my: 1 }}>
+              <List>
+                  <ListItem dense>
+                      <Grid item xs={6}>
+                          <Typography sx={{ px: 1 }} variant="transactionHeaderDate">
+                              <Skeleton variant="text" />
+                          </Typography>{" "}
+                      </Grid>
+                      <Grid
+                          item
+                          xs={3}
+                          sx={{
+                              display: "flex",
+                              textAlign: "center",
+                              justifyContent: "center",
+                          }}
+                      >
+                          <Typography
+                              color="green"
+                              sx={{ px: 1, alignSelf: "center", fontColor: "success" }}
+                              variant="transactionHeaderDate"
+                          >
+                              <Skeleton variant="text" width="5rem" />
+
+                          </Typography>
+                      </Grid>
+                      <Grid
+                          item
+                          xs={3}
+                          sx={{
+                              display: "flex",
+                              textAlign: "center",
+                              justifyContent: "center",
+                          }}
+                      >
+                          <Typography
+                              color="red"
+                              sx={{ px: 1, alignSelf: "center", fontColor: "danger" }}
+                              variant="transactionHeaderDate"
+                          >
+                              <Skeleton variant="text" width="5rem" />
+                          </Typography>
+                      </Grid>
+                  </ListItem>
+                  <Divider />
+                  <TransactionListItem item={{}} loading={true} />
+                  <TransactionListItem item={{}} loading={true} />
+                  <TransactionListItem item={{}} loading={true} />
+              </List>
+          </Paper>
+          }
     </Box>
   );
 };
