@@ -7,7 +7,7 @@ namespace FinanceProject.Controllers
 {
 		[Route("api")]
 		[ApiController]
-		[Authorize]
+		[Authorize(Roles = "finance_user")]
 		public class AccountBalanceController : ControllerBase
 		{
 				private readonly IAccountBalanceRepo _repo;

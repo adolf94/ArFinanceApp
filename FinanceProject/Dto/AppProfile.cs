@@ -1,4 +1,5 @@
 using AutoMapper;
+using FinanceApp.Dto;
 using FinanceProject.Models;
 
 namespace FinanceProject.Dto
@@ -9,6 +10,7 @@ namespace FinanceProject.Dto
 				{
 						CreateMap<CreateTransactionDto, Transaction>();
 
+						CreateMap<CreateUserDto, User>();
 				}
 
 

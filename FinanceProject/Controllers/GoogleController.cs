@@ -104,15 +104,26 @@ namespace FinanceApp.Controllers
 								return Forbid();
 						}
 
-						claims.Add(new Claim("userId", user!.Id.ToString()));
-						claims.Add(new Claim(ClaimTypes.Role, "Default_Access"));
+						if (user != null)
+						{
+								claims.Add(new Claim("userId", user!.Id.ToString()));
+								claims.Add(new Claim(ClaimTypes.Role, "Registered"));
+								user.Roles.ForEach(e =>
+								{
+										claims.Add(new Claim(ClaimTypes.Role, e.RoleName));
+								});
+						}
+						else
+						{
+								claims.Add(new Claim(ClaimTypes.Role, "Unregistered"));
+						}
 						//foreach (var item in gClaims!)
 						//{
 						//		claims.Add(new Claim(item.Key, item.Value));
 						//}
 						var tokenDescriptor = new SecurityTokenDescriptor
 						{
-								Subject = new ClaimsIdentity(idToken.Claims.Where(e => e.Type != "aud")),
+								Subject = new ClaimsIdentity(claims.Where(e => e.Type != "aud")),
 								Expires = DateTime.UtcNow.AddMinutes(tokenLifetime),
 								Issuer = _config.jwtConfig.issuer,
 								Audience = _config.jwtConfig.audience,
@@ -182,11 +193,19 @@ namespace FinanceApp.Controllers
 								return Forbid();
 						}
 
-						claims.Add(new Claim("userId", user!.Id.ToString()));
-						user.Roles.ForEach(e =>
+						if(user != null)
 						{
-								claims.Add(new Claim(ClaimTypes.Role, e.RoleName));
-						});
+								claims.Add(new Claim("userId", user!.Id.ToString()));
+								claims.Add(new Claim(ClaimTypes.Role, "Registered"));
+								user.Roles.ForEach(e =>
+								{
+										claims.Add(new Claim(ClaimTypes.Role, e));
+								});
+						}else
+						{
+								claims.Add(new Claim(ClaimTypes.Role, "Unregistered"));
+						}
+
 						//foreach (var item in gClaims!)
 						//{
 						//		claims.Add(new Claim(item.Key, item.Value));
@@ -194,7 +213,7 @@ namespace FinanceApp.Controllers
 
 						var tokenDescriptor = new SecurityTokenDescriptor
 						{
-								Subject = new ClaimsIdentity(idToken.Claims.Where(e => e.Type != "aud")),
+								Subject = new ClaimsIdentity(claims.Where(e => e.Type != "aud")),
 								Expires = DateTime.UtcNow.AddMinutes(tokenLifetime),
 								Issuer = _config.jwtConfig.issuer,
 								Audience = _config.jwtConfig.audience,

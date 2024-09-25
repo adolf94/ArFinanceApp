@@ -1,6 +1,7 @@
-﻿using Newtonsoft.Json;
+﻿using FinanceProject.Models;
+using System.Text.Json.Serialization;
 
-namespace FinanceProject.Models
+namespace FinanceApp.Data.CosmosRepo.Dtos
 {
 		public class User
 		{
@@ -13,9 +14,8 @@ namespace FinanceProject.Models
 
 				public string EmailAddress { get; set; } = string.Empty;
 
-				public List<string> Roles { get; set; } = new List<string>();
 
-        [JsonIgnore]
+				[JsonIgnore]
 				public ICollection<Transaction>? Transactions { get; set; }
 		}
 }

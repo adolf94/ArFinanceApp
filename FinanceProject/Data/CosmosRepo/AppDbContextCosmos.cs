@@ -1,6 +1,7 @@
 ﻿using FinanceProject.Data;
 using FinanceProject.Models;
 using FinanceProject.Utilities;
+using CosmosModels = FinanceApp.Data.CosmosRepo.Dtos;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -90,12 +91,13 @@ namespace FinanceApp.Data.CosmosRepo
 										.ToContainer("User")
 										.HasKey(e => e.Id);
 
-						builder.Entity<User>()
-								.Property(e=>e.Roles)
-								.HasConversion(
-										(v) => JArray.FromObject(v),
-										v =>  v.ToObject<List<Role>>()!//JsonConvert.DeserializeObject<List<Role>>(v, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore })!
-								);
+						//builder.Entity<User>();
+								//.Property(e=>e.Roles)
+								//.HasConversion(
+								//		v=> JsonConvert.SerializeObject(v, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore }),
+								////(v) => JArray.FromObject(v),
+								//		v => JsonConvert.DeserializeObject<List<Role>>(v, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore })!
+								//);
 
 
 						base.OnModelCreating(builder);

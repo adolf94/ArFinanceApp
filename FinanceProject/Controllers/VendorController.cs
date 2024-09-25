@@ -7,7 +7,7 @@ namespace FinanceProject.Controllers
 {
 		[Route("api")]
 		[ApiController]
-		[Authorize]
+		[Authorize(Roles = "finance_user")]
 		public class VendorController : ControllerBase
 		{
 				private IVendorRepo _repo;

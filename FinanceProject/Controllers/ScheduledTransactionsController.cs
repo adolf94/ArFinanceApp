@@ -7,6 +7,7 @@ namespace FinanceProject.Controllers
 {
 		[Route("api")]
 		[ApiController]
+		[Authorize(Roles = "finance_user")]
 		[Authorize]
 		public class ScheduledTransactionsController : ControllerBase
 		{
