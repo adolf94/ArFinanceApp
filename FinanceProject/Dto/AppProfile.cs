@@ -10,7 +10,9 @@ namespace FinanceProject.Dto
 				{
 						CreateMap<CreateTransactionDto, Transaction>();
 
-						CreateMap<CreateUserDto, User>();
+						CreateMap<CreateUserDto, User>()
+								.ForMember(e=>e.EmailAddress, opt=>opt.MapFrom(e=>e.UserName))
+								;
 				}
 
 

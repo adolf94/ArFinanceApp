@@ -13,6 +13,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FinanceApp", "FinanceProjec
 EndProject
 Project("{54A90642-561A-4BB1-A94E-469ADEE60C69}") = "FinanceUi", "FinanceUi\FinanceUi.esproj", "{0342CC32-C89B-434E-B98B-6B859D19A925}"
 EndProject
+Project("{54A90642-561A-4BB1-A94E-469ADEE60C69}") = "cooploanapp", "CoopLoanApp\cooploanapp.esproj", "{2926724F-A5DA-4F94-B64F-6AC3E7F175FF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,12 @@ Global
 		{0342CC32-C89B-434E-B98B-6B859D19A925}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0342CC32-C89B-434E-B98B-6B859D19A925}.Release|Any CPU.Build.0 = Release|Any CPU
 		{0342CC32-C89B-434E-B98B-6B859D19A925}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{2926724F-A5DA-4F94-B64F-6AC3E7F175FF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2926724F-A5DA-4F94-B64F-6AC3E7F175FF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2926724F-A5DA-4F94-B64F-6AC3E7F175FF}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{2926724F-A5DA-4F94-B64F-6AC3E7F175FF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2926724F-A5DA-4F94-B64F-6AC3E7F175FF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2926724F-A5DA-4F94-B64F-6AC3E7F175FF}.Release|Any CPU.Deploy.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

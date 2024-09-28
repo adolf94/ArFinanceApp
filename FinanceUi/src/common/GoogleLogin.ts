@@ -3,7 +3,7 @@ import { v4 } from "uuid";
 export const oauthSignIn = (promptType? : string) => {
   // Google's OAuth 2.0 endpoint for requesting an access token
   var oauth2Endpoint = "https://accounts.google.com/o/oauth2/v2/auth";
-  const { protocal, host, pathname, search } = window.location;
+  const { protocol, host, pathname, search } = window.location;
   var state = {
     currentPath: `${pathname}${search}`,
     uid: v4(),
@@ -21,7 +21,7 @@ export const oauthSignIn = (promptType? : string) => {
   var params = {
       client_id: window.webConfig.clientId,
     response_type: "code",
-    scope: "openid",
+      scope: "openid .../auth/userinfo.profile .../auth/userinfo.email	",
     access_type: "offline",
     include_granted_scopes: "true",
       state: base64State,
@@ -64,5 +64,4 @@ function handleGoogleRedirect(dAtA) {
     return "state_mismatch";
   }
   console.log(hash2Obj);
-  setCode(hash2Obj.code);
 }

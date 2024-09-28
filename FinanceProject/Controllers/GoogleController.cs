@@ -7,6 +7,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
+using static FinanceProject.Models.AppConfig;
 
 namespace FinanceApp.Controllers
 {
@@ -32,10 +33,23 @@ namespace FinanceApp.Controllers
 
 						var data = new Dictionary<string, string>();
 
+						//get redirect 
+						AppRedirects? app = _config.RedirectUrl.FirstOrDefault(e => e.App == tokenBody.App);
+
+						if(app == null)
+						{
+										_logger.LogError("Invalid App Provided: " + tokenBody.App);
+
+										HttpContext.Response.Headers["X-GLogin-Error"] = "Invalid App Text";
+										return Forbid();
+
+						}
+
+
 						data.Add("client_id", _config.authConfig.client_id);
 						data.Add("client_secret", _config.authConfig.client_secret);
 						data.Add("scope", _config.authConfig.scope);
-						data.Add("redirect_uri", _config.authConfig.redirect_uri);
+						data.Add("redirect_uri", app.redirect_uri);
 						data.Add("grant_type", "authorization_code");
 						data.Add("code", tokenBody.Code);
 
@@ -61,10 +75,10 @@ namespace FinanceApp.Controllers
 								switch (error["error"])
 								{
 										case "redirect_uri_mismatch":
-												_logger.LogError("Misconifguration : REDIRECT URL MISMATCH");
+												_logger.LogError("Misconfiguration : REDIRECT URL MISMATCH");
 												return StatusCode(500);
 										case "invalid_client":
-												_logger.LogError("Misconifguration : INVALID CLIENT");
+												_logger.LogError("Misconfiguration : INVALID CLIENT");
 												return StatusCode(500);
 										case "invalid_grant":
 												HttpContext.Response.Headers["X-GLogin-Error"] = "Invalid Code Key";
@@ -97,16 +111,20 @@ namespace FinanceApp.Controllers
 						string[] claimsToCopy = new[] { "sub", "email", "nane", "azp" };
 						claims = idToken.Claims.Where(e => claimsToCopy.Contains(e.Type)).ToList();
 						Claim? emailClaim = claims.FirstOrDefault(e => e.Type == "email");
-						User? user = await _user.GetByEmailAsync(emailClaim!.Value)!;
-						if (user == null)
+						if(emailClaim == null)
 						{
-								_logger.LogInformation($"{emailClaim!.Value} has no linked user");
-								return Forbid();
+								_logger.LogError("Google Error? : No consent for email");
+
+								return StatusCode(500);
 						}
+
+						User? user = await _user.GetByEmailAsync(emailClaim!.Value)!;
+				
 
 						if (user != null)
 						{
 								claims.Add(new Claim("userId", user!.Id.ToString()));
+								claims.Add(new Claim("app", tokenBody.App));
 								claims.Add(new Claim(ClaimTypes.Role, "Registered"));
 								user.Roles.ToList().ForEach(e =>
 								{
@@ -115,6 +133,7 @@ namespace FinanceApp.Controllers
 						}
 						else
 						{
+								_logger.LogInformation($"{emailClaim!.Value} has no linked user");
 								claims.Add(new Claim(ClaimTypes.Role, "Unregistered"));
 						}
 						//foreach (var item in gClaims!)
@@ -148,11 +167,21 @@ namespace FinanceApp.Controllers
 						HttpClient client = new HttpClient();
 
 						var data = new Dictionary<string, string>();
+						AppRedirects? app = _config.RedirectUrl.FirstOrDefault(e => e.App == tokenBody.App);
+
+						if (app == null)
+						{
+								_logger.LogError("Invalid App Provided: " + tokenBody.App);
+
+								HttpContext.Response.Headers["X-GLogin-Error"] = "Invalid App Input";
+								return Forbid();
+
+						}
 
 						data.Add("client_id", _config.authConfig.client_id);
 						data.Add("client_secret", _config.authConfig.client_secret);
 						data.Add("scope", _config.authConfig.scope);
-						data.Add("redirect_uri", _config.authConfig.redirect_uri);
+						data.Add("redirect_uri", app.redirect_uri);
 						data.Add("grant_type", "refresh_token");
 						data.Add("refresh_token", tokenBody.Refresh_Token);
 
@@ -237,6 +266,7 @@ namespace FinanceApp.Controllers
 				{
 						public string Code { get; set; } = string.Empty;
 						public string Refresh_Token { get; set; } = string.Empty;
-				}
+						public string App { get; set; } = string.Empty;
+        }
 		}
 }
