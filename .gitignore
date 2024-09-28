@@ -3,3 +3,5 @@
 /packages/Microsoft.TypeScript.MSBuild.5.5.3
 /FinanceUi/.env.development
 /CosmosMigrations/data
+/cooploanapp/obj/Debug
+/package.json

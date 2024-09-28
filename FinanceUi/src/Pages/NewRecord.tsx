@@ -31,6 +31,7 @@ import {
   fetchTransactionById,
 } from "../repositories/transactions";
 import { ACCOUNT, fetchByAccountId } from "../repositories/accounts";
+import { getToken } from "../components/api";
 
 export const SelectAccountContext = createContext({});
 //const useStyles = makeStyles({
@@ -56,7 +57,6 @@ const NewRecordPage = (props) => {
   const [formData, setFormData] = useState<
     Partial<Transaction | ScheduledTransactions>
       >({ ...defaultValue, id: v4() });
-    console.log(formData.id);
   const theme = useTheme();
   const con = useRef();
   const queryClient = useQueryClient();
@@ -65,7 +65,8 @@ const NewRecordPage = (props) => {
   const navigate = useNavigate();
     const { state } = useLocation() as { state: any };
 
-  useEffect(() => {
+    useEffect(() => {
+        getToken();
     (async () => {
       if (
         transId == "new" ||
@@ -93,7 +94,7 @@ const NewRecordPage = (props) => {
           .then((e) => setFormData(e));
       }
     })();
-  }, [transId]);
+  }, [transId, query, queryClient]);
 
   //const styles = useStyles();
   const sm = useMediaQuery(theme.breakpoints.down("md"));
