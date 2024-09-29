@@ -23,9 +23,9 @@ const SmsOtpButton = ({ requestOtp, nextOtp }: SmsOtpButtonProps) => {
 		const [disabled, setDisabled] = useState(false)
 
 		useEffect(() => {
-				setDisabled(true)
+				if (moment().isBefore(nextOtp)) setDisabled(true)
 				const interval = setInterval(() => {
-						setRemaining(moment().diff(nextOtp, 'seconds'))
+						setRemaining(nextOtp.diff(moment(), 'seconds'))
 						if (moment().isAfter(nextOtp)) {
 								clearInterval(interval)
 								setRemaining(0)
@@ -40,7 +40,7 @@ const SmsOtpButton = ({ requestOtp, nextOtp }: SmsOtpButtonProps) => {
 
 		return <Button onClick={requestOtp} disabled={ disabled }>
 				{
-						!disabled&&(remaining>0) ? "Resend in "	+ remaining :	"Send OTP"
+						disabled&&(remaining>0) ? "Resend in "	+ remaining :	"Send OTP"
 				}
 				</Button>
 }
@@ -100,13 +100,16 @@ const Register = ({ token }: {token: string}) => {
 		}
 
 		const requestOtp = () => {
-				const nextSms = moment().add(90, "minute");
+				const nextSms = moment().add(90, "seconds");
 				setOtpState(nextSms)
 				api.post("/otp", { mobileNumber: form.mobileNumber })
 						.then(e => {
 								enqueueSnackbar("We've sent an OTP to your provided number", { autoHideDuration: 3000, anchorOrigin: {horizontal:'right', vertical:'bottom'} ,variant: 'success' })
 								setForm({ ...form, otpGuid: e.data.id})
 						}).catch(err => {
+								if (!err.response) {
+										setOtpState(moment())
+								}
 								if (err.response.status == 429) {
 										enqueueSnackbar("You've already requested too much OTP! Please wait!", { autoHideDuration: 3000, anchorOrigin: {horizontal:'right', vertical:'bottom'} ,variant: 'error' })
 								}

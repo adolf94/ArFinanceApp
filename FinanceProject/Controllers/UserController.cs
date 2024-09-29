@@ -8,7 +8,6 @@ using FinanceProject.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
-using Microsoft.Azure.Cosmos.Linq;
 using System.Security.Claims;
 
 namespace FinanceProject.Controllers
@@ -43,7 +42,7 @@ namespace FinanceProject.Controllers
 				{
 						string email = HttpContext.User.FindFirstValue(ClaimTypes.Email)!;
 
-						if(HttpContext.User.Claims.Any(e=> e.Type == ClaimTypes.Role && e.Value == "Unregistered"))
+						if (HttpContext.User.Claims.Any(e => e.Type == ClaimTypes.Role && e.Value == "Unregistered"))
 						{
 								if (user.UserName != email) return BadRequest();
 
@@ -55,7 +54,7 @@ namespace FinanceProject.Controllers
 								switch (result)
 								{
 										case -2:
-												return BadRequest(new { validation_required = "Incorrect OTP", result=-2 });
+												return BadRequest(new { validation_required = "Incorrect OTP", result = -2 });
 										case -1:
 												return BadRequest(new { validation_required = "Invalid OTP", result = -1 });
 										case 0:
@@ -69,10 +68,14 @@ namespace FinanceProject.Controllers
 
 						}
 						// check if email exist
-						User newUser = _mapper.Map<User>(user);
-						//await _users.CreateUser(newUser);
+						User? newUser = await _users.GetByEmailAsync(email);
+						if (newUser == null)
+						{
+								newUser = _mapper.Map<User>(user);
+								await _users.CreateUser(newUser);
+						}
 						//ToDo add New Access Token
-						return await Task.FromResult(Ok(user));
+						return await Task.FromResult(Ok(newUser));
 				}
 
 
@@ -112,6 +115,6 @@ namespace FinanceProject.Controllers
 				public class OtpRequestBody
 				{
 						public string MobileNumber { get; set; } = string.Empty;
-        }
+				}
 		}
 }

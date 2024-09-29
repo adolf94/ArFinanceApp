@@ -7,5 +7,6 @@ namespace FinanceApp.Data
 				public Task<User?> GetByEmailAsync(string email);
 				public Task<User?> GetById(string guid);
 				public Task<User> CreateUser(User user);
+
 		}
 }
