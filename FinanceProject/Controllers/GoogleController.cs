@@ -226,6 +226,7 @@ namespace FinanceApp.Controllers
 						{
 								claims.Add(new Claim("userId", user!.Id.ToString()));
 								claims.Add(new Claim(ClaimTypes.Role, "Registered"));
+								claims.Add(new Claim("appId", tokenBody.App));
 								user.Roles.ToList().ForEach(e =>
 								{
 										claims.Add(new Claim(ClaimTypes.Role, e));

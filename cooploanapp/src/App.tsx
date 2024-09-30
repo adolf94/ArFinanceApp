@@ -5,6 +5,8 @@ import  Index  from "./Pages/Index"
 import  Admin from './Pages/Admin'
 import { UserContext } from './components/userContext'
 import { SnackbarProvider, enqueueSnackbar } from 'notistack'
+import { LocalizationProvider } from '@mui/x-date-pickers'
+import { AdapterMoment } from '@mui/x-date-pickers/AdapterMoment'
 
 
 function App() {
@@ -19,11 +21,15 @@ function App() {
 
 
     return (
+
+        <LocalizationProvider dateAdapter={AdapterMoment}>
+
         <UserContext.Provider value={{ get: userctx, set: setUserCtx }}>
             <SnackbarProvider />
 
               <RouterProvider router={ router } />
             </UserContext.Provider>
+        </LocalizationProvider>
   )
 }
 

@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Net;
+using FinanceApp.Models;
 
 namespace FinanceApp.Data.CosmosRepo
 {
@@ -18,6 +19,7 @@ namespace FinanceApp.Data.CosmosRepo
 				public DbSet<User>? Users { get; set; }
 				public DbSet<Vendor>? Vendors { get; set; }
 				public DbSet<AccountBalance>? AccountBalances { get; set; }
+				public DbSet<LoanProfile>? LoanProfiles { get; set; }
 				public DbSet<ScheduledTransactions>? ScheduledTransactions { get; set; }
 
 				private readonly IConfiguration _configuration;
@@ -91,13 +93,20 @@ namespace FinanceApp.Data.CosmosRepo
 										.ToContainer("User")
 										.HasKey(e => e.Id);
 
+
+
+
+
+						builder.Entity<LoanProfile>().HasPartitionKey(e => new { e.AppId, e.ProfileId})
+										.ToContainer("LoanProfiles")
+										.HasKey(e => e.ProfileId);
 						//builder.Entity<User>();
-								//.Property(e=>e.Roles)
-								//.HasConversion(
-								//		v=> JsonConvert.SerializeObject(v, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore }),
-								////(v) => JArray.FromObject(v),
-								//		v => JsonConvert.DeserializeObject<List<Role>>(v, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore })!
-								//);
+						//.Property(e=>e.Roles)
+						//.HasConversion(
+						//		v=> JsonConvert.SerializeObject(v, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore }),
+						////(v) => JArray.FromObject(v),
+						//		v => JsonConvert.DeserializeObject<List<Role>>(v, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore })!
+						//);
 
 
 						base.OnModelCreating(builder);
@@ -131,6 +140,7 @@ namespace FinanceApp.Data.CosmosRepo
 						services.AddScoped<IVendorRepo, VendorRepo>();
 						services.AddScoped<IScheduledTransactionRepo, ScheduledTransactionRepo>();
 						services.AddScoped<IUserRepo, UserRepo>();
+						services.AddScoped<ILoanProfileRepo, LoanProfileRepo>();
 
 						return services;
 				}

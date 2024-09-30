@@ -2,7 +2,13 @@ import axios, { AxiosRequestConfig } from "axios";
 import moment from "moment";
 import { oauthSignIn } from "./googlelogin";
 import { memoize as mm } from "underscore";
+import { jwtDecode, JwtPayload } from "jwt-decode";
 
+
+interface IdToken extends JwtPayload {
+    email: string,
+    name: string
+}
 
 
 const getTokenFromApi = mm(
@@ -30,9 +36,9 @@ export const getToken = async (force: boolean) => {
 
     if (!token || force) token = await getTokenFromApi();
 
-    const tokenJson = JSON.parse(window.atob(token!.split(".")[1]));
 
-    if (moment().add(1, "minute").isAfter(tokenJson.exp * 1000))
+    const tokenJson = jwtDecode<JwtPayload>(token!)
+    if (moment().add(1, "minute").isAfter(tokenJson.exp! * 1000))
         token = await getTokenFromApi();
 
     return token;
