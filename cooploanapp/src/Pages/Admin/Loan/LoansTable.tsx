@@ -1,12 +1,12 @@
 import { TableContainer, Table, TableHead, TableRow, TableCell, TableBody, formControlClasses } from "@mui/material"
 import { useQuery } from "@tanstack/react-query"
-import { USER, getAll } from "../../repositories/users"
+import { USER, getAll } from "../../../repositories/users"
 import { User } from "FinanceApi"
-import { getByUserId, LOAN } from "../../repositories/loan"
+import { getByUserId, LOAN } from "../../../repositories/loan"
 import { useEffect, useState } from "react"
 import {  ArrowDropDown, ArrowRight } from "@mui/icons-material"
 import moment from "moment"
-import { FormattedAmount } from "../../components/NumberInput"
+import { FormattedAmount } from "../../../components/NumberInput"
 import { useNavigate } from "react-router-dom"
 
 

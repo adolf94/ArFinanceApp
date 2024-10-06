@@ -3,6 +3,7 @@ import { useEffect } from "react"
 import { Navigate, Route, Routes, useLocation, useMatch, useNavigate, useParams } from "react-router-dom"
 import LoansTable from "./LoansTable"
 import ViewLoanDetails from "./ViewLoanDetails"
+import SettingsIndex from "../Settings/Index"
 
 
 
@@ -31,6 +32,7 @@ const AdminBody = () => {
             <Grid container size={12}> 
                 <Routes>
                   <Route path="/loan/*" element={ <LoansTable /> }></Route>
+                  <Route path="/settings/*" element={ <SettingsIndex /> }></Route>
                 </Routes>
               
             </Grid>

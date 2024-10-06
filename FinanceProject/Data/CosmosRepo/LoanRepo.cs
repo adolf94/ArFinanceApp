@@ -1,5 +1,6 @@
 ﻿using FinanceApp.Models;
 using Microsoft.EntityFrameworkCore;
+using System;
 using static FinanceApp.Models.Loans;
 
 namespace FinanceApp.Data.CosmosRepo
@@ -37,7 +38,7 @@ namespace FinanceApp.Data.CosmosRepo
 						return await Task.FromResult(loans);
 				}
 
-				public async Task<ComputeInterestResult> ComputeInterests(Loans loan)
+				public async Task<ComputeInterestResult> ComputeInterests(Loans loan, DateTime dateRef, bool createPayment = false)
 				{
 
 						var balances = new
@@ -51,6 +52,7 @@ namespace FinanceApp.Data.CosmosRepo
 						double days = (loan.NextInterestDate - StartDate).TotalDays;
 						decimal totalInterest = 0m;
 						DateTime nextDate;
+						DateTime nextComputeDate;
 						LoanProfile loanProfile = loan.LoanProfile;
 						loanProfile.Fixed.Sort((a, b) => a.MaxDays - b.MaxDays);
 						var sort = loanProfile.Fixed;
@@ -72,43 +74,59 @@ namespace FinanceApp.Data.CosmosRepo
 								}
 								nextDate = loan.Date.AddDays(sort[useIndex].MaxDays);
 								totalInterest = sort[useIndex].Interest;
+								nextComputeDate = nextDate;
+								if (useIndex == sort.Count() - 1 && loanProfile.ComputePerDay && !createPayment)
+								{
+										//Computation for after the interest period (for ComputePer Day)
+										nextComputeDate = loan.Date.AddMonths(1);
+										while (nextDate.AddMonths(-1) <= loan.Date.AddDays(sort[useIndex].MaxDays))
+										{
+												nextComputeDate = nextComputeDate.AddMonths(1);
+										}
+								}
 						}
 						else
 						{
 								nextDate = loan.Date.AddMonths(1);
 
-								totalInterest = loanProfile.InterestPerMonth;
-								while (nextDate <= loan.NextInterestDate)
+								nextComputeDate = nextDate;
+								if (createPayment || !loanProfile.ComputePerDay)
 								{
-										nextDate = nextDate.AddMonths(1);
-										totalInterest = totalInterest + loanProfile.InterestPerMonth;
+										totalInterest = loanProfile.InterestPerMonth;
+										while (nextDate <= loan.NextInterestDate)
+										{
+												nextDate = nextDate.AddMonths(1);
+												totalInterest = totalInterest + loanProfile.InterestPerMonth;
 
+										}
+										nextComputeDate = nextDate;
+
+										if (loanProfile.ComputePerDay && dateRef < nextDate) {
+
+												int noOfDaysInMonth = nextDate.AddMonths(1).AddDays(-1).Day;
+												int rebateDays = (nextDate - dateRef).Days;
+												decimal percent = (rebateDays / noOfDaysInMonth) * loanProfile.InterestPerMonth;
+												totalInterest = totalInterest - percent;
+												nextDate = dateRef;
+												nextComputeDate = nextDate.AddMonths(1);
+										}
+								}
+								else
+								{
+										totalInterest = 0;
+										while (nextComputeDate <= loan.NextInterestDate)
+										{
+												nextComputeDate = nextComputeDate.AddMonths(1);
+												totalInterest = totalInterest + loanProfile.InterestPerMonth;
+										}
+										nextDate = nextComputeDate.AddMonths(-1);
 								}
 
-								if (loanProfile.ComputePerDay)
-								{
-										//const curDaysInMonth = nextDate.daysInMonth()
-										//const noOfDaysInMonth = nextDate.daysInMonth();
-
-										//const rebateDays = nextDate.diff(balance.date, 'day');
-										//const percent = (rebateDays / noOfDaysInMonth) * loanProfile.interestPerMonth!
-
-										//totalInterest = totalInterest - percent
-
-										//lastInterest = balance.date.clone()
-
-										//nextDate = balance.date.clone().add(1, 'day')
-
-								}
-
-
-								interestPercent = totalInterest - loan.TotalInterestPercent;
-
-								if (interestPercent <= 0) interestPercent = 0;
 
 
 						}
 						decimal interest = 0;
+						interestPercent = totalInterest - loan.TotalInterestPercent;
 						switch (loanProfile.InterestFactor)
 						{
 								case "principalBalance":
@@ -128,7 +146,7 @@ namespace FinanceApp.Data.CosmosRepo
 						var newInterestItem = new LoanInterest
 						{
 								DateCreated = DateTime.Now,
-								DateStart = loan.NextInterestDate.Date,
+								DateStart = loan.NextInterestDate.Date,			
 								DateEnd = nextDate.Date,
 								Amount = interest
 						};
@@ -136,9 +154,9 @@ namespace FinanceApp.Data.CosmosRepo
 
 						loan.InterestRecords.Add(newInterestItem);
 						loan.Interests = loan.Interests + newInterestItem.Amount;
-						loan.TotalInterestPercent = interestPercent;
+						loan.TotalInterestPercent = totalInterest;
 						loan.LastInterestDate = loan.NextInterestDate.Date;
-						loan.NextInterestDate = nextDate.Date;
+						loan.NextInterestDate = nextComputeDate;
 
 						_context.Update(loan);
 						await _context.SaveChangesAsync();
@@ -147,7 +165,7 @@ namespace FinanceApp.Data.CosmosRepo
 						{
 								NewLoanData = loan,
 								InterestData = newInterestItem,
-								NextDate = nextDate.Date
+								NextDate = createPayment? nextDate : nextComputeDate.Date
 						};
 				}
 

@@ -1,16 +1,16 @@
 import { Dialog, DialogTitle, DialogContent, Autocomplete, Box, Grid2 as Grid, TextField, Chip, Button} from "@mui/material"
 import { useQuery } from "@tanstack/react-query"
 import React, { Suspense,  useState } from "react"
-import { getAll, USER } from "../../repositories/users"
+import { getAll, USER } from "../../../repositories/users"
 import {CreateLoanDto, DisbursementAccount, LoanProfile, User} from 'FinanceApi'
-import { LOAN_PROFILE, getAll as allProfiles } from "../../repositories/loanProfiles"
-import LoanModeler, { Payment } from "./LoanModeler"
+import { LOAN_PROFILE, getAll as allProfiles } from "../../../repositories/loanProfiles"
+import LoanModeler, { Payment } from "./../LoanModeler"
 import { useNavigate } from "react-router-dom"
 import moment from "moment"
-import { useMutateLoan } from "../../repositories/loan"
+import { useMutateLoan } from "../../../repositories/loan"
 import { enqueueSnackbar } from "notistack"
-import BackdropLoader from "../../components/BackdropLoader"
-import CreateDisbursementAccount from "./CreateDisbursementAccount"
+import BackdropLoader from "../../../components/BackdropLoader"
+import CreateDisbursementAccount from "../CreateDisbursementAccount"
 
 interface CreateLoanProps {
 
@@ -31,7 +31,11 @@ interface LoanForm {
 const CreateLoan = (props:CreateLoanProps) => {
     const navigate = useNavigate()
     const {data: users, isLoading: userLoading} = useQuery({queryKey:[USER], queryFn: ()=>getAll()})
-    const {data: profiles, isLoading: profileLoading} = useQuery<LoanProfile[]>({queryKey:[LOAN_PROFILE], queryFn: ()=>allProfiles()})
+    const {data: profiles, isLoading: profileLoading} = useQuery<LoanProfile[]>({
+      queryKey:[LOAN_PROFILE], 
+      gcTime: 86400000,
+      staleTime:100000,
+      queryFn: ()=>allProfiles()})
     const [payments, setPaymentData] = useState<Payment[]>([])
     const [showNewDisbursement, setShowNewDisbursement] = useState<boolean>(false)
     const {create: createLoan} = useMutateLoan()

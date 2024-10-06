@@ -1,4 +1,4 @@
-import { Grid2 as Grid, Typography, TextField, TableContainer, Table, TableHead, TableRow, TableCell, TableBody, TableFooter, Button, Alert, InputAdornment, Chip, Box } from "@mui/material";
+                   import { Grid2 as Grid, Typography, TextField, TableContainer, Table, TableHead, TableRow, TableCell, TableBody, TableFooter, Button, Alert, InputAdornment, Chip, Box } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers";
 import { LoanProfile } from "FinanceApi";
 import moment from "moment";
@@ -83,7 +83,7 @@ const LoanModeler = ({ loanProfile, onChange, onPaymentsChange }: LoanModelerPro
                 nextDate = createDate.clone().add(sort[useIndex].maxDays, 'days');
                 totalInterest = sort[useIndex].interest;
             } else {
-                nextDate = createDate.clone().add(1, 'day').add(1, 'month');
+                nextDate = createDate.clone().add(1, 'month');
                 totalInterest = loanProfile.interestPerMonth!;
 
                 while (nextDate.isSameOrBefore(lastInterest)) {
@@ -91,15 +91,14 @@ const LoanModeler = ({ loanProfile, onChange, onPaymentsChange }: LoanModelerPro
                     totalInterest = totalInterest + loanProfile.interestPerMonth!;
                 }
 
-                if (loanProfile.computePerDay) {
+                if (loanProfile.computePerDay && balance.date.isBefore(nextDate)) {
                     //const curDaysInMonth = nextDate.daysInMonth()
-                    const noOfDaysInMonth = nextDate.daysInMonth();
-
-                    const rebateDays = nextDate.diff(balance.date, 'day');
+                    const noOfDaysInMonth = nextDate.clone().add(-1,'month').daysInMonth();
+                    console.log(noOfDaysInMonth)
+                    const rebateDays = nextDate.clone().diff(balance.date.clone(), 'day');
                     const percent = (rebateDays / noOfDaysInMonth) * loanProfile.interestPerMonth!
                     totalInterest = totalInterest - percent
-                    lastInterest = balance.date.clone()
-                    nextDate = balance.date.clone().add(1,'day')
+                    nextDate = balance.date.clone()
                 }
 
 
@@ -152,7 +151,7 @@ const LoanModeler = ({ loanProfile, onChange, onPaymentsChange }: LoanModelerPro
         let nextInterest = form.date
         const computed = payments.reduce((prev: Payment[], cur, index) => {
 
-            while (nextInterest.isBefore(cur.date.clone().add(1,'hour'))) {
+            while (nextInterest.clone().isBefore(cur.date)) {
                 const prior = {
                     date: cur.date,
                     interest,

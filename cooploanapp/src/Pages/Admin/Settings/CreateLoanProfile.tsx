@@ -7,8 +7,8 @@ import {
 } from "@mui/material"
 import { LoanProfile, FixedInterests } from "FinanceApi"
 import { ReactElement, useState } from "react"
-import api from "../../components/api"
-import LoanModeler from "./LoanModeler"
+import api from "../../../components/api"
+import LoanModeler from "../LoanModeler"
 import { useNavigate } from "react-router-dom"
 
 

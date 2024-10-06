@@ -43,9 +43,9 @@ namespace FinanceApp.Controllers
 						if (DateTime.Now > newLoan.Date.AddDays(1))
 						{
 								DateTime nextDate = newLoan.NextInterestDate;
-								while (nextDate < DateTime.Now)
+								while (nextDate <= DateTime.Now)
 								{
-										var result = await _repo.ComputeInterests(newLoan);
+										var result = await _repo.ComputeInterests(newLoan, DateTime.Now);
 										newLoan = result.NewLoanData;
 										nextDate = result.NextDate;
 								}
@@ -62,8 +62,11 @@ namespace FinanceApp.Controllers
 				public async Task<IActionResult> GetByUser(Guid userId)
 				{
 						var query = await _repo.GetByUserId(userId);
-						var items = await query.Where(e => e.Status == "Active").ToArrayAsync();
+						var items = await query
+								
+								.Where(e => e.Status == "Active").ToArrayAsync();
 
+						items.Select(e=>e.)
 
 						return Ok(items);
 

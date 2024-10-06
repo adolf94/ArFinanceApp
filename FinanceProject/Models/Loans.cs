@@ -14,6 +14,7 @@ namespace FinanceApp.Models
 
 				public DateTime Date { get; set; }
 				public DateTime DateCreated { get; set; } = DateTime.Now;
+				public DateTime? DateClosed { get; set; }
 				public DateTime NextInterestDate { get; set; }
 				public DateTime LastInterestDate { get; set; }
 				public DateTime[] ExpectedPayments { get; set; } = Array.Empty<DateTime>();

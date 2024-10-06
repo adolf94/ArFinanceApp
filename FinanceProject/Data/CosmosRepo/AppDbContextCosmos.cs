@@ -19,6 +19,7 @@ namespace FinanceApp.Data.CosmosRepo
 				public DbSet<Loans>? Loans { get; set; }
 				public DbSet<ScheduledTransactions>? ScheduledTransactions { get; set; }
 				public DbSet<PaymentRecord>? Payments { get; set; }
+				public DbSet<LoanPayment>? LoanPayments { get; set; }
 
 				private readonly IConfiguration _configuration;
 				public AppDbContext(DbContextOptions<AppDbContext> options, IConfiguration config) : base(options)
@@ -95,8 +96,9 @@ namespace FinanceApp.Data.CosmosRepo
 
 						builder.Entity<LoanPayment>().HasPartitionKey(e => new { e.AppId, e.UserId, e.LoanId })
 										.ToContainer("LoanPayments")
-										.HasKey(e => new { e.LoanId, e.PaymentId, e.AgainstPrincipal })
-										;
+										.HasKey(e => new { e.LoanId, e.PaymentId, e.AgainstPrincipal });
+
+						//builder.Entity<LoanPayment>().HasIndex(e => new { e.AppId, e.UserId, e.Date });
 
 						builder.Entity<PaymentRecord>().HasPartitionKey(e => new { e.AppId, e.UserId, e.Id })
 
@@ -152,6 +154,7 @@ namespace FinanceApp.Data.CosmosRepo
 						services.AddScoped<IUserRepo, UserRepo>();
 						services.AddScoped<ILoanProfileRepo, LoanProfileRepo>();
 						services.AddScoped<ILoanRepo, LoanRepo>();
+						services.AddScoped<IPaymentRepo, PaymentRepo>();
 
 
 						return services;

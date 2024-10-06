@@ -1,10 +1,10 @@
 import { AccountBalance, AttachMoney, VolunteerActivism } from "@mui/icons-material"
-import { Card, CardContent, Grid2 as Grid, Paper, Skeleton, Typography } from "@mui/material"
+import {  CardContent, Grid2 as Grid, Paper, Skeleton, Typography } from "@mui/material"
 import { useParams } from "react-router-dom"
-import { getByLoanId, LOAN } from "../../repositories/loan"
+import { getByLoanId, LOAN } from "../../../repositories/loan"
 import { useQuery } from "@tanstack/react-query"
 import { useEffect, useState } from "react"
-import { FormattedAmount } from "../../components/NumberInput"
+import { FormattedAmount } from "../../../components/NumberInput"
 
 
 

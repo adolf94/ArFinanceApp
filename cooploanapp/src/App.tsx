@@ -2,7 +2,7 @@ import { lazy, useState } from 'react'
 import React from 'react'
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 import  Index  from "./Pages/Index"
-import  Admin from './Pages/Admin'
+import  Admin from './Pages/Admin/Index'
 import { UserContext } from './components/userContext'
 import { SnackbarProvider, enqueueSnackbar } from 'notistack'
 import { LocalizationProvider } from '@mui/x-date-pickers'

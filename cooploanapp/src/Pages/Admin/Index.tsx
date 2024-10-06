@@ -7,15 +7,15 @@ import {
 	Grid2 as Grid,
 	Typography,
 } from "@mui/material";
-import AuthenticatedLayout from "../components/AuthenticatedLayout";
+import AuthenticatedLayout from "../../components/AuthenticatedLayout";
 import { PersonAdd } from "@mui/icons-material";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faHandHoldingDollar } from "@fortawesome/free-solid-svg-icons";
-import CreateLoanProfile from "./AdminComponents/CreateLoanProfile";
-import CreateUser from "./AdminComponents/CreateUser";
+import CreateUser from "./User/CreateUser";
 import { Outlet, Route, Routes, useNavigate } from "react-router-dom";
-import CreateLoan from "./AdminComponents/CreateLoan";
-import AdminBody from "./AdminComponents/AdminBody";
+import CreateLoan from "./Loan/Create";
+import AdminBody from "./Loan/AdminBody";
+import CreatePayment from "./Payments/CreatePayment";
 
 const Admin = () => {
 	const navigate = useNavigate();
@@ -58,24 +58,24 @@ const Admin = () => {
 										sx={{ cursor: "pointer" }}
 										onClick={() => navigate("./loan/new")}
 									>
-										<Typography variant="h5">Release a loan</Typography>
+										<Typography variant="h5">Issue a loan</Typography>
 									</Grid>
 								</Grid>
 							</CardContent>
 							<CardActions>
-								<CreateLoanProfile>
-									<Button variant="text"> Create Loan Profile</Button>
-								</CreateLoanProfile>
+								<Button onClick={() => navigate("./payment/new")}>Record payment</Button>
 							</CardActions>
 						</Card>
 					</Grid>
 				</Grid>
 				<Grid container sx={{ pt: 2, width: "100vw" }}>
+					
 					<AdminBody />
 				</Grid>
 			</Grid>
 			<Routes>
 				<Route path="/user/new" element={<CreateUser />}></Route>
+				<Route path="/payment/new" element={<CreatePayment />}></Route>
 				<Route path="/loan/new" element={<CreateLoan />}></Route>
 				<Route path="*" element={<Outlet />}></Route>
 			</Routes>

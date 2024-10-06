@@ -11,7 +11,8 @@ namespace FinanceApp.Models
 								return PaymentId.ToString() + "|" + LoanId.ToString() + "|" + (AgainstPrincipal ? "principal" : "interest");
 						}
 				}
-				public Guid PaymentId { get; set; }
+        public DateTime Date { get; set; }
+        public Guid PaymentId { get; set; }
 				[JsonIgnore]
 				public PaymentRecord Payment { get; set; }
 				public Guid LoanId { get; set; }

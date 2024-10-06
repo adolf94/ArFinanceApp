@@ -1,9 +1,9 @@
 import { Autocomplete, Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Grid2 as Grid, InputAdornment, TextField } from "@mui/material";
 import React, { useState } from "react";
-import { getAll, LOAN_PROFILE } from "../../repositories/loanProfiles";
+import { getAll, LOAN_PROFILE } from "../../../repositories/loanProfiles";
 import { useQuery } from "@tanstack/react-query";
 import { LoanProfile, User } from "FinanceApi";
-import { useMutateUser } from "../../repositories/users";
+import { useMutateUser } from "../../../repositories/users";
 import {v4 as uid} from 'uuid'
 import { enqueueSnackbar } from "notistack";
 import { useNavigate } from "react-router-dom";
