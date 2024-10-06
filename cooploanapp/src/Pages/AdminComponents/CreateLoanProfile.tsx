@@ -2,14 +2,14 @@
 import { Delete, Save }
     from "@mui/icons-material"
 import {
-    Box, Button, Checkbox, Dialog, DialogContent, DialogTitle,
-    FormControl, FormControlLabel, FormHelperText, Grid2 as Grid, IconButton, InputAdornment, InputLabel, MenuItem, Select, Table, TableBody, TableCell, TableContainer, TableFooter, TableHead, TableRow, TextField, Typography
+    Box, Button, Checkbox, Dialog, DialogActions, DialogContent, DialogTitle,
+    FormControl, FormControlLabel, FormHelperText, Grid2 as Grid, IconButton, InputAdornment, InputLabel, MenuItem, Select, Table, TableBody, TableCell, TableContainer, TableFooter, TableHead, TableRow, TextField
 } from "@mui/material"
-import { DateField } from '@mui/x-date-pickers'
 import { LoanProfile, FixedInterests } from "FinanceApi"
-import { useState } from "react"
+import { ReactElement, useState } from "react"
 import api from "../../components/api"
 import LoanModeler from "./LoanModeler"
+import { useNavigate } from "react-router-dom"
 
 
 const interestFactors = [
@@ -20,7 +20,7 @@ const interestFactors = [
 ]
 
 
-const CreateLoanProfile = () => {
+const CreateLoanProfile = ({ children }: {children : ReactElement}) => {
     const [form, setForm] = useState<Partial<LoanProfile>>({
         loanProfileName: "",
         interestPerMonth: 0.00,
@@ -33,8 +33,10 @@ const CreateLoanProfile = () => {
         maxDays: 0,
         interest: 0
     })
+    const navigate = useNavigate()
     const [add, setAdd] = useState(false)
     const [show, setShow] = useState(false)
+    const [showModel, setShowModel] = useState(false)
 
 
     const createCondition = () => {
@@ -56,21 +58,22 @@ const CreateLoanProfile = () => {
     const saveProfile = () => {
 
         api.post("/loanprofile", form)
-            .then((res) => {
-                console.log(res.data)
+            .then(() => {
+                navigate("../")
             })
 
     }
 
 
-		return <Grid container>
-        <Button variant="contained" onClick={ ()=>setShow(true)}>Add Loan Profile</Button>
+    return <Grid container>
+        <Box component="span" onClick={()=>setShow(true)}>{children}</Box>
+        
         <Dialog open={show} maxWidth="lg" fullWidth onClose={() => setShow(false)} >
             <DialogTitle>Create new Loan Profile</DialogTitle>
             <DialogContent>
                 <Grid container>
-                    <Grid container size={{ md: 5, sm: 12 }} sx={{p:2} }>
-
+                    <Grid container size={{ md: 5, sm: 12 }} alignSelf="start" sx={{ p: 2, display: { sm: (showModel?'none':'flex'), md: 'flex' }} }>
+                        
                         <Grid size={12} sx={{ pb: 2 }}>
                             <TextField label="Profile Name" fullWidth value={form.loanProfileName}
                                 onChange={(evt) => setForm({ ...form, loanProfileName: evt.target.value })}
@@ -180,15 +183,27 @@ const CreateLoanProfile = () => {
                                     </TableFooter>
                                 </Table>
                             </TableContainer>
-                            <Button onClick={saveProfile}> Submit </Button>
                         </Grid>
                     </Grid>
-                    <Grid container alignSelf="start" size={{ md: 7, sm: 12 }} sx={{ p: 2 }}>
+                    <Grid container alignSelf="start" size={{ md: 7, sm: 12 }} sx={{ p: 2, display: { sm: (showModel?'flex':'none'), md: 'flex' } }}>
+                       
                         <LoanModeler loanProfile={form} />
                     </Grid>
                 </Grid>
             </DialogContent>
+            <DialogActions>
+                <Grid container sx={{px:3,justifyContent:'space-between', width:'100%'} }>
+                    <Grid>
+                        {showModel ? <Button onClick={() => setShowModel(false)}> {"<"} Return to Loan Profile </Button> : <Button onClick={() => setShowModel(true)}>  Model Loan/Payments </Button> }
+                        
+                    </Grid>
+                    <Grid>
+                        <Button onClick={saveProfile}> Create </Button>
+                    </Grid>
+                    
+                </Grid>
 
+            </DialogActions>
         </Dialog>
     </Grid>
 

@@ -1,34 +1,32 @@
-﻿namespace FinanceApp.Models
+﻿using FinanceApp.Models.SubModels;
+
+namespace FinanceApp.Models
 {
 		public class Loans
 		{
-				public Guid Id { get; set; }
+				public Guid Id { get; set; } = Guid.NewGuid();
 				public string AppId { get; set; } = string.Empty;
 
 				public Guid UserId { get; set; }
 				public Guid CoborrowerId { get; set; }
+				public Guid CreatedBy { get; set; }
 
-				public DateTime DateCreated { get; set; }
+
 				public DateTime Date { get; set; }
+				public DateTime DateCreated { get; set; } = DateTime.Now;
 				public DateTime NextInterestDate { get; set; }
 				public DateTime LastInterestDate { get; set; }
 				public DateTime[] ExpectedPayments { get; set; } = Array.Empty<DateTime>();
-
+				public DisbursementAccount? DisbursementAccount { get; set; }
 				public decimal Principal { get; set; }
 				public decimal Interests { get; set; }
-				public LoanProfile LoanProfile { get; set; } = new LoanProfile();
+				public decimal TotalInterestPercent { get; set; }
+				public NoNavigationLoanProfile LoanProfile { get; set; } = new NoNavigationLoanProfile();
 
-				public LoanPayment[] Payment { get; set; } = Array.Empty<LoanPayment>();
-				public LoanInterest[] InterestRecords { get; set; } = Array.Empty<LoanInterest>();
-
+				public List<LoanPayment> Payment { get; set; } = new List<LoanPayment>();
+				public List<LoanInterest> InterestRecords { get; set; } = new List<LoanInterest>();
 				public string Status { get; set; } = "Active";
 
-				public class LoanPayment
-				{
-						public Guid PaymentId { get; set; }
-						public decimal Amount { get; set; }
-						public bool AgainstPrincipal { get; set; }
-				}
 
 				public class LoanInterest
 				{
@@ -39,4 +37,6 @@
 				}
 
 		}
+
+		public class NoNavigationLoanProfile : LoanProfile { }
 }

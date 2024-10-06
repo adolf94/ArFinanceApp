@@ -7,28 +7,35 @@ import { UserContext } from './components/userContext'
 import { SnackbarProvider, enqueueSnackbar } from 'notistack'
 import { LocalizationProvider } from '@mui/x-date-pickers'
 import { AdapterMoment } from '@mui/x-date-pickers/AdapterMoment'
+import {
+    QueryClient,
+    QueryClientProvider,
+} from '@tanstack/react-query'
+import { IdToken } from './Pages/IndexComponents/Register'
 
 
+export const queryClient = new QueryClient()
 function App() {
 
     const router = createBrowserRouter([
         { path: "/", element: <Index /> },
-        { path: "/admin", element: <Admin /> }
+        { path: "/admin/*", element: <Admin /> }
 
     ], {basename: "/loans"})
-    const [userctx, setUserCtx] = useState({})
+    const [userctx, setUserCtx] = useState<IdToken>(null as any)
 
 
 
     return (
 
         <LocalizationProvider dateAdapter={AdapterMoment}>
-
+            <QueryClientProvider client={queryClient}>
         <UserContext.Provider value={{ get: userctx, set: setUserCtx }}>
             <SnackbarProvider />
 
               <RouterProvider router={ router } />
-            </UserContext.Provider>
+                </UserContext.Provider>
+            </QueryClientProvider>
         </LocalizationProvider>
   )
 }

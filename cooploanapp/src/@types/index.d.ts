@@ -61,6 +61,7 @@ declare module 'FinanceApi' {
     }
 
     // ..\FinanceProject\Models\LoanProfile.cs
+    
     export interface LoanProfile {
         profileId: string;
         appId: string;
@@ -70,7 +71,6 @@ declare module 'FinanceApi' {
         interestFactor: string;
         fixed: FixedInterests[];
     }
-
     // ..\FinanceProject\Models\Loans.cs
     export interface Loans {
         id: string;
@@ -132,15 +132,16 @@ declare module 'FinanceApi' {
         description: string;
     }
 
-    // ..\FinanceProject\Models\User.cs
     export interface User {
         id: string;
-        userName?: string;
-        name?: string;
-        azureId?: string;
+        userName: string | null;
+        name: string | null;
+        azureId: string | null;
         mobileNumber: string;
         emailAddress: string;
         roles: string[];
+        disbursementAccounts: DisbursementAccount[];
+        loanProfile: LoanProfile | null;
     }
 
     // ..\FinanceProject\Models\Vendor.cs
@@ -213,5 +214,21 @@ declare module 'FinanceApi' {
         expiresIn: number;
         scope: string;
     }
+    
+    export interface DisbursementAccount {
+        bankName: string;
+        accountId: string;
+        accountName: string;
+    }
 
+
+    export interface CreateLoanDto {
+        userId: string;
+        coborrowerId: string;
+        date: string;
+        expectedPayments: string[];
+        loanProfile: LoanProfile;
+        disbursementAccount: DisbursementAccount | null;
+        principal: number;
+    }
 }

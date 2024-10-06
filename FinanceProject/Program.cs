@@ -10,7 +10,6 @@ using FinanceProject.Models;
 using FinanceProject.Utilities;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.FileProviders;
-using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using System.Text.Json;
@@ -83,6 +82,7 @@ builder.Services.AddControllersWithViews()
 {
 		//mc.SetGeneratePropertyMaps<Generate>()
 		mc.AddProfile(new FinanceProject.Dto.AppProfile());
+		mc.AddProfile(new FinanceApp.Dto.LoansProfile());
 });
 
 
@@ -216,7 +216,7 @@ foreach (var item in apps)
 				evt.UseRouting();
 				evt.UseRateLimiter();
 
-				app.UseAuthorization();		
+				app.UseAuthorization();
 
 				evt.UseStaticFiles(staticFileOptions);
 				evt.UseEndpoints(e => e.MapFallbackToFile(item + "/index.html"));

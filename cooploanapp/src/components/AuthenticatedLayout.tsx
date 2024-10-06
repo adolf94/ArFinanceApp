@@ -5,6 +5,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import moment from 'moment';
 import { UserContextValue, UserContext } from './userContext';
+import { oauthSignIn } from './googlelogin';
 
 
 interface AuthenticatedLayoutProps {
@@ -60,7 +61,7 @@ const PersonaMenu = ({ persona } :{ persona:string }) => {
 
 
 
-const AuthenticatedLayoutChild = ({ children, persona }: { contextValue: UserContextValue } & AuthenticatedLayoutProps) => {
+const AuthenticatedLayoutChild = ({ children, persona, contextValue }: { contextValue: UserContextValue } & AuthenticatedLayoutProps) => {
 
     const navigate = useNavigate()
     const [loggedIn, setLoggedIn] = useState(false)
@@ -68,10 +69,10 @@ const AuthenticatedLayoutChild = ({ children, persona }: { contextValue: UserCon
     useEffect(() => {
         //check if token is valid
         const token = window.sessionStorage.getItem("access_token");
-        if (!token) return navigate("/")
+        if (!token) return oauthSignIn()
         const tokenJson = JSON.parse(window.atob(token!.split(".")[1]));
 
-        if (moment().add(1, "minute").isAfter(tokenJson.exp * 1000)) return navigate("/")
+        if (moment().add(1, "minute").isAfter(tokenJson.exp * 1000)) oauthSignIn()
         setLoggedIn(true)
         return
 

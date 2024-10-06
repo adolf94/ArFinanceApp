@@ -11,7 +11,7 @@ namespace FinanceApp.Models
 				public bool ComputePerDay { get; set; }
 				public string InterestFactor { get; set; } = "principalBalance";
 
-				public IEnumerable<FixedInterests> Fixed { get; set; } = Array.Empty<FixedInterests>();
+				public List<FixedInterests> Fixed { get; set; } = new List<FixedInterests>();
 
 		}
 }

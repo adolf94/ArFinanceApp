@@ -1,12 +1,8 @@
-﻿using FinanceProject.Data;
+﻿using FinanceApp.Models;
+using FinanceProject.Data;
 using FinanceProject.Models;
 using FinanceProject.Utilities;
-using CosmosModels = FinanceApp.Data.CosmosRepo.Dtos;
 using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using System.Net;
-using FinanceApp.Models;
 
 namespace FinanceApp.Data.CosmosRepo
 {
@@ -20,7 +16,9 @@ namespace FinanceApp.Data.CosmosRepo
 				public DbSet<Vendor>? Vendors { get; set; }
 				public DbSet<AccountBalance>? AccountBalances { get; set; }
 				public DbSet<LoanProfile>? LoanProfiles { get; set; }
+				public DbSet<Loans>? Loans { get; set; }
 				public DbSet<ScheduledTransactions>? ScheduledTransactions { get; set; }
+				public DbSet<PaymentRecord>? Payments { get; set; }
 
 				private readonly IConfiguration _configuration;
 				public AppDbContext(DbContextOptions<AppDbContext> options, IConfiguration config) : base(options)
@@ -95,11 +93,23 @@ namespace FinanceApp.Data.CosmosRepo
 
 
 
+						builder.Entity<LoanPayment>().HasPartitionKey(e => new { e.AppId, e.UserId, e.LoanId })
+										.ToContainer("LoanPayments")
+										.HasKey(e => new { e.LoanId, e.PaymentId, e.AgainstPrincipal })
+										;
+
+						builder.Entity<PaymentRecord>().HasPartitionKey(e => new { e.AppId, e.UserId, e.Id })
+
+										.ToContainer("Payments");
 
 
-						builder.Entity<LoanProfile>().HasPartitionKey(e => new { e.AppId, e.ProfileId})
+
+						builder.Entity<LoanProfile>().HasPartitionKey(e => new { e.AppId, e.ProfileId })
 										.ToContainer("LoanProfiles")
 										.HasKey(e => e.ProfileId);
+
+						builder.Entity<Loans>().HasPartitionKey(e => new { e.AppId, e.UserId, e.Id })
+										.ToContainer("Loans");
 						//builder.Entity<User>();
 						//.Property(e=>e.Roles)
 						//.HasConversion(
@@ -141,6 +151,8 @@ namespace FinanceApp.Data.CosmosRepo
 						services.AddScoped<IScheduledTransactionRepo, ScheduledTransactionRepo>();
 						services.AddScoped<IUserRepo, UserRepo>();
 						services.AddScoped<ILoanProfileRepo, LoanProfileRepo>();
+						services.AddScoped<ILoanRepo, LoanRepo>();
+
 
 						return services;
 				}

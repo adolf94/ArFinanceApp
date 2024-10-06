@@ -7,9 +7,11 @@ import { jwtDecode, JwtPayload } from "jwt-decode"
 import moment from "moment"
 
 
-interface IdToken extends JwtPayload {
+export interface IdToken extends JwtPayload {
 		email: string,
-		name :string 
+		name :string ,
+		userId?: string,
+		role: string[] | string
 }
 
 interface SmsOtpButtonProps {
@@ -78,7 +80,7 @@ const Register = ({ token }: {token: string}) => {
 		const registerClicked = () => {
 				const { name, userName, mobileNumber} = form
 				if (!name || !userName || !mobileNumber) {
-						enqueueSnackbar("Please check your provided inputs", { autoClose: 3000, anchorOrigin: {horizontal:'right', vertical:'bottom'} ,variant: 'error' })
+						enqueueSnackbar("Please check your provided inputs", { autoHideDuration: 3000, anchorOrigin: {horizontal:'right', vertical:'bottom'} ,variant: 'error' })
 						return
 				}
 				api.post("/user", form)

@@ -1,4 +1,6 @@
-﻿using Newtonsoft.Json;
+﻿using FinanceApp.Models;
+using FinanceApp.Models.SubModels;
+using Newtonsoft.Json;
 
 namespace FinanceProject.Models
 {
@@ -14,9 +16,12 @@ namespace FinanceProject.Models
 
 				public string EmailAddress { get; set; } = string.Empty;
 
-				public string[] Roles { get; set; } = Array.Empty<string>() ;
+				public string[] Roles { get; set; } = Array.Empty<string>();
+				public bool HasActiveLoans { get; set; } = false;
+				public List<DisbursementAccount> DisbursementAccounts { get; set; } = new List<DisbursementAccount>();
+				public LoanProfile? LoanProfile { get; set; } = null;
 
-        [JsonIgnore]
+				[JsonIgnore]
 				public ICollection<Transaction>? Transactions { get; set; }
 		}
 }

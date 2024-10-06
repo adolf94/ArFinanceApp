@@ -24,7 +24,8 @@ const getTokenFromApi = mm(
                 window.sessionStorage.setItem("access_token", e.data.access_token);
                 return e.data.access_token;
             })
-            .catch(() => {
+            .catch((e) => {
+                console.log(e);
                 oauthSignIn();
             });
     },
@@ -80,9 +81,9 @@ api.interceptors.response.use(
     },
     (err) => {
         if (!!err?.response) {
-            if (err.response.status === 401 && !err.request.retryGetToken) {
+            if (err.response.status === 401 && !err.response.config.retryGetToken) {
                 console.debug("retry with getToken");
-                return api({ ...err.request, retryGetToken: true })
+                return api({ ...err.response.config, retryGetToken: true })
             }
         }
         return Promise.reject(err)
