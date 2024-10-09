@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react"
 import { Box, Button, CircularProgress, Grid2 as Grid, InputAdornment, TextField, Typography } from "@mui/material"
 import { enqueueSnackbar } from 'notistack'
-import { oauthSignIn } from "../../components/googlelogin"
-import api from "../../components/api"
+import { oauthSignIn } from "../components/googlelogin"
+import api from "../components/api"
 import { jwtDecode, JwtPayload } from "jwt-decode"
 import moment from "moment"
 

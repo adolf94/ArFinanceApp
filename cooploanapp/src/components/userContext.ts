@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useContext } from "react";
-import { IdToken } from "../Pages/IndexComponents/Register";
+import { IdToken } from "../Pages/Register";
 
 export interface UserContextValue {
 		get: IdToken,

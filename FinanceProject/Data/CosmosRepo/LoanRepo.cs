@@ -1,6 +1,5 @@
 ﻿using FinanceApp.Models;
 using Microsoft.EntityFrameworkCore;
-using System;
 using static FinanceApp.Models.Loans;
 
 namespace FinanceApp.Data.CosmosRepo
@@ -37,6 +36,7 @@ namespace FinanceApp.Data.CosmosRepo
 						IQueryable<Loans> loans = _context.Loans!.Where(e => e.UserId == guid);
 						return await Task.FromResult(loans);
 				}
+
 
 				public async Task<ComputeInterestResult> ComputeInterests(Loans loan, DateTime dateRef, bool createPayment = false)
 				{
@@ -101,7 +101,8 @@ namespace FinanceApp.Data.CosmosRepo
 										}
 										nextComputeDate = nextDate;
 
-										if (loanProfile.ComputePerDay && dateRef < nextDate) {
+										if (loanProfile.ComputePerDay && dateRef < nextDate)
+										{
 
 												int noOfDaysInMonth = nextDate.AddMonths(1).AddDays(-1).Day;
 												int rebateDays = (nextDate - dateRef).Days;
@@ -146,9 +147,10 @@ namespace FinanceApp.Data.CosmosRepo
 						var newInterestItem = new LoanInterest
 						{
 								DateCreated = DateTime.Now,
-								DateStart = loan.NextInterestDate.Date,			
+								DateStart = loan.NextInterestDate.Date,
 								DateEnd = nextDate.Date,
-								Amount = interest
+								Amount = interest,
+								TotalPercent = totalInterest,
 						};
 
 
@@ -165,7 +167,7 @@ namespace FinanceApp.Data.CosmosRepo
 						{
 								NewLoanData = loan,
 								InterestData = newInterestItem,
-								NextDate = createPayment? nextDate : nextComputeDate.Date
+								NextDate = createPayment ? nextDate : nextComputeDate.Date
 						};
 				}
 

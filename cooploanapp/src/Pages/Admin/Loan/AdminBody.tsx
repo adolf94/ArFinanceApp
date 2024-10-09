@@ -13,7 +13,7 @@ const AdminBody = () => {
 
   return <Box sx={{width:'100%'}}>
     <Grid container>
-      <Grid size={6}>
+      <Grid size={{sm:12,lg:6}}>
         <Paper sx={{p:1}}>
           <Grid container>
             <Grid size={12}>
@@ -39,7 +39,7 @@ const AdminBody = () => {
           </Grid>
         </Paper>
       </Grid>
-      <Grid size={6}>
+      <Grid size={{sm:12,lg:6}}>
         <Routes>
           <Route path="/loan/:loanid" element={ <ViewLoanDetails />}></Route>
         </Routes>

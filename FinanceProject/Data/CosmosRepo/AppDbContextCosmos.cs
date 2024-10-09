@@ -97,7 +97,6 @@ namespace FinanceApp.Data.CosmosRepo
 						builder.Entity<LoanPayment>().HasPartitionKey(e => new { e.AppId, e.UserId, e.LoanId })
 										.ToContainer("LoanPayments")
 										.HasKey(e => new { e.LoanId, e.PaymentId, e.AgainstPrincipal });
-
 						//builder.Entity<LoanPayment>().HasIndex(e => new { e.AppId, e.UserId, e.Date });
 
 						builder.Entity<PaymentRecord>().HasPartitionKey(e => new { e.AppId, e.UserId, e.Id })

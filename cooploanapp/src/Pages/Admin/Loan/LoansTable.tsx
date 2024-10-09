@@ -16,7 +16,7 @@ const LoanClientRow = ( {client} : {client : User}  )=>{
   const [expand,setExpand] = useState(false)
   const [total,setTotal] = useState<any>({})
   const [loanCalculation,setLoanCalculated] = useState<any>([])
-  const { data: loans, isLoading: loading } = useQuery({ queryKey: [LOAN,{userId: client.id}], queryFn: () => getByUserId(client.id), enabled:!!client?.id && expand })
+  const { data: loans, isLoading: loading } = useQuery({ queryKey: [LOAN,{userId: client.id}], queryFn: () => getByUserId(client.id), enabled:!!client?.id })
   const navigate = useNavigate()
 
   useEffect(()=>{
@@ -29,21 +29,20 @@ const LoanClientRow = ( {client} : {client : User}  )=>{
     }
 
     let loansCalculated = (loans||[]).map((l :any)=>{
-      let payments = l.payment.reduce((p : number,c)=>{ Number.parseFloat(c.amount) + p },0)
-
+      let payments = l.payment.reduce((p : number,c)=>{ return Number.parseFloat(c.amount) + p },0)
+      let interest = l.interestRecords.reduce((p : number,c)=>{ return Number.parseFloat(c.amount) + p },0)
       total.principal = total.principal + Number.parseFloat(l.principal);
-      total.interest = total.interest +  Number.parseFloat(l.interests);
+      total.interest = total.interest +  interest;
       total.payments = total.payments +  Number.parseFloat(payments);
 
       let res = {
         date:l.date,
         principal: l.principal,
-        interests: l.interests,
+        interests: interest,
         payments: payments,
-        balance: l.principal + Number.parseFloat(l.interests) - Number.parseFloat(payments),
+        balance: l.principal + interest - Number.parseFloat(payments),
         orig: l
       }
-      console.log(res)
       return res
     })
     setLoanCalculated(loansCalculated)
@@ -61,7 +60,7 @@ const LoanClientRow = ( {client} : {client : User}  )=>{
     <TableCell>{FormattedAmount(total.payments)}</TableCell>
     <TableCell>{FormattedAmount(total.balance)}</TableCell>
   </TableRow>
-  {expand && !loading && (loanCalculation || []).map((l:any)=><TableRow onClick={()=>navigate(`../loan/${l.orig.id}`)}>
+  {expand && !loading && (loanCalculation || []).map((l:any)=><TableRow key={l.orig.id} onClick={()=>navigate(`../loan/${l.orig.id}`)}>
     <TableCell></TableCell>
     <TableCell>{moment(l.date).format("YYYY-MM-DD")}</TableCell>
     <TableCell>{FormattedAmount(l.principal)}</TableCell>
@@ -93,7 +92,7 @@ const LoansTable = () => {
       </TableHead>
       <TableBody>
         {
-          !loading && clients.map((e:User)=> <LoanClientRow client={e} />)
+          !loading && clients.map((e:User)=> <LoanClientRow key={e.id} client={e} />)
         }
       </TableBody>
     </Table>

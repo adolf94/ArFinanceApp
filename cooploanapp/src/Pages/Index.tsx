@@ -6,9 +6,9 @@ import { Box, Button, CircularProgress, Grid2 as Grid } from "@mui/material"
 import { useNavigate, useSearchParams } from "react-router-dom"
 import { oauthSignIn } from "../components/googlelogin"
 import api from "../components/api"
-import IndexAuthenticated from "./IndexAuthenticated"
+import IndexAuthenticated from "./Borrower/Index"
 import moment from "moment"
-import Register, { IdToken } from './IndexComponents/Register'
+import Register, { IdToken } from './Register'
 import { jwtDecode as decodeJwt } from 'jwt-decode'
 import useUserInfo, { useUpdateUserInfo } from "../components/userContext"
 
@@ -116,6 +116,7 @@ const Index = () => {
             const userInfo = decodeJwt<IdToken>(e)
             setIsLoggedIn(true)
             //@ts-ignore
+            console.log(userInfo)
             updateUser(userInfo)
 
             const stateFromStorage = sessionStorage.getItem("googleLoginState");

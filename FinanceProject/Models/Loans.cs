@@ -35,6 +35,7 @@ namespace FinanceApp.Models
 						public DateTime DateStart { get; set; }
 						public DateTime DateEnd { get; set; }
 						public decimal Amount { get; set; }
+						public decimal TotalPercent { get; set; }
 				}
 
 		}

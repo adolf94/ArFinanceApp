@@ -1,10 +1,12 @@
 import { AccountBalance, AttachMoney, VolunteerActivism } from "@mui/icons-material"
-import {  CardContent, Grid2 as Grid, Paper, Skeleton, Typography } from "@mui/material"
+import {  CardContent, Chip, Grid2 as Grid, Paper, Skeleton, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@mui/material"
 import { useParams } from "react-router-dom"
 import { getByLoanId, LOAN } from "../../../repositories/loan"
 import { useQuery } from "@tanstack/react-query"
 import { useEffect, useState } from "react"
 import { FormattedAmount } from "../../../components/NumberInput"
+import moment from "moment"
+import React from "react"
 
 
 
@@ -78,17 +80,119 @@ const LoadingFallback = ()=> {
 
 const ViewLoanDetails = () => {
   const {loanid} = useParams()
-  const { data: loan, isLoading: loading } = useQuery({ queryKey: [LOAN,{loanId: loanid}], queryFn: () => getByLoanId(loanid!), enabled:!!loanid })
+  const { data: loan, isLoading: loading } = useQuery({ queryKey: [LOAN,{loanId: loanid}], queryFn: () => getByLoanId(loanid!), enabled:!!loanid && loanid != 'new'})
   const [summary, setSummary] = useState({balance:0,interest:0, payments:0})
   useEffect(()=>{
     if(!loan) return
-    let payments = loan.payment.reduce((p,c)=>{p + c.amount},0)
-    let interest = loan.interests
-    let balance = loan.principal + loan.interests - payments
+    let payments = loan.payment.reduce((p,c)=>{return p + c.amount},0)
+    let interest = loan.interestRecords.reduce((p,c)=>{return p + c.amount},0)
+    let balance = loan.principal + interest - payments
     setSummary({balance, interest, payments})
-},[loan])
+  },[loan])
 
-  if(!loanid || loanid=="new") return <></>
+  const transactions = (()=>{
+    if(!loan) return []
+    const balance = {
+      total : loan.principal,
+      interest : 0,
+      principal: loan.principal
+    }
+
+    let interest = loan.interestRecords.map(e=>({...e,date:e.dateStart,type:'interest'}))
+    let payments = loan.payment.reduce((p,c)=>{
+      let index = p.findIndex(e=>e.paymentId == c.paymentId)
+      let key = c.againstPrincipal?'principal':'interest'
+
+      if(index === -1){
+        p.push({...c, type:'payment', sub:{[key]:c} })
+      }else{
+        p[index].amount = p[index].amount + c.amount;
+        p[index].sub[key] = c
+      }
+
+      return p;
+    },[])
+
+    let records = [...payments, ...interest]
+      .sort((a,b)=>a.date==b.date?0: a.date>b.date?1:-1)
+      .map(e=>{
+        let out = {...e,
+          interestBalance : balance.interest,
+          principalBalance : balance.principal,
+
+          principalAmount : 0,
+          interestAmount : 0,
+          balance:balance.total
+
+
+        }
+        if(e.type=='interest'){
+          balance.interest = balance.interest + e.amount;
+          out.interestBalance = balance.interest;
+          balance.total = balance.total + e.amount
+          out.balance = balance.total;
+
+          out.interestAmount = e.amount;
+
+        }else{
+          let currentAmount = e.amount;
+          if(balance.interest > 0){
+            if(balance.interest > e.amount){
+              balance.interest = balance.interest - currentAmount;
+              out.interestBalance = balance.interest;
+              
+              balance.total = balance.total - currentAmount;
+              out.balance = balance.total;
+
+              out.interestAmount = -currentAmount;
+              currentAmount = 0;
+
+            }else{
+              
+              balance.total = balance.total - balance.interest;
+              out.balance = balance.total;
+
+              out.interestAmount = -balance.interest;
+              currentAmount = currentAmount - balance.interest;
+              balance.interest = 0;
+              out.interestBalance = balance.interest;
+
+
+            }
+
+          }
+          
+          if(currentAmount > 0){
+            if(balance.principal > currentAmount){
+              balance.principal = balance.principal - currentAmount;
+              out.principalBalance = balance.principal;
+
+              balance.total = balance.total - currentAmount;
+              out.balance = balance.total;
+
+              out.principalAmount = -currentAmount
+              currentAmount = 0
+            }else{
+              balance.principal = 0;
+              out.principalBalance = balance.principal;
+              balance.total =  0;
+              out.balance = balance.total;
+
+              
+              out.principalAmount = -balance.principal
+              currentAmount = 0
+            }
+          }
+          out.amount = -e.amount
+        }
+
+
+        return out
+      })
+      return records
+  })()
+
+  if(!loanid || loanid == "new") return <></>
 
   return loading ? <LoadingFallback /> : <Grid container>
     <Grid size={{ lg: 4, sm: 6, xs: 12 }} sx={{ p: 2 }}>
@@ -146,6 +250,50 @@ const ViewLoanDetails = () => {
             </Grid>
           </Grid>
         </CardContent>
+      </Paper>
+    </Grid>
+    <Grid size={12} sx={{ pt: 3, p: 2 }}>
+      <Paper>
+        <TableContainer>
+          <Table size="small">
+            <TableHead>
+              <TableRow>
+                <TableCell>Date</TableCell>
+                <TableCell colSpan={2}>Amount</TableCell>
+                <TableCell colSpan={2}>Balance</TableCell>
+              </TableRow>
+                  {/* <TableRow>
+                      <TableCell></TableCell>
+                      <TableCell sx={{textAlign:'center', fontSize:'small'}}>Interest</TableCell>
+                      <TableCell sx={{textAlign:'center', fontSize:'small'}}>Principal</TableCell>
+                      <TableCell sx={{textAlign:'center', fontSize:'small'}}>Interest</TableCell>
+                      <TableCell sx={{textAlign:'center', fontSize:'small'}}>Principal</TableCell>
+                  </TableRow> */}
+            </TableHead>
+            <TableBody>
+                {transactions.map(item=><React.Fragment key={item.id}><TableRow sx={{backgroundColor:item.type=='interest'?'#ffbcbc':'unset'}}>
+                      <TableCell>{moment(item.date).format("YYYY-MM-DD")}</TableCell>
+                      <TableCell colSpan={2} sx={{textAlign:'center'}}>{FormattedAmount(item.amount)}</TableCell>
+                      <TableCell colSpan={2} sx={{textAlign:'center'}}>{FormattedAmount(item.balance)}</TableCell>
+                  </TableRow>
+                  {/* <TableRow sx={{backgroundColor:item.type=='interest'?'#ffbcbc':'unset'}}>
+                      <TableCell>{item.type}</TableCell>
+                      <TableCell sx={{textAlign:'center ', fontSize:'small'}}>
+                        {item.interestAmount === 0 ? <Chip label="0.00" size="small"/> : 
+                              item.interestAmount <0 ? <Chip label={FormattedAmount(item.interestAmount)} color='primary' /> : <Chip label={FormattedAmount(item.interestAmount)} color='error' />}
+                        </TableCell>
+                      <TableCell sx={{textAlign:'center', fontSize:'small'}}>
+                        
+                      {item.principalAmount === 0 ? <Chip label="0.00" size="small"/> : 
+                              item.principalAmount < 0 ? <Chip label={FormattedAmount(item.principalAmount)} color='success' /> : <Chip label={FormattedAmount(item.principalAmount)} color='error' />}
+                       </TableCell>
+                      <TableCell sx={{textAlign:'right', fontSize:'small'}}>{FormattedAmount(item.interestBalance)}</TableCell>
+                      <TableCell sx={{textAlign:'right', fontSize:'small'}}>{FormattedAmount(item.principalBalance)}</TableCell>
+                  </TableRow> */}
+                </React.Fragment>)}
+            </TableBody>
+          </Table>
+        </TableContainer>
       </Paper>
     </Grid>
   </Grid>

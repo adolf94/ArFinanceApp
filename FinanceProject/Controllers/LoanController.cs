@@ -17,12 +17,14 @@ namespace FinanceApp.Controllers
 				private readonly ILoanRepo _repo;
 				private readonly ILogger<LoanController> _logger;
 				private readonly IMapper _mapper;
+				private readonly IPaymentRepo _payment;
 
-				public LoanController(ILoanRepo repo, ILogger<LoanController> logger, IMapper mapper)
+				public LoanController(ILoanRepo repo, IPaymentRepo payment, ILogger<LoanController> logger, IMapper mapper)
 				{
 						_repo = repo;
 						_logger = logger;
 						_mapper = mapper;
+						_payment = payment;
 				}
 
 				[HttpPost("loan")]
@@ -63,10 +65,16 @@ namespace FinanceApp.Controllers
 				{
 						var query = await _repo.GetByUserId(userId);
 						var items = await query
-								
-								.Where(e => e.Status == "Active").ToArrayAsync();
 
-						items.Select(e=>e.)
+								.Where(e => e.Status == "Active")
+
+								.ToArrayAsync();
+
+						items = items.Select(item =>
+						{
+								item.Payment = _payment.GetByLoanId(item.Id);
+								return item;
+						}).ToArray();
 
 						return Ok(items);
 
@@ -79,6 +87,8 @@ namespace FinanceApp.Controllers
 				{
 						var item = await _repo.GetOneLoan(id);
 						if (item == null) return NotFound();
+						item.Payment = _payment.GetByLoanId(item.Id);
+
 						return await Task.FromResult(Ok(item));
 				}
 

@@ -6,6 +6,7 @@
 				public string AppId { get; set; }
 				public Guid UserId { get; set; }
 				public DateTime Date { get; set; }
+				public DateTime DateAdded { get; set; } = DateTime.Now;
 				public string Method { get; set; }
 				public string? ReferenceId { get; set; }
 				public decimal Amount { get; set; }

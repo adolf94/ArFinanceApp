@@ -3,13 +3,59 @@ import {
 	TableCell, TableContainer, TableHead, TableRow, Typography, Button,
 	Box
 } from "@mui/material"
-import AuthenticatedLayout from "../components/AuthenticatedLayout"
+import AuthenticatedLayout from "../../components/AuthenticatedLayout"
 import { AccountBalance, GridView, ViewList, VolunteerActivism } from '@mui/icons-material'
-import { useState } from "react"
+import { useEffect, useState } from "react"
+import useUserInfo from "../../components/userContext"
+import { getByUserId, LOAN } from "../../repositories/loan"
+import { useQuery } from "@tanstack/react-query"
+import { FormattedAmount } from "../../components/NumberInput"
+import moment from "moment"
 
 const IndexAuthenticated = () => {
-
+	const { user } = useUserInfo();
+	const { data: loans, isLoading: loading } = useQuery({ queryKey: [LOAN, { userId: user.userId }], queryFn: () => getByUserId(user.userId!) })
 	const [view, setView] = useState("tiles")
+	const [total, setTotal] = useState<any>({})
+	const [loanCalculation, setLoanCalculated] = useState<any>([])
+
+	useEffect(() => {
+
+		let total = {
+			principal: 0,
+			interest: 0,
+			payments: 0,
+			balance: 0,
+			lastPayment: null
+		}
+
+		let loansCalculated = (loans || []).map((l: any) => {
+			let payments = l.payment.reduce((p: number, c: any) => { return Number.parseFloat(c.amount) + p }, 0)
+			let interest = l.interestRecords.reduce((p: number, c: any) => { return Number.parseFloat(c.amount) + p }, 0)
+			total.principal = total.principal + Number.parseFloat(l.principal);
+			total.interest = total.interest + interest;
+			total.payments = total.payments + Number.parseFloat(payments);
+			total.lastPayment = l.payment.reduce((p,c)=>{
+				if(p===null) return c;
+				if(p.date < c.date ) return {...c};
+				if(p.paymentId == c.paymentId) p.amount = p.amount + c.amount;
+				return p;
+			  },null)
+			let res = {
+				date: l.date,
+				principal: l.principal,
+				interests: interest,
+				payments: payments,
+				balance: l.principal + interest - Number.parseFloat(payments),
+				orig: l
+			}
+			return res
+		})
+		setLoanCalculated(loansCalculated)
+		setTotal({ ...total, balance: total.interest + total.principal - total.payments })
+
+	}, [loans])
+
 
 	return <AuthenticatedLayout persona="Borrower" >
 		<Grid container sx={{ width: '100vw', pt: 2 }}>
@@ -22,7 +68,7 @@ const IndexAuthenticated = () => {
 							</Grid>
 							<Grid size={9} sx={{ textAlign: 'center', pr: 3 }}>
 								<Typography gutterBottom variant="h5" component="div">
-									Php 5,000.00
+								P {FormattedAmount(total.balance)}
 								</Typography>
 								<Typography variant="subtitle1" sx={{ color: 'text.secondary' }}>
 									Outstanding Balance
@@ -41,10 +87,10 @@ const IndexAuthenticated = () => {
 							</Grid>
 							<Grid size={9} sx={{ textAlign: 'center', pr: 3 }}>
 								<Typography gutterBottom variant="h5" component="div">
-									Php 5,000.00
+									P {FormattedAmount(total.lastPayment?.amount || 0)}
 								</Typography>
 								<Typography variant="subtitle1" sx={{ color: 'text.secondary' }}>
-									Last Payment : Sept 24,2024
+									{total.lastPayment?moment(total.lastPayment.date).format("MMMM DD"):"No payments yet"}
 								</Typography>
 							</Grid>
 						</Grid>
@@ -66,110 +112,38 @@ const IndexAuthenticated = () => {
 			</Grid>
 			{view === "tiles" ?
 				<Grid container size={12} sx={{ p: 2 }}>
+					{loanCalculation.map(loan=>
 					<Grid size={{ xl: 4, md: 6, xs: 12 }} sx={{ p: 1 }}>
 						<Card>
 							<CardContent sx={{ p: 2, paddingBottom: '8px!important' }}>
 								{/*<CardContent sx={{}}>*/}
 								<Grid container sx={{ justifyContent: "space-between", pb: 1 }}>
-									<Typography variant="h5" component="div" gutterBottom={false}>
-										Php 5,000.00
-									</Typography>
+									<Box>
+										<Typography variant="h5" component="div" gutterBottom={false}>
+											P {FormattedAmount(loan.balance)}
+										</Typography>
+									</Box>
 									<Typography variant="subtitle1" sx={{ color: 'text.secondary' }} component="div" gutterBottom={false}>
-										Due: Sept 24
+										Due: {moment(loan.nextInterest).format("MMM DD")}
 									</Typography>
 								</Grid>
-								<Grid sx={{ pb: 1 }}>
-									<Box>
-										<Chip size="small" color="primary" label="Principal: 5,000.00" />
-										<Chip size="small" color="warning" label="Interests: 5,000.00" />
-										<Chip size="small" color="success" label="Payments: 5,000.00" />
-									</Box>
-
+								<Grid sx={{ pb: 1, justifyContent:'start' }}>
+									<Grid sx={{display:'flex',flexWrap:'wrap'}}>
+										<Box sx={{textAlign:'center'}}>
+											<Chip size="small" color="primary" label={`Principal: ${FormattedAmount(loan.principal)}`}  />
+											<Chip size="small" color="warning" label={`Interest: ${FormattedAmount(loan.interests)}`}  />
+											<Chip size="small" color="success" label={`Payments: ${FormattedAmount(loan.payments)}`}  />
+										</Box>
+									</Grid>
 								</Grid>
 							</CardContent>
 							<CardActions sx={{ justifyContent: 'end' }}>
 								<Button> More Details </Button>
 							</CardActions>
 						</Card>
-					</Grid>
-					<Grid size={{ xl: 4, md: 6, xs: 12 }} sx={{ p: 1 }}>
-						<Card>
-							<CardContent sx={{ p: 2, paddingBottom: '8px!important' }}>
-								{/*<CardContent sx={{}}>*/}
-								<Grid container sx={{ justifyContent: "space-between", pb: 1 }}>
-									<Typography variant="h5" component="div" gutterBottom={false}>
-										Php 5,000.00
-									</Typography>
-									<Typography variant="subtitle1" sx={{ color: 'text.secondary' }} component="div" gutterBottom={false}>
-										Due: Sept 24
-									</Typography>
-								</Grid>
-								<Grid sx={{ pb: 1 }}>
-									<Box>
-										<Chip size="small" color="primary" label="Principal: 5,000.00" />
-										<Chip size="small" color="warning" label="Interests: 5,000.00" />
-										<Chip size="small" color="success" label="Payments: 5,000.00" />
-									</Box>
+					</Grid>)}
 
-								</Grid>
-							</CardContent>
-							<CardActions sx={{ justifyContent: 'end' }}>
-								<Button> More Details </Button>
-							</CardActions>
-						</Card>
-					</Grid>
-					<Grid size={{ xl: 4, md: 6, xs: 12 }} sx={{ p: 1 }}>
-						<Card>
-							<CardContent sx={{ p: 2, paddingBottom: '8px!important' }}>
-								{/*<CardContent sx={{}}>*/}
-								<Grid container sx={{ justifyContent: "space-between", pb: 1 }}>
-									<Typography variant="h5" component="div" gutterBottom={false}>
-										Php 5,000.00
-									</Typography>
-									<Typography variant="subtitle1" sx={{ color: 'text.secondary' }} component="div" gutterBottom={false}>
-										Due: Sept 24
-									</Typography>
-								</Grid>
-								<Grid sx={{ pb: 1 }}>
-									<Box>
-										<Chip size="small" color="primary" label="Principal: 5,000.00" />
-										<Chip size="small" color="warning" label="Interests: 5,000.00" />
-										<Chip size="small" color="success" label="Payments: 5,000.00" />
-									</Box>
 
-								</Grid>
-							</CardContent>
-							<CardActions sx={{ justifyContent: 'end' }}>
-								<Button> More Details </Button>
-							</CardActions>
-						</Card>
-					</Grid>
-					<Grid size={{ xl: 4, md: 6, xs: 12 }} sx={{ p: 1 }}>
-						<Card>
-							<CardContent sx={{ p: 2, paddingBottom: '8px!important' }}>
-								{/*<CardContent sx={{}}>*/}
-								<Grid container sx={{ justifyContent: "space-between", pb: 1 }}>
-									<Typography variant="h5" component="div" gutterBottom={false}>
-										Php 5,000.00
-									</Typography>
-									<Typography variant="subtitle1" sx={{ color: 'text.secondary' }} component="div" gutterBottom={false}>
-										Due: Sept 24
-									</Typography>
-								</Grid>
-								<Grid sx={{ pb: 1 }}>
-									<Box>
-										<Chip size="small" color="primary" label="Principal: 5,000.00" />
-										<Chip size="small" color="warning" label="Interests: 5,000.00" />
-										<Chip size="small" color="success" label="Payments: 5,000.00" />
-									</Box>
-
-								</Grid>
-							</CardContent>
-							<CardActions sx={{ justifyContent: 'end' }}>
-								<Button> More Details </Button>
-							</CardActions>
-						</Card>
-					</Grid>
 				</Grid> :
 				<Grid size={12} sx={{ p: 2 }}>
 					<TableContainer>

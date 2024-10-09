@@ -11,7 +11,7 @@ import {
     QueryClient,
     QueryClientProvider,
 } from '@tanstack/react-query'
-import { IdToken } from './Pages/IndexComponents/Register'
+import { IdToken } from './Pages/Register'
 
 
 export const queryClient = new QueryClient()
@@ -30,10 +30,10 @@ function App() {
 
         <LocalizationProvider dateAdapter={AdapterMoment}>
             <QueryClientProvider client={queryClient}>
-        <UserContext.Provider value={{ get: userctx, set: setUserCtx }}>
-            <SnackbarProvider />
+                <UserContext.Provider value={{ get: userctx, set: setUserCtx }}>
+                    <SnackbarProvider />
 
-              <RouterProvider router={ router } />
+                      <RouterProvider router={ router } />
                 </UserContext.Provider>
             </QueryClientProvider>
         </LocalizationProvider>
