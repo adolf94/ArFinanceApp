@@ -113,7 +113,7 @@ const IndexAuthenticated = () => {
 			{view === "tiles" ?
 				<Grid container size={12} sx={{ p: 2 }}>
 					{loanCalculation.map(loan=>
-					<Grid size={{ xl: 4, md: 6, xs: 12 }} sx={{ p: 1 }}>
+					<Grid size={{ xl: 4, md: 6, xs: 12 }} sx={{ p: 1 }} key={loan.id}>
 						<Card>
 							<CardContent sx={{ p: 2, paddingBottom: '8px!important' }}>
 								{/*<CardContent sx={{}}>*/}

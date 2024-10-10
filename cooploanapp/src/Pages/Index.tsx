@@ -116,10 +116,10 @@ const Index = () => {
             const userInfo = decodeJwt<IdToken>(e)
             setIsLoggedIn(true)
             //@ts-ignore
-            console.log(userInfo)
             updateUser(userInfo)
 
             const stateFromStorage = sessionStorage.getItem("googleLoginState");
+            if(!stateFromStorage) return
             const state = JSON.parse(window.atob(stateFromStorage!))
             navigate(state.currentPath.replace("/loans", ""))
             sessionStorage.removeItem("googleLoginState")
