@@ -11,9 +11,12 @@ import { getByUserId, LOAN } from "../../repositories/loan"
 import { useQuery } from "@tanstack/react-query"
 import { FormattedAmount } from "../../components/NumberInput"
 import moment from "moment"
+import { Outlet, Route, Routes, useNavigate } from "react-router-dom"
+import ViewLoanAsBorrower from "./Loans/View"
 
 const IndexAuthenticated = () => {
-	const { user } = useUserInfo();
+		const { user } = useUserInfo();
+		const navigate = useNavigate();
 	const { data: loans, isLoading: loading } = useQuery({ queryKey: [LOAN, { userId: user.userId }], queryFn: () => getByUserId(user.userId!) })
 	const [view, setView] = useState("tiles")
 	const [total, setTotal] = useState<any>({})
@@ -113,7 +116,7 @@ const IndexAuthenticated = () => {
 			{view === "tiles" ?
 				<Grid container size={12} sx={{ p: 2 }}>
 					{loanCalculation.map(loan=>
-					<Grid size={{ xl: 4, md: 6, xs: 12 }} sx={{ p: 1 }} key={loan.id}>
+					<Grid size={{ xl: 4, md: 6, xs: 12 }} sx={{ p: 1 }} key={loan.orig.id}>
 						<Card>
 							<CardContent sx={{ p: 2, paddingBottom: '8px!important' }}>
 								{/*<CardContent sx={{}}>*/}
@@ -138,7 +141,7 @@ const IndexAuthenticated = () => {
 								</Grid>
 							</CardContent>
 							<CardActions sx={{ justifyContent: 'end' }}>
-								<Button> More Details </Button>
+													<Button onClick={() => navigate("./loan/" + loan.orig.id)}> More Details </Button>
 							</CardActions>
 						</Card>
 					</Grid>)}
@@ -233,6 +236,13 @@ const IndexAuthenticated = () => {
 					</TableContainer>
 				</Grid>
 			}
+
+			<Routes>
+				<Route path="/payment/:paymentId" element={<Outlet />}></Route>
+				<Route path="loan/:loanId" element={<ViewLoanAsBorrower />}></Route>
+				<Route path="*" element={<Outlet />}></Route>
+			</Routes>
+
 		</Grid>
 	</AuthenticatedLayout>
 }

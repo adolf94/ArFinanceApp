@@ -18,7 +18,7 @@ export const queryClient = new QueryClient()
 function App() {
 
     const router = createBrowserRouter([
-        { path: "/", element: <Index /> },
+        { path: "/*", element: <Index /> },
         { path: "/admin/*", element: <Admin /> }
 
     ], {basename: "/loans"})

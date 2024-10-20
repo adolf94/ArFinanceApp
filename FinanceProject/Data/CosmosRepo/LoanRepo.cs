@@ -38,9 +38,9 @@ namespace FinanceApp.Data.CosmosRepo
 				}
 
 
-				public async Task<ComputeInterestResult> ComputeInterests(Loans loan, DateTime dateRef, bool createPayment = false)
+				public async Task<ComputeInterestResult?> ComputeInterests(Loans loan, DateTime dateRef, bool createPayment = false)
 				{
-
+						if (loan.NextInterestDate > dateRef) return null;
 						var balances = new
 						{
 								Principal = loan.Principal - loan.Payment.Where(e => e.AgainstPrincipal == true).Sum(e => e.Amount),
@@ -93,7 +93,7 @@ namespace FinanceApp.Data.CosmosRepo
 								if (createPayment || !loanProfile.ComputePerDay)
 								{
 										totalInterest = loanProfile.InterestPerMonth;
-										while (nextDate <= loan.NextInterestDate)
+										while (nextDate <= loan.NextInterestDate && loan.LastInterestDate < dateRef)
 										{
 												nextDate = nextDate.AddMonths(1);
 												totalInterest = totalInterest + loanProfile.InterestPerMonth;
