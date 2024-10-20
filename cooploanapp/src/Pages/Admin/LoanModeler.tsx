@@ -1,14 +1,19 @@
-                   import { Grid2 as Grid, Typography, TextField, TableContainer, Table, TableHead, TableRow, TableCell, TableBody, TableFooter, Button, Alert, InputAdornment, Chip, Box, Autocomplete } from "@mui/material";
+import { Grid2 as Grid, Typography, TextField, TableContainer, Table, TableHead,
+     TableRow, TableCell, TableBody, TableFooter, Button, Alert, InputAdornment, Chip, Box, Autocomplete, IconButton } from "@mui/material";
+
 import { DatePicker } from "@mui/x-date-pickers";
 import { LoanProfile } from "FinanceApi";
 import moment from "moment";
 import { useEffect, useMemo, useState } from "react";
 import NumberInput, { FormattedAmount } from "../../components/NumberInput";
+import { Delete } from "@mui/icons-material";
 
 
 
 interface LoanModelerProps {
     loanProfile: Partial<LoanProfile>,
+    loanInfo?: {principal:number, date: moment.Moment, readonly?: boolean}
+    payments?: Partial<Payment>[]
     onPaymentsChange?: (data: Payment[])=>void
     onChange?: (data: any)=>void
 }
@@ -18,6 +23,7 @@ export interface Payment {
     amount: number,
     balance: number,
     index?: number,
+    readonly?:boolean,
     type: string,
     principalBalance: number,
     interestBalance: number,
@@ -115,11 +121,12 @@ const dateDropdown = ()=>{
     return items;
 }
 
-const LoanModeler = ({ loanProfile, onChange, onPaymentsChange }: LoanModelerProps) => {
+const LoanModeler = ({ loanProfile, loanInfo, onChange, onPaymentsChange,payments : previousPayments }: LoanModelerProps) => {
 
     const [form, setForm] = useState({
-        date: moment(),
-        principal: 0,
+        date: loanInfo?.date || moment(),
+        principal: loanInfo?.principal || 0,
+        readonly: !!loanInfo?.readonly,
         months:0
     })
     const [customPayments, setCustomPayments] = useState<Payment[]>([])
@@ -142,14 +149,14 @@ const LoanModeler = ({ loanProfile, onChange, onPaymentsChange }: LoanModelerPro
             date: defaultDate,
             amount: 0, type: 'payment',
             principalBalance: 0,
-            balance: 0,
+            balance: 0,  
             interestBalance: 0,
             minimumDate: defaultDate,
-            totalInterestPercent: 0
+            totalInterestPercent: 0,
+            readonly:false
         }])
         
     }
-
     const setMonth = (data)=>{
         if(data.isCustom){
             setPayments(customPayments);
@@ -234,9 +241,9 @@ const LoanModeler = ({ loanProfile, onChange, onPaymentsChange }: LoanModelerPro
         let interest = 0
             
         let totalInterestPercent = 0;
-
+        let previousPaymentsAndModelPayments = [...(previousPayments || []).map(e=>({...e,readonly:true })),...payments.map((e,i)=>({...e,index:i}))]
         let nextInterest = form.date
-        const computed = payments.reduce((prev: Payment[], cur, index) => {
+        const computed = previousPaymentsAndModelPayments.reduce((prev: Payment[], cur) => {
 
             while (nextInterest.clone().isBefore(cur.date)) {
                 const prior = {
@@ -255,11 +262,11 @@ const LoanModeler = ({ loanProfile, onChange, onPaymentsChange }: LoanModelerPro
                 if (interestData.amount !== 0) prev.push(interestData)
             }
 
-            cur.balance = balance - cur.amount
+            cur.balance = balance - cur.amount!
             balance = cur.balance
             //deduct to interest;
             if (cur.type == "payment") {
-                const payment = cur.amount;
+                const payment = cur.amount!;
                 if (interest < payment) {
                     principal = principal - (payment - interest)
                     interest = 0
@@ -277,12 +284,11 @@ const LoanModeler = ({ loanProfile, onChange, onPaymentsChange }: LoanModelerPro
             cur.totalInterestPercent = totalInterestPercent
 
 
-            cur.index = index
-            prev.push(cur)
+            prev.push(cur!)
             return [...prev]
         }, [])
         return computed
-    }, [form.principal, form.date, payments, loanProfile])
+    }, [form.principal, form.date, payments, loanProfile, previousPayments])
 
     useEffect(()=>{
         if(onChange) onChange(form)
@@ -307,7 +313,7 @@ const LoanModeler = ({ loanProfile, onChange, onPaymentsChange }: LoanModelerPro
             <Typography variant="subtitle1">Model Loan Payments</Typography>
         </Grid>
         <Grid size={4} sx={{ pb: 2, px: 1 }}>
-            <DatePicker label="Date of Loan" value={form.date}
+            <DatePicker label="Date of Loan" disabled={!!form.readonly} value={form.date}
                 onAccept={newValue => setForm({...form, date:newValue!})}
                 slots={{
                     textField: (params) => (
@@ -317,7 +323,7 @@ const LoanModeler = ({ loanProfile, onChange, onPaymentsChange }: LoanModelerPro
                 }} />
         </Grid>
         <Grid size={4} sx={{ pb: 2, px: 1 }}>
-            <NumberInput label="Principal" value={form.principal} onChange={(value:string) => setForm({ ...form, principal: Number.parseFloat(value) })} fullWidth></NumberInput>
+            <NumberInput label="Principal" disabled={form?.readonly} value={form.principal} onChange={(value:string) => setForm({ ...form, principal: Number.parseFloat(value) })} fullWidth></NumberInput>
         </Grid>
         <Grid size={4} sx={{ pb: 2, px: 1 }}>
                         <Autocomplete
@@ -327,7 +333,7 @@ const LoanModeler = ({ loanProfile, onChange, onPaymentsChange }: LoanModelerPro
                           }}
                           getOptionKey={ e=>e.month}
                           getOptionLabel={e=>e?.label || ""}
-
+                          readOnly={loanInfo?.readonly}
                           fullWidth
                           options={ dateDropdown() || []}
                           renderInput={(params) => <TextField {...params}  label="Months to pay" />}
@@ -346,6 +352,7 @@ const LoanModeler = ({ loanProfile, onChange, onPaymentsChange }: LoanModelerPro
                                 <TableCell>Balance</TableCell>
                                 <TableCell>Interest</TableCell>
                                 <TableCell>Principal</TableCell>
+                                <TableCell></TableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>
@@ -353,8 +360,12 @@ const LoanModeler = ({ loanProfile, onChange, onPaymentsChange }: LoanModelerPro
                                 computedPayments.map((item, i) => {
                                     return item.type === "payment" ? <TableRow>
                                         <TableCell>{i + 1}</TableCell>
-                                        <TableCell>
-                                            <DatePicker label="Payment date" value={item.date}
+                                       
+                                        {
+                                            item.readonly?  <TableCell sx={{ pl: 4 }}>
+                                                    {item.date.format("MM/DD/YYYY")}
+                                            </TableCell>: <TableCell>
+                                                <DatePicker label="Payment date" value={item.date}
                                                 minDate={item.minimumDate}
                                                 onAccept={newValue => changeModelValues(item.index!, 'date', newValue)}
                                                 slots={{
@@ -364,17 +375,30 @@ const LoanModeler = ({ loanProfile, onChange, onPaymentsChange }: LoanModelerPro
                                                             size="small"
                                                         />)
                                                 }} />
-                                        </TableCell>
-                                        <TableCell><NumberInput size="small" 
+                                            </TableCell>
+                                        }
+                                        {
+                                            
+                                            item.readonly?  <TableCell sx={{ pr: 4 }}>
+                                            <Grid container sx={{justifyContent: 'space-between'}}>
+                                                <Box sx={{pl:2}}>
+                                                    <Chip size="small" color="success" label="P"></Chip>
+                                                </Box>
+                                                <Box>{FormattedAmount(item.amount)}</Box>
+                                            </Grid>
+                                        </TableCell> : <TableCell><NumberInput size="small" 
                                                             slotProps={{
                                                                 input: {
                                                                     startAdornment : <InputAdornment position="start"> <Chip size="small" color="success" label="P"></Chip></InputAdornment>
                                                                 }
                                                             }} value={item.amount} onChange={(value : string) => changeModelValues(item.index!, 'amount', value)} /></TableCell>
+                                        }
+                                        
 
                                         <TableCell sx={{ textAlign: 'right' }}>{FormattedAmount(item.balance)}</TableCell>
                                         <TableCell sx={{ textAlign: 'right' }}>{FormattedAmount(item.interestBalance)}</TableCell>
                                         <TableCell sx={{ textAlign: 'right' }}>{FormattedAmount(item.principalBalance)}</TableCell>
+                                        <TableCell sx={{ textAlign: 'right' }}>{!item.readonly && <IconButton><Delete fontSize="small" /></IconButton>}</TableCell>
                                     </TableRow> : <TableRow>
                                         <TableCell>{i + 1}</TableCell>
                                         <TableCell sx={{ pl: 4 }}>
@@ -391,13 +415,14 @@ const LoanModeler = ({ loanProfile, onChange, onPaymentsChange }: LoanModelerPro
                                         <TableCell sx={{ textAlign: 'right' }}>{FormattedAmount(item.balance)}</TableCell>
                                         <TableCell sx={{ textAlign: 'right' }}>{FormattedAmount(item.interestBalance)}</TableCell>
                                         <TableCell sx={{ textAlign: 'right' }}>{FormattedAmount(item.principalBalance)}</TableCell>
+                                        <TableCell sx={{ textAlign: 'right' }}></TableCell>
                                     </TableRow>
 
 
                                 })
                             }
                             <TableRow>
-                                <TableCell colSpan={6} sx={{ textAlign: 'center' }} ><Button onClick={addDate}> Add Payment </Button></TableCell>
+                                <TableCell colSpan={7} sx={{ textAlign: 'center' }} ><Button onClick={addDate}> Add Payment </Button></TableCell>
                             </TableRow>
                         </TableBody>
                         <TableFooter>

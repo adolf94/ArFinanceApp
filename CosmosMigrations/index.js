@@ -82,7 +82,6 @@ const getCurrentMigrationData = async ()=>{
                 "FilePath": os.tmpdir() + "/_efMigrations.json"
             },
         }
-
         fs.writeFileSync(file, JSON.stringify(migrationJson));
 
         let proc = spawn("./cosmosMigrationTool/dmt.exe", [`--settings=${file}`])
@@ -100,7 +99,7 @@ const getCurrentMigrationData = async ()=>{
                     if(!!prev) return cur;
                     if(cur.Id > prev.Id) return cur
                     return prev
-            },null)
+                },null)
             }
 
             res(lastMigration)
@@ -116,7 +115,6 @@ const readMigrationsConfig =()=>{
     return new Promise( async res=>{
         let files = fs.readdirSync(__dirname + "/migrations")
         let configs = {};
-    
         for (let i in files)
         {
             
@@ -215,6 +213,14 @@ const applyBackup = async (dbConfigToApply)=>{
 }
 
 
+const backupCurrent = async ()=>{
+    const migrationNow = await getCurrentMigrationData()
+    const migrationsData = await readMigrationsConfig();
+    const migrationKeys= Object.keys(migrationsData).sort((a,b)=>(a>b?0:1))
+
+
+}
+
 const OnDemandBackup = async ()=>{
 
     const migrationNow = await getCurrentMigrationData()
@@ -230,18 +236,23 @@ const OnDemandBackup = async ()=>{
     if(migrationNow === null){
         // create empty data for first migration array
         let theIndexFinal = migrationKeys.length - 1
-        let firstMigration = migrationsData[theIndexFinal].default;
+        migrationIndex = migrationKeys.length - 1
+        console.log( migrationsData)
+
+        let firstMigration = migrationsData[migrationKeys[theIndexFinal]].default;
         for( var i in firstMigration.migrate.database) {
             let table =  firstMigration.migrate.database[i]
             // console.log(firstMigration)
             fs.writeFileSync(`${__dirname}\\data\\${table.Container}.json`, "[]")
             console.debug(`${table.Container}.json written with []`)
         }
+        applyBackup(firstMigration);
+
     }else{
         let migration = migrationsData[migrationNow.Id].default;
+        migrationIndex = migrationKeys.indexOf(migrationNow.Id);
         applyBackup(migration);
     }
-    migrationIndex = migrationKeys.indexOf(migrationNow.Id);
     
     //perform transform
     for (let i = migrationIndex+1; i<migrationKeys;i++){
@@ -259,16 +270,18 @@ const OnDemandBackup = async ()=>{
 
 
 
+
+
 }
 
 
-(async ()=>{
+// (async ()=>{
     
-    const migrationsData = await readMigrationsConfig();
-    const migrationKeys= Object.keys(migrationsData).sort((a,b)=>(a>b?0:1))
-    let firstMigration = migrationsData[migrationKeys[0]].default;
-    applyRestore(firstMigration)
-})()
+//     const migrationsData = await readMigrationsConfig();
+//     const migrationKeys= Object.keys(migrationsData).sort((a,b)=>(a>b?0:1))
+//     let firstMigration = migrationsData[migrationKeys[0]].default;
+//     applyRestore(firstMigration)
+// })()
 
 
-// doBackupFirst()
+OnDemandBackup()

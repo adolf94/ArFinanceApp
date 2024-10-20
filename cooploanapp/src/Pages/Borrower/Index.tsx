@@ -163,74 +163,26 @@ const IndexAuthenticated = () => {
 								</TableRow>
 							</TableHead>
 							<TableBody>
-								<TableRow>
-									<TableCell align="center">2024-01-01</TableCell>
-									<TableCell align="right">
-										<Typography> 100.00 </Typography>
-									</TableCell>
-									<TableCell align="right">
-										<Typography> 100.00 </Typography>
-									</TableCell>
-									<TableCell align="right" >
-										<Typography sx={{ fontWeight: 'bold' }} color="success"> 100.00 </Typography>
-									</TableCell>
-									<TableCell align="right">
-										<Typography sx={{ fontWeight: 'bold' }} color="red"> 100.00 </Typography>
-									</TableCell>
-									<TableCell align="center">Pending</TableCell>
-									<TableCell align="center"></TableCell>
-								</TableRow>
-								<TableRow>
-									<TableCell align="center">2024-01-01</TableCell>
-									<TableCell align="right">
-										<Typography> 100.00 </Typography>
-									</TableCell>
-									<TableCell align="right">
-										<Typography> 100.00 </Typography>
-									</TableCell>
-									<TableCell align="right" >
-										<Typography sx={{ fontWeight: 'bold' }} color="success"> 100.00 </Typography>
-									</TableCell>
-									<TableCell align="right">
-										<Typography sx={{ fontWeight: 'bold' }} color="red"> 100.00 </Typography>
-									</TableCell>
-									<TableCell align="center">Pending</TableCell>
-									<TableCell align="center"></TableCell>
-								</TableRow>
-								<TableRow>
-									<TableCell align="center">2024-01-01</TableCell>
-									<TableCell align="right">
-										<Typography> 100.00 </Typography>
-									</TableCell>
-									<TableCell align="right">
-										<Typography> 100.00 </Typography>
-									</TableCell>
-									<TableCell align="right" >
-										<Typography sx={{ fontWeight: 'bold' }} color="success"> 100.00 </Typography>
-									</TableCell>
-									<TableCell align="right">
-										<Typography sx={{ fontWeight: 'bold' }} color="red"> 100.00 </Typography>
-									</TableCell>
-									<TableCell align="center">Pending</TableCell>
-									<TableCell align="center"></TableCell>
-								</TableRow>
-								<TableRow>
-									<TableCell align="center">2024-01-01</TableCell>
-									<TableCell align="right">
-										<Typography> 100.00 </Typography>
-									</TableCell>
-									<TableCell align="right">
-										<Typography> 100.00 </Typography>
-									</TableCell>
-									<TableCell align="right" >
-										<Typography sx={{ fontWeight: 'bold' }} color="success"> 100.00 </Typography>
-									</TableCell>
-									<TableCell align="right">
-										<Typography sx={{ fontWeight: 'bold' }} color="red"> 100.00 </Typography>
-									</TableCell>
-									<TableCell align="center">Pending</TableCell>
-									<TableCell align="center"></TableCell>
-								</TableRow>
+								{
+									loanCalculation.map(loan=><TableRow>
+										<TableCell align="center">{moment(loan.date).format("YYYY-MM-DD")}</TableCell>
+										<TableCell align="right">{FormattedAmount(loan.principal)}</TableCell>
+										<TableCell align="right">{FormattedAmount(loan.interests)}</TableCell>
+										<TableCell align="right">
+											<Typography sx={{ fontWeight: 'bold' }} color="success"> {FormattedAmount(loan.payments)} </Typography>
+										</TableCell>
+										<TableCell align="right">
+											<Typography sx={{ fontWeight: 'bold' }} color="error"> {FormattedAmount(loan.balance)} </Typography>
+										</TableCell>
+										<TableCell align="center">Pending</TableCell>
+										<TableCell align="center"><Button variant="outlined" onClick={() => navigate("./loan/" + loan.orig.id)}>
+												View
+											</Button>
+										</TableCell>
+
+									</TableRow>)
+								}
+
 							</TableBody>
 						</Table>
 					</TableContainer>
@@ -239,7 +191,7 @@ const IndexAuthenticated = () => {
 
 			<Routes>
 				<Route path="/payment/:paymentId" element={<Outlet />}></Route>
-				<Route path="loan/:loanId" element={<ViewLoanAsBorrower />}></Route>
+				<Route path="/loan/:loanId" element={<ViewLoanAsBorrower />}></Route>
 				<Route path="*" element={<Outlet />}></Route>
 			</Routes>
 

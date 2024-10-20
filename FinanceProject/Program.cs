@@ -9,6 +9,7 @@ using FinanceApp.Utilities;
 using FinanceProject.Models;
 using FinanceProject.Utilities;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
@@ -85,6 +86,7 @@ builder.Services.AddControllersWithViews()
 		mc.AddProfile(new FinanceApp.Dto.LoansProfile());
 });
 
+builder.Services.AddScoped<IAuthorizationHandler, RoleRequirementHandler>();
 
 PersistentConfig pConfig = new PersistentConfig();
 builder.Services.AddSingleton(pConfig);

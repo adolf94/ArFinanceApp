@@ -2,15 +2,17 @@
 using FinanceApp.Data;
 using FinanceApp.Dto;
 using FinanceApp.Models;
+using FinanceApp.Utilities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Identity.Web;
 using System.Security.Claims;
 
 namespace FinanceApp.Controllers
 {
 		[ApiController]
-		[Authorize]
+		[Authorize(Roles = "REGISTERED")]
 		[Route("api")]
 		public class LoanController : ControllerBase
 		{
@@ -28,6 +30,7 @@ namespace FinanceApp.Controllers
 				}
 
 				[HttpPost("loan")]
+				[Authorize(Roles = "MANAGE_LOAN")]
 				public async Task<IActionResult> CreateLoan(CreateLoanDto loan)
 				{
 
@@ -61,8 +64,15 @@ namespace FinanceApp.Controllers
 
 
 				[HttpGet("user/{userId}/loan")]
+
 				public async Task<IActionResult> GetByUser(Guid userId)
 				{
+						string currentUserId = HttpContext.User.FindFirstValue("userId")!;
+						string App = HttpContext.User.FindFirstValue("app")!;
+						if (userId != Guid.Parse(currentUserId) && !HttpContext.User.IsInAppRole(AppRoles.MANAGE_LOAN))
+						{
+								return Forbid();
+						}
 						var query = await _repo.GetByUserId(userId);
 						var items = await query
 
@@ -87,6 +97,12 @@ namespace FinanceApp.Controllers
 				{
 						var item = await _repo.GetOneLoan(id);
 						if (item == null) return NotFound();
+						string currentUserId = HttpContext.User.FindFirstValue("userId")!;
+
+						if (item.UserId != Guid.Parse(currentUserId) && !HttpContext.User.IsInAppRole(AppRoles.MANAGE_LOAN))
+						{
+								return Forbid();
+						}
 						item.Payment = _payment.GetByLoanId(item.Id);
 
 						return await Task.FromResult(Ok(item));

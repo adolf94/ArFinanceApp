@@ -124,7 +124,7 @@ const Register = ({ token }: {token: string}) => {
 						<Typography variant="h5">Complete your registration</Typography>
 				</Box>
 				<Box sx={{ pb: 2 }}>
-						<TextField label="Name" value={form.name} fullWidth />
+						<TextField label="Name" value={form.name} fullWidth onChange={(evt)=> setForm({ ...form, name: evt.target.value })} />
 				</Box>
 				<Box sx={{ pb: 2 }}>
 						<TextField label="Email" value={form.userName } fullWidth />

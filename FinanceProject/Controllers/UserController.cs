@@ -38,7 +38,7 @@ namespace FinanceProject.Controllers
 				}
 
 				[HttpPost("user")]
-				[Authorize(Roles = "Unregistered,Enroll_User")]
+				[Authorize(Roles = "Unregistered,ENROLL_USER")]
 				public async Task<IActionResult> CreateUser(CreateUserDto user)
 				{
 						bool isRegistered = !HttpContext.User.Claims.Any(e => e.Type == ClaimTypes.Role && e.Value == "Unregistered");
