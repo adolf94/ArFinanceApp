@@ -6,7 +6,7 @@ const os = require("node:os")
 
 
 
-//variables 
+//variables
 let lastMigration = null
 
 
@@ -22,12 +22,12 @@ const doBackupFirst = ()=>{
     return new Promise((res)=>{
         let file = GenMigrationBJson();
         let proc = spawn("./cosmosMigrationTool/dmt.exe", [`--settings=${file}`])
-            
+
         proc.stdout.pipe(process.stdout)
         proc.stderr.pipe(process.stderr)
         proc.on('exit', (code) => {
         })
-      
+
     })
 
 
@@ -85,7 +85,7 @@ const getCurrentMigrationData = async ()=>{
         fs.writeFileSync(file, JSON.stringify(migrationJson));
 
         let proc = spawn("./cosmosMigrationTool/dmt.exe", [`--settings=${file}`])
-            
+
         proc.stdout.pipe(process.stdout)
         proc.stderr.pipe(process.stderr)
         proc.on('exit', (code) => {
@@ -96,8 +96,8 @@ const getCurrentMigrationData = async ()=>{
             if(text !== "["){
                 let migrations = JSON.parse(text)
                 lastMigration = migrations.reduce((prev, cur, i)=>{
-                    if(!!prev) return cur;
-                    if(cur.Id > prev.Id) return cur
+                    if(!prev) return cur;
+                    if(cur.id > prev.id) return cur
                     return prev
                 },null)
             }
@@ -105,9 +105,9 @@ const getCurrentMigrationData = async ()=>{
             res(lastMigration)
 
 
-        }); 
+        });
     })
-        
+
 }
 // getCurrentMigrationData()
 
@@ -117,13 +117,13 @@ const readMigrationsConfig =()=>{
         let configs = {};
         for (let i in files)
         {
-            
+
             let config = await import(  "./migrations/" + files[i]);
-    
+
             configs[files[i].split(".")[0]] = config;
-    
+
         }
-        
+
         res(configs)
     })
 
@@ -132,83 +132,89 @@ const readMigrationsConfig =()=>{
 
 const  applyRestore = async (dbConfigToApply)=>{
 
+    return new Promise( async res=>{
 
-    let migrationJson = {
-        Source: "json",
-        Sink: "cosmos-nosql",
-        SinkSettings: {
-            "ConnectionString": process.env.connectionString,
-            "Database":process.env.database
-        }
-    }
-
-    let metaData = dbConfigToApply.migrate.database
-    
-    let operations = metaData.map(e=>{
-        return {
-            "SourceSettings": {
-                "FilePath":  `${__dirname}\\data\\${e.Container}.json`
-            },
-            "SinkSettings": {
-                "Container":e.Container,
-                "Database": process.env.database,
-                "RecreateContainer" :true,
-                "PartitionKeyPath" : e.PartitionKeyPath ,
-                "PartitionKeyPaths" :e.PartitionKeyPaths
+        let migrationJson = {
+            Source: "json",
+            Sink: "cosmos-nosql",
+            SinkSettings: {
+                "ConnectionString": process.env.connectionString,
+                "Database":process.env.database
             }
         }
-    })
-    migrationJson.Operations = operations
 
-    let file = os.tmpdir() + "\\tmp_dmtApply.json"
-    fs.writeFileSync(file, JSON.stringify(migrationJson));
-    console.log(migrationJson.Operations.map(e=>e.SinkSettings))
-    let proc = spawn("./cosmosMigrationTool/dmt.exe", [`--settings=${file}`])
+        let metaData = dbConfigToApply.migrate.database
 
-    proc.stdout.pipe(process.stdout)
-    proc.stderr.pipe(process.stderr)
-    proc.on('exit', (code) => {
+        let operations = metaData.map(e=>{
+            return {
+                "SourceSettings": {
+                    "FilePath":  `${__dirname}\\data\\${e.Container}.json`
+                },
+                "SinkSettings": {
+                    "Container":e.Container,
+                    "Database": process.env.database,
+                    "RecreateContainer" :true,
+                    "PartitionKeyPath" : e.PartitionKeyPath ,
+                    "PartitionKeyPaths" :e.PartitionKeyPaths
+                }
+            }
+        })
+        migrationJson.Operations = operations
+
+        let file = os.tmpdir() + "\\tmp_dmtApply.json"
+        fs.writeFileSync(file, JSON.stringify(migrationJson));
+        console.log("runningRestore")
+        let internalProc = spawn("./cosmosMigrationTool/dmt.exe", [`--settings=${file}`])
+
+        internalProc.stdout.pipe(process.stdout)
+        internalProc.stderr.pipe(process.stderr)
+        internalProc.on('exit', (code) => {
+            res(code)
+        })
     })
 }
 
 const applyBackup = async (dbConfigToApply)=>{
-    
-    let migrationJson = {
-        Sink: "json",
-        Source: "cosmos-nosql",
-        SourceSettings: {
-            "ConnectionString": process.env.connectionString,
-            "Database":process.env.database
-        }
-    }
+    return new Promise((res=>{
 
-    let metaData = dbConfigToApply.migrate.database
-    
-    let operations = metaData.map(e=>{
-        return {
-            "SinkSettings": {
-                "FilePath":  `${__dirname}\\data\\${e.Container}.json`
-            },
-            "SourceSettings": {
-                "Container":e.Container,
-                "Database": process.env.database,
-                "RecreateContainer" :true,
-                "PartitionKeyPath" : e.PartitionKeyPath ,
-                "PartitionKeyPaths" :e.PartitionKeyPaths
+        let migrationJson = {
+            Sink: "json",
+            Source: "cosmos-nosql",
+            SourceSettings: {
+                "ConnectionString": process.env.connectionString,
+                "Database":process.env.database
             }
         }
-    })
-    migrationJson.Operations = operations
 
-    let file = os.tmpdir() + "\\tmp_dmtApply.json"
-    fs.writeFileSync(file, JSON.stringify(migrationJson));
-    console.log(migrationJson.Operations.map(e=>e.SinkSettings))
-    let proc = spawn("./cosmosMigrationTool/dmt.exe", [`--settings=${file}`])
+        let metaData = dbConfigToApply.migrate.database
 
-    proc.stdout.pipe(process.stdout)
-    proc.stderr.pipe(process.stderr)
-    proc.on('exit', (code) => {
-    })
+        let operations = metaData.map(e=>{
+            return {
+                "SinkSettings": {
+                    "FilePath":  `${__dirname}\\data\\${e.Container}.json`
+                },
+                "SourceSettings": {
+                    "Container":e.Container,
+                    "Database": process.env.database,
+                    "RecreateContainer" :true,
+                    "PartitionKeyPath" : e.PartitionKeyPath ,
+                    "PartitionKeyPaths" :e.PartitionKeyPaths
+                }
+            }
+        })
+        migrationJson.Operations = operations
+
+        let file = os.tmpdir() + "\\tmp_dmtApply.json"
+        fs.writeFileSync(file, JSON.stringify(migrationJson));
+        console.log(migrationJson.Operations.map(e=>e.SinkSettings))
+        let proc = spawn("./cosmosMigrationTool/dmt.exe", [`--settings=${file}`])
+
+        proc.stdout.pipe(process.stdout)
+        proc.stderr.pipe(process.stderr)
+        proc.on('exit', (code) => {
+            res(code)
+        })
+    }))
 
 }
 
@@ -221,7 +227,7 @@ const backupCurrent = async ()=>{
 
 }
 
-const OnDemandBackup = async ()=>{
+const Migration = async ()=>{
 
     const migrationNow = await getCurrentMigrationData()
 
@@ -237,7 +243,6 @@ const OnDemandBackup = async ()=>{
         // create empty data for first migration array
         let theIndexFinal = migrationKeys.length - 1
         migrationIndex = migrationKeys.length - 1
-        console.log( migrationsData)
 
         let firstMigration = migrationsData[migrationKeys[theIndexFinal]].default;
         for( var i in firstMigration.migrate.database) {
@@ -246,27 +251,44 @@ const OnDemandBackup = async ()=>{
             fs.writeFileSync(`${__dirname}\\data\\${table.Container}.json`, "[]")
             console.debug(`${table.Container}.json written with []`)
         }
-        applyBackup(firstMigration);
+        console.log("No Migration Exists")
+       await applyBackup(firstMigration);
 
     }else{
-        let migration = migrationsData[migrationNow.Id].default;
-        migrationIndex = migrationKeys.indexOf(migrationNow.Id);
-        applyBackup(migration);
+        let migration = migrationsData[migrationNow.id].default;
+        migrationIndex = migrationKeys.indexOf(migrationNow.id);
+        console.log("current Migration:" + migrationNow.id)
+
+        await applyBackup(migration);
     }
-    
+
     //perform transform
     for (let i = migrationIndex+1; i<migrationKeys;i++){
         let transformMigration = migrationsData[migrationKeys[i]]
         let tables = transformMigration.migrate.database
+        console.debug("migration: " + migrationKeys[i] );
+
         tables.forEach((conf)=>{
+            console.log("container: " + table.Container)
             let jsonText = fs.readFileSync(`${__dirname}\\data\\${table.Container}.json`);
             let jsonArr = JSON.parse(jsonText);
+            console.log("item Count : " + jsonArr.length)
 
             jsonArr = jsonArr.map(conf.mapper)
 
             fs.writeFileSync(`${__dirname}\\data\\${table.Container}.json`, JSON.stringify(jsonArr));
         })
+
+
     }
+
+
+    console.log("Restoring")
+
+    const lastMigration = migrationsData[migrationKeys[migrationKeys.length - 1]].default;
+
+    // console.log(lastMigration.migrate.database.map(e=>e.Container))
+    await applyRestore(lastMigration);
 
 
 
@@ -274,14 +296,61 @@ const OnDemandBackup = async ()=>{
 
 }
 
+const getCurrentMigrationFromFile = ()=>{
+    let text = fs.readFileSync(`${__dirname}\\data\\__EfMigrations.json`)
+    let lastMigration = null
+    if(text !== "["){
+        let migrations = JSON.parse(text)
+        lastMigration = migrations.reduce((prev, cur, i)=>{
+            console.log(cur)
+            if(!prev) return cur;
+            if(cur.id > prev.id) return cur
+            return prev
+        },null)
+    }
+    return lastMigration
+}
 
+const OnDemandRestore = async (type)=>{
+    const migrationNow = await type == "file" ? getCurrentMigrationFromFile() : getCurrentMigrationData()
+    const migrationsData = await readMigrationsConfig();
+    const migrationKeys= Object.keys(migrationsData).sort((a,b)=>(a>b?0:1))
+
+
+    //NOTE : if may data na, fetchData muna
+    if(!fs.existsSync(".\\data")) fs.mkdirSync(".\\data")
+
+    if(migrationNow === null){
+        // create empty data for first migration array
+        let theIndexFinal = migrationKeys.length - 1
+        migrationIndex = migrationKeys.length - 1
+
+        let firstMigration = migrationsData[migrationKeys[theIndexFinal]].default;
+        for( var i in firstMigration.migrate.database) {
+            let table =  firstMigration.migrate.database[i]
+            // console.log(firstMigration)
+            fs.writeFileSync(`${__dirname}\\data\\${table.Container}.json`, "[]")
+            console.debug(`${table.Container}.json written with []`)
+        }
+        applyRestore(migration);
+
+    }else{
+        console.log(migrationsData)
+        console.log(migrationNow.id)
+        console.log(migrationsData[migrationNow.id])
+        let migration = migrationsData[migrationNow.id].default;
+        migrationIndex = migrationKeys.indexOf(migrationNow.id);
+        applyRestore(migration);
+    }
+
+}
 // (async ()=>{
-    
+
 //     const migrationsData = await readMigrationsConfig();
 //     const migrationKeys= Object.keys(migrationsData).sort((a,b)=>(a>b?0:1))
 //     let firstMigration = migrationsData[migrationKeys[0]].default;
 //     applyRestore(firstMigration)
 // })()
-
-
+// Migration()
+// OnDemandRestore("file")
 OnDemandBackup()
