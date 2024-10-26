@@ -38,6 +38,18 @@ namespace FinanceApp.Data.CosmosRepo
 				}
 
 
+				public async Task<IEnumerable<Loans>> GetPendingInterests()
+				{
+						DateTime Now = DateTime.Now.Date;
+						IQueryable<Loans> loans = _context.Loans!.Where(e => e.NextInterestDate < Now
+								&& e.Status == "Active"
+						);
+
+
+						IEnumerable<Loans> items = await loans.ToArrayAsync();
+						return items;
+				}
+
 				public async Task<ComputeInterestResult?> ComputeInterests(Loans loan, DateTime dateRef, bool createPayment = false)
 				{
 						if (loan.NextInterestDate > dateRef) return null;
@@ -171,6 +183,21 @@ namespace FinanceApp.Data.CosmosRepo
 						};
 				}
 
+				public async Task<decimal> GetOutstandingBalance(Guid UserId)
+				{
+						IEnumerable<Loans> loans = await _context.Loans!.Where(e => e.UserId == UserId && e.Status == "Active").ToArrayAsync();
+
+						decimal result = loans.Select(loan =>
+						{
+								decimal interests = loan.InterestRecords.Select(e => e.Amount).Sum();
+								decimal payments = loan.Payment.Select(e => e.Amount).Sum();
+
+								return loan.Principal + interests - payments;
+
+						})
+						.Sum();
+						return result;
+				}
 
 		}
 

@@ -132,6 +132,7 @@ builder.Services.AddRateLimiter(e =>
 });
 
 builder.Services.AddHostedService<OnStartupBgSvc>();
+builder.Services.AddHostedService<ComputeInterestBg>();
 builder.Services.AddAuthorization();
 
 

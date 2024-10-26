@@ -3,10 +3,10 @@ using FinanceApp.Data;
 using FinanceApp.Dto;
 using FinanceApp.Models;
 using FinanceApp.Utilities;
+using FinanceProject.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Identity.Web;
 using System.Security.Claims;
 
 namespace FinanceApp.Controllers
@@ -20,13 +20,18 @@ namespace FinanceApp.Controllers
 				private readonly ILogger<LoanController> _logger;
 				private readonly IMapper _mapper;
 				private readonly IPaymentRepo _payment;
+				private readonly IUserRepo _user;
+				private readonly Sms _sms;
 
-				public LoanController(ILoanRepo repo, IPaymentRepo payment, ILogger<LoanController> logger, IMapper mapper)
+				public LoanController(ILoanRepo repo, IPaymentRepo payment, IUserRepo user,
+						ILogger<LoanController> logger, IMapper mapper, Sms sms)
 				{
 						_repo = repo;
 						_logger = logger;
 						_mapper = mapper;
 						_payment = payment;
+						_user = user;
+						_sms = sms;
 				}
 
 				[HttpPost("loan")]
@@ -36,7 +41,8 @@ namespace FinanceApp.Controllers
 
 						string userId = HttpContext.User.FindFirstValue("userId")!;
 						string appId = HttpContext.User.FindFirstValue("app")!;
-
+						User? user = await _user.GetById(loan.UserId);
+						if (user == null) return BadRequest();
 						Loans newLoan = _mapper.Map<Loans>(loan);
 						newLoan.CreatedBy = Guid.Parse(userId);
 						newLoan.NextInterestDate = loan.Date;
@@ -45,24 +51,29 @@ namespace FinanceApp.Controllers
 						//TODO : process Interests
 						await _repo.CreateLoan(newLoan);
 
+
+						//send sms
+						await _sms.SendSms($"We have recorded your loan of P {loan.Principal} with a monthly interest of {loan.LoanProfile.InterestPerMonth}% dated {loan.Date.ToString("MMM-dd")} "
+								, user.MobileNumber, true);
+
+
+
 						if (DateTime.Now > newLoan.Date.AddDays(1))
 						{
 								DateTime nextDate = newLoan.NextInterestDate;
 								while (nextDate <= DateTime.Now)
 								{
 										var result = await _repo.ComputeInterests(newLoan, DateTime.Now);
+
 										newLoan = result.NewLoanData;
 										nextDate = result.NextDate;
+
 								}
 						}
 						//TODO SEND EMAIL AND SMS;
 						//Reminder to reset interest on payment 
-
 						return CreatedAtAction("GetOneLoan", new { id = newLoan.Id }, newLoan);
 				}
-
-
-
 				[HttpGet("user/{userId}/loan")]
 
 				public async Task<IActionResult> GetByUser(Guid userId)

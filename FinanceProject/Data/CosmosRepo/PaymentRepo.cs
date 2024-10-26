@@ -127,7 +127,8 @@ namespace FinanceApp.Data.CosmosRepo
 																								.OrderBy(e => e.Date).ToListAsync()
 																								.GetAwaiter().GetResult();
 
-								List<LoanPayment> appliedPayments = await _context.LoanPayments!.Where(e => e.AppId == record.AppId && e.Date >= loan.LastInterestDate && e.UserId == record.UserId).ToListAsync();
+								List<LoanPayment> appliedPayments = await _context.LoanPayments!.Where(e => e.AppId == record.AppId
+								&& e.Date >= loan.LastInterestDate && e.LoanId == loan.Id).ToListAsync();
 								appliedPayments.ForEach(e => _context.Remove(e));
 								await _context.SaveChangesAsync();
 

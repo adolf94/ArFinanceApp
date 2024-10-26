@@ -9,6 +9,9 @@ namespace FinanceApp.Data
 				public Task<IQueryable<Loans>> GetByUserId(Guid guid);
 				public Task<Loans?> GetOneLoan(Guid loanId);
 				public Task<ComputeInterestResult> ComputeInterests(Loans loan, DateTime dateRef, bool createPayment = false);
+				public Task<IEnumerable<Loans>> GetPendingInterests();
+				public Task<decimal> GetOutstandingBalance(Guid UserId);
+
 
 		}
 }
