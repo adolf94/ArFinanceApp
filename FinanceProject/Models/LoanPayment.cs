@@ -17,7 +17,7 @@ namespace FinanceApp.Models
 				public PaymentRecord Payment { get; set; }
 				public Guid LoanId { get; set; }
 				[JsonIgnore]
-				public Loans Loan { get; set; }
+				public Loan Loan { get; set; }
 				public string AppId { get; set; }
 				public Guid UserId { get; set; }
 				public decimal Amount { get; set; }

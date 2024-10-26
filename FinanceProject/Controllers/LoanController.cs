@@ -43,7 +43,7 @@ namespace FinanceApp.Controllers
 						string appId = HttpContext.User.FindFirstValue("app")!;
 						User? user = await _user.GetById(loan.UserId);
 						if (user == null) return BadRequest();
-						Loans newLoan = _mapper.Map<Loans>(loan);
+						Loan newLoan = _mapper.Map<Loan>(loan);
 						newLoan.CreatedBy = Guid.Parse(userId);
 						newLoan.NextInterestDate = loan.Date;
 						newLoan.LastInterestDate = loan.Date;

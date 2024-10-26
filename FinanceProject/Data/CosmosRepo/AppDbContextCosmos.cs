@@ -16,10 +16,12 @@ namespace FinanceApp.Data.CosmosRepo
 				public DbSet<Vendor>? Vendors { get; set; }
 				public DbSet<AccountBalance>? AccountBalances { get; set; }
 				public DbSet<LoanProfile>? LoanProfiles { get; set; }
-				public DbSet<Loans>? Loans { get; set; }
+				public DbSet<Loan>? Loans { get; set; }
 				public DbSet<ScheduledTransactions>? ScheduledTransactions { get; set; }
 				public DbSet<PaymentRecord>? Payments { get; set; }
 				public DbSet<LoanPayment>? LoanPayments { get; set; }
+				public DbSet<CoopOption>? CoopOptions { get; set; }
+				public DbSet<MemberProfile>? MemberProfiles { get; set; }
 
 				private readonly IConfiguration _configuration;
 				public AppDbContext(DbContextOptions<AppDbContext> options, IConfiguration config) : base(options)
@@ -109,16 +111,17 @@ namespace FinanceApp.Data.CosmosRepo
 										.ToContainer("LoanProfiles")
 										.HasKey(e => e.ProfileId);
 
-						builder.Entity<Loans>().HasPartitionKey(e => new { e.AppId, e.UserId, e.Id })
+						builder.Entity<Loan>().HasPartitionKey(e => new { e.AppId, e.UserId, e.Id })
 										.ToContainer("Loans");
-						//builder.Entity<User>();
-						//.Property(e=>e.Roles)
-						//.HasConversion(
-						//		v=> JsonConvert.SerializeObject(v, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore }),
-						////(v) => JArray.FromObject(v),
-						//		v => JsonConvert.DeserializeObject<List<Role>>(v, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore })!
-						//);
 
+
+						builder.Entity<CoopOption>().HasPartitionKey(e => new { e.AppId, e.Year })
+								.ToContainer("Loans");
+
+						builder.Entity<MemberProfile>	().HasPartitionKey(e => new { e.AppId, e.Year, e.UserId })
+								.ToContainer("MemberProfiles");
+
+				
 
 						base.OnModelCreating(builder);
 				}

@@ -2,7 +2,7 @@
 
 namespace FinanceApp.Models
 {
-		public class Loans
+		public class Loan
 		{
 				public Guid Id { get; set; } = Guid.NewGuid();
 				public string AppId { get; set; } = string.Empty;

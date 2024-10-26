@@ -1,14 +1,13 @@
 ﻿namespace FinanceApp.Models
 {
-		public class MemberProfile
+		public class CoopOption
 		{
 				public string AppId { get; set; }
 				public int Year { get; set; }
-				public Guid UserId { get; set; }
-
 				public decimal InitialAmount { get; set; }
 				public decimal Increments { get; set; }
-				public decimal NoOfParts { get; set; }
+				public int InstallmentCount { get; set; }
+
 
 		}
 }

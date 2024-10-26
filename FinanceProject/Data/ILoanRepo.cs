@@ -5,11 +5,11 @@ namespace FinanceApp.Data
 {
 		public interface ILoanRepo
 		{
-				public Task<Loans> CreateLoan(Loans loan);
-				public Task<IQueryable<Loans>> GetByUserId(Guid guid);
-				public Task<Loans?> GetOneLoan(Guid loanId);
-				public Task<ComputeInterestResult> ComputeInterests(Loans loan, DateTime dateRef, bool createPayment = false);
-				public Task<IEnumerable<Loans>> GetPendingInterests();
+				public Task<Loan> CreateLoan(Loan loan);
+				public Task<IQueryable<Loan>> GetByUserId(Guid guid);
+				public Task<Loan?> GetOneLoan(Guid loanId);
+				public Task<ComputeInterestResult> ComputeInterests(Loan loan, DateTime dateRef, bool createPayment = false);
+				public Task<IEnumerable<Loan>> GetPendingInterests();
 				public Task<decimal> GetOutstandingBalance(Guid UserId);
 
 

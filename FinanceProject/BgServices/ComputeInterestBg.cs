@@ -30,14 +30,14 @@ namespace FinanceApp.BgServices
 						string SchedFolder = Path.Combine(scope.ServiceProvider.GetRequiredService<IWebHostEnvironment>().ContentRootPath, "configs");
 						string SchedTaskFile = Path.Combine(SchedFolder, "scheduled.json");
 
-						IEnumerable<Loans> items = await repo.GetPendingInterests();
+						IEnumerable<Loan> items = await repo.GetPendingInterests();
 
 						if (items.Any())
 						{
 
 								for (int i = 0; i < items.Count(); i++)
 								{
-										Loans item = items.ToList()[i];
+										Loan item = items.ToList()[i];
 
 										User? user = await _user.GetById(item.UserId);
 										var result = await repo.ComputeInterests(item, DateTime.Now);

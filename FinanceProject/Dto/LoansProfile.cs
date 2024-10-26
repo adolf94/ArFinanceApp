@@ -8,7 +8,7 @@ namespace FinanceApp.Dto
 				public LoansProfile()
 				{
 
-						CreateMap<CreateLoanDto, Loans>();
+						CreateMap<CreateLoanDto, Loan>();
 						CreateMap<LoanProfile, NoNavigationLoanProfile>()
 								.ReverseMap();
 

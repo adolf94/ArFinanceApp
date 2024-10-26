@@ -1,6 +1,6 @@
 ﻿using FinanceApp.Models;
 using Microsoft.EntityFrameworkCore;
-using static FinanceApp.Models.Loans;
+using static FinanceApp.Models.Loan;
 
 namespace FinanceApp.Data.CosmosRepo
 {
@@ -13,7 +13,7 @@ namespace FinanceApp.Data.CosmosRepo
 						_context = context;
 				}
 
-				public async Task<Loans> CreateLoan(Loans loan)
+				public async Task<Loan> CreateLoan(Loan loan)
 				{
 
 						await _context.Loans!.AddAsync(loan);
@@ -22,35 +22,35 @@ namespace FinanceApp.Data.CosmosRepo
 						return await Task.FromResult(loan);
 						//TODO Validate Authenticity of Loan Details
 				}
-				public async Task<Loans?> GetOneLoan(Guid loanId)
+				public async Task<Loan?> GetOneLoan(Guid loanId)
 				{
 
-						Loans? item = await _context.Loans!.Where(e => e.Id == loanId).FirstOrDefaultAsync();
+						Loan? item = await _context.Loans!.Where(e => e.Id == loanId).FirstOrDefaultAsync();
 						return item;
 
 						//TODO Validate Authenticity of Loan Details
 				}
 
-				public async Task<IQueryable<Loans>> GetByUserId(Guid guid)
+				public async Task<IQueryable<Loan>> GetByUserId(Guid guid)
 				{
-						IQueryable<Loans> loans = _context.Loans!.Where(e => e.UserId == guid);
+						IQueryable<Loan> loans = _context.Loans!.Where(e => e.UserId == guid);
 						return await Task.FromResult(loans);
 				}
 
 
-				public async Task<IEnumerable<Loans>> GetPendingInterests()
+				public async Task<IEnumerable<Loan>> GetPendingInterests()
 				{
 						DateTime Now = DateTime.Now.Date;
-						IQueryable<Loans> loans = _context.Loans!.Where(e => e.NextInterestDate < Now
+						IQueryable<Loan> loans = _context.Loans!.Where(e => e.NextInterestDate < Now
 								&& e.Status == "Active"
 						);
 
 
-						IEnumerable<Loans> items = await loans.ToArrayAsync();
+						IEnumerable<Loan> items = await loans.ToArrayAsync();
 						return items;
 				}
 
-				public async Task<ComputeInterestResult?> ComputeInterests(Loans loan, DateTime dateRef, bool createPayment = false)
+				public async Task<ComputeInterestResult?> ComputeInterests(Loan loan, DateTime dateRef, bool createPayment = false)
 				{
 						if (loan.NextInterestDate > dateRef) return null;
 						var balances = new
@@ -185,7 +185,7 @@ namespace FinanceApp.Data.CosmosRepo
 
 				public async Task<decimal> GetOutstandingBalance(Guid UserId)
 				{
-						IEnumerable<Loans> loans = await _context.Loans!.Where(e => e.UserId == UserId && e.Status == "Active").ToArrayAsync();
+						IEnumerable<Loan> loans = await _context.Loans!.Where(e => e.UserId == UserId && e.Status == "Active").ToArrayAsync();
 
 						decimal result = loans.Select(loan =>
 						{
@@ -203,7 +203,7 @@ namespace FinanceApp.Data.CosmosRepo
 
 		public class ComputeInterestResult
 		{
-				public Loans NewLoanData { get; set; }
+				public Loan NewLoanData { get; set; }
 				public LoanInterest InterestData { get; set; }
 				public DateTime NextDate { get; set; }
 		}
