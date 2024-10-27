@@ -116,12 +116,12 @@ namespace FinanceApp.Data.CosmosRepo
 
 
 						builder.Entity<CoopOption>().HasPartitionKey(e => new { e.AppId, e.Year })
-								.ToContainer("Loans");
+								.ToContainer("CoopOption").HasKey(e => new { e.AppId, e.Year });
 
-						builder.Entity<MemberProfile>	().HasPartitionKey(e => new { e.AppId, e.Year, e.UserId })
-								.ToContainer("MemberProfiles");
+						builder.Entity<MemberProfile>().HasPartitionKey(e => new { e.AppId, e.Year, e.UserId })
+								.ToContainer("MemberProfiles").HasKey(e => new { e.AppId, e.Year, e.UserId });
 
-				
+
 
 						base.OnModelCreating(builder);
 				}

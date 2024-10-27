@@ -8,9 +8,9 @@ namespace FinanceApp.Data.CosmosRepo
 				private readonly AppDbContext _context;
 
 				public MemberProfileRepo(AppDbContext context)
-        {
-           _context = context;
-        }
+				{
+						_context = context;
+				}
 
 
 				public async Task<IEnumerable<MemberProfile>> GetMemberProfiles(string app, int year)
@@ -36,6 +36,17 @@ namespace FinanceApp.Data.CosmosRepo
 				{
 						return await _context.MemberProfiles!.Where(e => e.AppId == app && e.Year == year && e.UserId == userId).FirstOrDefaultAsync();
 				}
+
+
+				public async Task<MemberProfile?> PostProfile(MemberProfile profile)
+				{
+						_context.MemberProfiles!.Add(profile);
+						await _context.SaveChangesAsync();
+						return profile;
+				}
+
+
+
 
 				public async Task<CoopOption?> GetCoopOptions(string app, int year)
 				{

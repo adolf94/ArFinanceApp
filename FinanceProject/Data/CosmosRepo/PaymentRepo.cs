@@ -63,7 +63,7 @@ namespace FinanceApp.Data.CosmosRepo
 
 
 						//get and update affected loans (for interest recalculation)
-						List<Loans> affectedLoans = await _context.Loans!.Where(e => e.AppId == record.AppId && e.UserId == record.UserId && e.LastInterestDate > record.Date)
+						List<Loan> affectedLoans = await _context.Loans!.Where(e => e.AppId == record.AppId && e.UserId == record.UserId && e.LastInterestDate > record.Date)
 						.ToListAsync();
 						//rollback Interest charging
 						affectedLoans.ForEach(loan =>
@@ -110,7 +110,7 @@ namespace FinanceApp.Data.CosmosRepo
 						});
 						await _context.SaveChangesAsync();
 
-						List<Loans> loansToApply = await _context.Loans!.Where(e => e.AppId == record.AppId && e.UserId == record.UserId && e.Status == "Active")
+						List<Loan> loansToApply = await _context.Loans!.Where(e => e.AppId == record.AppId && e.UserId == record.UserId && e.Status == "Active")
 
 								.OrderByDescending(e => e.LoanProfile.InterestPerMonth)
 								.OrderBy(e => e.Date).ToListAsync();
@@ -121,7 +121,7 @@ namespace FinanceApp.Data.CosmosRepo
 
 						for (int loanIndex = 0; loanIndex < loansToApply.Count; loanIndex++)
 						{
-								Loans loan = loansToApply[loanIndex];
+								Loan loan = loansToApply[loanIndex];
 
 								List<PaymentRecord> records = _context.Payments!.Where(e => e.AppId == loan.AppId && e.Date >= loan.LastInterestDate && e.UserId == loan.UserId)
 																								.OrderBy(e => e.Date).ToListAsync()

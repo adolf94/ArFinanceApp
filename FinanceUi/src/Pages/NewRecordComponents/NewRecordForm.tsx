@@ -41,6 +41,7 @@ import VendorTextField from "./VendorTextField";
 const cronOptions = [
   { name: "Monthly", cron: "0 0 DD * *" },
   { name: "Twice a month 15/30", cron: "0 0 15,[L] * *" },
+   { name: "Weekly (Friday)", cron: "0 0 0 * * 5"}
 ];
 
 interface NewRecordFormProps {
