@@ -3,7 +3,7 @@
 		public class CreateMemberProfileDto
 		{
 
-				public int StockCount { get; set; }
+				public int Shares { get; set; }
 
 		}
 }

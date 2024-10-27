@@ -9,6 +9,7 @@ namespace FinanceApp.Controllers
 {
 		[ApiController]
 		[Authorize]
+		[Route("api")]
 		public class MemberProfileController : ControllerBase
 		{
 				private readonly IMemberProfileRepo _repo;
@@ -33,6 +34,7 @@ namespace FinanceApp.Controllers
 				public async Task<IActionResult> CreateCoopOption([FromBody] CoopOption option, int year)
 				{
 						string? app = HttpContext.User!.FindFirstValue("app")!;
+						if (string.IsNullOrEmpty(option.AppId)) option.AppId = app;
 						if (option.AppId != app || option.Year != year) return BadRequest();
 
 						CoopOption? item = await _repo.GetCoopOptions(app, year);
@@ -82,7 +84,7 @@ namespace FinanceApp.Controllers
 						if (item != null) return Conflict();
 
 						CoopOption? option = await _repo.GetCoopOptions(app, year)!;
-						if (option != null) return NotFound();
+						if (option == null) return NotFound();
 
 						MemberProfile profile = new MemberProfile
 						{
@@ -91,12 +93,12 @@ namespace FinanceApp.Controllers
 								UserId = userId,
 								InitialAmount = option!.InitialAmount,
 								Increments = option.Increments,
-								StockCount = dto.StockCount,
+								Shares = dto.Shares,
 								InstallmentCount = option.InstallmentCount,
 								FirstInstallment = option.FirstInstallment
 						};
 
-
+						await _repo.PostProfile(profile);
 						return Ok(profile);
 
 				}

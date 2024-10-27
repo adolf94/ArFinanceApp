@@ -8,7 +8,7 @@
 
 				public decimal InitialAmount { get; set; }
 				public decimal Increments { get; set; }
-				public int StockCount { get; set; }
+				public int Shares { get; set; }
 				public int InstallmentCount { get; set; }
 				public DateTime FirstInstallment { get; set; }
 

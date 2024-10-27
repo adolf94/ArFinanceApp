@@ -12,6 +12,7 @@ import {
     QueryClientProvider,
 } from '@tanstack/react-query'
 import { IdToken } from './Pages/Register'
+import { ConfirmProvider } from 'material-ui-confirm'
 
 
 export const queryClient = new QueryClient()
@@ -27,16 +28,17 @@ function App() {
 
 
     return (
+        <ConfirmProvider>
+            <LocalizationProvider dateAdapter={AdapterMoment}>
+                <QueryClientProvider client={queryClient}>
+                    <UserContext.Provider value={{ get: userctx, set: setUserCtx }}>
+                        <SnackbarProvider />
 
-        <LocalizationProvider dateAdapter={AdapterMoment}>
-            <QueryClientProvider client={queryClient}>
-                <UserContext.Provider value={{ get: userctx, set: setUserCtx }}>
-                    <SnackbarProvider />
-
-                      <RouterProvider router={ router } />
-                </UserContext.Provider>
-            </QueryClientProvider>
-        </LocalizationProvider>
+                        <RouterProvider router={ router } />
+                    </UserContext.Provider>
+                </QueryClientProvider>
+            </LocalizationProvider>
+        </ConfirmProvider>
   )
 }
 

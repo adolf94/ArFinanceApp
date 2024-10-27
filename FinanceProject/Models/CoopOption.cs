@@ -2,8 +2,8 @@
 {
 		public class CoopOption
 		{
-				public string AppId { get; set; }
-				public int Year { get; set; }
+				public string AppId { get; set; } = "";
+				public int Year { get; set; }		
 				public decimal InitialAmount { get; set; }
 				public DateTime FirstInstallment { get; set; }
 				public CoopOptionFrequency Frequency { get; set; } = FrequencyOptions.TwicePerMonth;

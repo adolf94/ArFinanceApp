@@ -3,6 +3,7 @@ import moment from "moment";
 import { oauthSignIn } from "./googlelogin";
 import { memoize as mm } from "underscore";
 import { jwtDecode, JwtPayload } from "jwt-decode";
+import { enqueueSnackbar } from "notistack";
 
 
 interface IdToken extends JwtPayload {
@@ -85,6 +86,16 @@ api.interceptors.response.use(
                 console.debug("retry with getToken");
                 return api({ ...err.response.config, retryGetToken: true })
             }
+
+            if(err.response.status === 500){
+                enqueueSnackbar("Something went wrong!", {variant:'error'})
+            }
+            
+            if(err.response.status === 400){
+                enqueueSnackbar("Please check inputs", {variant:'error'})
+            }
+        }else{
+            enqueueSnackbar("API Might be off", {variant:'error'})
         }
         return Promise.reject(err)
     },

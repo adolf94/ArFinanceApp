@@ -157,6 +157,7 @@ namespace FinanceApp.Data.CosmosRepo
 						services.AddScoped<ILoanProfileRepo, LoanProfileRepo>();
 						services.AddScoped<ILoanRepo, LoanRepo>();
 						services.AddScoped<IPaymentRepo, PaymentRepo>();
+						services.AddScoped<IMemberProfileRepo, MemberProfileRepo>();
 
 
 						return services;

@@ -4,6 +4,7 @@ import { Navigate, Route, Routes, useLocation, useMatch, useNavigate, useParams 
 import LoansTable from "./LoansTable"
 import ViewLoanDetails from "./ViewLoanDetails"
 import SettingsIndex from "../Settings/Index"
+import UserPanel from "../User/UserPanel"
 
 
 
@@ -33,6 +34,7 @@ const AdminBody = () => {
                 <Routes>
                   <Route path="/loan/*" element={ <LoansTable /> }></Route>
                   <Route path="/settings/*" element={ <SettingsIndex /> }></Route>
+                  <Route path="/user/*" element={ <UserPanel /> }></Route>
                 </Routes>
               
             </Grid>
