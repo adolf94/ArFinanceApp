@@ -156,6 +156,16 @@ namespace FinanceProject.Controllers
 						return Ok(users);
 				}
 
+				[HttpGet("user/{userId}")]
+				[Authorize(Roles = "MANAGE_LOAN,COOP_MEMBER")]
+				public async Task<IActionResult> GetOne(Guid userId)
+				{
+						User? user = await _users.GetById(userId);
+						if (user == null) return NotFound();
+
+						return Ok(user);
+				}
+
 				[HttpPost("user/{id}/disbursementaccount")]
 				public async Task<IActionResult> AddDisbursementAccount(Guid id, DisbursementAccount acct)
 				{

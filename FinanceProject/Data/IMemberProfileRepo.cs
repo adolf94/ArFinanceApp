@@ -10,6 +10,7 @@ namespace FinanceApp.Data
 				public Task<CoopOption> CreateCoopOption(CoopOption option);
 				public Task<CoopOption> UpdateCoopOption(CoopOption option);
 				public Task<MemberProfile> PostProfile(MemberProfile profile);
+				public Task<MemberProfile> UpdateProfile(MemberProfile profile);
 
 		}
 }

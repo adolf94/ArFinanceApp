@@ -114,9 +114,9 @@ const Index = () => {
             }
             if (e === "") return
             const userInfo = decodeJwt<IdToken>(e)
-            setIsLoggedIn(true)
             //@ts-ignore
             updateUser(userInfo)
+            setIsLoggedIn(true)
 
             const stateFromStorage = sessionStorage.getItem("googleLoginState");
             if(!stateFromStorage) return

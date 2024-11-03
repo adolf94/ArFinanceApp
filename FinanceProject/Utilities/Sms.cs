@@ -69,7 +69,7 @@ namespace FinanceApp.Utilities
 						}
 
 						SmsRequestResponse response = JsonSerializer.Deserialize<SmsRequestResponse>(str)!;
-						return response.id;
+						return ""; //response.id;
 				}
 
 
@@ -138,7 +138,7 @@ namespace FinanceApp.Utilities
 				{
 						public string id { get; set; } = string.Empty;
 						public string state { get; set; } = string.Empty;
-						public string isEncrypted { get; set; } = string.Empty;
+						public bool isEncrypted { get; set; }
 						public IEnumerable<SmsRecipientStatus> recipients { get; set; } = new List<SmsRecipientStatus>();
 				}
 				public class SmsRequestFailedResponse

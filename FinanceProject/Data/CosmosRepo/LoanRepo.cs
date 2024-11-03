@@ -31,9 +31,9 @@ namespace FinanceApp.Data.CosmosRepo
 						//TODO Validate Authenticity of Loan Details
 				}
 
-				public async Task<IQueryable<Loan>> GetByUserId(Guid guid)
+				public async Task<IQueryable<Loan>> GetByUserId(Guid guid, string appId)
 				{
-						IQueryable<Loan> loans = _context.Loans!.Where(e => e.UserId == guid);
+						IQueryable<Loan> loans = _context.Loans!.Where(e => e.UserId == guid && e.AppId == appId);
 						return await Task.FromResult(loans);
 				}
 
@@ -183,9 +183,16 @@ namespace FinanceApp.Data.CosmosRepo
 						};
 				}
 
-				public async Task<decimal> GetOutstandingBalance(Guid UserId)
+
+				public async Task<IQueryable<Loan>> GetLoansByMemberId(Guid guid, string appId)
 				{
-						IEnumerable<Loan> loans = await _context.Loans!.Where(e => e.UserId == UserId && e.Status == "Active").ToArrayAsync();
+						IQueryable<Loan> loans = _context.Loans!.Where(e => e.CoborrowerId == guid && e.AppId == appId);
+						return await Task.FromResult(loans);
+				}
+
+				public async Task<decimal> GetOutstandingBalance(Guid UserId, string appId)
+				{
+						IEnumerable<Loan> loans = await _context.Loans!.Where(e => e.UserId == UserId && e.Status == "Active" && e.AppId == appId).ToArrayAsync();
 
 						decimal result = loans.Select(loan =>
 						{

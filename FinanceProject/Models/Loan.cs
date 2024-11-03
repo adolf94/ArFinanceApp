@@ -17,7 +17,7 @@ namespace FinanceApp.Models
 				public DateTime? DateClosed { get; set; }
 				public DateTime NextInterestDate { get; set; }
 				public DateTime LastInterestDate { get; set; }
-				public DateTime[] ExpectedPayments { get; set; } = Array.Empty<DateTime>();
+				public List<PaymentPlan> ExpectedPayments { get; set; } = new List<PaymentPlan>();
 				public DisbursementAccount? DisbursementAccount { get; set; }
 				public decimal Principal { get; set; }
 				public decimal Interests { get; set; }
@@ -37,8 +37,12 @@ namespace FinanceApp.Models
 						public decimal Amount { get; set; }
 						public decimal TotalPercent { get; set; }
 				}
-
+				public class PaymentPlan
+				{
+						public DateTime Date { get; set; }
+						public decimal Amount { get; set; }
+				}
 		}
-
 		public class NoNavigationLoanProfile : LoanProfile { }
 }
+

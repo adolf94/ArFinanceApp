@@ -13,6 +13,7 @@ import { FormattedAmount } from "../../components/NumberInput"
 import moment from "moment"
 import { Outlet, Route, Routes, useNavigate } from "react-router-dom"
 import ViewLoanAsBorrower from "./Loans/View"
+import {Loan, LoanPayment} from "FinanceApi";
 
 const IndexAuthenticated = () => {
 		const { user } = useUserInfo();
@@ -32,7 +33,7 @@ const IndexAuthenticated = () => {
 			lastPayment: null
 		}
 
-		let loansCalculated = (loans || []).map((l: any) => {
+		let loansCalculated = (loans || []).map((l: Loan) => {
 			let payments = l.payment.reduce((p: number, c: any) => { return Number.parseFloat(c.amount) + p }, 0)
 			let interest = l.interestRecords.reduce((p: number, c: any) => { return Number.parseFloat(c.amount) + p }, 0)
 			total.principal = total.principal + Number.parseFloat(l.principal);
@@ -44,6 +45,11 @@ const IndexAuthenticated = () => {
 				if(p.paymentId == c.paymentId) p.amount = p.amount + c.amount;
 				return p;
 			  },null)
+			
+			total.nextPayment = l.expectedPayments.sort((a,b)=>{
+				moment(a.date).isBefore(b.date)
+			})
+			
 			let res = {
 				date: l.date,
 				principal: l.principal,
@@ -67,6 +73,7 @@ const IndexAuthenticated = () => {
 					<CardContent>
 						<Grid container>
 							<Grid size={3} >
+								
 								<AccountBalance sx={{ fontSize: '4rem', alignSelf: 'center' }} />
 							</Grid>
 							<Grid size={9} sx={{ textAlign: 'center', pr: 3 }}>
@@ -75,7 +82,7 @@ const IndexAuthenticated = () => {
 								</Typography>
 								<Typography variant="subtitle1" sx={{ color: 'text.secondary' }}>
 									Outstanding Balance
-								</Typography>
+								</Typography>	
 							</Grid>
 						</Grid>
 					</CardContent>
@@ -115,13 +122,16 @@ const IndexAuthenticated = () => {
 			</Grid>
 			{view === "tiles" ?
 				<Grid container size={12} sx={{ p: 2 }}>
-					{loanCalculation.map(loan=>
+					{loanCalculation.map((loan:any)=>
 					<Grid size={{ xl: 4, md: 6, xs: 12 }} sx={{ p: 1 }} key={loan.orig.id}>
 						<Card>
 							<CardContent sx={{ p: 2, paddingBottom: '8px!important' }}>
 								{/*<CardContent sx={{}}>*/}
 								<Grid container sx={{ justifyContent: "space-between", pb: 1 }}>
 									<Box>
+										<Typography variant="caption" gutterBottom={false}>
+											Date Created: {moment(loan.date).format("MMM DD")}
+										</Typography>
 										<Typography variant="h5" component="div" gutterBottom={false}>
 											P {FormattedAmount(loan.balance)}
 										</Typography>
@@ -137,6 +147,9 @@ const IndexAuthenticated = () => {
 											<Chip size="small" color="warning" label={`Interest: ${FormattedAmount(loan.interests)}`}  />
 											<Chip size="small" color="success" label={`Payments: ${FormattedAmount(loan.payments)}`}  />
 										</Box>
+									</Grid>
+									<Grid>
+										Next Payment: Before 
 									</Grid>
 								</Grid>
 							</CardContent>

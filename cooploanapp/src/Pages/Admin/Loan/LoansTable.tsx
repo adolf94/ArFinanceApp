@@ -1,13 +1,14 @@
-import { TableContainer, Table, TableHead, TableRow, TableCell, TableBody, formControlClasses } from "@mui/material"
+import { TableContainer, Table, TableHead, TableRow, TableCell, TableBody } from "@mui/material"
 import { useQuery } from "@tanstack/react-query"
 import { USER, getAll } from "../../../repositories/users"
-import { User } from "FinanceApi"
+import {Loan, LoanInterest, LoanPayment, LoanProfile, User} from "FinanceApi"
 import { getByUserId, LOAN } from "../../../repositories/loan"
 import { useEffect, useState } from "react"
 import {  ArrowDropDown, ArrowRight } from "@mui/icons-material"
 import moment from "moment"
 import { FormattedAmount } from "../../../components/NumberInput"
 import { useNavigate } from "react-router-dom"
+import {generateCompute} from "../../../components/useComputeInterest";
 
 
 
@@ -28,13 +29,25 @@ const LoanClientRow = ( {client} : {client : User}  )=>{
       balance:0
     }
 
-    let loansCalculated = (loans||[]).map((l :any)=>{
-      let payments = l.payment.reduce((p : number,c)=>{ return Number.parseFloat(c.amount) + p },0)
-      let interest = l.interestRecords.reduce((p : number,c)=>{ return Number.parseFloat(c.amount) + p },0)
-      total.principal = total.principal + Number.parseFloat(l.principal);
+    let loansCalculated = (loans||[]).map((l : Loan)=>{
+      let payments = l.payment.reduce((p : number,c : LoanPayment)=>{ return c.amount + p },0)
+      let interest = l.interestRecords.reduce((p : number,c: LoanInterest)=>{ return c.amount + p },0)
+      total.principal = total.principal + l.principal;
       total.interest = total.interest +  interest;
-      total.payments = total.payments +  Number.parseFloat(payments);
-
+      total.payments = total.payments +  payments;
+      
+      let computeInterest = generateCompute({principal: total.principal, date:moment(l.nextInterestDate)}, l.loanProfile)
+      if(moment().isBefore(l.nextInterestDate)){
+        let additionalInterest = computeInterest(moment(l.lastInterestDate), {
+          balance: total.balance,
+          date: moment(l.nextInterestDate),
+          interest: total.interest,
+          principal: total.principal,
+          totalInterestPercent: l.totalInterestPercent
+        })
+        console.log(additionalInterest)
+      }
+      
       let res = {
         date:l.date,
         principal: l.principal,

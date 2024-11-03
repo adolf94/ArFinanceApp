@@ -74,8 +74,40 @@ namespace FinanceApp.Controllers
 						//Reminder to reset interest on payment 
 						return CreatedAtAction("GetOneLoan", new { id = newLoan.Id }, newLoan);
 				}
-				[HttpGet("user/{userId}/loan")]
 
+
+				[HttpGet("member/{userId}/loan")]
+				[Authorize(Roles = "COOP_MEMBER")]
+				public async Task<IActionResult> GetByMember(Guid userId)
+				{
+						string currentUserId = HttpContext.User.FindFirstValue("userId")!;
+						string App = HttpContext.User.FindFirstValue("app")!;
+
+
+
+						var query = await _repo.GetLoansByMemberId(userId, App);
+						var items = await query
+
+								.Where(e => e.Status == "Active")
+
+								.ToArrayAsync();
+
+						items = items.Select(item =>
+						{
+								item.Payment = _payment.GetByLoanId(item.Id);
+								return item;
+						}).ToArray();
+
+						return Ok(items);
+
+
+				}
+
+
+
+
+
+				[HttpGet("user/{userId}/loan")]
 				public async Task<IActionResult> GetByUser(Guid userId)
 				{
 						string currentUserId = HttpContext.User.FindFirstValue("userId")!;
@@ -84,7 +116,7 @@ namespace FinanceApp.Controllers
 						{
 								return Forbid();
 						}
-						var query = await _repo.GetByUserId(userId);
+						var query = await _repo.GetByUserId(userId, App);
 						var items = await query
 
 								.Where(e => e.Status == "Active")

@@ -16,6 +16,15 @@ export const getAll = ()=>{
 
 }
 
+export const getUserById = (userId : string)=>{
+
+    return api.get(`/user/${userId}`)
+        .then(res=>{
+            return res.data
+        })
+
+}
+
 export const useMutateUser = (id?:string)=>{
     const create = useMutation({
         mutationFn:(user:Partial<User>)=>{

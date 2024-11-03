@@ -4,7 +4,7 @@ import { ReactNode, useEffect, useState } from 'react';
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import moment from 'moment';
-import { UserContextValue, UserContext } from './userContext';
+import { UserContextValue, UserContext, useUpdateUserInfo } from './userContext';
 import { oauthSignIn } from './googlelogin';
 
 
@@ -65,14 +65,17 @@ const AuthenticatedLayoutChild = ({ children, persona, contextValue }: { context
 
     const navigate = useNavigate()
     const [loggedIn, setLoggedIn] = useState(false)
+    const updateUser = useUpdateUserInfo()
 
     useEffect(() => {
         //check if token is valid
+        if(loggedIn) return
         const token = window.sessionStorage.getItem("access_token");
         if (!token) return oauthSignIn()
         const tokenJson = JSON.parse(window.atob(token!.split(".")[1]));
 
         if (moment().add(1, "minute").isAfter(tokenJson.exp * 1000)) oauthSignIn()
+        updateUser(tokenJson);
         setLoggedIn(true)
         return
 

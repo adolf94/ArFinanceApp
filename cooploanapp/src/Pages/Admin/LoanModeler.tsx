@@ -1,13 +1,30 @@
-import { Grid2 as Grid, Typography, TextField, TableContainer, Table, TableHead,
-     TableRow, TableCell, TableBody, TableFooter, Button, Alert, InputAdornment, Chip, Box, Autocomplete, IconButton } from "@mui/material";
+import {
+    Alert,
+    Autocomplete,
+    Box,
+    Button,
+    Chip,
+    Grid2 as Grid,
+    IconButton,
+    InputAdornment,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableFooter,
+    TableHead,
+    TableRow,
+    TextField,
+    Typography
+} from "@mui/material";
 
-import { DatePicker } from "@mui/x-date-pickers";
-import { LoanProfile } from "FinanceApi";
+import {DatePicker} from "@mui/x-date-pickers";
+import {LoanProfile} from "FinanceApi";
 import moment from "moment";
-import { useEffect, useMemo, useState } from "react";
-import NumberInput, { FormattedAmount } from "../../components/NumberInput";
-import { Delete } from "@mui/icons-material";
-
+import {useEffect, useMemo, useState} from "react";
+import NumberInput, {FormattedAmount} from "../../components/NumberInput";
+import {Delete} from "@mui/icons-material";
+import {generateCompute} from "../../components/useComputeInterest";
 
 
 interface LoanModelerProps {
@@ -32,84 +49,6 @@ export interface Payment {
 }
 
 
-const generateCompute = (form:any, loanProfile: LoanProfile) => {
-    
-    return (lastInterest: moment.Moment, balance: any) => {
-        const createDate = form.date;
-        const days = lastInterest.diff(createDate, 'day')
-        let totalInterest = 0;
-        let nextDate;
-        //check fixedConditions 
-        const sort = loanProfile.fixed!.sort((a, b) => a.maxDays - b.maxDays)
-        const useIndex = sort.findIndex(e => e.maxDays > (days));
-        let interestPercent = 0;
-        if (useIndex > -1) {
-            if (useIndex == 0) {
-                interestPercent = sort[useIndex].interest
-            } else {
-                interestPercent = sort[useIndex].interest - sort[useIndex - 1].interest
-
-            }
-            nextDate = createDate.clone().add(sort[useIndex].maxDays, 'days');
-            totalInterest = sort[useIndex].interest;
-        } else {
-            nextDate = createDate.clone().add(1, 'month');
-            totalInterest = loanProfile.interestPerMonth!;
-
-            while (nextDate.isSameOrBefore(lastInterest)) {
-                nextDate.add(1, 'month')
-                totalInterest = totalInterest + loanProfile.interestPerMonth!;
-            }
-
-            if (loanProfile.computePerDay && balance.date.isBefore(nextDate)) {
-                //const curDaysInMonth = nextDate.daysInMonth()
-                const noOfDaysInMonth = nextDate.clone().add(-1,'month').daysInMonth();
-                console.log(noOfDaysInMonth)
-                const rebateDays = nextDate.clone().diff(balance.date.clone(), 'day');
-                const percent = (rebateDays / noOfDaysInMonth) * loanProfile.interestPerMonth!
-                totalInterest = totalInterest - percent
-                nextDate = balance.date.clone()
-            }
-
-
-            interestPercent = totalInterest - balance.totalInterestPercent
-            if (interestPercent <= 0) interestPercent = 0
-
-        }
-        //compute interestFactor
-
-        //{ value: 'principalBalance', label: 'Principal Balance' },
-        //{ value: 'principalTotal', label: 'Principal Total' },
-        //{ value: 'totalBalance', label: 'Total Balance' },
-        let interest = -0;
-        switch (loanProfile.interestFactor) {
-            case "principalBalance":
-                interest = balance.principal * (interestPercent / 100)
-                break;
-            case "principalTotal":
-                interest = form.principal * (interestPercent / 100)
-                break;
-            case "totalBalance":
-                interest = balance.balance * (interestPercent / 100)
-                break;
-        }
-
-
-        const newItem = {
-            date: lastInterest!,
-            amount: -interest,
-            type: 'interest',
-            principalBalance: balance.principal,
-            balance: balance.balance + interest,
-            interestBalance: balance.interest + interest,
-            minimumDate: lastInterest!,
-            nextInterest: nextDate!,
-            totalInterestPercent: totalInterest
-        }
-        return newItem;
-    }
-
-}
 
 const dateDropdown = ()=>{
     let items = []
@@ -129,7 +68,7 @@ const LoanModeler = ({ loanProfile, loanInfo, onChange, onPaymentsChange,payment
         readonly: !!loanInfo?.readonly,
         months:0
     })
-    const [customPayments, setCustomPayments] = useState<Payment[]>([])
+    const [customPayments] = useState<Payment[]>([])
 
     const [payments, setPayments] = useState<Payment[]>([])
     const [month, setSelectedMonth] = useState({month:0, label: `Custom`, isCustom:true})
@@ -157,7 +96,7 @@ const LoanModeler = ({ loanProfile, loanInfo, onChange, onPaymentsChange,payment
         }])
         
     }
-    const setMonth = (data)=>{
+    const setMonth = (data : any)=>{
         if(data.isCustom){
             setPayments(customPayments);
             setSelectedMonth(data);
@@ -165,7 +104,7 @@ const LoanModeler = ({ loanProfile, loanInfo, onChange, onPaymentsChange,payment
         }
 
         //@ts-ignore
-        const computeInterest = generateCompute(form, loanProfile);
+        const computeInterest = generateCompute(form, {...loanProfile, computePerDay:false});
 
         let items = []
         
@@ -174,15 +113,12 @@ const LoanModeler = ({ loanProfile, loanInfo, onChange, onPaymentsChange,payment
         let interest = 0
             
         let totalInterestPercent = 0;
-
-        let prevPayment = 0;
-        let nextInterest = form.date.clone()
+        let nextInterest = form.date.clone().add(1,'day')
 
         for(let i = 1; i<=data.month;i++){
             let thisInterest = 0
             
             let thisDate = form.date.clone().add(i,'month')
-            console.log(thisInterest)
             while (nextInterest.clone().isBefore(thisDate)) {
                 const prior = {
                     date: nextInterest.clone(),
@@ -243,11 +179,11 @@ const LoanModeler = ({ loanProfile, loanInfo, onChange, onPaymentsChange,payment
         let totalInterestPercent = 0;
         let previousPaymentsAndModelPayments = [...(previousPayments || []).map(e=>({...e,readonly:true })),...payments.map((e,i)=>({...e,index:i}))]
         let nextInterest = form.date
-        const computed = previousPaymentsAndModelPayments.reduce((prev: Payment[], cur) => {
+        return previousPaymentsAndModelPayments.reduce((prev: Payment[], cur: any) => {
 
             while (nextInterest.clone().isBefore(cur.date)) {
                 const prior = {
-                    date: cur.date,
+                    date: cur.date.clone(),
                     interest,
                     principal,
                     balance,
@@ -287,7 +223,6 @@ const LoanModeler = ({ loanProfile, loanInfo, onChange, onPaymentsChange,payment
             prev.push(cur!)
             return [...prev]
         }, [])
-        return computed
     }, [form.principal, form.date, payments, loanProfile, previousPayments])
 
     useEffect(()=>{
@@ -313,9 +248,9 @@ const LoanModeler = ({ loanProfile, loanInfo, onChange, onPaymentsChange,payment
             <Typography variant="subtitle1">Model Loan Payments</Typography>
         </Grid>
         <Grid size={4} sx={{ pb: 2, px: 1 }}>
-            <DatePicker label="Date of Loan" disabled={!!form.readonly} value={form.date}
-                onAccept={newValue => setForm({...form, date:newValue!})}
-                slots={{
+            <DatePicker label="Date of Loan" disabled={form.readonly} value={form.date}
+                        onAccept={newValue => setForm({...form, date:newValue!})}
+                        slots={{
                     textField: (params) => (
                         <TextField
                             {...params}

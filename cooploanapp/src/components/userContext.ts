@@ -3,15 +3,15 @@ import React, { useContext } from "react";
 import { IdToken } from "../Pages/Register";
 
 export interface UserContextValue {
-		get: IdToken,
-		set: React.SetStateAction<IdToken>
+		get: IdToken | null,
+		set: (data: any)=>void
 }
 
 export const UserContext = React.createContext<UserContextValue>({
-//ts-gnore
+//@ts-gnore
 		get: null,
-//ts-gnore
-		set: () => {}
+//@ts-gnore
+		set: () => {} 
 })
 
 
@@ -20,7 +20,7 @@ const useUserInfo = () => {
 	const ctx = useContext(UserContext)
 	   
 		const value = {
-			user : ctx.get
+			user : ctx.get!
 		}
 
 		return value

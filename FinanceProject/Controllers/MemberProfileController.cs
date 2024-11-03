@@ -1,6 +1,8 @@
 ﻿using FinanceApp.Data;
 using FinanceApp.Dto;
 using FinanceApp.Models;
+using FinanceApp.Utilities;
+using FinanceProject.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -13,10 +15,12 @@ namespace FinanceApp.Controllers
 		public class MemberProfileController : ControllerBase
 		{
 				private readonly IMemberProfileRepo _repo;
+				private readonly IUserRepo _user;
 
-				public MemberProfileController(IMemberProfileRepo repo)
+				public MemberProfileController(IMemberProfileRepo repo, IUserRepo user)
 				{
 						_repo = repo;
+						_user = user;
 				}
 
 				[HttpGet("coopOptions/{year}")]
@@ -79,12 +83,20 @@ namespace FinanceApp.Controllers
 				public async Task<IActionResult> CreateMemberProfile(int year, Guid userId, CreateMemberProfileDto dto)
 				{
 						string? app = HttpContext.User!.FindFirstValue("app")!;
+						User? user = await _user.GetById(userId);
+						if (user == null) return NotFound();
+
 
 						MemberProfile? item = await _repo.GetMemberProfiles(app, year, userId);
 						if (item != null) return Conflict();
 
 						CoopOption? option = await _repo.GetCoopOptions(app, year)!;
 						if (option == null) return NotFound();
+
+						if (!user!.Roles.Any(e => e == AppRoles.COOP_MEMBER))
+						{
+								user.Roles = user.Roles.Append(AppRoles.COOP_MEMBER).ToArray();
+						}
 
 						MemberProfile profile = new MemberProfile
 						{
@@ -109,6 +121,14 @@ namespace FinanceApp.Controllers
 
 						MemberProfile? item = await _repo.GetMemberProfiles(app, year, userId);
 						if (item == null) return NotFound();
+
+						MemberProfile.Contribution? dbContribution = item.Contributions.FirstOrDefault(e => e.Index == contribution.Index);
+						if (dbContribution != null) return Conflict();
+
+						item.Contributions.Add(contribution);
+
+						await _repo.UpdateProfile(item);
+
 
 						return Ok(item);
 

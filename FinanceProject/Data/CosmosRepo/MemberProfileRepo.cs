@@ -45,6 +45,14 @@ namespace FinanceApp.Data.CosmosRepo
 						return profile;
 				}
 
+				public async Task<MemberProfile> UpdateProfile(MemberProfile profile)
+				{
+
+						_context.Entry(profile).State = EntityState.Modified;
+						await _context.SaveChangesAsync();
+						return profile;
+				}
+
 
 
 

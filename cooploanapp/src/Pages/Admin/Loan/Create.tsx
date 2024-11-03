@@ -55,7 +55,10 @@ const CreateLoan = (props:CreateLoanProps) => {
         principal: form.amount,
         disbursementAccount: form.disbursementAccount,
         date: form.date.format("YYYY-MM-DD"),
-        expectedPayments: payments.map(e=>e.date.format("YYYY-MM-DD"))
+        expectedPayments: payments.map(e=> ({
+            date:moment(e.date).format("YYYY-MM-DD"),
+            amount:e.amount
+        }))
       }
       createLoan.mutateAsync(output)
         .then(()=>{

@@ -10,6 +10,12 @@ export const getByUserId = (userId: string)=>{
     return api.get(`/user/${userId}/loan`)
         .then(res=>res.data)
 }
+
+export const getByMemberId = (userId: string)=>{
+
+    return api.get(`/member/${userId}/loan`)
+        .then(res=>res.data)
+}
  
 export const getByLoanId = (loanId: string)=>{
 

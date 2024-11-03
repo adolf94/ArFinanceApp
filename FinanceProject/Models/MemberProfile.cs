@@ -17,10 +17,11 @@
 
 				public class Contribution
 				{
+						public DateTime ForDate { get; set; }
 						public DateTime Date { get; set; }
-						public DateTime DateAdded { get; set; }
-						public DateTime Amount { get; set; }
-						public DateTime Index { get; set; }
+						public DateTime DateAdded { get; set; } = DateTime.Now;
+						public decimal Amount { get; set; }
+						public int Index { get; set; }
 				}
 		}
 }

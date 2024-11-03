@@ -9,7 +9,7 @@ namespace FinanceApp.Dto
 				public Guid CoborrowerId { get; set; }
 
 				public DateTime Date { get; set; }
-				public DateTime[] ExpectedPayments { get; set; } = Array.Empty<DateTime>();
+				public Loan.PaymentPlan[] ExpectedPayments { get; set; } = Array.Empty<Loan.PaymentPlan>();
 				public NoNavigationLoanProfile LoanProfile { get; set; } = new NoNavigationLoanProfile();
 				public DisbursementAccount? DisbursementAccount { get; set; }
 				public decimal Principal { get; set; }
