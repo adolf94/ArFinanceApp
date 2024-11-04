@@ -21,7 +21,7 @@ const Admin = () => {
 	const navigate = useNavigate();
 
 	return (
-		<AuthenticatedLayout persona="admin">
+		<AuthenticatedLayout persona="admin"  roles={["MANAGE_LOAN"]}>
 			<Grid container sx={{ width: "100vw" }}>
 				<Grid container sx={{ width: "100vw", pt: 5 }}>
 					<Grid size={{ lg: 3, md: 4, xs: 12 }} sx={{ p: 2 }}>

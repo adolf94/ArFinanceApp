@@ -46,6 +46,7 @@ namespace FinanceApp.Controllers
 						Loan newLoan = _mapper.Map<Loan>(loan);
 						newLoan.CreatedBy = Guid.Parse(userId);
 						newLoan.NextInterestDate = loan.Date;
+						newLoan.NextComputeDate = loan.Date;
 						newLoan.LastInterestDate = loan.Date;
 						newLoan.AppId = appId;
 						//TODO : process Interests
@@ -60,13 +61,13 @@ namespace FinanceApp.Controllers
 
 						if (DateTime.Now > newLoan.Date.AddDays(1))
 						{
-								DateTime nextDate = newLoan.NextInterestDate;
-								while (nextDate <= DateTime.Now)
+								DateTime nextCompute = newLoan.NextInterestDate;
+								while (nextCompute <= DateTime.Now)
 								{
 										var result = await _repo.ComputeInterests(newLoan, DateTime.Now);
 
 										newLoan = result.NewLoanData;
-										nextDate = result.NextDate;
+										nextCompute = result.NextDate;
 
 								}
 						}

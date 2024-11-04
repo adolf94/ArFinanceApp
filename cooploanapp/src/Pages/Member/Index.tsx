@@ -125,7 +125,7 @@ const MemberP = () => {
 
 
 const MemberPage = () => {
-  return <AuthenticatedLayout persona="member">
+  return <AuthenticatedLayout persona="member"  roles={["COOP_MEMBER"]}>
     <MemberP />
   </AuthenticatedLayout>
 }

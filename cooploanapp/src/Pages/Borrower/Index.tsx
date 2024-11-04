@@ -13,7 +13,8 @@ import { FormattedAmount } from "../../components/NumberInput"
 import moment from "moment"
 import { Outlet, Route, Routes, useNavigate } from "react-router-dom"
 import ViewLoanAsBorrower from "./Loans/View"
-import {Loan, LoanPayment} from "FinanceApi";
+import {Loan, LoanPayment, PaymentPlan} from "FinanceApi";
+import {generateCompute} from "../../components/useComputeInterest";
 
 const IndexAuthenticated = () => {
 		const { user } = useUserInfo();
@@ -30,32 +31,53 @@ const IndexAuthenticated = () => {
 			interest: 0,
 			payments: 0,
 			balance: 0,
-			lastPayment: null
+			lastPayment: null as LoanPayment | null,
+			nextPayment: null as PaymentPlan | null | undefined 
 		}
 
 		let loansCalculated = (loans || []).map((l: Loan) => {
 			let payments = l.payment.reduce((p: number, c: any) => { return Number.parseFloat(c.amount) + p }, 0)
 			let interest = l.interestRecords.reduce((p: number, c: any) => { return Number.parseFloat(c.amount) + p }, 0)
-			total.principal = total.principal + Number.parseFloat(l.principal);
+
+			let principalBalance =  l.payment.reduce((p: number,c:LoanPayment)=>{return  p - (c.againstPrincipal? c.amount: 0)},l.principal)
+			let balance = l.principal + interest - payments
+			if(l.loanProfile.computePerDay) {
+				const computeInterest = generateCompute({date: moment(l.date), principal:l.principal}, l.loanProfile)
+
+				let interestOut = computeInterest(moment(), {
+					date: moment(),
+					balance: balance,
+					totalInterestPercent:l.totalInterestPercent,
+					interest:interest,
+					principal:principalBalance
+				})
+
+				principalBalance = balance  - interestOut.amount;
+				interest = interest - interestOut.amount
+			}
+
+
+
+
+			total.principal = total.principal + l.principal;
 			total.interest = total.interest + interest;
-			total.payments = total.payments + Number.parseFloat(payments);
-			total.lastPayment = l.payment.reduce((p,c)=>{
+			total.payments = total.payments + payments;
+			total.lastPayment = l.payment.reduce((p : LoanPayment | null,c)=>{
 				if(p===null) return c;
 				if(p.date < c.date ) return {...c};
 				if(p.paymentId == c.paymentId) p.amount = p.amount + c.amount;
 				return p;
 			  },null)
 			
-			total.nextPayment = l.expectedPayments.sort((a,b)=>{
-				moment(a.date).isBefore(b.date)
-			})
-			
+			let nextPayment = l.expectedPayments.sort((a,b)=>a.date.localeCompare(b.date))
+				.find(e=>moment(e.date).isAfter(moment()))
 			let res = {
 				date: l.date,
 				principal: l.principal,
 				interests: interest,
 				payments: payments,
-				balance: l.principal + interest - Number.parseFloat(payments),
+				nextPayment,
+				balance: principalBalance,
 				orig: l
 			}
 			return res
@@ -135,10 +157,25 @@ const IndexAuthenticated = () => {
 										<Typography variant="h5" component="div" gutterBottom={false}>
 											P {FormattedAmount(loan.balance)}
 										</Typography>
+										<Typography variant="caption" gutterBottom={false}>
+											Balance
+										</Typography>
 									</Box>
-									<Typography variant="subtitle1" sx={{ color: 'text.secondary' }} component="div" gutterBottom={false}>
-										Due: {moment(loan.nextInterest).format("MMM DD")}
-									</Typography>
+									<Box>
+										
+										{/*Due: {moment(loan.nextInterest).format("MMM DD")}*/}
+
+										<Typography variant="caption" gutterBottom={false}>
+											Next Payment
+										</Typography>
+										<Typography variant="h5" gutterBottom={false}>
+											{FormattedAmount(loan.nextPayment?.amount)}
+										</Typography>
+										<Typography variant="caption" gutterBottom={false}>
+											Before {moment(loan.nextPayment?.date).format("MMM DD")}
+
+										</Typography>
+									</Box>
 								</Grid>
 								<Grid sx={{ pb: 1, justifyContent:'start' }}>
 									<Grid sx={{display:'flex',flexWrap:'wrap'}}>
@@ -149,7 +186,6 @@ const IndexAuthenticated = () => {
 										</Box>
 									</Grid>
 									<Grid>
-										Next Payment: Before 
 									</Grid>
 								</Grid>
 							</CardContent>
@@ -177,7 +213,7 @@ const IndexAuthenticated = () => {
 							</TableHead>
 							<TableBody>
 								{
-									loanCalculation.map(loan=><TableRow>
+									loanCalculation.map((loan : any )=><TableRow key={loan.id}>
 										<TableCell align="center">{moment(loan.date).format("YYYY-MM-DD")}</TableCell>
 										<TableCell align="right">{FormattedAmount(loan.principal)}</TableCell>
 										<TableCell align="right">{FormattedAmount(loan.interests)}</TableCell>

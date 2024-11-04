@@ -4,13 +4,14 @@ import { ReactNode, useEffect, useState } from 'react';
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import moment from 'moment';
-import { UserContextValue, UserContext, useUpdateUserInfo } from './userContext';
+import useUserInfo, { UserContextValue, UserContext, useUpdateUserInfo } from './userContext';
 import { oauthSignIn } from './googlelogin';
 
 
 interface AuthenticatedLayoutProps {
     children: ReactNode;
-    persona: string 
+    persona: string,
+    roles? :string[]
 }
 
 
@@ -22,6 +23,7 @@ const PersonaMenu = ({ persona } :{ persona:string }) => {
             setAnchorEl(event.currentTarget);
     };
         const navigate = useNavigate()
+        const {isInRole} = useUserInfo()
         const handleClose = () => {
             setAnchorEl(null);
         };
@@ -52,8 +54,8 @@ const PersonaMenu = ({ persona } :{ persona:string }) => {
                     }}
                 >
                     <MenuItem onClick={()=>navigate("/")}>Borrower</MenuItem>
-                    <MenuItem onClick={() => navigate("/member")}>Member</MenuItem>
-                    <MenuItem onClick={() => navigate("/admin")}>Admin</MenuItem>
+                    {isInRole("COOP_MEMBER") && <MenuItem onClick={() => navigate("/member")}>Member</MenuItem>}
+                    {isInRole("MANAGE_LOAN") && <MenuItem onClick={() => navigate("/admin")}>Admin</MenuItem> }
                 </Menu>
             </div>
         );
@@ -61,11 +63,12 @@ const PersonaMenu = ({ persona } :{ persona:string }) => {
 
 
 
-const AuthenticatedLayoutChild = ({ children, persona, contextValue }: { contextValue: UserContextValue } & AuthenticatedLayoutProps) => {
+const AuthenticatedLayoutChild = ({ children, persona, roles, contextValue }: { contextValue: UserContextValue } & AuthenticatedLayoutProps) => {
 
     const navigate = useNavigate()
     const [loggedIn, setLoggedIn] = useState(false)
     const updateUser = useUpdateUserInfo()
+    const {isInRole} = useUserInfo()
 
     useEffect(() => {
         //check if token is valid
@@ -81,7 +84,13 @@ const AuthenticatedLayoutChild = ({ children, persona, contextValue }: { context
 
     }, [navigate, children])
 
-
+    useEffect(() => {
+        if(!loggedIn || !roles ) return;
+        console.log(roles)
+        if(Array.isArray(roles)){
+            if(!roles.some(e=>isInRole(e))) navigate("/Errors/403")
+        }
+    }, [roles,loggedIn]);
 
     return loggedIn && <>
             <Box flexGrow={1}>
@@ -115,7 +124,7 @@ const AuthenticatedLayout = (props : AuthenticatedLayoutProps) => {
 
     return <UserContext.Consumer>
 
-        {value => <AuthenticatedLayoutChild {...props} contextValue={ value } /> }
+        {value => <AuthenticatedLayoutChild {...props} contextValue={ value }  children={props.children}/> }
 
     </UserContext.Consumer>
 }

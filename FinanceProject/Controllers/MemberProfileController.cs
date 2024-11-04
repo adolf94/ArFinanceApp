@@ -93,9 +93,9 @@ namespace FinanceApp.Controllers
 						CoopOption? option = await _repo.GetCoopOptions(app, year)!;
 						if (option == null) return NotFound();
 
-						if (!user!.Roles.Any(e => e == AppRoles.COOP_MEMBER))
+						if (!user.Roles.Any(role=> role == $"{app.ToUpper()}_{AppRoles.COOP_MEMBER}" || role == AppRoles.COOP_MEMBER))
 						{
-								user.Roles = user.Roles.Append(AppRoles.COOP_MEMBER).ToArray();
+								user.Roles = user.Roles.Append($"{app.ToLower()}_{AppRoles.COOP_MEMBER}").ToArray();
 						}
 
 						MemberProfile profile = new MemberProfile

@@ -1,4 +1,5 @@
 import {LoanProfile} from "FinanceApi";
+import moment from "moment";
 
 interface ComputeInterestVars {
     date: moment.Moment,
@@ -9,9 +10,9 @@ interface ComputeInterestVars {
 }
 export const generateCompute = (form:{date:moment.Moment, principal: number, readonly?: boolean , months?: number}, loanProfile: LoanProfile) => {
 
-    return (lastInterest: moment.Moment, balance: ComputeInterestVars) => {
-        const createDate = form.date;
-        const days = lastInterest.diff(createDate, 'day')
+    return (nextInterest: moment.Moment, balance: ComputeInterestVars) => {
+        const createDate = moment(form.date);
+        const days = nextInterest.diff(createDate, 'day')
         let totalInterest: number;
         let nextDate;
         //check fixedConditions 
@@ -31,7 +32,7 @@ export const generateCompute = (form:{date:moment.Moment, principal: number, rea
             nextDate = createDate.clone().add(1, 'month');
             totalInterest = loanProfile.interestPerMonth!;
 
-            while (nextDate.isSameOrBefore(lastInterest)) {
+            while (nextDate.isSameOrBefore(nextInterest)) {
                 nextDate.add(1, 'month')
                 totalInterest = totalInterest + loanProfile.interestPerMonth!;
             }
@@ -39,7 +40,7 @@ export const generateCompute = (form:{date:moment.Moment, principal: number, rea
             if (loanProfile.computePerDay && balance.date.isBefore(nextDate)) {
                 //const curDaysInMonth = nextDate.daysInMonth()
                 const noOfDaysInMonth = nextDate.clone().add(-1,'month').daysInMonth();
-                const rebateDays = nextDate.clone().diff(balance.date.clone(), 'day');
+                const rebateDays = nextDate.clone().diff(balance.date.clone().startOf('day'), 'day');
                 const percent = (rebateDays / noOfDaysInMonth) * loanProfile.interestPerMonth!
                 totalInterest = totalInterest - percent
                 nextDate = balance.date.clone()
@@ -70,13 +71,13 @@ export const generateCompute = (form:{date:moment.Moment, principal: number, rea
 
 
         return {
-            date: lastInterest!,
+            date: nextInterest!,
             amount: -interest,
             type: 'interest',
             principalBalance: balance.principal,
             balance: balance.balance + interest,
             interestBalance: balance.interest + interest,
-            minimumDate: lastInterest!,
+            minimumDate: nextInterest!,
             nextInterest: nextDate!,
             totalInterestPercent: totalInterest
         };

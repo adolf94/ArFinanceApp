@@ -7,6 +7,8 @@ import { useEffect, useState } from "react"
 import { FormattedAmount } from "../../../components/NumberInput"
 import moment from "moment"
 import React from "react"
+import {generateCompute} from "../../../components/useComputeInterest";
+import {LoanInterest, LoanPayment} from "FinanceApi";
 
 
 
@@ -82,24 +84,54 @@ const ViewLoanDetails = () => {
   const {loanid} = useParams()
   const { data: loan, isLoading: loading } = useQuery({ queryKey: [LOAN,{loanId: loanid}], queryFn: () => getByLoanId(loanid!), enabled:!!loanid && loanid != 'new'})
   const [summary, setSummary] = useState({balance:0,interest:0, payments:0})
+  const [transactions, setTransactions] = useState<any[]>([])
   useEffect(()=>{
     if(!loan) return
     let payments = loan.payment.reduce((p,c)=>{return p + c.amount},0)
+    let principal = loan.payment.reduce((p: number,c:LoanPayment)=>{return  p - (c.againstPrincipal? c.amount: 0)},loan.principal)
     let interest = loan.interestRecords.reduce((p,c)=>{return p + c.amount},0)
-    let balance = loan.principal + interest - payments
-    setSummary({balance, interest, payments})
-  },[loan])
+    let balanceAmount = loan.principal + interest - payments
 
-  const transactions = (()=>{
-    if(!loan) return []
     const balance = {
       total : loan.principal,
       interest : 0,
       principal: loan.principal
     }
 
-    let interest = loan.interestRecords.map(e=>({...e,date:e.dateStart,type:'interest'}))
-    let payments = loan.payment.reduce((p,c)=>{
+    let interestItems = loan.interestRecords.map(e=>({...e,date:e.dateStart,type:'interest'}))
+    
+    if(loan.loanProfile.computePerDay){
+      const computeInterest = generateCompute(loan, loan.loanProfile)
+
+      let interestOut = computeInterest(moment(), {
+        date: moment(),
+        balance: balanceAmount,
+        totalInterestPercent:loan.totalInterestPercent,
+        interest:interest,
+        principal:principal
+      })
+
+      balanceAmount = balanceAmount - interestOut.amount
+      interest = interest - interestOut.amount
+
+
+
+      interestItems.push(  {
+        dateCreated: moment().format('YYYY-MM-DD'),
+        dateStart: loan.lastInterest,
+        dateEnd: moment().add(-1,'days'),
+        amount: -interestOut.amount,
+        type: "interest",
+        totalPercentage: interestOut.totalInterestPercent
+      })
+    }
+    
+    setSummary({balance: balanceAmount, interest, payments})
+
+
+    
+    
+    let paymentsItems = loan.payment.reduce((p,c)=>{
       let index = p.findIndex(e=>e.paymentId == c.paymentId)
       let key = c.againstPrincipal?'principal':'interest'
 
@@ -113,84 +145,86 @@ const ViewLoanDetails = () => {
       return p;
     },[])
 
-    let records = [...payments, ...interest]
-      .sort((a,b)=>a.date==b.date?0: a.date>b.date?1:-1)
-      .map(e=>{
-        let out = {...e,
-          interestBalance : balance.interest,
-          principalBalance : balance.principal,
+    let records = [...paymentsItems, ...interestItems]
+        .sort((a,b)=>a.date==b.date?0: a.date<b.date?1:-1)
+        .map(e=>{
+          let out = {...e,
+            interestBalance : balance.interest,
+            principalBalance : balance.principal,
 
-          principalAmount : 0,
-          interestAmount : 0,
-          balance:balance.total
+            principalAmount : 0,
+            interestAmount : 0,
+            balance:balance.total
 
 
-        }
-        if(e.type=='interest'){
-          balance.interest = balance.interest + e.amount;
-          out.interestBalance = balance.interest;
-          balance.total = balance.total + e.amount
-          out.balance = balance.total;
+          }
+          if(e.type=='interest'){
+            balance.interest = balance.interest + e.amount;
+            out.interestBalance = balance.interest;
+            balance.total = balance.total + e.amount
+            out.balance = balance.total;
 
-          out.interestAmount = e.amount;
+            out.interestAmount = e.amount;
 
-        }else{
-          let currentAmount = e.amount;
-          if(balance.interest > 0){
-            if(balance.interest > e.amount){
-              balance.interest = balance.interest - currentAmount;
-              out.interestBalance = balance.interest;
-              
-              balance.total = balance.total - currentAmount;
-              out.balance = balance.total;
+          }else{
+            let currentAmount = e.amount;
+            if(balance.interest > 0){
+              if(balance.interest > e.amount){
+                balance.interest = balance.interest - currentAmount;
+                out.interestBalance = balance.interest;
 
-              out.interestAmount = -currentAmount;
-              currentAmount = 0;
+                balance.total = balance.total - currentAmount;
+                out.balance = balance.total;
 
-            }else{
-              
-              balance.total = balance.total - balance.interest;
-              out.balance = balance.total;
+                out.interestAmount = -currentAmount;
+                currentAmount = 0;
 
-              out.interestAmount = -balance.interest;
-              currentAmount = currentAmount - balance.interest;
-              balance.interest = 0;
-              out.interestBalance = balance.interest;
+              }else{
 
+                balance.total = balance.total - balance.interest;
+                out.balance = balance.total;
+
+                out.interestAmount = -balance.interest;
+                currentAmount = currentAmount - balance.interest;
+                balance.interest = 0;
+                out.interestBalance = balance.interest;
+
+
+              }
 
             }
 
-          }
-          
-          if(currentAmount > 0){
-            if(balance.principal > currentAmount){
-              balance.principal = balance.principal - currentAmount;
-              out.principalBalance = balance.principal;
+            if(currentAmount > 0){
+              if(balance.principal > currentAmount){
+                balance.principal = balance.principal - currentAmount;
+                out.principalBalance = balance.principal;
 
-              balance.total = balance.total - currentAmount;
-              out.balance = balance.total;
+                balance.total = balance.total - currentAmount;
+                out.balance = balance.total;
 
-              out.principalAmount = -currentAmount
-              currentAmount = 0
-            }else{
-              balance.principal = 0;
-              out.principalBalance = balance.principal;
-              balance.total =  0;
-              out.balance = balance.total;
+                out.principalAmount = -currentAmount
+                currentAmount = 0
+              }else{
+                balance.principal = 0;
+                out.principalBalance = balance.principal;
+                balance.total =  0;
+                out.balance = balance.total;
 
-              
-              out.principalAmount = -balance.principal
-              currentAmount = 0
+
+                out.principalAmount = -balance.principal
+                currentAmount = 0
+              }
             }
+            out.amount = -e.amount
           }
-          out.amount = -e.amount
-        }
 
 
-        return out
-      })
-      return records
-  })()
+          return out
+        })
+    setTransactions(records)
+    
+  },[loan])
+
 
   if(!loanid || loanid == "new") return <></>
 
