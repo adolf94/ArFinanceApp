@@ -53,11 +53,59 @@ declare module 'FinanceApi' {
         redirectUrl: AppRedirects[];
     }
 
+    // ..\FinanceProject\Models\CoopOption.cs
+    export interface CoopOption {
+        appId: string;
+        year: number;
+        initialAmount: number;
+        firstInstallment: string;
+        frequency: CoopOptionFrequency;
+        increments: number;
+        installmentCount: number;
+    }
+
+    // ..\FinanceProject\Models\CoopOption.cs
+    export interface FrequencyOptions {
+    }
+
+    // ..\FinanceProject\Models\CoopOption.cs
+    export interface CoopOptionFrequency {
+        name: string;
+        cron: string;
+    }
+
     // ..\FinanceProject\Models\Currency.cs
     export interface Currency {
         currencyId: number;
         currencyName: string;
         currencyCode: string;
+    }
+
+    // ..\FinanceProject\Models\Loan.cs
+    export interface Loan {
+        id: string;
+        appId: string;
+        userId: string;
+        coborrowerId: string;
+        createdBy: string;
+        date: string;
+        dateCreated: string;
+        dateClosed?: string;
+        nextInterestDate: string;
+        lastInterestDate: string;
+        expectedPayments: PaymentPlan[];
+        disbursementAccount?: DisbursementAccount;
+        principal: number;
+        interests: number;
+        totalInterestPercent: number;
+        loanProfile: NoNavigationLoanProfile;
+        payment: LoanPayment[];
+        interestRecords: LoanInterest[];
+        status: string;
+    }
+
+    // ..\FinanceProject\Models\Loan.cs
+    export interface NoNavigationLoanProfile extends LoanProfile {
     }
 
     // ..\FinanceProject\Models\LoanPayment.cs
@@ -83,31 +131,17 @@ declare module 'FinanceApi' {
         fixed: FixedInterests[];
     }
 
-    // ..\FinanceProject\Models\Loans.cs
-    export interface Loans {
-        id: string;
+    // ..\FinanceProject\Models\MemberProfile.cs
+    export interface MemberProfile {
         appId: string;
+        year: number;
         userId: string;
-        coborrowerId: string;
-        createdBy: string;
-        date: string;
-        dateCreated: string;
-        dateClosed?: string;
-        nextInterestDate: string;
-        lastInterestDate: string;
-        expectedPayments: string[];
-        disbursementAccount?: DisbursementAccount;
-        principal: number;
-        interests: number;
-        totalInterestPercent: number;
-        loanProfile: NoNavigationLoanProfile;
-        payment: LoanPayment[];
-        interestRecords: LoanInterest[];
-        status: string;
-    }
-
-    // ..\FinanceProject\Models\Loans.cs
-    export interface NoNavigationLoanProfile extends LoanProfile {
+        initialAmount: number;
+        increments: number;
+        shares: number;
+        installmentCount: number;
+        firstInstallment: string;
+        contributions: Contribution[];
     }
 
     // ..\FinanceProject\Models\PaymentRecord.cs
@@ -204,10 +238,15 @@ declare module 'FinanceApi' {
         userId: string;
         coborrowerId: string;
         date: string;
-        expectedPayments: string[];
+        expectedPayments: Loan.PaymentPlan[];
         loanProfile: NoNavigationLoanProfile;
         disbursementAccount?: DisbursementAccount;
         principal: number;
+    }
+
+    // ..\FinanceProject\Dto\CreateMemberProfileDto.cs
+    export interface CreateMemberProfileDto {
+        shares: number;
     }
 
     // ..\FinanceProject\Dto\CreateTransactionDto.cs

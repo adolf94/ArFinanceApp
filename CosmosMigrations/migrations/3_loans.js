@@ -86,6 +86,7 @@ const data = {
                 mapper: e=>{
                     e.HasActiveLoans = false
                     e.LoanProfile = null
+                    e.roles = e.roles.map(e=>e.toUpperCase())
                     e.LoanProfileProfileId = null
                     e.DisbursementAccounts = []
                     return e;

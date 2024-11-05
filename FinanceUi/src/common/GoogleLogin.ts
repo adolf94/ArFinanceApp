@@ -20,8 +20,8 @@ export const oauthSignIn = (promptType? : string) => {
   // Parameters to pass to OAuth 2.0 endpoint.
   var params = {
       client_id: window.webConfig.clientId,
-    response_type: "code",
-      scope: "openid .../auth/userinfo.profile .../auth/userinfo.email	",
+    scope: "openid https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email",
+      response_type: "code",
     access_type: "offline",
     include_granted_scopes: "true",
       state: base64State,
