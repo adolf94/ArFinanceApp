@@ -18,7 +18,7 @@ const data = {
             {
                 "Container": "AccountBalance",
                 "PartitionKeyPaths": [
-                    "/Id"
+                    '/Year','/Month','/AccountId' 
                 ],
                 mapper: e=>e
             },

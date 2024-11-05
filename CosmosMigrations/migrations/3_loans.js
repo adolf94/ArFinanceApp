@@ -18,7 +18,7 @@ const data = {
             {
                 "Container": "AccountBalance",
                 "PartitionKeyPaths": [
-                    "/Id"
+                    '/Year','/Month','/AccountId' 
                 ],
                 mapper: e=>e
             },
@@ -33,8 +33,16 @@ const data = {
                 mapper: e=>e
             },
             {
+                "Container": "CoopOption",
+                "PartitionKeyPaths":["/AppId","/Year"],
+                mapper: e=>e
+            },
+            {
                 "Container":"ScheduledTransactions",
-                "PartitionKeyPath":"/Id",
+                "PartitionKeyPaths":[
+                    "/AppId", "/UserId", "/Id"
+                ],
+                comment:"new",
                 mapper: e=>e
             },
             {
@@ -44,8 +52,20 @@ const data = {
                 mapper: e=>e
             },
             {
+                "Container": "LoanProfile",
+                "PartitionKeyPaths": ["/AppId", "/ProfileId"],
+                comment : "new",
+                mapper: e=>e
+            },
+            {
                 "Container": "Loans",
-                "PartitionKeyPaths":["/AppId", "/UserId", "/Id"],
+                "PartitionKeyPaths":["/AppId", "/UserId", "/Status"],
+                comment : "new",
+                mapper: e=>e
+            },
+            {
+                "Container": "MemberProfiles",
+                "PartitionKeyPaths":["/AppId", "/Year", "/UserId"],
                 comment : "new",
                 mapper: e=>e
             },
@@ -66,6 +86,8 @@ const data = {
                 mapper: e=>{
                     e.HasActiveLoans = false
                     e.LoanProfile = null
+                    e.LoanProfileProfileId = null
+                    e.DisbursementAccounts = []
                     return e;
                 }
               },

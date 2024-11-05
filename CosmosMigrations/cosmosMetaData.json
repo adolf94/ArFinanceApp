@@ -1,9 +1,5 @@
 [
     {
-        "Container": "__EfMigrations",
-        "PartitionKeyPath": "/Id"
-    },
-    {
         "Container": "Account",
         "PartitionKeyPath": "/Id"
     },

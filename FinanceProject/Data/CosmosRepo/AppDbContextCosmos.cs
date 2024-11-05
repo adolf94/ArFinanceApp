@@ -27,7 +27,7 @@ namespace FinanceApp.Data.CosmosRepo
 				public AppDbContext(DbContextOptions<AppDbContext> options, IConfiguration config) : base(options)
 				{
 						_configuration = config;
-						base.Database.EnsureCreatedAsync().Wait();
+						// base.Database.EnsureCreatedAsync().Wait();
 				}
 
 
@@ -111,7 +111,7 @@ namespace FinanceApp.Data.CosmosRepo
 										.ToContainer("LoanProfiles")
 										.HasKey(e => e.ProfileId);
 
-						builder.Entity<Loan>().HasPartitionKey(e => new { e.AppId, e.UserId, e.Id })
+						builder.Entity<Loan>().HasPartitionKey(e => new { e.AppId, e.UserId, e.Status })
 										.ToContainer("Loans");
 
 
@@ -143,7 +143,7 @@ namespace FinanceApp.Data.CosmosRepo
 
 								var encrypted = Configuration.GetConnectionString("CosmosDb")!;
 								var connection = AesOperation.DecryptString(passkey, encrypted);
-								opt.UseCosmos(connection, "FinanceApp");
+								opt.UseCosmos(connection, "FinanceAppLocal");
 						});
 
 						services.AddScoped<IAccountTypeRepo, AccountTypeRepo>();

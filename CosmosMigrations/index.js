@@ -13,7 +13,6 @@ let lastMigration = null
 
 
 
-
 const autoBackUpFolder = __dirname + "/autoBackUp/" + moment().format("YYYYMMDDHHmm")
 
 
@@ -48,7 +47,7 @@ const GenMigrationBJson = (location)=>{
             "Database":process.env.database
         }
     }
-
+    console.log(migrationJson)
     let operations = metaData.map(e=>{
         return {
             "SinkSettings": {
@@ -162,6 +161,8 @@ const  applyRestore = async (dbConfigToApply)=>{
         migrationJson.Operations = operations
 
         let file = os.tmpdir() + "\\tmp_dmtApply.json"
+
+        console.log(migrationJson)
         fs.writeFileSync(file, JSON.stringify(migrationJson));
         console.log("runningRestore")
         let internalProc = spawn("./cosmosMigrationTool/dmt.exe", [`--settings=${file}`])
@@ -261,25 +262,35 @@ const Migration = async ()=>{
 
         await applyBackup(migration);
     }
-
+    // process.exit()
     //perform transform
-    for (let i = migrationIndex+1; i<migrationKeys;i++){
+    for (let i = migrationIndex+1; i<migrationKeys.length ;i++){
         let transformMigration = migrationsData[migrationKeys[i]]
-        let tables = transformMigration.migrate.database
-        console.debug("migration: " + migrationKeys[i] );
-
-        tables.forEach((conf)=>{
+        console.log(transformMigration)
+        let tables = transformMigration.default.migrate.database
+        console.log("migration: " + migrationKeys[i] );
+        
+        tables.forEach((table)=>{
             console.log("container: " + table.Container)
-            let jsonText = fs.readFileSync(`${__dirname}\\data\\${table.Container}.json`);
+            let jsonFile = `${__dirname}\\data\\${table.Container}.json`;
+            if(!fs.existsSync(jsonFile)) return
+            let jsonText = fs.readFileSync(jsonFile);
             let jsonArr = JSON.parse(jsonText);
             console.log("item Count : " + jsonArr.length)
 
-            jsonArr = jsonArr.map(conf.mapper)
+            jsonArr = jsonArr.map(table.mapper)
 
             fs.writeFileSync(`${__dirname}\\data\\${table.Container}.json`, JSON.stringify(jsonArr));
         })
 
+        //addID 
+        let jsonText = fs.readFileSync(`${__dirname}\\data\\__EfMigrations.json`);
+        let jsonArr = JSON.parse(jsonText);
+        console.log("item Count : " + jsonArr.length)
 
+        jsonArr = jsonArr.push({id:migrationKeys[i]})
+
+        fs.writeFileSync(`${__dirname}\\data\\__EfMigrations.json`, JSON.stringify(jsonArr));
     }
 
 
@@ -316,7 +327,6 @@ const OnDemandRestore = async (type)=>{
     const migrationsData = await readMigrationsConfig();
     const migrationKeys= Object.keys(migrationsData).sort((a,b)=>(a>b?0:1))
 
-
     //NOTE : if may data na, fetchData muna
     if(!fs.existsSync(".\\data")) fs.mkdirSync(".\\data")
 
@@ -335,11 +345,9 @@ const OnDemandRestore = async (type)=>{
         applyRestore(migration);
 
     }else{
-        console.log(migrationsData)
-        console.log(migrationNow.id)
-        console.log(migrationsData[migrationNow.id])
         let migration = migrationsData[migrationNow.id].default;
         migrationIndex = migrationKeys.indexOf(migrationNow.id);
+        console.log(migration)
         applyRestore(migration);
     }
 
@@ -351,6 +359,7 @@ const OnDemandRestore = async (type)=>{
 //     let firstMigration = migrationsData[migrationKeys[0]].default;
 //     applyRestore(firstMigration)
 // })()
-// Migration()
+Migration()
 // OnDemandRestore("file")
-OnDemandBackup()
+// OnDemandBackup()
+// getCurrentMigrationData()
