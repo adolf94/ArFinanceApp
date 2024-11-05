@@ -8,6 +8,7 @@ import moment from "moment"
 import { useQuery } from "@tanstack/react-query";
 import {TableCell, TableRow } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+import {generateCompute} from "../../components/useComputeInterest";
 interface  ClientRowProps  {
     item : { userId : string, loans : Loan[]}
 }
@@ -31,19 +32,35 @@ const ClientRow = ({item} : ClientRowProps)=>{
             balance:0
         }
     
-        let loansCalculated = (loans||[]).map((l :any)=>{
+        let loansCalculated = (loans||[]).map((l :Loan)=>{
             let payments = l.payment.reduce((p : number,c : LoanPayment)=>{ return c.amount + p },0)
+            let principal = l.payment.reduce((p: number,c:LoanPayment)=>{return  p - (c.againstPrincipal? c.amount: 0)},l.principal)
+            
             let interest = l.interestRecords.reduce((p : number,c : LoanInterest )=>{ return  c.amount + p  },0)
-            total.principal = total.principal + Number.parseFloat(l.principal);
+
+
+            let computeInterest = generateCompute({principal: total.principal, date:moment(l.date)}, l.loanProfile)
+            if(moment().isBefore(l.nextInterestDate)){
+                let additionalInterest = computeInterest(moment(), {
+                    balance: principal + interest - payments,
+                    date: moment(),
+                    interest: interest,
+                    principal: principal,
+                    totalInterestPercent: l.totalInterestPercent
+                })
+                interest = interest - additionalInterest.amount
+            }
+            
+            total.principal = total.principal + l.principal;
             total.interest = total.interest +  interest;
-            total.payments = total.payments +  Number.parseFloat(payments);
+            total.payments = total.payments +  payments;
     
             return {
                 date: l.date,
                 principal: l.principal,
                 interests: interest,
                 payments: payments,
-                balance: l.principal + interest - Number.parseFloat(payments),
+                balance: l.principal + interest - payments,
                 orig: l
             }
         })

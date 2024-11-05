@@ -17,6 +17,7 @@ namespace FinanceApp.Models
 				public DateTime? DateClosed { get; set; }
 				public DateTime NextInterestDate { get; set; }
 				public DateTime LastInterestDate { get; set; }
+				public DateTime NextComputeDate { get; set; }
 				public List<PaymentPlan> ExpectedPayments { get; set; } = new List<PaymentPlan>();
 				public DisbursementAccount? DisbursementAccount { get; set; }
 				public decimal Principal { get; set; }

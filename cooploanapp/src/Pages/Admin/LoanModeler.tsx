@@ -19,7 +19,7 @@ import {
 } from "@mui/material";
 
 import {DatePicker} from "@mui/x-date-pickers";
-import {LoanProfile} from "FinanceApi";
+import {LoanProfile, PaymentPlan} from "FinanceApi";
 import moment from "moment";
 import {useEffect, useMemo, useState} from "react";
 import NumberInput, {FormattedAmount} from "../../components/NumberInput";
@@ -31,8 +31,10 @@ interface LoanModelerProps {
     loanProfile: Partial<LoanProfile>,
     loanInfo?: {principal:number, date: moment.Moment, readonly?: boolean}
     payments?: Partial<Payment>[]
+    expectedPayments?: PaymentPlan[]
     onPaymentsChange?: (data: Payment[])=>void
-    onChange?: (data: any)=>void
+    onChange?: (data: any)=>void,
+    addCurrentDate?: boolean
 }
 
 export interface Payment {
@@ -60,7 +62,9 @@ const dateDropdown = ()=>{
     return items;
 }
 
-const LoanModeler = ({ loanProfile, loanInfo, onChange, onPaymentsChange,payments : previousPayments }: LoanModelerProps) => {
+const LoanModeler = ({
+                     loanProfile,  loanInfo, onChange, onPaymentsChange,addCurrentDate,payments : previousPayments }
+                     : LoanModelerProps) => {
 
     const [form, setForm] = useState({
         date: loanInfo?.date || moment(),
@@ -72,8 +76,23 @@ const LoanModeler = ({ loanProfile, loanInfo, onChange, onPaymentsChange,payment
 
     const [payments, setPayments] = useState<Payment[]>([])
     const [month, setSelectedMonth] = useState({month:0, label: `Custom`, isCustom:true})
-    
 
+    useEffect(() => {
+        
+        if(!addCurrentDate || !loanProfile.computePerDay) return;
+        // let shouldAdd = !expectedPayments || expectedPayments.every(e=>moment().isAfter(e.date))
+        // if(!shouldAdd) return
+            setPayments([{
+            date: moment(),
+            amount: 0, type: 'payment',
+            principalBalance: 0,
+            balance: 0,
+            interestBalance: 0,
+            minimumDate: moment(),
+            totalInterestPercent: 0,
+            readonly:false
+        }])
+    }, []);
     const addDate = () => {
         // check if there is already items
         let defaultDate = form.date.clone().add(1, 'day');
@@ -128,7 +147,6 @@ const LoanModeler = ({ loanProfile, loanInfo, onChange, onPaymentsChange,payment
                     totalInterestPercent
                 }
                 ;
-                console.log({...prior,thisInterest})
                 const interestData = computeInterest(nextInterest, prior);
                 interest = interestData.interestBalance
                 principal = interestData.principalBalance

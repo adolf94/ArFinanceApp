@@ -54,7 +54,7 @@ const Index = () => {
             }
 
             setLoading(true);
-            api.post("/google/auth", { code: decodeURIComponent(hash2Obj.code), app: 'loans' }, { preventAuth: true })
+            api.post("/google/auth", { code: decodeURIComponent(hash2Obj.code), app: window.webConfig.app}, { preventAuth: true })
                 .then((e) => {
                     window.localStorage.setItem("refresh_token", e.data.refresh_token);
                     window.sessionStorage.setItem("access_token", e.data.access_token);
@@ -121,7 +121,7 @@ const Index = () => {
             const stateFromStorage = sessionStorage.getItem("googleLoginState");
             if(!stateFromStorage) return
             const state = JSON.parse(window.atob(stateFromStorage!))
-            navigate(state.currentPath.replace("/loans", ""))
+            navigate(state.currentPath.replace(window.webConfig.basePath, ""))
             sessionStorage.removeItem("googleLoginState")
         });
     }, []);

@@ -145,7 +145,7 @@ namespace FinanceApp.Data.CosmosRepo
 
 
 
-										while (nextDate < currentPayment.Date)
+										while (nextDate < currentPayment.Date )
 										{
 												var result = _loan.ComputeInterests(updatedLoan, currentPayment.Date, true).GetAwaiter().GetResult();
 												nextDate = result.NextDate;
