@@ -155,6 +155,7 @@ using (var scope = app.Services.CreateScope())
 		logger.LogInformation($"jwtConfig.issuer: {config.jwtConfig.issuer}");
 		logger.LogInformation($"jwtConfig.audience: {config.jwtConfig.audience}");
 		logger.LogInformation($"jwtConfig.secret: " + (config.jwtConfig.secret_key == "abcd" ? "" : "(basta hindi sya abcd)"));
+		logger.LogInformation($"smsConfig.pw: " + (config.SmsConfig.Password == "abcd" ? "" : "(basta hindi sya abcd)"));
 
 }
 
