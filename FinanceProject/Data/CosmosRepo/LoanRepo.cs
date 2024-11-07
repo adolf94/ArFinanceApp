@@ -42,7 +42,7 @@ namespace FinanceApp.Data.CosmosRepo
 		public async Task<IEnumerable<Loan>> GetPendingInterests()
 		{
 			DateTime Now = DateTime.Now.Date;
-			IQueryable<Loan> loans = _context.Loans!.Where(e => e.NextComputeDate < Now
+			IQueryable<Loan> loans =  _context.Loans!.Where(e => e.NextComputeDate < Now
 			                                                    && e.Status == "Active"
 			);
 

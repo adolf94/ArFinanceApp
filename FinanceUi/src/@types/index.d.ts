@@ -93,6 +93,7 @@ declare module 'FinanceApi' {
         dateClosed?: string;
         nextInterestDate: string;
         lastInterestDate: string;
+        nextComputeDate: string;
         expectedPayments: PaymentPlan[];
         disbursementAccount?: DisbursementAccount;
         principal: number;

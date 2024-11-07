@@ -135,15 +135,15 @@ namespace FinanceApp.Data.CosmosRepo
 
 				public static IServiceCollection AddCosmosContext(this IServiceCollection services, ConfigurationManager Configuration)
 				{
-
-
+						
+						string? db = Configuration.GetSection("AppConfig").GetValue<string>("DatabaseName");
 						services.AddDbContext<AppDbContext>(opt =>
 						{
 								var passkey = Environment.GetEnvironmentVariable("ENV_PASSKEY")!;
 
 								var encrypted = Configuration.GetConnectionString("CosmosDb")!;
 								var connection = AesOperation.DecryptString(passkey, encrypted);
-								opt.UseCosmos(connection, "FinanceAppLocal");
+								opt.UseCosmos(connection, db);
 						});
 
 						services.AddScoped<IAccountTypeRepo, AccountTypeRepo>();
