@@ -26,7 +26,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.Identity.Web" Version="2.17.0" />
+    <PackageReference Include="Microsoft.Identity.Web" Version="3.3.1" />
     <PackageReference Include="Microsoft.TypeScript.MSBuild" Version="5.5.3">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -34,7 +34,7 @@
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.17.0" />
     <PackageReference Include="NCrontab" Version="3.3.3" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-    <PackageReference Include="System.Text.Json" Version="9.0.0-preview.7.24405.7" />
+    <PackageReference Include="System.Text.Json" Version="9.0.0-rc.2.24473.5" />
     <PackageReference Include="TypeLite" Version="1.8.4" />
   </ItemGroup>
 
