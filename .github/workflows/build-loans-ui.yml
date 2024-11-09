@@ -1,0 +1,47 @@
+name: Build and deploy Loans App UI
+
+on:
+  workflow_dispatch:
+
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    environment: GITHUB_TOKEN
+    steps:
+    - uses: actions/checkout@v4
+    
+    - uses: actions/setup-node@v4
+      name: Cache Dependency modules
+      with:
+        node-version: 20
+        cache: 'npm'
+        cache-dependency-path: cooploanapp/package-lock.json
+
+    - name: Install Dependencies
+      run: npm install
+      working-directory: cooploanapp
+      
+    - name: Build React
+      run: npm run build
+      working-directory: cooploanapp
+
+    - name: Substitute JSON 
+      uses: restackio/update-json-file-action@2.1
+      with:
+        file: cooploanapp/dist/config.json
+        fields: '{"api":"${{ vars.API }}", "redirectUri":"${{ vars.REDIRECT_URI_LOANS }}"}'
+        
+    - name: Move/Rename config.json to js
+      run: |
+            echo window.webConfig= > config.js
+            cat config.json >> config.js
+      working-directory: cooploanapp/dist
+
+    - uses: kheiakiyama/install-azcopy-action@v1
+      with:
+        version: 'v10'
+
+    - name: Upload to Azure Files
+      run: azcopy_v10 copy "./dist/*" "https://financeappstore.file.core.windows.net/financeapp/wwwroot/loans?${{secrets.STORAGE_KEY}}" --recursive=true
+      working-directory: cooploanapp
