@@ -207,7 +207,7 @@ foreach (var item in apps)
 		{
 				string physicalPath = Path.Combine(app.Environment.ContentRootPath, "wwwroot", item.TrimStart(new[] { '/', '\\' }));
 
-
+				if(!Directory.Exists(physicalPath)) Directory.CreateDirectory(physicalPath);
 				IndexFallbackFileProvider provider = new IndexFallbackFileProvider(new PhysicalFileProvider(physicalPath));
 
 				//app.MapFallbackToFile("index.html"); ;

@@ -111,7 +111,7 @@ namespace FinanceApp.Data.CosmosRepo
 										.ToContainer("LoanProfiles")
 										.HasKey(e => e.ProfileId);
 
-						builder.Entity<Loan>().HasPartitionKey(e => new { e.AppId, e.UserId, e.Status })
+						builder.Entity<Loan>().HasPartitionKey(e => new { e.AppId, e.UserId })
 										.ToContainer("Loans");
 
 

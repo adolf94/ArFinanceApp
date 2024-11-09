@@ -52,7 +52,7 @@ const data = {
                 mapper: e=>e
             },
             {
-                "Container": "LoanProfile",
+                "Container": "LoanProfiles",
                 "PartitionKeyPaths": ["/AppId", "/ProfileId"],
                 comment : "new",
                 mapper: e=>e
