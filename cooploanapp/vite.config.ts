@@ -8,7 +8,7 @@ import dotenv from 'dotenv'
 dotenv.config();
 
 export default defineConfig({
-    base: process.env?.VITE_BASE_PATH || "/",
+    base: process.env?.VITE_LOANS_PATH || "/",
     build: { sourcemap:true},
     plugins: [react(), mkcert()],
 })
