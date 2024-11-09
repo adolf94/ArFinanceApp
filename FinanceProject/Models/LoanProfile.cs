@@ -1,20 +1,17 @@
-﻿namespace FinanceApp.Models
+﻿using FinanceApp.Models.SubModels;
+
+namespace FinanceApp.Models
 {
 		public class LoanProfile
 		{
-				public Guid ProfileId { get; set; }
+				public Guid ProfileId { get; set; } = Guid.NewGuid();
 				public string AppId { get; set; } = string.Empty;
 				public string LoanProfileName { get; set; } = string.Empty;
 				public decimal InterestPerMonth { get; set; }
 				public bool ComputePerDay { get; set; }
 				public string InterestFactor { get; set; } = "principalBalance";
 
-				public FixedInterests[] Fixed { get; set; } = Array.Empty<FixedInterests>();
+				public List<FixedInterests> Fixed { get; set; } = new List<FixedInterests>();
 
-				public class FixedInterests
-				{
-						public int MaxDays { get; set; }
-						public decimal Interest { get; set; }
-				}
 		}
 }

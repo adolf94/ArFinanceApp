@@ -2,6 +2,7 @@
 using FinanceApp.BgServices;
 using FinanceApp.Data;
 using FinanceApp.Dto;
+using FinanceApp.Models.SubModels;
 using FinanceApp.Utilities;
 using FinanceProject.Data;
 using FinanceProject.Models;
@@ -37,13 +38,13 @@ namespace FinanceProject.Controllers
 				}
 
 				[HttpPost("user")]
-				[Authorize(Roles = "Unregistered,Enroll_User")]
+				[Authorize(Roles = "Unregistered,ENROLL_USER")]
 				public async Task<IActionResult> CreateUser(CreateUserDto user)
 				{
-						string email = HttpContext.User.FindFirstValue(ClaimTypes.Email)!;
-
-						if (HttpContext.User.Claims.Any(e => e.Type == ClaimTypes.Role && e.Value == "Unregistered"))
+						bool isRegistered = !HttpContext.User.Claims.Any(e => e.Type == ClaimTypes.Role && e.Value == "Unregistered");
+						if (!isRegistered)
 						{
+								string email = HttpContext.User.FindFirstValue(ClaimTypes.Email)!;
 								if (user.UserName != email) return BadRequest();
 
 								if (user.OtpGuid == null || user.OtpCode == null)
@@ -68,14 +69,48 @@ namespace FinanceProject.Controllers
 
 						}
 						// check if email exist
-						User? newUser = await _users.GetByEmailAsync(email);
-						if (newUser == null)
+						User? newUser = null;
+						if (!string.IsNullOrEmpty(user.UserName))
 						{
-								newUser = _mapper.Map<User>(user);
-								await _users.CreateUser(newUser);
+								newUser = await _users.GetByEmailAsync(user.UserName);
+								if (newUser != null)
+								{
+										return BadRequest(new { user_exist = "email", result = -3 });
+								}
 						}
+
+
+						if (!string.IsNullOrEmpty(user.MobileNumber))
+						{
+								newUser = await _users.GetByMobile(user.MobileNumber);
+
+								if (newUser == null)
+								{
+										newUser = _mapper.Map<User>(user);
+										newUser.DisbursementAccounts.Add(new DisbursementAccount { AccountId = "0", AccountName = "Cash", BankName = "Cash" });
+										await _users.CreateUser(newUser);
+										return Ok(newUser);
+								}
+								else if (!string.IsNullOrEmpty(newUser.UserName))
+								{
+										string[] parts = newUser.UserName.Split("@");
+										string first3 = parts[0].Substring(0, 3);
+										string last = parts[0].Substring(parts[1].Length);
+										return BadRequest(new { user_exist = "mobile", email = $"{first3}***{last}@{parts[1]}", result = -4 });
+								}
+								else if (isRegistered)
+								{
+										return BadRequest(new { user_exist = "mobile", email = $"", result = -5 });
+								}
+
+
+								newUser.UserName = user.UserName;
+								await _users.UpdateUser(newUser);
+								return await Task.FromResult(Ok(newUser));
+						}
+
 						//ToDo add New Access Token
-						return await Task.FromResult(Ok(newUser));
+						return BadRequest(new { validation_required = "Mobile Number is required" });
 				}
 
 
@@ -98,6 +133,8 @@ namespace FinanceProject.Controllers
 
 
 				[HttpGet("user/login")]
+				[Authorize]
+
 				public async Task<IActionResult> Login()
 				{
 						if (_pConfig.NextScheduledTransactionDate < DateTime.UtcNow && !_pConfig.ScheduleHasErrors)
@@ -108,9 +145,39 @@ namespace FinanceProject.Controllers
 						string? userId = HttpContext.User.FindFirstValue("userId");
 
 
-						User? user = await _users.GetById(userId!);
+						User? user = await _users.GetById(Guid.Parse(userId!));
 						return Ok(user);
 				}
+
+				[HttpGet("user")]
+				public async Task<IActionResult> GetAllUsers()
+				{
+						User[] users = await _users.GetAll();
+						return Ok(users);
+				}
+
+				[HttpGet("user/{userId}")]
+				[Authorize(Roles = "MANAGE_LOAN,COOP_MEMBER")]
+				public async Task<IActionResult> GetOne(Guid userId)
+				{
+						User? user = await _users.GetById(userId);
+						if (user == null) return NotFound();
+
+						return Ok(user);
+				}
+
+				[HttpPost("user/{id}/disbursementaccount")]
+				public async Task<IActionResult> AddDisbursementAccount(Guid id, DisbursementAccount acct)
+				{
+
+						User? user = await _users.GetById(id);
+						if (user == null) return NotFound();
+						user.DisbursementAccounts.Add(acct);
+						await _users.UpdateUser(user);
+						return NoContent();
+
+				}
+
 
 				public class OtpRequestBody
 				{

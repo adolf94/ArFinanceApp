@@ -2,7 +2,14 @@ import axios, { AxiosRequestConfig } from "axios";
 import moment from "moment";
 import { oauthSignIn } from "./googlelogin";
 import { memoize as mm } from "underscore";
+import { jwtDecode, JwtPayload } from "jwt-decode";
+import { enqueueSnackbar } from "notistack";
 
+
+interface IdToken extends JwtPayload {
+    email: string,
+    name: string
+}
 
 
 const getTokenFromApi = mm(
@@ -18,7 +25,8 @@ const getTokenFromApi = mm(
                 window.sessionStorage.setItem("access_token", e.data.access_token);
                 return e.data.access_token;
             })
-            .catch(() => {
+            .catch((e) => {
+                console.log(e);
                 oauthSignIn();
             });
     },
@@ -30,9 +38,9 @@ export const getToken = async (force: boolean) => {
 
     if (!token || force) token = await getTokenFromApi();
 
-    const tokenJson = JSON.parse(window.atob(token!.split(".")[1]));
 
-    if (moment().add(1, "minute").isAfter(tokenJson.exp * 1000))
+    const tokenJson = jwtDecode<JwtPayload>(token!)
+    if (moment().add(1, "minute").isAfter(tokenJson.exp! * 1000))
         token = await getTokenFromApi();
 
     return token;
@@ -74,10 +82,20 @@ api.interceptors.response.use(
     },
     (err) => {
         if (!!err?.response) {
-            if (err.response.status === 401 && !err.request.retryGetToken) {
+            if (err.response.status === 401 && !err.response.config.retryGetToken) {
                 console.debug("retry with getToken");
-                return api({ ...err.request, retryGetToken: true })
+                return api({ ...err.response.config, retryGetToken: true })
             }
+
+            if(err.response.status === 500){
+                enqueueSnackbar("Something went wrong!", {variant:'error'})
+            }
+            
+            if(err.response.status === 400){
+                enqueueSnackbar("Please check inputs", {variant:'error'})
+            }
+        }else{
+            enqueueSnackbar("API Might be off", {variant:'error'})
         }
         return Promise.reject(err)
     },

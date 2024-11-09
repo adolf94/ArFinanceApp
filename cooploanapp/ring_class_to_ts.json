@@ -1,0 +1,26 @@
+{
+    "include": [
+        "../FinanceProject/Models/*.cs",
+        "../FinanceProject/Models/SubModels/*.cs",
+        "../FinanceProject/Dto/*.cs",
+        "../FinanceProject/QueryParams/*.cs"
+    ],
+  "exclude": [],
+  "namespace": "'FinanceApi'",
+  "output": "./src/@types/index.d.ts",
+  "camelCase": true,
+  "camelCaseEnums": false,
+  "camelCaseOptions": {
+    "pascalCase": false,
+    "preserveConsecutiveUppercase": true,
+    "locale": "en-US"
+  },
+  "numericEnums": false,
+  "omitFilePathComment": false,
+  "omitSemicolon": false,
+  "stringLiteralTypesInsteadOfEnums": false,
+  "customTypeTranslations": {
+    "ProductName": "string",
+    "ProductNumber": "string"
+  }
+}

@@ -8,6 +8,12 @@
 		},
 		{
 			"path": "FinanceProject/WebApplication1"
+		},
+		{
+			"path": "cooploanapp"
+		},
+		{
+			"path": "CosmosMigrations"
 		}
 	],
 	"settings": {}

@@ -96,7 +96,7 @@ const TheApp = (props) => {
         }
 
 
-      api.post("/google/auth", { code: decodeURIComponent(hash2Obj.code) }, { preventAuth: true })
+      api.post("/google/auth", { code: decodeURIComponent(hash2Obj.code), app: 'finance' }, { preventAuth: true })
         .then((e) => {
             window.localStorage.setItem("refresh_token", e.data.refresh_token);
             window.sessionStorage.setItem("access_token", e.data.access_token);

@@ -36,12 +36,12 @@ namespace FinanceApp.Controllers
 						//get redirect 
 						AppRedirects? app = _config.RedirectUrl.FirstOrDefault(e => e.App == tokenBody.App);
 
-						if(app == null)
+						if (app == null)
 						{
-										_logger.LogError("Invalid App Provided: " + tokenBody.App);
+								_logger.LogError("Invalid App Provided: " + tokenBody.App);
 
-										HttpContext.Response.Headers["X-GLogin-Error"] = "Invalid App Text";
-										return Forbid();
+								HttpContext.Response.Headers["X-GLogin-Error"] = "Invalid App Text";
+								return Forbid();
 
 						}
 
@@ -93,7 +93,7 @@ namespace FinanceApp.Controllers
 						if (string.IsNullOrEmpty(currentToken!.refresh_token))
 						{
 								_logger.LogWarning("No refresh token was received!");
-								tokenLifetime = 30;
+								tokenLifetime = 60;
 						}
 
 						//byte[] byteData = Convert.FromBase64String(currentToken!.id_token.Split(".")[1]);
@@ -110,8 +110,9 @@ namespace FinanceApp.Controllers
 						List<Claim> claims = new List<Claim>();
 						string[] claimsToCopy = new[] { "sub", "email", "nane", "azp" };
 						claims = idToken.Claims.Where(e => claimsToCopy.Contains(e.Type)).ToList();
+						List<Claim> idClaims = idToken.Claims.ToList();
 						Claim? emailClaim = claims.FirstOrDefault(e => e.Type == "email");
-						if(emailClaim == null)
+						if (emailClaim == null)
 						{
 								_logger.LogError("Google Error? : No consent for email");
 
@@ -119,12 +120,15 @@ namespace FinanceApp.Controllers
 						}
 
 						User? user = await _user.GetByEmailAsync(emailClaim!.Value)!;
-				
+
 
 						if (user != null)
 						{
 								claims.Add(new Claim("userId", user!.Id.ToString()));
 								claims.Add(new Claim("app", tokenBody.App));
+
+								idClaims.Add(new Claim("userId", user!.Id.ToString()));
+
 								claims.Add(new Claim(ClaimTypes.Role, "Registered"));
 								user.Roles.ToList().ForEach(e =>
 								{
@@ -136,11 +140,16 @@ namespace FinanceApp.Controllers
 								_logger.LogInformation($"{emailClaim!.Value} has no linked user");
 								claims.Add(new Claim(ClaimTypes.Role, "Unregistered"));
 						}
+
+
+
+
+
 						//foreach (var item in gClaims!)
 						//{
 						//		claims.Add(new Claim(item.Key, item.Value));
 						//}
-						var tokenDescriptor = new SecurityTokenDescriptor
+						var accessDescriptor = new SecurityTokenDescriptor
 						{
 								Subject = new ClaimsIdentity(claims.Where(e => e.Type != "aud")),
 								Expires = DateTime.UtcNow.AddMinutes(tokenLifetime),
@@ -150,12 +159,29 @@ namespace FinanceApp.Controllers
 								(new SymmetricSecurityKey(key),
 								SecurityAlgorithms.HmacSha256)
 						};
-						var tokenHandler = new JwtSecurityTokenHandler();
-						var token = tokenHandler.CreateToken(tokenDescriptor);
-						var jwtToken = tokenHandler.WriteToken(token);
-						var stringToken = tokenHandler.WriteToken(token);
-						currentToken.access_token = stringToken;
 
+
+						var idDescriptor = new SecurityTokenDescriptor
+						{
+								Subject = new ClaimsIdentity(idClaims),
+								Expires = DateTime.UtcNow.AddMinutes(tokenLifetime),
+								Issuer = _config.jwtConfig.issuer,
+								Audience = _config.jwtConfig.audience,
+								SigningCredentials = new SigningCredentials
+								(new SymmetricSecurityKey(key),
+								SecurityAlgorithms.HmacSha256)
+						};
+
+
+						var tokenHandler = new JwtSecurityTokenHandler();
+						var token = tokenHandler.CreateToken(accessDescriptor);
+						var strClaimToken = tokenHandler.WriteToken(token);
+						currentToken.access_token = strClaimToken;
+
+
+						var idTokenNew = tokenHandler.CreateToken(idDescriptor);
+						var strIdToken = tokenHandler.WriteToken(idTokenNew);
+						currentToken.id_token = strClaimToken;
 
 						return await Task.FromResult(Ok(currentToken));
 				}
@@ -222,15 +248,17 @@ namespace FinanceApp.Controllers
 								return Forbid();
 						}
 
-						if(user != null)
+						if (user != null)
 						{
 								claims.Add(new Claim("userId", user!.Id.ToString()));
 								claims.Add(new Claim(ClaimTypes.Role, "Registered"));
+								claims.Add(new Claim("appId", tokenBody.App));
 								user.Roles.ToList().ForEach(e =>
 								{
 										claims.Add(new Claim(ClaimTypes.Role, e));
 								});
-						}else
+						}
+						else
 						{
 								claims.Add(new Claim(ClaimTypes.Role, "Unregistered"));
 						}
@@ -267,6 +295,6 @@ namespace FinanceApp.Controllers
 						public string Code { get; set; } = string.Empty;
 						public string Refresh_Token { get; set; } = string.Empty;
 						public string App { get; set; } = string.Empty;
-        }
+				}
 		}
 }

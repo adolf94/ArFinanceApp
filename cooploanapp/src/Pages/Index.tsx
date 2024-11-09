@@ -1,25 +1,26 @@
-import { Outlet } from "@mui/icons-material"
+
 import AnonymousLayout from "../components/AnonLayout"
 import { useEffect, useState } from "react"
 import { Google } from '@mui/icons-material'
-import { Box, Button, CircularProgress, Grid2 as Grid, Typography } from "@mui/material"
-import React from "react"
+import { Box, Button, CircularProgress, Grid2 as Grid } from "@mui/material"
 import { useNavigate, useSearchParams } from "react-router-dom"
 import { oauthSignIn } from "../components/googlelogin"
-import api, { getToken } from "../components/api"
-import IndexAuthenticated from "./IndexAuthenticated"
+import api from "../components/api"
+import IndexAuthenticated from "./Borrower/Index"
 import moment from "moment"
-import Register from './IndexComponents/Register'
-import { jwtDecode as decodeJwt} from 'jwt-decode'
+import Register, { IdToken } from './Register'
+import { jwtDecode as decodeJwt } from 'jwt-decode'
+import useUserInfo, { useUpdateUserInfo } from "../components/userContext"
 
 
 const Index = () => {
-		const [isLoggedIn, setIsLoggedIn] = useState(false)  
+    const [isLoggedIn, setIsLoggedIn] = useState(false)
     const [loginLoading, setLoading] = useState(false)
     const [idToken, setIdToken] = useState('')
     const navigate = useNavigate()
     const [searchParams, setSearchParams] = useSearchParams();
-
+    const updateUser = useUpdateUserInfo()
+    const { user } = useUserInfo()
 
 
     const handleGoogleRedirect = () => {
@@ -53,15 +54,17 @@ const Index = () => {
             }
 
             setLoading(true);
-            api.post("/google/auth", { code: decodeURIComponent(hash2Obj.code), app:'loans' }, { preventAuth: true })
+            api.post("/google/auth", { code: decodeURIComponent(hash2Obj.code), app: window.webConfig.app}, { preventAuth: true })
                 .then((e) => {
                     window.localStorage.setItem("refresh_token", e.data.refresh_token);
                     window.sessionStorage.setItem("access_token", e.data.access_token);
-                    setSearchParams({})
 
                     res(e.data.id_token);
                 }).catch(err => {
-                    if (!err.response?.status) return navigate("/errors/Down")
+                    if (!err.response?.status) {
+                        console.log(err)
+                        return navigate("/errors/Down")
+                    }
                     if (err.response.status === 401 && !!err.response.headers["X-GLogin-Error"]) {
                         console.debug("INVALID CODE")
                         oauthSignIn();
@@ -73,7 +76,7 @@ const Index = () => {
         });
     };
 
-    const isInRole = (jwt, role) => {
+    const isInRole = (jwt: IdToken, role: string) => {
 
         if (Array.isArray(jwt.role)) {
             return jwt.role.some(e => e.toLowerCase() === role)
@@ -84,50 +87,68 @@ const Index = () => {
 
 
     useEffect(() => {
-        handleGoogleRedirect().then((e  ) => {
+        if (user) {
+            console.log(user)
+            setIsLoggedIn(true)
+            return;
+        }
+
+
+        handleGoogleRedirect().then((e: string) => {
             setLoading(false);
+            setSearchParams({})
 
             const token = window.sessionStorage.getItem("access_token");
             if (!token) return
-            const tokenJson = decodeJwt(token);
-            if (moment().add(1, "minute").isAfter(tokenJson.exp * 1000)) return
-
+            const tokenJson = decodeJwt<IdToken>(token);
+            if (moment().add(1, "minute").isAfter(tokenJson.exp! * 1000)) return
             if (isInRole(tokenJson, "unregistered")) {
                 setIdToken(e as string)
                 return;
             }
             //validate first
+
+            if (e != "") window.localStorage.setItem("id_token", e);
+            if (e === "") {
+                e = window.localStorage.getItem("id_token") || ""
+            }
+            if (e === "") return
+            const userInfo = decodeJwt<IdToken>(e)
+            //@ts-ignore
+            updateUser(userInfo)
             setIsLoggedIn(true)
 
             const stateFromStorage = sessionStorage.getItem("googleLoginState");
+            if(!stateFromStorage) return
             const state = JSON.parse(window.atob(stateFromStorage!))
-            navigate(state.currentPath.replace("/loans", ""))
+            navigate(state.currentPath.replace(window.webConfig.basePath, ""))
+            sessionStorage.removeItem("googleLoginState")
         });
     }, []);
 
 
-		return <>
-				{
-            isLoggedIn ? <IndexAuthenticated /> : 
-								<AnonymousLayout>
-										<Box sx={{ pt: 1, width:"100vw" }} >
-												<Grid container>
-                            <Grid size={{md:6, xs:12}} >
-														
-														</Grid>
+    return <>
+        {
+            isLoggedIn ? <IndexAuthenticated /> :
+                <AnonymousLayout>
+                    <Box sx={{ pt: 1, width: "100vw" }} >
+                        <Grid container>
+                            <Grid size={{ md: 6, xs: 12 }} >
+
+                            </Grid>
                             <Grid size={{ md: 6, xs: 12 }}>
-																
+
                                 {idToken ? <Register token={idToken} /> : <Box sx={{ pt: '200px', px: 4, display: '' }}>
                                     <Button fullWidth variant="outlined" sx={{ py: 2 }} size="x-large" onClick={() => oauthSignIn()}>
                                         <Google sx={{ mr: 1 }} /> {loginLoading ? <CircularProgress /> : "Login/Register with Google"}</Button>
 
                                 </Box>}
-														</Grid>
-												</Grid>
-										</Box>
-								</AnonymousLayout>
-				}
-		</>
+                            </Grid>
+                        </Grid>
+                    </Box>
+                </AnonymousLayout>
+        }
+    </>
 
 
 }

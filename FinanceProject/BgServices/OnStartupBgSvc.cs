@@ -47,6 +47,7 @@ namespace FinanceApp.BgServices
 
 						_pConfig.LastTransactionId = confi.LastTransactionId;
 						_pConfig.NextScheduledTransactionDate = confi.NextScheduledTransactionDate;
+						_pConfig.NextScheduledTransactionDate = confi.NextScheduledTransactionDate;
 
 						return Task.CompletedTask;
 

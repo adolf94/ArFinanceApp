@@ -1,11 +1,8 @@
-﻿using FinanceProject.Data;
+﻿using FinanceApp.Models;
+using FinanceProject.Data;
 using FinanceProject.Models;
 using FinanceProject.Utilities;
-using CosmosModels = FinanceApp.Data.CosmosRepo.Dtos;
 using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using System.Net;
 
 namespace FinanceApp.Data.CosmosRepo
 {
@@ -18,13 +15,19 @@ namespace FinanceApp.Data.CosmosRepo
 				public DbSet<User>? Users { get; set; }
 				public DbSet<Vendor>? Vendors { get; set; }
 				public DbSet<AccountBalance>? AccountBalances { get; set; }
+				public DbSet<LoanProfile>? LoanProfiles { get; set; }
+				public DbSet<Loan>? Loans { get; set; }
 				public DbSet<ScheduledTransactions>? ScheduledTransactions { get; set; }
+				public DbSet<PaymentRecord>? Payments { get; set; }
+				public DbSet<LoanPayment>? LoanPayments { get; set; }
+				public DbSet<CoopOption>? CoopOptions { get; set; }
+				public DbSet<MemberProfile>? MemberProfiles { get; set; }
 
 				private readonly IConfiguration _configuration;
 				public AppDbContext(DbContextOptions<AppDbContext> options, IConfiguration config) : base(options)
 				{
 						_configuration = config;
-						base.Database.EnsureCreatedAsync().Wait();
+						// base.Database.EnsureCreatedAsync().Wait();
 				}
 
 
@@ -91,13 +94,33 @@ namespace FinanceApp.Data.CosmosRepo
 										.ToContainer("User")
 										.HasKey(e => e.Id);
 
-						//builder.Entity<User>();
-								//.Property(e=>e.Roles)
-								//.HasConversion(
-								//		v=> JsonConvert.SerializeObject(v, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore }),
-								////(v) => JArray.FromObject(v),
-								//		v => JsonConvert.DeserializeObject<List<Role>>(v, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore })!
-								//);
+
+
+						builder.Entity<LoanPayment>().HasPartitionKey(e => new { e.AppId, e.UserId, e.LoanId })
+										.ToContainer("LoanPayments")
+										.HasKey(e => new { e.LoanId, e.PaymentId, e.AgainstPrincipal });
+						//builder.Entity<LoanPayment>().HasIndex(e => new { e.AppId, e.UserId, e.Date });
+
+						builder.Entity<PaymentRecord>().HasPartitionKey(e => new { e.AppId, e.UserId, e.Id })
+
+										.ToContainer("Payments");
+
+
+
+						builder.Entity<LoanProfile>().HasPartitionKey(e => new { e.AppId, e.ProfileId })
+										.ToContainer("LoanProfiles")
+										.HasKey(e => e.ProfileId);
+
+						builder.Entity<Loan>().HasPartitionKey(e => new { e.AppId, e.UserId, e.Status })
+										.ToContainer("Loans");
+
+
+						builder.Entity<CoopOption>().HasPartitionKey(e => new { e.AppId, e.Year })
+								.ToContainer("CoopOption").HasKey(e => new { e.AppId, e.Year });
+
+						builder.Entity<MemberProfile>().HasPartitionKey(e => new { e.AppId, e.Year, e.UserId })
+								.ToContainer("MemberProfiles").HasKey(e => new { e.AppId, e.Year, e.UserId });
+
 
 
 						base.OnModelCreating(builder);
@@ -112,15 +135,15 @@ namespace FinanceApp.Data.CosmosRepo
 
 				public static IServiceCollection AddCosmosContext(this IServiceCollection services, ConfigurationManager Configuration)
 				{
-
-
+						
+						string? db = Configuration.GetSection("AppConfig").GetValue<string>("DatabaseName");
 						services.AddDbContext<AppDbContext>(opt =>
 						{
 								var passkey = Environment.GetEnvironmentVariable("ENV_PASSKEY")!;
 
 								var encrypted = Configuration.GetConnectionString("CosmosDb")!;
 								var connection = AesOperation.DecryptString(passkey, encrypted);
-								opt.UseCosmos(connection, "FinanceApp");
+								opt.UseCosmos(connection, db);
 						});
 
 						services.AddScoped<IAccountTypeRepo, AccountTypeRepo>();
@@ -131,6 +154,11 @@ namespace FinanceApp.Data.CosmosRepo
 						services.AddScoped<IVendorRepo, VendorRepo>();
 						services.AddScoped<IScheduledTransactionRepo, ScheduledTransactionRepo>();
 						services.AddScoped<IUserRepo, UserRepo>();
+						services.AddScoped<ILoanProfileRepo, LoanProfileRepo>();
+						services.AddScoped<ILoanRepo, LoanRepo>();
+						services.AddScoped<IPaymentRepo, PaymentRepo>();
+						services.AddScoped<IMemberProfileRepo, MemberProfileRepo>();
+
 
 						return services;
 				}

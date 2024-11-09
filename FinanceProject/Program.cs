@@ -9,8 +9,8 @@ using FinanceApp.Utilities;
 using FinanceProject.Models;
 using FinanceProject.Utilities;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.FileProviders;
-using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using System.Text.Json;
@@ -83,8 +83,10 @@ builder.Services.AddControllersWithViews()
 {
 		//mc.SetGeneratePropertyMaps<Generate>()
 		mc.AddProfile(new FinanceProject.Dto.AppProfile());
+		mc.AddProfile(new FinanceApp.Dto.LoansProfile());
 });
 
+builder.Services.AddScoped<IAuthorizationHandler, RoleRequirementHandler>();
 
 PersistentConfig pConfig = new PersistentConfig();
 builder.Services.AddSingleton(pConfig);
@@ -130,6 +132,7 @@ builder.Services.AddRateLimiter(e =>
 });
 
 builder.Services.AddHostedService<OnStartupBgSvc>();
+builder.Services.AddHostedService<ComputeInterestBg>();
 builder.Services.AddAuthorization();
 
 
@@ -152,6 +155,7 @@ using (var scope = app.Services.CreateScope())
 		logger.LogInformation($"jwtConfig.issuer: {config.jwtConfig.issuer}");
 		logger.LogInformation($"jwtConfig.audience: {config.jwtConfig.audience}");
 		logger.LogInformation($"jwtConfig.secret: " + (config.jwtConfig.secret_key == "abcd" ? "" : "(basta hindi sya abcd)"));
+		logger.LogInformation($"smsConfig.pw: " + (config.SmsConfig.Password == "abcd" ? "" : "(basta hindi sya abcd)"));
 
 }
 
@@ -216,7 +220,7 @@ foreach (var item in apps)
 				evt.UseRouting();
 				evt.UseRateLimiter();
 
-				app.UseAuthorization();		
+				app.UseAuthorization();
 
 				evt.UseStaticFiles(staticFileOptions);
 				evt.UseEndpoints(e => e.MapFallbackToFile(item + "/index.html"));

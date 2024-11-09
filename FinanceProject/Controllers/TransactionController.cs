@@ -10,7 +10,7 @@ namespace FinanceProject.Controllers
 {
 		[Route("api")]
 		[ApiController]
-		[Authorize(Roles = "finance_user")]
+		[Authorize(Roles = "FINANCE_USER")]
 		public class TransactionController : ControllerBase
 		{
 				private readonly ITransactionRepo _repo;

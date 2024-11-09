@@ -15,12 +15,12 @@ namespace FinanceApp.Utilities
 
 
 				public Sms(AppConfig config, ILogger<Sms> logger, IMemoryCache cache)
-        {
-            _config = config;
-            _enabled = config.SmsConfig.Enabled;
+				{
+						_config = config;
+						_enabled = config.SmsConfig.Enabled;
 						string passkey = Environment.GetEnvironmentVariable("ENV_PASSKEY")!;
-            string user = AesOperation.DecryptString(passkey, config.SmsConfig.Username);
-            string pass = AesOperation.DecryptString(passkey, config.SmsConfig.Password);
+						string user = AesOperation.DecryptString(passkey, config.SmsConfig.Username);
+						string pass = AesOperation.DecryptString(passkey, config.SmsConfig.Password);
 
 						_cache = cache;
 						_logger = logger;
@@ -30,18 +30,18 @@ namespace FinanceApp.Utilities
 				}
 
 
-				public async Task<string> SendSms(string message, string number)
+				public async Task<string> SendSms(string message, string number, bool includeAutomatedWaiver = false)
 				{
 
 						//TODO: add validation that number is a PH number;
-						if(!number.StartsWith("9") || number.Length != 10)
+						if (!number.StartsWith("9") || number.Length != 10)
 						{
 								throw new Exception("number is not a valid number");
 						}
 
 						if (!_enabled)
 						{
-								
+
 								_logger.LogWarning($"SMS disabled!");
 								_logger.LogDebug($"SMS \"sent\" to {number}: {message}");
 								return Guid.NewGuid().ToString();
@@ -54,7 +54,7 @@ namespace FinanceApp.Utilities
 
 						var msg = new
 						{
-								 message,
+								message = message + (includeAutomatedWaiver ? "\n---\n This is an automated message(beta)" : ""),
 								phoneNumbers = new[] { "+63" + number }
 						};
 
@@ -69,7 +69,7 @@ namespace FinanceApp.Utilities
 						}
 
 						SmsRequestResponse response = JsonSerializer.Deserialize<SmsRequestResponse>(str)!;
-						return response.id;
+						return ""; //response.id;
 				}
 
 
@@ -83,9 +83,9 @@ namespace FinanceApp.Utilities
 
 						OtpEntry item = new OtpEntry
 						{
-								Id =id,
+								Id = id,
 								User = user,
-								MobileNumber =  mobileNumber,
+								MobileNumber = mobileNumber,
 								Otp = otp
 						};
 
@@ -105,8 +105,8 @@ namespace FinanceApp.Utilities
 
 				public int ValidateOtp(string user, string mobileNumber, int otp, Guid id)
 				{
-						OtpEntry? item ;
-								
+						OtpEntry? item;
+
 						_cache.TryGetValue($"otp_{mobileNumber}_{id.ToString()}", out item);
 
 
@@ -121,10 +121,11 @@ namespace FinanceApp.Utilities
 
 
 
-				public class OtpEntry {
-            public Guid Id { get; set; }
+				public class OtpEntry
+				{
+						public Guid Id { get; set; }
 						public string User { get; set; } = string.Empty;
-            public string MobileNumber { get; set; } = string.Empty;
+						public string MobileNumber { get; set; } = string.Empty;
 						public int Otp { get; set; }
 						public string SmsId { get; set; } = string.Empty;
 				}
@@ -137,7 +138,7 @@ namespace FinanceApp.Utilities
 				{
 						public string id { get; set; } = string.Empty;
 						public string state { get; set; } = string.Empty;
-						public string isEncrypted { get; set; } = string.Empty;
+						public bool isEncrypted { get; set; }
 						public IEnumerable<SmsRecipientStatus> recipients { get; set; } = new List<SmsRecipientStatus>();
 				}
 				public class SmsRequestFailedResponse

@@ -7,7 +7,7 @@ namespace FinanceProject.Controllers
 {
 		[Route("api")]
 		[ApiController]
-		[Authorize(Roles = "finance_user")]
+		[Authorize(Roles = "FINANCE_USER")]
 		public class AccountGroupController : ControllerBase
 		{
 				private readonly IAccountGroupRepo _repo;
@@ -42,7 +42,6 @@ namespace FinanceProject.Controllers
 				{
 						_repo.Create(type);
 						return await Task.FromResult(CreatedAtAction("GetOne", new { id = type.Id }, type));
-
 				}
 		}
 }
