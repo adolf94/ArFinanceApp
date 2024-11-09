@@ -6,9 +6,9 @@
 				public string CosmosKey { get; set; } = string.Empty;
 				public string DataImplementation { get; set; } = "";
 				public GoogleConfig authConfig { get; set; } = new();
-				public AppJwtConfig jwtConfig { get; set; } = new();
-        public SmsConfiguration SmsConfig { get; set; }
-        public IEnumerable<AppRedirects> RedirectUrl { get; set; } = Array.Empty<AppRedirects>();
+					public AppJwtConfig jwtConfig { get; set; } = new();
+		        public SmsConfiguration SmsConfig { get; set; }
+		        public IEnumerable<Application> Apps { get; set; } = Array.Empty<Application>();
 
 				public class GoogleConfig
 				{
@@ -16,10 +16,11 @@
 						public string client_secret { get; set; } = "";
 						public string scope { get; set; } = "";
 				}
-				public class AppRedirects
+				public class Application
 				{
 						public string App { get; set; } = string.Empty;
-            public string redirect_uri { get; set; } = string.Empty;
+						public string RedirectUri { get; set; } = string.Empty;
+						public string Subdirectory { get; set; } = string.Empty;
 				}
 				public class SmsConfiguration
 				{

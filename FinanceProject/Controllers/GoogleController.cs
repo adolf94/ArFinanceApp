@@ -34,7 +34,7 @@ namespace FinanceApp.Controllers
 						var data = new Dictionary<string, string>();
 
 						//get redirect 
-						AppRedirects? app = _config.RedirectUrl.FirstOrDefault(e => e.App == tokenBody.App);
+						Application? app = _config.Apps.FirstOrDefault(e => e.App == tokenBody.App);
 
 						if (app == null)
 						{
@@ -49,7 +49,7 @@ namespace FinanceApp.Controllers
 						data.Add("client_id", _config.authConfig.client_id);
 						data.Add("client_secret", _config.authConfig.client_secret);
 						data.Add("scope", _config.authConfig.scope);
-						data.Add("redirect_uri", app.redirect_uri);
+						data.Add("redirect_uri", app.RedirectUri);
 						data.Add("grant_type", "authorization_code");
 						data.Add("code", tokenBody.Code);
 
@@ -193,7 +193,7 @@ namespace FinanceApp.Controllers
 						HttpClient client = new HttpClient();
 
 						var data = new Dictionary<string, string>();
-						AppRedirects? app = _config.RedirectUrl.FirstOrDefault(e => e.App == tokenBody.App);
+						Application? app = _config.Apps.FirstOrDefault(e => e.App == tokenBody.App);
 
 						if (app == null)
 						{
@@ -207,7 +207,7 @@ namespace FinanceApp.Controllers
 						data.Add("client_id", _config.authConfig.client_id);
 						data.Add("client_secret", _config.authConfig.client_secret);
 						data.Add("scope", _config.authConfig.scope);
-						data.Add("redirect_uri", app.redirect_uri);
+						data.Add("redirect_uri", app.RedirectUri);
 						data.Add("grant_type", "refresh_token");
 						data.Add("refresh_token", tokenBody.Refresh_Token);
 

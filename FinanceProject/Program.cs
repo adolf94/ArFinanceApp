@@ -198,7 +198,7 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseMiddleware<AppMiddleware>();
 
-string[] apps = new[] { "/finance" };
+string[] apps = config.Apps.Select((e) => e.Subdirectory).ToArray();
 
 
 foreach (var item in apps)
