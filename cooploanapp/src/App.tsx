@@ -32,7 +32,7 @@ function App() {
         { path: "/member/*", element: <MemberPage /> },
         { path: "/admin/*", element: <Admin /> }
 
-    ], {basename: meta.imports.env.BASE_URL})
+    ], {basename: import.meta.env.BASE_URL})
     const [userctx, setUserCtx] = useState<IdToken>(null as any)
 
     const userContextValue = { get: userctx, set: setUserCtx }
