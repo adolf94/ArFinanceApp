@@ -16,7 +16,15 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import MemberPage from './Pages/Member/Index'
 
 
-export const queryClient = new QueryClient()
+export const queryClient = new QueryClient({defaultOptions: {
+        queries: {
+            staleTime: 1000 * 60 * 5,
+            refetchOnWindowFocus: false 
+        },
+        mutations :{
+            retry:false
+        }
+    }})
 function App() {
 
     const router = createBrowserRouter([

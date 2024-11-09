@@ -1,4 +1,4 @@
-import { TableContainer, Table, TableHead, TableRow, TableCell, TableBody } from "@mui/material"
+import { TableContainer, Table, TableHead, TableRow, TableCell, TableBody, Checkbox } from "@mui/material"
 import { useQuery } from "@tanstack/react-query"
 import { USER, getAll } from "../../../repositories/users"
 import {Loan, LoanInterest, LoanPayment, User} from "FinanceApi"
@@ -9,19 +9,21 @@ import moment from "moment"
 import { FormattedAmount } from "../../../components/NumberInput"
 import { useNavigate } from "react-router-dom"
 import {generateCompute} from "../../../components/useComputeInterest";
+import {usePaymentContext} from "./AdminBody";
 
 
 
 const LoanClientRow = ( {client} : {client : User}  )=>{
+  const ctx = usePaymentContext()
 
   const [expand,setExpand] = useState(false)
   const [total,setTotal] = useState<any>({})
   const [loanCalculation,setLoanCalculated] = useState<any>([])
-  const { data: loans, isLoading: loading } = useQuery({ queryKey: [LOAN,{userId: client.id}], queryFn: () => getByUserId(client.id), enabled:!!client?.id })
+  const { data: loans, isLoading: loading } = useQuery<Loan>({ queryKey: [LOAN,{userId: client.id}], queryFn: () => getByUserId(client.id), enabled:!!client?.id })
   const navigate = useNavigate()
+  
 
   useEffect(()=>{
-
     let total = {
       principal: 0,
       interest: 0,
@@ -51,6 +53,7 @@ const LoanClientRow = ( {client} : {client : User}  )=>{
       total.payments = total.payments +  payments;
       let res = {
         date:l.date,
+        id:l.id,
         principal: l.principal,
         interests: interest,
         payments: payments,
@@ -64,18 +67,49 @@ const LoanClientRow = ( {client} : {client : User}  )=>{
 
   },[loans])
 
+  const onClickCheck = (item: {id:string, balance:number})=>{
+      if(ctx.payCtx.userId !=  client.id ){
+        ctx.setPayCtx({
+          userId: client.id,
+          items : [{
+            id: item.id,
+            balance: item.balance
+          }]
+        })
+        return
+      }
+
+    const included:boolean = ctx.payCtx.items.some(e=>e.id==item.id)
+    
+    if(!included){
+      ctx.setPayCtx({
+        ...ctx.payCtx,
+        items:[...ctx.payCtx.items, {
+          id: item.id,
+          balance: item.balance
+        }]
+      })
+    }else{
+      let newData = {...ctx.payCtx}
+      newData.items = newData.items.filter(e=>e.id!=item.id)
+      ctx.setPayCtx(newData)
+    }
+    
+  }
+  
 
   return <>
   <TableRow>
-    <TableCell onClick={()=>setExpand(!expand)}>{expand? <ArrowDropDown /> : <ArrowRight /> } </TableCell>
+    <TableCell sx={{textAlign:'center'}} onClick={()=>setExpand(!expand)}>{expand? <ArrowDropDown /> : <ArrowRight /> } </TableCell>
     <TableCell  onClick={()=>setExpand(!expand)}>{client.name}</TableCell>
     <TableCell>{FormattedAmount(total.principal)}</TableCell>
     <TableCell>{FormattedAmount(total.interest)}</TableCell>
     <TableCell>{FormattedAmount(total.payments)}</TableCell>
     <TableCell>{FormattedAmount(total.balance)}</TableCell>
-  </TableRow>
-  {expand && !loading && (loanCalculation || []).map((l:any)=><TableRow key={l.orig.id} onClick={()=>navigate(`../loan/${l.orig.id}`)}>
     <TableCell></TableCell>
+  </TableRow>
+  {expand && !loading && (loanCalculation || []).map((l:any)=><TableRow key={l.id} onClick={()=>navigate(`../loan/${l.orig.id}`)}>
+    <TableCell><Checkbox onChange={()=>onClickCheck(l)} checked={ctx.payCtx.items.some(e=>e.id==l.id)}/></TableCell>  
     <TableCell>{moment(l.date).format("YYYY-MM-DD")}</TableCell>
     <TableCell>{FormattedAmount(l.principal)}</TableCell>
     <TableCell>{FormattedAmount(l.interests)}</TableCell>

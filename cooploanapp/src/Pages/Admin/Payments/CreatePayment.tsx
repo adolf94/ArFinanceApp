@@ -2,18 +2,19 @@ import { Autocomplete, Box, Button, Chip, Dialog, DialogActions, DialogContent, 
 import { useQuery } from "@tanstack/react-query";
 import { User } from "FinanceApi";
 import moment from "moment";
-import { useState } from "react";
+import {useEffect, useState } from "react";
 import { USER, getAll } from "../../../repositories/users";
 import NumberInput from "../../../components/NumberInput";
 import { DatePicker } from "@mui/x-date-pickers";
 import { useMutatePayment } from "../../../repositories/payment";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 
 
 const CreatePayment = () => {
   const { data: users, isLoading: userLoading } = useQuery<User>({ queryKey: [USER], queryFn: () => getAll() })
 const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [form, setForm] = useState({
     user: null,
     date: moment(),
@@ -21,6 +22,16 @@ const navigate = useNavigate();
     method: "Cash"
   })
   const {create } = useMutatePayment()
+  useEffect(() => {
+    const data = {...form}
+    if(!!searchParams.get("clientId") && !!users){
+      data.user = users.find(e=>e.id==searchParams.get("clientId"))
+    }
+    if(!!searchParams.get("amount")){
+      data.amount = Number(searchParams.get("amount"))
+    }
+    setForm(data)
+  }, [users]);
 
   const doCreate = ()=>{
       const item ={
@@ -31,11 +42,11 @@ const navigate = useNavigate();
         method:form.method
       }
       create.mutateAsync(item).then(e=>{
-        navigate("../")
+        navigate(-1)
       })
   }
 
-  return <Dialog open={true} maxWidth="sm" fullWidth onClose={()=>navigate("../")}>
+  return <Dialog open={true} maxWidth="sm" fullWidth onClose={()=>navigate(-1)}>
     <DialogTitle>Receive a payment</DialogTitle>
     <DialogContent>
 
