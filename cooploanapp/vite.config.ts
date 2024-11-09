@@ -7,6 +7,9 @@ import dotenv from 'dotenv'
 // https://vitejs.dev/config/
 dotenv.config();
 
+
+console.info(`Output basePath: ${process.env?.VITE_LOANS_PATH }`)
+
 export default defineConfig({
     base: process.env?.VITE_LOANS_PATH || "/",
     build: { sourcemap:true},
