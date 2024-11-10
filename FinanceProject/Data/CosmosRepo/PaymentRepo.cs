@@ -45,28 +45,37 @@ public class PaymentRepo : IPaymentRepo
 			{
 				loan.LastInterestDate = loan.Date;
 				loan.NextInterestDate = loan.Date;
+				loan.NextComputeDate = loan.Date;
 			}
 			else
 			{
 				var loanProfile = loan.LoanProfile;
 				loan.TotalInterestPercent = lastToRetain.TotalPercent;
 				//ComputeInterestPercent(loanProfile, loan.Date, lastToRetain.DateEnd);
-				if (loanProfile.ComputePerDay)
-				{
-					var days = (loan.Date - lastToRetain.DateEnd).TotalDays;
-					loanProfile.Fixed.Sort((a, b) => a.MaxDays - b.MaxDays);
-					var sort = loanProfile.Fixed;
-					var useIndex = sort.FindIndex(e => e.MaxDays > days);
-					loan.LastInterestDate = lastToRetain.DateEnd;
-					loan.NextInterestDate = useIndex > -1
-						? loan.Date.AddDays(sort[useIndex].MaxDays)
-						: lastToRetain.DateEnd.AddMonths(1);
-				}
-				else
-				{
+				// if (loanProfile.ComputePerDay)
+				// {
+				// 	var days = (loan.Date - lastToRetain.DateEnd).TotalDays;
+				// 	loanProfile.Fixed.Sort((a, b) => a.MaxDays - b.MaxDays);
+				// 	var sort = loanProfile.Fixed;
+				// 	var useIndex = sort.FindIndex(e => e.MaxDays > days);
+				// 	loan.LastInterestDate = lastToRetain.DateEnd;
+				// 	loan.NextInterestDate = useIndex > -1
+				// 		? loan.Date.AddDays(sort[useIndex].MaxDays)
+				// 		: lastToRetain.DateEnd.AddMonths(1);
+				// }
+				// else
+				// {
+					// var days = (loan.Date - lastToRetain.DateEnd).TotalDays;
+					// loanProfile.Fixed.Sort((a, b) => a.MaxDays - b.MaxDays);
+					// var sort = loanProfile.Fixed;
+					// var useIndex = sort.FindIndex(e => e.MaxDays > days);
+					
 					loan.LastInterestDate = lastToRetain.DateStart;
 					loan.NextInterestDate = lastToRetain.DateEnd;
-				}
+					loan.NextComputeDate = loanProfile.ComputePerDay
+						? lastToRetain.DateEnd.AddMonths(1)
+						: lastToRetain.DateEnd;
+				// }
 			}
 
 			var interestToRemove = loan.InterestRecords.Where(e => e.DateStart > record.Date).ToList();
