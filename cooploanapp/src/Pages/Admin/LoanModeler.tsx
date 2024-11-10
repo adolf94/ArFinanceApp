@@ -265,7 +265,7 @@ const LoanModeler = ({
         <Grid size={12} sx={{ pb: 1 }} display="block">
             <Typography variant="subtitle1">Model Loan Payments</Typography>
         </Grid>
-        <Grid size={4} sx={{ pb: 2, px: 1 }}>
+        <Grid size={{xs:12,sm:4}} sx={{ pb: 2, px: 1 }}>
             <DatePicker label="Date of Loan" disabled={form.readonly} value={form.date}
                         onAccept={newValue => setForm({...form, date:newValue!})}
                         slots={{
@@ -275,10 +275,10 @@ const LoanModeler = ({
                         />)
                 }} />
         </Grid>
-        <Grid size={4} sx={{ pb: 2, px: 1 }}>
+        <Grid size={{xs:12,sm:4}} sx={{ pb: 2, px: 1 }}>
             <NumberInput label="Principal" disabled={form?.readonly} value={form.principal} onChange={(value:string) => setForm({ ...form, principal: Number.parseFloat(value) })} fullWidth></NumberInput>
         </Grid>
-        <Grid size={4} sx={{ pb: 2, px: 1 }}>
+        <Grid size={{xs:12,sm:4}} sx={{ pb: 2, px: 1 }}>
                         <Autocomplete
                           value={month}
                           onChange={(_event, newValue) => {
@@ -301,7 +301,7 @@ const LoanModeler = ({
                             <TableRow>
                                 <TableCell>#</TableCell>
                                 <TableCell>Date</TableCell>
-                                <TableCell>Payment</TableCell>
+                                <TableCell sx={{minWidth:'8rem'}}>Payment</TableCell>
                                 <TableCell>Balance</TableCell>
                                 <TableCell>Interest</TableCell>
                                 <TableCell>Principal</TableCell>

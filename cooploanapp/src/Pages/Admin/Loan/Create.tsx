@@ -85,8 +85,8 @@ const CreateLoan = (props:CreateLoanProps) => {
 						<DialogTitle>Add a new Loan</DialogTitle>
 						<DialogContent>
               <Grid container>
-                <Grid container size={4}>
-                  <Grid size={12} sx={{ p: 1 }}>
+                <Grid container size={{xs:12, md:4}} alignSelf="start" >
+                  <Grid size={{xs:12,sm:6,md:12}} sx={{ p: 1 }}>
                         <Autocomplete
                           value={form.user}
                           onChange={(_event, newValue) => {
@@ -116,7 +116,7 @@ const CreateLoan = (props:CreateLoanProps) => {
 
                   </Grid>
                   
-                  <Grid size={12} sx={{ p: 1 }}>
+                  <Grid size={{xs:12,sm:6,md:12}} sx={{ p: 1 }}>
                         <Autocomplete
                           value={form.coborrower}
                           onChange={(_event, newValue) => {
@@ -146,7 +146,7 @@ const CreateLoan = (props:CreateLoanProps) => {
 
                   </Grid>
                   
-                  <Grid size={12} sx={{ p: 1 }}>
+                  <Grid size={{xs:12,sm:6,md:12}} sx={{ p: 1 }}>
                         <Autocomplete
                           value={form.profile}
                           onChange={(_event, newValue) => {
@@ -161,7 +161,7 @@ const CreateLoan = (props:CreateLoanProps) => {
                         />
 
                   </Grid>
-                  <Grid size={12} sx={{ p: 1 }}>
+                  <Grid size={{xs:12,sm:6,md:12}} sx={{ p: 1 }}>
                         <Autocomplete
                           value={form.disbursementAccount}
                           onChange={(_event, outValue ) => {
@@ -209,7 +209,7 @@ const CreateLoan = (props:CreateLoanProps) => {
                     <NumberInput label="Principal / Amount to borrow" value={form.amount} onChange={(value : number)=>setForm({...form, amount:value})} />
                   </Grid> */}
                 </Grid>
-                <Grid size={8}>
+                <Grid size={{xs:12, md:8}}>
                   <LoanModeler loanProfile={form.profile!} onChange={(data)=>setForm({...form,date:data.date, amount:data.principal})}  onPaymentsChange={(data)=>setPaymentData(data)} />
                 </Grid>
               </Grid>
