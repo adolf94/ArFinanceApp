@@ -11,6 +11,8 @@ import { useMutateLoan } from "../../../repositories/loan"
 import { enqueueSnackbar } from "notistack"
 import BackdropLoader from "../../../components/BackdropLoader"
 import CreateDisbursementAccount from "../CreateDisbursementAccount"
+import numeral from "numeral"
+import LoanProfileHelperText from "./LoanProfileHelperText";
 
 interface CreateLoanProps {
 
@@ -157,7 +159,9 @@ const CreateLoan = (props:CreateLoanProps) => {
                           loading={ profileLoading }
                           fullWidth
                           options={profiles || []}
-                          renderInput={(params) => <TextField {...params}  label="Loan Profile" />}
+                          renderInput={(params) => <TextField {...params}
+                                                              helperText={<LoanProfileHelperText loanProfile={form.profile!} /> }
+                                                              label="Loan Profile" />}
                         />
 
                   </Grid>

@@ -10,6 +10,8 @@ import { ReactElement, useState } from "react"
 import api from "../../../components/api"
 import LoanModeler from "../LoanModeler"
 import { useNavigate } from "react-router-dom"
+import {useMutateLoanProfile} from "../../../repositories/loanProfiles";
+import { enqueueSnackbar } from "notistack"
 
 
 const interestFactors = [
@@ -33,6 +35,7 @@ const CreateLoanProfile = ({ children }: {children : ReactElement}) => {
         maxDays: 0,
         interest: 0
     })
+    const {create} = useMutateLoanProfile()
     const navigate = useNavigate()
     const [add, setAdd] = useState(false)
     const [show, setShow] = useState(false)
@@ -56,11 +59,10 @@ const CreateLoanProfile = ({ children }: {children : ReactElement}) => {
     }
 
     const saveProfile = () => {
-
-        api.post("/loanprofile", form)
-            .then(() => {
-                navigate("../")
-            })
+        create.mutateAsync(form).then(e=> {
+            navigate(-1)
+            enqueueSnackbar("Loan profile added successfully.", {variant:"success"})
+        })
 
     }
 

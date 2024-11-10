@@ -23,6 +23,9 @@ const getTokenFromApi = mm(
             })
             .then((e) => {
                 window.sessionStorage.setItem("access_token", e.data.access_token);
+                if(e.data.refresh_token) {
+                    window.localStorage.setItem("refresh_token", e.data.refresh_token);
+                }
                 return e.data.access_token;
             })
             .catch((e) => {
@@ -40,6 +43,7 @@ export const getToken = async (force: boolean) => {
 
 
     const tokenJson = jwtDecode<JwtPayload>(token!)
+    console.debug("tokenJson", moment(tokenJson.exp! * 1000).fromNow());
     if (moment().add(1, "minute").isAfter(tokenJson.exp! * 1000))
         token = await getTokenFromApi();
 
@@ -95,6 +99,7 @@ api.interceptors.response.use(
                 enqueueSnackbar("Please check inputs", {variant:'error'})
             }
         }else{
+            console.log(err)
             enqueueSnackbar("API Might be off", {variant:'error'})
         }
         return Promise.reject(err)

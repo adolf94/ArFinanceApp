@@ -27,7 +27,7 @@ namespace FinanceApp.Data.CosmosRepo
 				public AppDbContext(DbContextOptions<AppDbContext> options, IConfiguration config) : base(options)
 				{
 						_configuration = config;
-						// base.Database.EnsureCreatedAsync().Wait();
+						base.Database.EnsureCreatedAsync().Wait();
 				}
 
 
@@ -112,8 +112,9 @@ namespace FinanceApp.Data.CosmosRepo
 										.HasKey(e => e.ProfileId);
 
 						builder.Entity<Loan>().HasPartitionKey(e => new { e.AppId, e.UserId })
-										.ToContainer("Loans");
+							.ToContainer("Loans");
 
+						// builder.Entity<Loan>().HasIndex(e => new { e.AppId, e.UserId, e.Date });
 
 						builder.Entity<CoopOption>().HasPartitionKey(e => new { e.AppId, e.Year })
 								.ToContainer("CoopOption").HasKey(e => new { e.AppId, e.Year });

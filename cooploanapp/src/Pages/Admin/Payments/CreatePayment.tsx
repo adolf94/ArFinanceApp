@@ -8,6 +8,7 @@ import NumberInput from "../../../components/NumberInput";
 import { DatePicker } from "@mui/x-date-pickers";
 import { useMutatePayment } from "../../../repositories/payment";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import DatePickerWithBlur from "../../../components/DatePickerWithBlur";
 
 
 
@@ -52,7 +53,7 @@ const navigate = useNavigate();
 
       <Grid container>
         <Grid size={12} sx={{p:1}}>
-        <DatePicker label="Date" value={form.date}
+        <DatePickerWithBlur label="Date" value={form.date}
                 onChange={newValue => setForm({...form, date:newValue!})}
                 slots={{
                     textField: (params) => (

@@ -25,6 +25,7 @@ import {useEffect, useMemo, useState} from "react";
 import NumberInput, {FormattedAmount} from "../../components/NumberInput";
 import {Delete} from "@mui/icons-material";
 import {generateCompute} from "../../components/useComputeInterest";
+import DatePickerWithBlur from "../../components/DatePickerWithBlur";
 
 
 interface LoanModelerProps {
@@ -79,7 +80,7 @@ const LoanModeler = ({
 
     useEffect(() => {
         
-        if(!addCurrentDate || !loanProfile.computePerDay) return;
+        // if(!addCurrentDate || !loanProfile.computePerDay) return;
         // let shouldAdd = !expectedPayments || expectedPayments.every(e=>moment().isAfter(e.date))
         // if(!shouldAdd) return
             setPayments([{
@@ -266,8 +267,10 @@ const LoanModeler = ({
             <Typography variant="subtitle1">Model Loan Payments</Typography>
         </Grid>
         <Grid size={{xs:12,sm:4}} sx={{ pb: 2, px: 1 }}>
-            <DatePicker label="Date of Loan" disabled={form.readonly} value={form.date}
-                        onAccept={newValue => setForm({...form, date:newValue!})}
+            <DatePickerWithBlur label="Date of Loan" disabled={form.readonly} defaultValue={form.date}
+                        onChange={newValue =>{  setForm({...form, date:newValue!})
+                            console.log(newValue);
+                        }}
                         slots={{
                     textField: (params) => (
                         <TextField

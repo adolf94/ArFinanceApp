@@ -1,6 +1,7 @@
 import { CreateLoanDto } from "FinanceApi"
 import api from "../components/api"
 import { useMutation } from "@tanstack/react-query"
+import {queryClient} from "../App";
 
 
 export const LOAN   = "loan"
@@ -28,6 +29,9 @@ export const useMutateLoan = ()=>{
         mutationFn : (data: CreateLoanDto) => {
             return api.post("loan", data)
                 .then(e=>e.data)
+        },
+        onSuccess: (data)=>{
+            queryClient.invalidateQueries({ queryKey: [LOAN,{userId: data.userId}] })
         }
     })
 
