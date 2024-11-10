@@ -1,5 +1,5 @@
 import { AccountBalance, AttachMoney, VolunteerActivism } from "@mui/icons-material"
-import {  CardContent, Chip, Grid2 as Grid, Paper, Skeleton, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@mui/material"
+import {  CardContent,  Grid2 as Grid, Paper, Skeleton, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@mui/material"
 import { useParams } from "react-router-dom"
 import { getByLoanId, LOAN } from "../../../repositories/loan"
 import { useQuery } from "@tanstack/react-query"
@@ -8,7 +8,7 @@ import { FormattedAmount } from "../../../components/NumberInput"
 import moment from "moment"
 import React from "react"
 import {generateCompute} from "../../../components/useComputeInterest";
-import {LoanInterest, LoanPayment} from "FinanceApi";
+import {Loan, LoanInterest, LoanPayment} from "FinanceApi";
 
 
 
@@ -82,14 +82,14 @@ const LoadingFallback = ()=> {
 
 const ViewLoanDetails = () => {
   const {loanid} = useParams()
-  const { data: loan, isLoading: loading } = useQuery({ queryKey: [LOAN,{loanId: loanid}], queryFn: () => getByLoanId(loanid!), enabled:!!loanid && loanid != 'new'})
+  const { data: loan, isLoading: loading } = useQuery<Loan>({ queryKey: [LOAN,{loanId: loanid}], queryFn: () => getByLoanId(loanid!), enabled:!!loanid && loanid != 'new'})
   const [summary, setSummary] = useState({balance:0,interest:0, payments:0})
   const [transactions, setTransactions] = useState<any[]>([])
   useEffect(()=>{
     if(!loan) return
-    let payments = loan.payment.reduce((p,c)=>{return p + c.amount},0)
+    let payments = loan.payment.reduce((p:number,c : LoanPayment)=>{return p + c.amount},0)
     let principal = loan.payment.reduce((p: number,c:LoanPayment)=>{return  p - (c.againstPrincipal? c.amount: 0)},loan.principal)
-    let interest = loan.interestRecords.reduce((p,c)=>{return p + c.amount},0)
+    let interest = loan.interestRecords.reduce((p :number ,c : LoanInterest)=>{return p + c.amount},0)
     let balanceAmount = loan.principal + interest - payments
 
     const balance = {
@@ -98,7 +98,7 @@ const ViewLoanDetails = () => {
       principal: loan.principal
     }
 
-    let interestItems = loan.interestRecords.map(e=>({...e,date:e.dateStart,type:'interest'}))
+    let interestItems = loan.interestRecords.map(e=>({...e,date:e.dateEnd,type:'interest'}))
     
     if(loan.loanProfile.computePerDay){
       const computeInterest = generateCompute(loan, loan.loanProfile)
@@ -117,9 +117,10 @@ const ViewLoanDetails = () => {
 
 
       interestItems.push(  {
+        date: moment().add(-1,'days').format("YYYY-MM-DD"),
         dateCreated: moment().format('YYYY-MM-DD'),
-        dateStart: loan.lastInterest,
-        dateEnd: moment().add(-1,'days'),
+        dateStart: loan.lastInterestDate,
+        dateEnd: moment().add(-1,'days').format("YYYY-MM-DD"),
         amount: -interestOut.amount,
         type: "interest",
         totalPercentage: interestOut.totalInterestPercent
@@ -131,8 +132,8 @@ const ViewLoanDetails = () => {
 
     
     
-    let paymentsItems = loan.payment.reduce((p,c)=>{
-      let index = p.findIndex(e=>e.paymentId == c.paymentId)
+    let paymentsItems = loan.payment.reduce((p :any,c:LoanPayment)=>{
+      let index = p.findIndex((e: {paymentId:string})=>e.paymentId == c.paymentId)
       let key = c.againstPrincipal?'principal':'interest'
 
       if(index === -1){
@@ -145,8 +146,8 @@ const ViewLoanDetails = () => {
       return p;
     },[])
 
-    let records = [...paymentsItems, ...interestItems]
-        .sort((a,b)=>a.date==b.date?0: a.date<b.date?1:-1)
+    let records = [...interestItems, ...paymentsItems ]
+        .sort((a,b)=>a.date==b.date?0: moment(a.date).isBefore(b.date)?-1:1)
         .map(e=>{
           let out = {...e,
             interestBalance : balance.interest,
@@ -276,7 +277,7 @@ const ViewLoanDetails = () => {
             </Grid>
             <Grid size={10} sx={{ textAlign: 'center', pr: 3 }}>
               <Typography gutterBottom variant="h5" component="div">
-                {FormattedAmount(loan.principal + summary.interest)}
+                {FormattedAmount(loan!.principal + summary.interest)}
               </Typography>
               <Typography variant="subtitle1" sx={{ color: 'text.secondary' }}>
                 Total Interest : {FormattedAmount(summary.interest)}
@@ -306,7 +307,7 @@ const ViewLoanDetails = () => {
             </TableHead>
             <TableBody>
                 {transactions.map(item=><React.Fragment key={item.id}><TableRow sx={{backgroundColor:item.type=='interest'?'#ffbcbc':'unset'}}>
-                      <TableCell>{moment(item.date).format("YYYY-MM-DD")}</TableCell>
+                      <TableCell> {moment(item.date).format("YYYY-MM-DD") }</TableCell>
                       <TableCell colSpan={2} sx={{textAlign:'center'}}>{FormattedAmount(item.amount)}</TableCell>
                       <TableCell colSpan={2} sx={{textAlign:'center'}}>{FormattedAmount(item.balance)}</TableCell>
                   </TableRow>

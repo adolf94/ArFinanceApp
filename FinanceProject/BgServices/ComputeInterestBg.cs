@@ -42,7 +42,7 @@ namespace FinanceApp.BgServices
 										User? user = await _user.GetById(item.UserId);
 										var result = await repo.ComputeInterests(item, DateTime.Now);
 
-										if (!string.IsNullOrEmpty(user!.MobileNumber))
+										if (!string.IsNullOrEmpty(user!.MobileNumber) && result.InterestData != null)
 										{
 												await sms.SendSms($"Interest worth {result.InterestData.Amount} was added to your loan dated {item.Date.ToString("MMM-dd")}."
 														//$"for period {result.NewLoanData.LastInterestDate.ToString("MMM-d")} - {result.NewLoanData.NextInterestDate.ToString("MMM-d")}. \n"

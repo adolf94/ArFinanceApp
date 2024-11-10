@@ -8,7 +8,7 @@ interface ComputeInterestVars {
     principal: number, //principal balance
     interest: number //interest balance
 }
-export const generateCompute = (form:{date:moment.Moment, principal: number, readonly?: boolean , months?: number}, loanProfile: LoanProfile) => {
+export const generateCompute = (form:{date:moment.Moment | string, principal: number, readonly?: boolean , months?: number}, loanProfile: LoanProfile) => {
 
     return (nextInterest: moment.Moment, balance: ComputeInterestVars) => {
         const createDate = moment(form.date);

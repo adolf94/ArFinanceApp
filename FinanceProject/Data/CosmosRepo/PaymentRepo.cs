@@ -38,7 +38,7 @@ public class PaymentRepo : IPaymentRepo
 		//rollback Interest charging
 		affectedLoans.ForEach(loan =>
 		{
-			var lastToRetain = loan.InterestRecords.Where(e => e.DateStart <= record.Date)
+			var lastToRetain = loan.InterestRecords.Where(e => e.DateEnd <= record.Date)
 				.OrderByDescending(e => e.DateStart)
 				.FirstOrDefault();
 			if (lastToRetain == null)
@@ -78,7 +78,7 @@ public class PaymentRepo : IPaymentRepo
 				// }
 			}
 
-			var interestToRemove = loan.InterestRecords.Where(e => e.DateStart > record.Date).ToList();
+			var interestToRemove = loan.InterestRecords.Where(e => e.DateEnd > record.Date).ToList();
 
 			loan.Status = "Active";
 
@@ -123,9 +123,9 @@ public class PaymentRepo : IPaymentRepo
 			// for ( paymentIndex = 0; paymentIndex < records.Count; paymentIndex++)
 			// {
 			var breakFlag = false;
+			Loan loan =  loansToApply[loanIndex];
 			while (!breakFlag && paymentIndex < records.Count())
 			{
-				var loan = loansToApply[loanIndex];
 				var updatedLoan = loan;
 
 				var currentPayment = records[paymentIndex];
@@ -224,23 +224,11 @@ public class PaymentRepo : IPaymentRepo
 
 				_context.Loans!.Update(updatedLoan);
 				_context.Payments!.Update(currentPayment);
-
+	
 				await _context.SaveChangesAsync();
 				var paymentsList = updatedLoan.Payment.Where(e => e.AgainstPrincipal).Sum(e => e.Amount);
 				var balance = updatedLoan.Principal - paymentsList;
-				if (updatedLoan.Status != "Closed")
-				{
-					var nextDatePost = loan.NextComputeDate;
-					
-					while (nextDatePost < DateTime.Now.Date)
-					{
-						var result = _loan.ComputeInterests(updatedLoan, DateTime.Now.Date).GetAwaiter()
-							.GetResult();
-						nextDatePost = result.NextDate;
-						updatedLoan = result.NewLoanData;
-					}
-
-				}
+				loan = updatedLoan;
 
 				if (currentBalance == 0)
 				{
@@ -250,7 +238,21 @@ public class PaymentRepo : IPaymentRepo
 
 				paymentIndex++;
 			}
+			if (  loan.Status != "Closed")
+			{
+				var nextDatePost = loan.NextComputeDate;
+					
+				while (nextDatePost < DateTime.Now.Date)
+				{
+					var result = _loan.ComputeInterests(loan, DateTime.Now.Date).GetAwaiter()
+						.GetResult();
+					nextDatePost = result.NextDate;
+					loan = result.NewLoanData;
+				}
+				_context.Loans!.Update(loan);
+				await _context.SaveChangesAsync();
 
+			}
 
 			// }
 		}
