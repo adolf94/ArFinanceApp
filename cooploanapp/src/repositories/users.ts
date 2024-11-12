@@ -11,6 +11,7 @@ export const getAll = ()=>{
 
     return api.get("/user")
         .then(res=>{
+            
             return res.data
         })
 
@@ -32,6 +33,9 @@ export const useMutateUser = (id?:string)=>{
                 .then(res=>{
                     return res.data
                 })
+        },
+        onSuccess : (data)=>{
+            queryClient.invalidateQueries({queryKey:[USER,{userId:data.id}]})
         }
     })
 

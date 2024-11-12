@@ -101,7 +101,9 @@ public class PaymentRepo : IPaymentRepo
 		{
 			var loan = loansToApply[loanIndex];
 
-			var appliedPayments = await _context.LoanPayments!.Where(e => e.AppId == record.AppId
+			var appliedPayments = await _context.LoanPayments!
+				
+														.Where(e => e.AppId == record.AppId
 			                                                              && e.Date >= record.Date &&
 			                                                              e.LoanId == loan.Id).ToListAsync();
 			appliedPayments.ForEach(e => _context.Remove(e));
@@ -127,7 +129,7 @@ public class PaymentRepo : IPaymentRepo
 			{
 				var loan = loansToApply[loanIndex];
 				var updatedLoan = loan;
-
+				loan.Payment = await _context.LoanPayments!.Where(e => e.LoanId == loan.Id).ToListAsync();
 				var currentPayment = records[paymentIndex];
 				var nextDate = loan.NextInterestDate;
 				var paymentBalance = currentPayment.Amount - currentPayment.LoanPayments.Sum(e => e.Amount);

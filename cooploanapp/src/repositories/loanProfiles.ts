@@ -1,6 +1,7 @@
 import { useMutation } from "@tanstack/react-query"
 import api from "../components/api"
 import {LoanProfile} from "FinanceApi";
+import {queryClient} from "../App";
 
 
 export const LOAN_PROFILE = "loanProfile"
@@ -22,6 +23,9 @@ export const useMutateLoanProfile = () => {
 				.then((res) => {
 					return res.data
 				})
+		},
+		onSuccess : ()=>{
+			queryClient.invalidateQueries({queryKey: [LOAN_PROFILE]})
 		}
 
 	})

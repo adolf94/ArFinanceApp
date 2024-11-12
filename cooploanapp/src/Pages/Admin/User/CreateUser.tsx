@@ -27,10 +27,14 @@ const CreateUser = () => {
 				enqueueSnackbar("Mobile Number / Name is required", {variant:'error'})
 				return;
 			}
+			if(form.mobileNumber.length != 10) {
+				enqueueSnackbar("Mobile Number should have 10 digits", {variant:'error'})
+			}
 			create.mutateAsync(form)
 				.then((res)=>{
 					enqueueSnackbar("User successfully Added", {variant:'success'})
-					navigate(`../user/${res.data.id}`)
+					// navigate(`../user/${res.data.id}`)
+					navigate(-1)
 				}).catch(res=>{
 					if(res.response?.status == 400){
 						let errorData = res.response.data.result;
@@ -43,7 +47,7 @@ const CreateUser = () => {
 		
  
 		return <React.Fragment>
-				<Dialog open={true} maxWidth="sm" fullWidth onClose={()=>navigate("../")}> 
+				<Dialog open={true} maxWidth="sm" fullWidth onClose={()=>navigate(-1)}> 
 						<DialogTitle>Create new User</DialogTitle>
 						<DialogContent>
 								<Box sx={{ width: '100%'}}>
