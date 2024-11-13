@@ -3,6 +3,7 @@ import {
     Autocomplete,
     Box,
     Button,
+    Card,
     Chip,
     Grid2 as Grid,
     IconButton,
@@ -15,7 +16,9 @@ import {
     TableHead,
     TableRow,
     TextField,
-    Typography
+    Typography,
+    useMediaQuery,
+    useTheme
 } from "@mui/material";
 
 import {DatePicker} from "@mui/x-date-pickers";
@@ -26,7 +29,7 @@ import NumberInput, {FormattedAmount} from "../../components/NumberInput";
 import {Delete} from "@mui/icons-material";
 import {generateCompute} from "../../components/useComputeInterest";
 import DatePickerWithBlur from "../../components/DatePickerWithBlur";
-
+import {v4 as uuid} from 'uuid'
 
 interface LoanModelerProps {
     loanProfile: Partial<LoanProfile>,
@@ -39,6 +42,7 @@ interface LoanModelerProps {
 }
 
 export interface Payment {
+    id:string,
     date: moment.Moment,
     amount: number,
     balance: number,
@@ -48,6 +52,7 @@ export interface Payment {
     principalBalance: number,
     interestBalance: number,
     totalInterestPercent: number,
+    nextInterest: moment.Moment,
     minimumDate: moment.Moment
 }
 
@@ -63,6 +68,7 @@ const dateDropdown = ()=>{
     return items;
 }
 
+
 const LoanModeler = ({
                      loanProfile,  loanInfo, onChange, onPaymentsChange,addCurrentDate,payments : previousPayments }
                      : LoanModelerProps) => {
@@ -75,23 +81,40 @@ const LoanModeler = ({
     })
     const [customPayments] = useState<Payment[]>([])
 
+    const theme = useTheme();
+    const smallScreen = useMediaQuery(theme.breakpoints.down('sm'));
+
+
+
     const [payments, setPayments] = useState<Payment[]>([])
     const [month, setSelectedMonth] = useState({month:0, label: `Custom`, isCustom:true})
 
+    useEffect(() => {
+        setForm({
+            ...form,
+            date: loanInfo?.date || moment(),
+            principal: loanInfo?.principal || 0,
+            readonly: !!loanInfo?.readonly,
+            months:0
+        })
+    }, [loanInfo]);
+    
     useEffect(() => {
         
         // if(!addCurrentDate || !loanProfile.computePerDay) return;
         // let shouldAdd = !expectedPayments || expectedPayments.every(e=>moment().isAfter(e.date))
         // if(!shouldAdd) return
             setPayments([{
-            date: moment(),
-            amount: 0, type: 'payment',
-            principalBalance: 0,
-            balance: 0,
-            interestBalance: 0,
-            minimumDate: moment(),
-            totalInterestPercent: 0,
-            readonly:false
+                id: uuid(),
+                date: moment(),
+                amount: 0, type: 'payment',
+                principalBalance: 0,
+                balance: 0,
+                interestBalance: 0,
+                minimumDate: moment(),
+                totalInterestPercent: 0, 
+                nextInterest: moment(),
+                readonly:false
         }])
     }, []);
     const addDate = () => {
@@ -112,7 +135,9 @@ const LoanModeler = ({
             interestBalance: 0,
             minimumDate: defaultDate,
             totalInterestPercent: 0,
-            readonly:false
+            readonly:false,
+            nextInterest:moment(),
+            id: uuid()
         }])
         
     }
@@ -156,7 +181,6 @@ const LoanModeler = ({
                 nextInterest = interestData.nextInterest
                 totalInterestPercent = interestData.totalInterestPercent
             }
-            console.log(thisInterest)
 
             let payment = (form.principal/data.month) - thisInterest
             if (interest < payment) {
@@ -174,7 +198,9 @@ const LoanModeler = ({
                 balance: balance,
                 interestBalance: 0,
                 minimumDate: thisDate,
-                totalInterestPercent: totalInterestPercent
+                totalInterestPercent: totalInterestPercent,
+                id:uuid(),
+                nextInterest:moment()
             }
             items.push(item)
         }
@@ -199,7 +225,7 @@ const LoanModeler = ({
         let previousPaymentsAndModelPayments = [...(previousPayments || []).map(e=>({...e,readonly:true })),...payments.map((e,i)=>({...e,index:i}))]
         let nextInterest = form.date
         return previousPaymentsAndModelPayments.reduce((prev: Payment[], cur: any) => {
-
+            let interestId = 0
             while (nextInterest.clone().isBefore(cur.date)) {
                 const prior = {
                     date: cur.date.clone(),
@@ -209,14 +235,16 @@ const LoanModeler = ({
                     totalInterestPercent
                 }
                 const interestData = computeInterest(nextInterest, prior);
+                interestId++
+                let toAdd : Payment = {...interestData,readonly:true, id :cur.id + interestId.toString()}
                 interest = interestData.interestBalance
                 principal = interestData.principalBalance
                 balance = interestData.balance
                 nextInterest = interestData.nextInterest
                 totalInterestPercent = interestData.totalInterestPercent
-                if (interestData.amount !== 0) prev.push(interestData)
+                if (interestData.amount !== 0) prev.push(toAdd)
             }
-
+            interestId++
             cur.balance = balance - cur.amount!
             balance = cur.balance
             //deduct to interest;
@@ -238,7 +266,7 @@ const LoanModeler = ({
             }
             cur.totalInterestPercent = totalInterestPercent
 
-
+            cur.id = cur.id + interestId.toString()
             prev.push(cur!)
             return [...prev]
         }, [])
@@ -264,21 +292,23 @@ const LoanModeler = ({
 
     return <Grid container>
         <Grid size={12} sx={{ pb: 1 }} display="block">
-            <Typography variant="subtitle1">Model Loan Payments</Typography>
+            <Typography variant="caption">Model Loan Payments</Typography>
         </Grid>
-        <Grid size={{xs:12,sm:4}} sx={{ pb: 2, px: 1 }}>
-            <DatePickerWithBlur label="Date of Loan" disabled={form.readonly} defaultValue={form.date}
+        <Grid size={{xs:6,sm:4}} sx={{ pb: 2, px: 1 }}>
+            <DatePickerWithBlur label="Date of Loan" disabled={form.readonly} value={form.date}
                         onChange={newValue =>{  setForm({...form, date:newValue!})
                             console.log(newValue);
                         }}
+                                fullWidth
                         slots={{
-                    textField: (params) => (
+                       textField: (params) => (
                         <TextField
+                            
                             {...params}
                         />)
                 }} />
         </Grid>
-        <Grid size={{xs:12,sm:4}} sx={{ pb: 2, px: 1 }}>
+        <Grid size={{xs:6,sm:4}} sx={{ pb: 2, px: 1 }}>
             <NumberInput label="Principal" disabled={form?.readonly} value={form.principal} onChange={(value:string) => setForm({ ...form, principal: Number.parseFloat(value) })} fullWidth></NumberInput>
         </Grid>
         <Grid size={{xs:12,sm:4}} sx={{ pb: 2, px: 1 }}>
@@ -296,8 +326,72 @@ const LoanModeler = ({
                           
                         />
         </Grid>
-        <Grid size={12}>
-            {!loanProfile ? <Alert variant="outlined" color="warning">Please select a loan profile first!</Alert> : 
+        {smallScreen &&  <Grid container size={12}>
+            {
+                computedPayments.map((item, i) => {
+
+                    if(item.readonly){
+                        return  <Grid size={12} key={item.id}>
+                            <Card variant="outlined">
+                                <Box sx={{p:2}} >
+                                    <Box sx={{fontSize:'small', fontWeight:'bold', pb:1}}>
+                                        {item.date.format("MMM DD")}
+                                        {item.type=="interest" && ` - ${item.nextInterest.clone().add(-1,'day').format("MMM DD")}` }
+                                    </Box>
+                                    <Box sx={{'display':'flex', justifyContent:'space-between'}}>
+                                        {
+                                            item.type=="payment" ? <Box sx={{color:'green', fontWeight:'bold'}}>Payment</Box>
+                                                : <Box sx={{color:'red'}}>Interest</Box>
+                                        }
+
+                                        <Box>{FormattedAmount(-item.amount)}</Box>
+                                    </Box>
+                                    <Box sx={{'display':'flex', justifyContent:'space-between'}}>
+                                        <Box>Running Balance</Box>
+                                        <Box>{FormattedAmount(item.balance)}</Box>
+                                    </Box>
+                                </Box>
+                            </Card>
+                        </Grid>
+                    }
+                    return  <Grid size={12} key={item.id}>
+                        <Card variant="outlined">
+                            <Grid container sx={{p:2}} >
+                                <Grid size={12} sx={{fontSize:'small', fontWeight:'bold', pb:1}}>
+                                    Proposed payment
+                                </Grid>
+                                <Grid size={6} sx={{py:1}}>
+                                    <DatePicker label="Payment date" value={item.date}
+                                                minDate={item.minimumDate}
+                                                onAccept={newValue => changeModelValues(item.index!, 'date', newValue)}
+                                                slots={{
+                                                    textField: (params) => (
+                                                        <TextField
+                                                            {...params}
+                                                            size="small"
+                                                        />)
+                                                }} />
+                                </Grid>
+                                <Grid size={6} sx={{pl:1 ,py:1}}>
+                                    <NumberInput label="Payment Amount" size="small" value={item.amount} onChange={(value : string) => changeModelValues(item.index!, 'amount', value)} />
+                                </Grid>
+                                <Grid size={12} sx={{'display':'flex', justifyContent:'space-between'}}>
+                                    <Box>Running Balance</Box>
+                                    <Box>{FormattedAmount(item.balance)}</Box>
+                                </Grid>
+                            </Grid>
+                        </Card>
+                    </Grid>
+
+                })
+            }
+		  <Grid size={12} sx={{textAlign:'center', pt:3}}>
+			<Button variant="contained" fullWidth color="success" onClick={addDate}> Add Payment for computation </Button>
+		  </Grid>
+		</Grid>
+        }
+        {!smallScreen && <Grid container size={12}>
+            {!loanProfile  ? <Alert variant="outlined" color="warning">Please select a loan profile first!</Alert> :
                 <TableContainer>
                     <Table size="small">
                         <TableHead>
@@ -316,40 +410,40 @@ const LoanModeler = ({
                                 computedPayments.map((item, i) => {
                                     return item.type === "payment" ? <TableRow>
                                         <TableCell>{i + 1}</TableCell>
-                                       
+
                                         {
                                             item.readonly?  <TableCell sx={{ pl: 4 }}>
-                                                    {item.date.format("MM/DD/YYYY")}
+                                                {item.date.format("MM/DD/YYYY")}
                                             </TableCell>: <TableCell>
                                                 <DatePicker label="Payment date" value={item.date}
-                                                minDate={item.minimumDate}
-                                                onAccept={newValue => changeModelValues(item.index!, 'date', newValue)}
-                                                slots={{
-                                                    textField: (params) => (
-                                                        <TextField
-                                                            {...params}
-                                                            size="small"
-                                                        />)
-                                                }} />
+                                                            minDate={item.minimumDate}
+                                                            onAccept={newValue => changeModelValues(item.index!, 'date', newValue)}
+                                                            slots={{
+                                                                textField: (params) => (
+                                                                    <TextField
+                                                                        {...params}
+                                                                        size="small"
+                                                                    />)
+                                                            }} />
                                             </TableCell>
                                         }
                                         {
-                                            
+
                                             item.readonly?  <TableCell sx={{ pr: 4 }}>
-                                            <Grid container sx={{justifyContent: 'space-between'}}>
-                                                <Box sx={{pl:2}}>
-                                                    <Chip size="small" color="success" label="P"></Chip>
-                                                </Box>
-                                                <Box>{FormattedAmount(item.amount)}</Box>
-                                            </Grid>
-                                        </TableCell> : <TableCell><NumberInput size="small" 
-                                                            slotProps={{
-                                                                input: {
-                                                                    startAdornment : <InputAdornment position="start"> <Chip size="small" color="success" label="P"></Chip></InputAdornment>
-                                                                }
-                                                            }} value={item.amount} onChange={(value : string) => changeModelValues(item.index!, 'amount', value)} /></TableCell>
+                                                <Grid container sx={{justifyContent: 'space-between'}}>
+                                                    <Box sx={{pl:2}}>
+                                                        <Chip size="small" color="success" label="P"></Chip>
+                                                    </Box>
+                                                    <Box>{FormattedAmount(item.amount)}</Box>
+                                                </Grid>
+                                            </TableCell> : <TableCell><NumberInput size="small"
+                                                                                   slotProps={{
+                                                                                       input: {
+                                                                                           startAdornment : <InputAdornment position="start"> <Chip size="small" color="success" label="P"></Chip></InputAdornment>
+                                                                                       }
+                                                                                   }} value={item.amount} onChange={(value : string) => changeModelValues(item.index!, 'amount', value)} /></TableCell>
                                         }
-                                        
+
 
                                         <TableCell sx={{ textAlign: 'right' }}>{FormattedAmount(item.balance)}</TableCell>
                                         <TableCell sx={{ textAlign: 'right' }}>{FormattedAmount(item.interestBalance)}</TableCell>
@@ -358,7 +452,7 @@ const LoanModeler = ({
                                     </TableRow> : <TableRow>
                                         <TableCell>{i + 1}</TableCell>
                                         <TableCell sx={{ pl: 4 }}>
-                                        {item.date.format("MM/DD/YYYY")}
+                                            {item.date.format("MM/DD/YYYY")}
                                         </TableCell>
                                         <TableCell sx={{ pr: 4 }}>
                                             <Grid container sx={{justifyContent: 'space-between'}}>
@@ -382,12 +476,12 @@ const LoanModeler = ({
                             </TableRow>
                         </TableBody>
                         <TableFooter>
-                            
-                    </TableFooter>
+
+                        </TableFooter>
                     </Table>
                 </TableContainer>
             }
-        </Grid>
+        </Grid>}
     </Grid>
 }
 

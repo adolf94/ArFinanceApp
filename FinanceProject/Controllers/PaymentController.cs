@@ -43,7 +43,7 @@ namespace FinanceApp.Controllers
 								user!.MobileNumber, true);
 
 
-						return Ok();
+						return Ok(payment);
 				}
 		}
 }

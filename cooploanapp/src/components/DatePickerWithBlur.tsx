@@ -1,18 +1,26 @@
 
 import moment from "moment"
-import {useRef, useState } from "react"
+import {useEffect, useRef, useState } from "react"
 import { DatePicker } from "@mui/x-date-pickers"
+import { DatePickerProps } from "@mui/x-date-pickers/DatePicker"
 import { TextField } from "@mui/material"
 
 
-const DatePickerWithBlur = (props: any) => {
+const DatePickerWithBlur  = (props:any & {value: moment.Moment}) => {
     const refValue = useRef(moment())
-    const [selectedDate, setSelectedDate] = useState(refValue.current);
+    const [selectedDate, setSelectedDate] = useState(props.value);
+
+
+    useEffect(() => {
+        setSelectedDate(props.value);
+    }, [props.value]);
     const handleDateChange = (date : moment.Moment) => {
             // setSelectedDate(date);
         // setSelectedDate(date)
         refValue.current = date;
     };
+    
+    
  
     const handleBlur = () => {
         setSelectedDate(refValue.current)
@@ -23,7 +31,6 @@ const DatePickerWithBlur = (props: any) => {
         setSelectedDate(newValue)
         props.onChange(newValue)
     }
-    console.log(selectedDate);
     return  <DatePicker label="Date of Loan"
                         {...props}
                         value={selectedDate}
@@ -34,6 +41,7 @@ const DatePickerWithBlur = (props: any) => {
                             textField: (params) => (
                                 <TextField
                                     {...params}
+                                    fullWidth
                                     onBlur={handleBlur}
                                 />)
                         }}/> 

@@ -1,4 +1,5 @@
-import { Dialog, DialogContent, Grid2 as Grid, Typography } from "@mui/material"
+import {Card,
+  CardContent, Dialog, DialogContent, DialogTitle, Grid2 as Grid, IconButton, Typography, useMediaQuery, useTheme } from "@mui/material"
 import { useQuery } from "@tanstack/react-query"
 import { useNavigate, useParams } from "react-router-dom"
 import { getByLoanId, LOAN } from "../../../repositories/loan"
@@ -9,6 +10,7 @@ import { FormattedAmount } from "../../../components/NumberInput"
 import LoanModeler from "../../Admin/LoanModeler"
 import {generateCompute} from "../../../components/useComputeInterest";
 import {LoanInterest, LoanPayment} from "FinanceApi";
+import { Close } from "@mui/icons-material"
 
 
 
@@ -23,6 +25,9 @@ const ViewLoanAsBorrower = (props: ViewLoanAsBorrowerProps) => {
   const [summary, setSummary] = useState({balance:0,interest:0, payments:0})
   const [payments, setPayments] = useState([])
   const navigate = useNavigate()
+  const theme = useTheme();
+  const fullScreen = useMediaQuery(theme.breakpoints.down('sm'));
+  
   useEffect(()=>{
     if(!loan) return
     let payments = loan.payment.reduce((p: number,c:LoanPayment)=>{return p + c.amount},0)
@@ -74,52 +79,65 @@ const ViewLoanAsBorrower = (props: ViewLoanAsBorrowerProps) => {
 
 
   return !!loading  ?  <BackdropLoader /> 
-    :<Dialog open maxWidth="lg" fullWidth onClose={()=>navigate("../")}>
-      <DialogContent>
-        <Grid container>
-          <Grid container size={4}>
-            <Grid container size={12} sx={{display:'flex'}}>
-              <Grid size={4}>
-                <Typography variant="body2" sx={{fontWeight:'bold'}}>Date Start:</Typography>
-              </Grid>
-              <Grid>
-                <Typography variant="body2">{moment(loan.date).format("MMM DD,YYYY")}</Typography>
-              </Grid>
-            </Grid>
-            <Grid container size={12} sx={{display:'flex'}}>
-              <Grid size={4}>
-                <Typography variant="body2" sx={{fontWeight:'bold'}}>Principal:</Typography>
-              </Grid>
-              <Grid>
-                <Typography variant="body2">{FormattedAmount(loan.principal)}</Typography>
-              </Grid>
-            </Grid>
-            <Grid container size={12} sx={{display:'flex'}}>
-              <Grid size={4}>
-                <Typography variant="body2" sx={{fontWeight:'bold'}}>Interests:</Typography>
-              </Grid>
-              <Grid>
-                <Typography variant="body2">{FormattedAmount(summary.interest)}</Typography>
-              </Grid>
-            </Grid>
-            <Grid container size={12} sx={{display:'flex'}}>
-              <Grid size={4}>
-                <Typography variant="body2" sx={{fontWeight:'bold'}}>Payments:</Typography>
-              </Grid>
-              <Grid>
-                <Typography variant="body2">{FormattedAmount(summary.payments)}</Typography>
-              </Grid>
-            </Grid>
-            <Grid container size={12} sx={{display:'flex'}}>
-              <Grid size={4}>
-                <Typography variant="body2" sx={{fontWeight:'bold'}}>Balance:</Typography>
-              </Grid>
-              <Grid>
-                <Typography variant="body2">{FormattedAmount(summary.balance)}</Typography>
-              </Grid>
-            </Grid>
+    :<Dialog open maxWidth="lg" fullScreen={fullScreen} fullWidth onClose={()=>navigate("../")}>
+        <DialogTitle>
+          <Grid container justifyContent="space-between">
+            <Typography variant="h5">Loan History</Typography>
+            <IconButton onClick={()=>navigate("../")}>
+              <Close />
+            </IconButton>
           </Grid>
-          <Grid size={8}>
+        </DialogTitle>
+        <DialogContent>
+        <Grid container>
+          <Grid  size={{xs:12, md:4}} sx={{pb:3}} alignSelf="start">
+            <Card onClick={() => navigate("./loan/" + loan.orig.id)}>
+            <CardContent sx={{ p: 2, paddingBottom: '8px!important' }}>
+              <Grid container direction="column">
+                <Grid container sx={{justifyContent:'space-between'}}>
+
+                  <Typography  sx={{fontWeight:"bold",pt:1}} gutterBottom={false}>
+                    Date Created: {moment(loan.date).format("MMM DD")}
+                  </Typography>
+                </Grid>
+
+                <Typography variant="caption" gutterBottom={false}>
+                  Principal: {FormattedAmount(loan.principal)}
+                </Typography>
+                <Typography variant="caption" gutterBottom={false}>
+                  Interest: {FormattedAmount(summary.interest)}
+                </Typography>
+                <Typography variant="caption" gutterBottom={false}>
+                  Payments: {FormattedAmount(summary.payments)}
+                </Typography>
+                <Grid container  sx={{pt:1, justifyContent:'space-between'}}>
+                  <Grid container direction="column"	>
+                    <Typography variant="h5" gutterBottom={false}>
+                      {FormattedAmount(loan.nextPayment?.amount)}
+                    </Typography>
+                    <Typography variant="caption" gutterBottom={false}>
+                      Next Payment
+                    </Typography>
+                    <Typography variant="caption" gutterBottom={false}>
+                      Before {moment(loan.nextPayment?.date).format("MMM DD")}
+                    </Typography>
+
+                  </Grid>
+                  <Grid>
+                    <Typography variant="h5" sx={{textWeight:'bold',textAlign:'right'}} gutterBottom={false}>
+                      {FormattedAmount(summary.balance)}
+                    </Typography>
+                    <Typography variant="caption" sx={{textAlign:'right'}} gutterBottom={false}>
+                      Outstanding Balance
+                    </Typography>
+                  </Grid>
+                </Grid>
+              </Grid>
+
+            </CardContent>
+          </Card>
+          </Grid>
+          <Grid size={{xs:12, md:8}}>
           <LoanModeler addCurrentDate loanProfile={loan.loanProfile!} payments={payments} expectedPayments={loan.expectedPayments}
                        loanInfo={{date:moment(loan.date), readonly:true, principal:loan.principal}} />
           {/* //onChange={(data)=>setForm({...form,date:data.date, amount:data.principal})}  onPaymentsChange={(data)=>setPaymentData(data)} /> */}

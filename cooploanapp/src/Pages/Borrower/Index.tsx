@@ -1,10 +1,11 @@
 import {
 	Card, CardContent, CardActions, Chip, Grid2 as Grid, Paper, Table, TableBody,
 	TableCell, TableContainer, TableHead, TableRow, Typography, Button,
-	Box
+	Box,
+    IconButton
 } from "@mui/material"
 import AuthenticatedLayout from "../../components/AuthenticatedLayout"
-import { AccountBalance, GridView, ViewList, VolunteerActivism } from '@mui/icons-material'
+import { AccountBalance, ExpandMore, GridView, ViewList, VolunteerActivism } from '@mui/icons-material'
 import { useEffect, useState } from "react"
 import useUserInfo from "../../components/userContext"
 import { getByUserId, LOAN } from "../../repositories/loan"
@@ -145,54 +146,106 @@ const IndexAuthenticated = () => {
 			{view === "tiles" ?
 				<Grid container size={12} sx={{ p: 2 }}>
 					{loanCalculation.map((loan:any)=>
-					<Grid size={{ xl: 4, md: 6, xs: 12 }} sx={{ p: 1 }} key={loan.orig.id}>
-						<Card>
+					<Grid size={{ xl: 3, lg:4, md: 6, xs: 12 }} sx={{ p: 1 }} key={loan.orig.id}>
+						<Card onClick={() => navigate("./loan/" + loan.orig.id)}>
 							<CardContent sx={{ p: 2, paddingBottom: '8px!important' }}>
-								{/*<CardContent sx={{}}>*/}
-								<Grid container sx={{ justifyContent: "space-between", pb: 1 }}>
-									<Box>
-										<Typography variant="caption" gutterBottom={false}>
+								<Grid container direction="column">
+									<Grid container sx={{justifyContent:'space-between'}}>
+								
+										<Typography variant="caption" sx={{fontWeight:"bold",pt:1}} gutterBottom={false}>
 											Date Created: {moment(loan.date).format("MMM DD")}
 										</Typography>
-										<Typography variant="h5" component="div" gutterBottom={false}>
-											P {FormattedAmount(loan.balance)}
-										</Typography>
-										<Typography variant="caption" gutterBottom={false}>
-											Balance
-										</Typography>
-									</Box>
-									<Box>
-										
-										{/*Due: {moment(loan.nextInterest).format("MMM DD")}*/}
-
-										<Typography variant="caption" gutterBottom={false}>
-											Next Payment
-										</Typography>
-										<Typography variant="h5" gutterBottom={false}>
-											{FormattedAmount(loan.nextPayment?.amount)}
-										</Typography>
-										<Typography variant="caption" gutterBottom={false}>
-											Before {moment(loan.nextPayment?.date).format("MMM DD")}
-
-										</Typography>
-									</Box>
-								</Grid>
-								<Grid sx={{ pb: 1, justifyContent:'start' }}>
-									<Grid sx={{display:'flex',flexWrap:'wrap'}}>
-										<Box sx={{textAlign:'center'}}>
-											<Chip size="small" color="primary" label={`Principal: ${FormattedAmount(loan.principal)}`}  />
-											<Chip size="small" color="warning" label={`Interest: ${FormattedAmount(loan.interests)}`}  />
-											<Chip size="small" color="success" label={`Payments: ${FormattedAmount(loan.payments)}`}  />
-										</Box>
+										<Grid>
+											<IconButton>
+												<ExpandMore fontSize="small" />
+											</IconButton>
+										</Grid>
 									</Grid>
-									<Grid>
+									
+									<Typography variant="caption" gutterBottom={false}>
+										Principal: {FormattedAmount(loan.principal)}
+									</Typography>
+									<Typography variant="caption" gutterBottom={false}>
+										Interest: {FormattedAmount(loan.interests)}
+									</Typography>
+									<Typography variant="caption" gutterBottom={false}>
+										Payments: {FormattedAmount(loan.payments)}
+									</Typography>
+									<Grid container  sx={{pt:1, justifyContent:'space-between'}}>
+										<Grid container direction="column"	>
+											<Typography variant="h5" gutterBottom={false}>
+												{FormattedAmount(loan.nextPayment?.amount)}
+											</Typography>
+											<Typography variant="caption" gutterBottom={false}>
+												Next Payment
+											</Typography>
+											<Typography variant="caption" gutterBottom={false}>
+												Before {moment(loan.nextPayment?.date).format("MMM DD")}
+											</Typography>
+											
+										</Grid>
+										<Grid>
+											<Typography variant="h5" sx={{textWeight:'bold',textAlign:'right'}} gutterBottom={false}>
+												{FormattedAmount(loan.balance)}
+											</Typography>
+											<Typography variant="caption" sx={{textAlign:'right'}} gutterBottom={false}>
+												Outstanding Balance
+											</Typography>
+										</Grid>
 									</Grid>
 								</Grid>
+								
 							</CardContent>
-							<CardActions sx={{ justifyContent: 'end' }}>
-													<Button onClick={() => navigate("./loan/" + loan.orig.id)}> More Details </Button>
-							</CardActions>
 						</Card>
+						
+						{/*<Card>*/}
+						{/*	<CardContent sx={{ p: 2, paddingBottom: '8px!important' }}>*/}
+						{/*		/!*<CardContent sx={{}}>*!/*/}
+						{/*		<Grid container sx={{ justifyContent: "space-between", pb: 1 }}>*/}
+						{/*			<Box>*/}
+						{/*				<Typography variant="caption" gutterBottom={false}>*/}
+						{/*					Date Created: {moment(loan.date).format("MMM DD")}*/}
+						{/*				</Typography>*/}
+						{/*				<Typography variant="h5" component="div" gutterBottom={false}>*/}
+						{/*					P {FormattedAmount(loan.balance)}*/}
+						{/*				</Typography>*/}
+						{/*				<Typography variant="caption" gutterBottom={false}>*/}
+						{/*					Balance*/}
+						{/*				</Typography>*/}
+						{/*			</Box>*/}
+						{/*			<Box>*/}
+						{/*				*/}
+						{/*				/!*Due: {moment(loan.nextInterest).format("MMM DD")}*!/*/}
+						
+						{/*				<Typography variant="caption" gutterBottom={false}>*/}
+						{/*					Next Payment*/}
+						{/*				</Typography>*/}
+						{/*				<Typography variant="h5" gutterBottom={false}>*/}
+						{/*					{FormattedAmount(loan.nextPayment?.amount)}*/}
+						{/*				</Typography>*/}
+						{/*				<Typography variant="caption" gutterBottom={false}>*/}
+						{/*					Before {moment(loan.nextPayment?.date).format("MMM DD")}*/}
+						
+						{/*				</Typography>*/}
+						{/*			</Box>*/}
+						{/*		</Grid>*/}
+						{/*		<Grid sx={{ pb: 1, justifyContent:'start' }}>*/}
+						{/*			<Grid sx={{display:'flex',flexWrap:'wrap'}}>*/}
+						{/*				<Box sx={{textAlign:'center'}}>*/}
+						{/*					<Chip size="small" color="primary" label={`Principal: ${FormattedAmount(loan.principal)}`}  />*/}
+						{/*					<Chip size="small" color="warning" label={`Interest: ${FormattedAmount(loan.interests)}`}  />*/}
+						{/*					<Chip size="small" color="success" label={`Payments: ${FormattedAmount(loan.payments)}`}  />*/}
+						{/*				</Box>*/}
+						{/*			</Grid>*/}
+						{/*			<Grid>*/}
+						{/*			</Grid>*/}
+						{/*		</Grid>*/}
+						{/*	</CardContent>*/}
+						{/*	<CardActions sx={{ justifyContent: 'end' }}>*/}
+						{/*							<Button onClick={() => navigate("./loan/" + loan.orig.id)}> More Details </Button>*/}
+						{/*	</CardActions>*/}
+						{/*</Card>*/}
+						
 					</Grid>)}
 
 

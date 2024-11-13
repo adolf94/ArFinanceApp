@@ -87,9 +87,9 @@ const ViewLoanDetails = () => {
   const [transactions, setTransactions] = useState<any[]>([])
   useEffect(()=>{
     if(!loan) return
-    let payments = loan.payment.reduce((p,c)=>{return p + c.amount},0)
+    let payments = loan.payment.reduce((p : number,c : LoanPayment)=>{return p + c.amount},0)
     let principal = loan.payment.reduce((p: number,c:LoanPayment)=>{return  p - (c.againstPrincipal? c.amount: 0)},loan.principal)
-    let interest = loan.interestRecords.reduce((p,c)=>{return p + c.amount},0)
+    let interest = loan.interestRecords.reduce((p: number,c: LoanPayment)=>{return p + c.amount},0)
     let balanceAmount = loan.principal + interest - payments
 
     const balance = {
@@ -98,9 +98,9 @@ const ViewLoanDetails = () => {
       principal: loan.principal
     }
 
-    let interestItems = loan.interestRecords.map(e=>({...e,date:e.dateStart,type:'interest'}))
+    let interestItems = loan.interestRecords.map((e : LoanInterest) =>({...e,date:e.dateStart,type:'interest'}))
     
-    if(loan.loanProfile.computePerDay){
+    if(loan.loanProfile.computePerDay){ 
       const computeInterest = generateCompute(loan, loan.loanProfile)
 
       let interestOut = computeInterest(moment(), {
@@ -131,9 +131,12 @@ const ViewLoanDetails = () => {
 
     
     
-    let paymentsItems = loan.payment.reduce((p,c)=>{
+    let paymentsItems = loan.payment.reduce(( 
+          p:(LoanPayment 
+              & {type: string,sub: {principal?: LoanPayment, interest?:LoanPayment}
+    })[],c:LoanPayment)=>{
       let index = p.findIndex(e=>e.paymentId == c.paymentId)
-      let key = c.againstPrincipal?'principal':'interest'
+      let key : "principal" | "interest" = c.againstPrincipal?'principal':'interest'
 
       if(index === -1){
         p.push({...c, type:'payment', sub:{[key]:c} })
@@ -145,8 +148,8 @@ const ViewLoanDetails = () => {
       return p;
     },[])
 
-    let records = [...paymentsItems, ...interestItems]
-        .sort((a,b)=>a.date==b.date?0: a.date<b.date?1:-1)
+    let records = [...interestItems, ...paymentsItems ]
+        .sort((a,b)=>a.date==b.date?0: moment(a.date).isAfter(b.date)?1:-1)
         .map(e=>{
           let out = {...e,
             interestBalance : balance.interest,
@@ -221,7 +224,7 @@ const ViewLoanDetails = () => {
 
           return out
         })
-    setTransactions(records)
+    setTransactions(records.reverse())
     
   },[loan])
 

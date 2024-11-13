@@ -1,4 +1,4 @@
-import { Dialog, DialogTitle, DialogContent, Autocomplete, Box, Grid2 as Grid, TextField, Chip, Button} from "@mui/material"
+import { Dialog, DialogTitle, DialogContent, Autocomplete, Box, Grid2 as Grid, TextField, Chip, Button, useMediaQuery, useTheme} from "@mui/material"
 import { useQuery } from "@tanstack/react-query"
 import React, { Suspense,  useState } from "react"
 import { getAll, USER } from "../../../repositories/users"
@@ -46,6 +46,8 @@ const CreateLoan = (props:CreateLoanProps) => {
       date: moment(),
       disbursementAccount : null
     })
+    const theme = useTheme();
+    const fullScreen = useMediaQuery(theme.breakpoints.down('sm'));
 
 
 
@@ -83,7 +85,7 @@ const CreateLoan = (props:CreateLoanProps) => {
             })
           }} onClose={()=>setShowNewDisbursement(false)}/>
         </Suspense>}
-				<Dialog open={true} maxWidth="lg" fullWidth onClose={()=>navigate("../")}> 
+				<Dialog fullScreen={fullScreen} open={true} maxWidth="lg" fullWidth onClose={()=>navigate("../")}> 
 						<DialogTitle>Add a new Loan</DialogTitle>
 						<DialogContent>
               <Grid container>

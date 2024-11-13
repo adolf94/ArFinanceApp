@@ -40,6 +40,7 @@ public class PaymentRepo : IPaymentRepo
 		{
 			var lastToRetain = loan.InterestRecords.Where(e => e.DateStart <= record.Date)
 				.OrderByDescending(e => e.DateStart)
+				.ThenByDescending(e => e.DateEnd)
 				.FirstOrDefault();
 			if (lastToRetain == null)
 			{
@@ -125,9 +126,10 @@ public class PaymentRepo : IPaymentRepo
 			// for ( paymentIndex = 0; paymentIndex < records.Count; paymentIndex++)
 			// {
 			var breakFlag = false;
+			var loan = loansToApply[loanIndex];
+			
 			while (!breakFlag && paymentIndex < records.Count())
 			{
-				var loan = loansToApply[loanIndex];
 				var updatedLoan = loan;
 				loan.Payment = await _context.LoanPayments!.Where(e => e.LoanId == loan.Id).ToListAsync();
 				var currentPayment = records[paymentIndex];
@@ -230,19 +232,7 @@ public class PaymentRepo : IPaymentRepo
 				await _context.SaveChangesAsync();
 				var paymentsList = updatedLoan.Payment.Where(e => e.AgainstPrincipal).Sum(e => e.Amount);
 				var balance = updatedLoan.Principal - paymentsList;
-				if (updatedLoan.Status != "Closed")
-				{
-					var nextDatePost = loan.NextComputeDate;
-					
-					while (nextDatePost < DateTime.Now.Date)
-					{
-						var result = _loan.ComputeInterests(updatedLoan, DateTime.Now.Date).GetAwaiter()
-							.GetResult();
-						nextDatePost = result.NextDate;
-						updatedLoan = result.NewLoanData;
-					}
-
-				}
+				
 
 				if (currentBalance == 0)
 				{
@@ -252,7 +242,19 @@ public class PaymentRepo : IPaymentRepo
 
 				paymentIndex++;
 			}
+			if (loan.Status != "Closed")
+			{
+				var nextDatePost = loan.NextComputeDate;
+					
+				while (nextDatePost < DateTime.Now.Date)
+				{
+					var result = _loan.ComputeInterests(loan, DateTime.Now.Date).GetAwaiter()
+						.GetResult();
+					nextDatePost = result.NextDate;
+					loan = result.NewLoanData;
+				}
 
+			}
 
 			// }
 		}
