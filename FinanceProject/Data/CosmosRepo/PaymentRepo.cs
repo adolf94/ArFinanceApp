@@ -51,7 +51,7 @@ public class PaymentRepo : IPaymentRepo
 						}
 						else
 						{
-								var loanProfile = loan.LoanProfile;
+								var loanProfile = loan.LoanProfile!;
 								loan.TotalInterestPercent = lastToRetain.TotalPercent;
 								loan.LastInterestDate = lastToRetain.DateStart;
 								loan.NextInterestDate = lastToRetain.DateEnd;
@@ -69,6 +69,7 @@ public class PaymentRepo : IPaymentRepo
 				});
 				await _context.SaveChangesAsync();
 
+				// ReSharper disable once EntityFramework.NPlusOne.IncompleteDataQuery
 				var loansToApply = await _context.Loans!.Where(e => e.AppId == record.AppId && e.UserId == record.UserId)
 					.ToListAsync();
 
@@ -120,7 +121,7 @@ public class PaymentRepo : IPaymentRepo
 
 								while (nextDate < currentPayment.Date)
 								{
-										var result = _loan.ComputeInterests(updatedLoan, currentPayment.Date, true).GetAwaiter()
+										var result = _loan.ComputeInterests(updatedLoan!, currentPayment.Date, true).GetAwaiter()
 											.GetResult();
 										nextDate = result.NextDate;
 										updatedLoan = result.NewLoanData;

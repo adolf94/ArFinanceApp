@@ -309,7 +309,8 @@ const ViewLoanDetails = () => {
             </TableHead>
             <TableBody>
                 {transactions.map(item=><React.Fragment key={item.id}><TableRow sx={{backgroundColor:item.type=='interest'?'#ffbcbc':'unset'}}>
-                      <TableCell>{moment(item.date).format("YYYY-MM-DD")}</TableCell>
+                  {item.type=="payment"? <TableCell>{moment(item.date).format("YYYY-MM-DD")}</TableCell>
+                      :<TableCell>{moment(item.dateStart).format("YYYY-MM-DD")} - {moment(item.dateEnd).format("YYYY-MM-DD")}</TableCell>}
                       <TableCell colSpan={2} sx={{textAlign:'center'}}>{FormattedAmount(item.amount)}</TableCell>
                       <TableCell colSpan={2} sx={{textAlign:'center'}}>{FormattedAmount(item.balance)}</TableCell>
                   </TableRow>

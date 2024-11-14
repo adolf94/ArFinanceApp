@@ -104,6 +104,7 @@ const LoanModeler = ({
         // if(!addCurrentDate || !loanProfile.computePerDay) return;
         // let shouldAdd = !expectedPayments || expectedPayments.every(e=>moment().isAfter(e.date))
         // if(!shouldAdd) return
+        if(addCurrentDate === false) return
             setPayments([{
                 id: uuid(),
                 date: moment(),
@@ -224,7 +225,7 @@ const LoanModeler = ({
         let totalInterestPercent = 0;
         let previousPaymentsAndModelPayments = [...(previousPayments || []).map(e=>({...e,readonly:true })),...payments.map((e,i)=>({...e,index:i}))]
         let nextInterest = form.date
-        return previousPaymentsAndModelPayments.reduce((prev: Payment[], cur: any) => {
+        return previousPaymentsAndModelPayments.reduce((prev: Payment[], cur: any, i:number) => {
             let interestId = 0
             while (nextInterest.clone().isBefore(cur.date)) {
                 const prior = {
@@ -265,7 +266,7 @@ const LoanModeler = ({
                 }
             }
             cur.totalInterestPercent = totalInterestPercent
-
+            cur.index = i;
             cur.id = cur.id + interestId.toString()
             prev.push(cur!)
             return [...prev]
@@ -280,6 +281,10 @@ const LoanModeler = ({
         if(onPaymentsChange) onPaymentsChange(payments)
     },[payments])
 
+    const deletePayment = (index:number)=>{
+        payments.splice(index,1)
+        setPayments([...payments])
+    }
     const changeModelValues = (index : number, field : string, newValue : any) => {
         const newArr = [...payments]
         let newItem = { ...newArr[index] }
@@ -296,12 +301,10 @@ const LoanModeler = ({
         </Grid>
         <Grid size={{xs:6,sm:4}} sx={{ pb: 2, px: 1 }}>
             <DatePickerWithBlur label="Date of Loan" disabled={form.readonly} value={form.date}
-                        onChange={newValue =>{  setForm({...form, date:newValue!})
-                            console.log(newValue);
-                        }}
+                        onChange={(newValue:moment.Moment) =>setForm({...form, date:newValue!})}
                                 fullWidth
                         slots={{
-                       textField: (params) => (
+                       textField: (params:any) => (
                         <TextField
                             
                             {...params}
@@ -328,7 +331,7 @@ const LoanModeler = ({
         </Grid>
         {smallScreen &&  <Grid container size={12}>
             {
-                computedPayments.map((item, i) => {
+                computedPayments.map((item) => {
 
                     if(item.readonly){
                         return  <Grid size={12} key={item.id}>
@@ -448,7 +451,7 @@ const LoanModeler = ({
                                         <TableCell sx={{ textAlign: 'right' }}>{FormattedAmount(item.balance)}</TableCell>
                                         <TableCell sx={{ textAlign: 'right' }}>{FormattedAmount(item.interestBalance)}</TableCell>
                                         <TableCell sx={{ textAlign: 'right' }}>{FormattedAmount(item.principalBalance)}</TableCell>
-                                        <TableCell sx={{ textAlign: 'right' }}>{!item.readonly && <IconButton><Delete fontSize="small" /></IconButton>}</TableCell>
+                                        <TableCell sx={{ textAlign: 'right' }}>{!item.readonly && <IconButton onClick={()=>deletePayment(item.index!)}><Delete fontSize="small" /></IconButton>}</TableCell>
                                     </TableRow> : <TableRow>
                                         <TableCell>{i + 1}</TableCell>
                                         <TableCell sx={{ pl: 4 }}>

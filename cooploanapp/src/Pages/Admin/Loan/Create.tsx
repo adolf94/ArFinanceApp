@@ -11,7 +11,6 @@ import { useMutateLoan } from "../../../repositories/loan"
 import { enqueueSnackbar } from "notistack"
 import BackdropLoader from "../../../components/BackdropLoader"
 import CreateDisbursementAccount from "../CreateDisbursementAccount"
-import numeral from "numeral"
 import LoanProfileHelperText from "./LoanProfileHelperText";
 
 interface CreateLoanProps {
@@ -57,7 +56,7 @@ const CreateLoan = (props:CreateLoanProps) => {
         coborrowerId:form.coborrower!.id,
         loanProfile:form.profile!,
         principal: form.amount,
-        disbursementAccount: form.disbursementAccount,
+        disbursementAccount: form.disbursementAccount!,
         date: form.date.format("YYYY-MM-DD"),
         expectedPayments: payments.map(e=> ({
             date:moment(e.date).format("YYYY-MM-DD"),
@@ -66,7 +65,7 @@ const CreateLoan = (props:CreateLoanProps) => {
       }
       createLoan.mutateAsync(output)
         .then(()=>{
-          navigate("../")
+          navigate(-1)
           enqueueSnackbar("Successfully Saved Load. Notified the user via SMS", {variant:'success'})
         })
     }
@@ -85,7 +84,7 @@ const CreateLoan = (props:CreateLoanProps) => {
             })
           }} onClose={()=>setShowNewDisbursement(false)}/>
         </Suspense>}
-				<Dialog fullScreen={fullScreen} open={true} maxWidth="lg" fullWidth onClose={()=>navigate("../")}> 
+				<Dialog fullScreen={fullScreen} open={true} maxWidth="lg" fullWidth onClose={()=>navigate(-1)}> 
 						<DialogTitle>Add a new Loan</DialogTitle>
 						<DialogContent>
               <Grid container>
@@ -216,7 +215,7 @@ const CreateLoan = (props:CreateLoanProps) => {
                   </Grid> */}
                 </Grid>
                 <Grid size={{xs:12, md:8}}>
-                  <LoanModeler loanProfile={form.profile!} onChange={(data)=>setForm({...form,date:data.date, amount:data.principal})}  onPaymentsChange={(data)=>setPaymentData(data)} />
+                  <LoanModeler addCurrentDate={false} loanProfile={form.profile!} onChange={(data)=>setForm({...form,date:data.date, amount:data.principal})}  onPaymentsChange={(data)=>setPaymentData(data)} />
                 </Grid>
               </Grid>
             </DialogContent>
