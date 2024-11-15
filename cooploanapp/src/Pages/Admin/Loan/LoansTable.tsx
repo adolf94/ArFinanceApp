@@ -19,7 +19,7 @@ const LoanClientRow = ( {client} : {client : User}  )=>{
   const [expand,setExpand] = useState(false)
   const [total,setTotal] = useState<any>({})
   const [loanCalculation,setLoanCalculated] = useState<any>([])
-  const { data: loans, isLoading: loading } = useQuery<Loan>({ queryKey: [LOAN,{userId: client.id}], queryFn: () => getByUserId(client.id), enabled:!!client?.id })
+  const { data: loans, isLoading: loading } = useQuery<Loan[]>({ queryKey: [LOAN,{userId: client.id}], queryFn: () => getByUserId(client.id), enabled:!!client?.id })
   const navigate = useNavigate()
   
 
@@ -79,7 +79,7 @@ const LoanClientRow = ( {client} : {client : User}  )=>{
         return
       }
 
-    const included:boolean = ctx.payCtx.items.some(e=>e.id==item.id)
+    const included:boolean = ctx.payCtx.items.some((e:any)=>e.id==item.id)
     
     if(!included){
       ctx.setPayCtx({

@@ -49,7 +49,7 @@ builder.Services.AddCors(opt =>
 				builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader()
 				.WithExposedHeaders(["X-GLogin-Error", "X-Last-Trans"]);
 				//builder.SetIsOriginAllowed(origin => new Uri(origin).Host == "localhost");
-				//builder.SetIsOriginAllowed(origin => true);
+				//builder.SetIsOriginAllowed(origin	 => true);
 		});
 		opt.AddDefaultPolicy(builder =>
 		{
@@ -89,7 +89,9 @@ builder.Services.AddControllersWithViews()
 builder.Services.AddScoped<IAuthorizationHandler, RoleRequirementHandler>();
 
 PersistentConfig pConfig = new PersistentConfig();
+UrlReminderConfig uConfig = new UrlReminderConfig();
 builder.Services.AddSingleton(pConfig);
+builder.Services.AddSingleton(uConfig);
 builder.Services.AddSingleton<Sms>();
 
 

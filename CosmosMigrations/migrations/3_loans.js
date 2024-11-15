@@ -39,10 +39,7 @@ const data = {
             },
             {
                 "Container":"ScheduledTransactions",
-                "PartitionKeyPaths":[
-                    "/AppId", "/UserId", "/Id"
-                ],
-                comment:"new",
+                "PartitionKeyPath":"/Id",
                 mapper: e=>e
             },
             {

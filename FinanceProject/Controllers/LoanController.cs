@@ -22,9 +22,10 @@ namespace FinanceApp.Controllers
 				private readonly IPaymentRepo _payment;
 				private readonly IUserRepo _user;
 				private readonly Sms _sms;
+				private readonly AppConfig _config;
 
 				public LoanController(ILoanRepo repo, IPaymentRepo payment, IUserRepo user,
-						ILogger<LoanController> logger, IMapper mapper, Sms sms)
+						ILogger<LoanController> logger, IMapper mapper, Sms sms, AppConfig config) 
 				{
 						_repo = repo;
 						_logger = logger;
@@ -32,6 +33,7 @@ namespace FinanceApp.Controllers
 						_payment = payment;
 						_user = user;
 						_sms = sms;
+						_config = config;
 				}
 
 				[HttpPost("loan")]
@@ -71,6 +73,32 @@ namespace FinanceApp.Controllers
 
 								}
 						}
+
+						if (newLoan!.Date.AddDays(-3) > DateTime.Now)
+						{
+							decimal totalInterest = newLoan.InterestRecords.Sum(e=>e.Amount);
+							await _sms.SendSms($"Interest worth {totalInterest} was added to your loan dated {newLoan.Date.ToString("MMM-dd")}. " +
+							                  $"This is not final if payments has been done between {newLoan.Date.ToString("MMM-dd")} and today"
+								//$"for period {result.NewLoanData.LastInterestDate.ToString("MMM-d")} - {result.NewLoanData.NextInterestDate.ToString("MMM-d")}. \n"
+								, user!.MobileNumber, false);
+
+						}
+						
+						
+						
+						if (await _user.GetLastUrlReminder(newLoan.UserId, newLoan.AppId) <
+						    DateTime.Now.AddDays(-3))
+						{
+													
+							//get basePath from appconfig
+							AppConfig.Application? app = _config.Apps.FirstOrDefault(e => e.App == newLoan.AppId);
+							if (app != null)
+							{
+								await _sms.SendSms($"View outstanding loans at {app.RedirectUri}."
+									, user!.MobileNumber);
+							}
+						}
+						
 						//TODO SEND EMAIL AND SMS;
 						//Reminder to reset interest on payment 
 						return CreatedAtAction("GetOneLoan", new { id = newLoan.Id }, newLoan);

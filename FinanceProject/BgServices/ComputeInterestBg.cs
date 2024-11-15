@@ -10,11 +10,13 @@ namespace FinanceApp.BgServices
 		{
 				private readonly IServiceProvider _services;
 				private PersistentConfig _pConfig;
+				private readonly AppConfig _config;
 
-				public ComputeInterestBg(IServiceProvider services, PersistentConfig pConfig)
+				public ComputeInterestBg(IServiceProvider services, PersistentConfig pConfig, AppConfig config)
 				{
 						_services = services;
 						_pConfig = pConfig;
+						_config = config;
 				}
 
 				public async Task StartAsync(CancellationToken cancellationToken)
@@ -32,21 +34,34 @@ namespace FinanceApp.BgServices
 
 						IEnumerable<Loan> items = await repo.GetPendingInterests();
 
-						if (items.Any())
+						var enumerable = items as Loan[] ?? items.ToArray();
+						if (enumerable.Any())
 						{
 
-								for (int i = 0; i < items.Count(); i++)
+								for (int i = 0; i < enumerable.Count(); i++)
 								{
-										Loan item = items.ToList()[i];
+										Loan item = enumerable.ToList()[i];
 
 										User? user = await _user.GetById(item.UserId);
 										var result = await repo.ComputeInterests(item, DateTime.Now);
 
-										if (!string.IsNullOrEmpty(user!.MobileNumber))
+										if (!string.IsNullOrEmpty(user!.MobileNumber) && result.InterestData.Amount > 0)
 										{
 												await sms.SendSms($"Interest worth {result.InterestData.Amount} was added to your loan dated {item.Date.ToString("MMM-dd")}."
 														//$"for period {result.NewLoanData.LastInterestDate.ToString("MMM-d")} - {result.NewLoanData.NextInterestDate.ToString("MMM-d")}. \n"
+														, user!.MobileNumber, true);
+
+												if (await _user.GetLastUrlReminder(item.UserId, item.AppId) <
+												    DateTime.Now.AddDays(-3))
+												{
+													
+													//get basePath from appconfig
+													AppConfig.Application? app = _config.Apps.FirstOrDefault(e => e.App == item.AppId);
+													if (app == null) return;
+													await sms.SendSms($"View outstanding loans at {app.RedirectUri}."
 														, user!.MobileNumber);
+												}
+												
 										}
 								}
 

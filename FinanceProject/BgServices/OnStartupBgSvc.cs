@@ -8,18 +8,20 @@ namespace FinanceApp.BgServices
 		{
 				private readonly IServiceProvider _services;
 				private PersistentConfig _pConfig;
+				private UrlReminderConfig _urlReminder;
 
-				public OnStartupBgSvc(IServiceProvider services, PersistentConfig pConfig)
+				public OnStartupBgSvc(IServiceProvider services, PersistentConfig pConfig, UrlReminderConfig urlReminderConfig)
 				{
 						_services = services;
 						_pConfig = pConfig;
+						_urlReminder = urlReminderConfig;
 				}
 
 				public Task StartAsync(CancellationToken cancellationToken)
 				{
 
 						var scope = _services.CreateScope();
-
+						EnsureUrlConfig(scope);
 						ITransactionRepo repo = scope.ServiceProvider.GetRequiredService<ITransactionRepo>();
 
 						//Writing to disk instead of sql query every run
@@ -51,6 +53,27 @@ namespace FinanceApp.BgServices
 
 						return Task.CompletedTask;
 
+				}
+
+
+				private void EnsureUrlConfig(IServiceScope scope)
+				{
+					string Folder = Path.Combine(scope.ServiceProvider.GetRequiredService<IWebHostEnvironment>().ContentRootPath, "configs");
+					string file = Path.Combine(Folder, "urlReminders.json");
+					
+					
+					if (!Directory.Exists(Folder)) Directory.CreateDirectory(Folder);
+					if (!File.Exists(file))
+					{
+						string data = System.Text.Json.JsonSerializer.Serialize(new
+						{
+							Data = new {}
+						});
+						File.WriteAllText(file, data);
+					}
+					string configString = File.ReadAllText(file);
+					UrlReminderConfig confi = System.Text.Json.JsonSerializer.Deserialize<UrlReminderConfig>(configString)!;
+					_urlReminder.Data = confi.Data;
 				}
 
 				public Task StopAsync(CancellationToken cancellationToken)
