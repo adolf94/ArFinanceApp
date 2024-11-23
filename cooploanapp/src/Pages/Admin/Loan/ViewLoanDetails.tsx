@@ -98,33 +98,35 @@ const ViewLoanDetails = () => {
       principal: loan.principal
     }
 
-    let interestItems = loan.interestRecords.map((e : LoanInterest) =>({...e,date:e.dateStart,type:'interest'}))
-    
-    if(loan.loanProfile.computePerDay){ 
+
+
+    if(loan.loanProfile.computePerDay && moment().isBefore(loan.nextInterestDate)){
       const computeInterest = generateCompute(loan, loan.loanProfile)
 
-      let interestOut = computeInterest(moment(), {
+      let discount = computeInterest.computeDiscount(moment(), {
         date: moment(),
         balance: balanceAmount,
         totalInterestPercent:loan.totalInterestPercent,
         interest:interest,
         principal:principal
       })
-
-      balanceAmount = balanceAmount - interestOut.amount
-      interest = interest - interestOut.amount
-
-
-
-      interestItems.push(  {
-        dateCreated: moment().format('YYYY-MM-DD'),
-        dateStart: loan.lastInterest,
-        dateEnd: moment().add(-1,'days'),
-        amount: -interestOut.amount,
-        type: "interest",
-        totalPercentage: interestOut.totalInterestPercent
-      })
+      interest = interest - discount.discountAmount
+      // balanceAmount = balanceAmount - interestOut.amount
+      // interest = interest - interestOut.amount
+      //
+      //
+      //
+      // interestItems.push(  {
+      //   dateCreated: moment().format('YYYY-MM-DD'),
+      //   dateStart: loan.lastInterest,
+      //   dateEnd: moment().add(-1,'days'),
+      //   amount: -interestOut.amount,
+      //   type: "interest",
+      //   totalPercentage: interestOut.totalInterestPercent
+      // })
     }
+    let interestItems = loan.interestRecords.map((e : LoanInterest) =>({...e,date:e.dateStart,type:'interest'}))
+    
     
     setSummary({balance: balanceAmount, interest, payments})
 

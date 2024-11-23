@@ -4,6 +4,7 @@ using FinanceApp.Utilities;
 using FinanceProject.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 
 namespace FinanceApp.Controllers
 {
@@ -27,6 +28,7 @@ namespace FinanceApp.Controllers
 
 
 				[HttpPost("payment")]
+				[Authorize(Roles = "MANAGE_LOAN")]
 				public async Task<IActionResult> PostPayment([FromBody] PaymentRecord payment)
 				{
 						string appId = HttpContext.User.FindFirstValue("app")!;
@@ -39,7 +41,7 @@ namespace FinanceApp.Controllers
 						await _repo.ApplyPayment(payment);
 						decimal balance = await _loan.GetOutstandingBalance(payment.UserId, appId);
 
-						await _sms.SendSms($"Thank you for you payment of {payment.Amount}. Your new outstanding balance is {balance}.",
+						await _sms.SendSms($"Thank you for you payment of {payment.Amount}.",
 								user!.MobileNumber, true);
 
 

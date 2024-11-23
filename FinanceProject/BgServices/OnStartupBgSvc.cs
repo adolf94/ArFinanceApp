@@ -1,6 +1,8 @@
 ﻿
 using FinanceProject.Data;
 using FinanceProject.Models;
+using FinanceProject.Utilities;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace FinanceApp.BgServices
 {
@@ -9,17 +11,20 @@ namespace FinanceApp.BgServices
 				private readonly IServiceProvider _services;
 				private PersistentConfig _pConfig;
 				private UrlReminderConfig _urlReminder;
+				private readonly IMemoryCache _cache;
+				private readonly AppConfig _config;
 
-				public OnStartupBgSvc(IServiceProvider services, PersistentConfig pConfig, UrlReminderConfig urlReminderConfig)
+				public OnStartupBgSvc(IServiceProvider services, AppConfig config, PersistentConfig pConfig, UrlReminderConfig urlReminderConfig, IMemoryCache cache)
 				{
 						_services = services;
 						_pConfig = pConfig;
 						_urlReminder = urlReminderConfig;
+						_cache = cache;
+						_config = config;
 				}
 
-				public Task StartAsync(CancellationToken cancellationToken)
+				public async Task StartAsync(CancellationToken cancellationToken)
 				{
-
 						var scope = _services.CreateScope();
 						EnsureUrlConfig(scope);
 						ITransactionRepo repo = scope.ServiceProvider.GetRequiredService<ITransactionRepo>();
@@ -44,20 +49,26 @@ namespace FinanceApp.BgServices
 								File.WriteAllText(SchedTaskFile, newConfig);
 						}
 
-						string configString = File.ReadAllText(SchedTaskFile);
+						string configString = await File.ReadAllTextAsync(SchedTaskFile, cancellationToken);
 						PersistentConfig confi = System.Text.Json.JsonSerializer.Deserialize<PersistentConfig>(configString)!;
 
 						_pConfig.LastTransactionId = confi.LastTransactionId;
 						_pConfig.NextScheduledTransactionDate = confi.NextScheduledTransactionDate;
 						_pConfig.NextScheduledTransactionDate = confi.NextScheduledTransactionDate;
 
-						return Task.CompletedTask;
+						 return;
 
 				}
 
 
 				private void EnsureUrlConfig(IServiceScope scope)
 				{
+					var passkey = Environment.GetEnvironmentVariable("ENV_PASSKEY")!;
+
+					//Ensure ClientSecret 
+					_cache.Set("gclientsecret", AesOperation.EncryptString(passkey, _config.authConfig.client_secret));
+					
+					
 					string Folder = Path.Combine(scope.ServiceProvider.GetRequiredService<IWebHostEnvironment>().ContentRootPath, "configs");
 					string file = Path.Combine(Folder, "urlReminders.json");
 					

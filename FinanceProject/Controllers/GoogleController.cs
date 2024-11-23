@@ -7,6 +7,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
+using Microsoft.Extensions.Caching.Memory;
 using static FinanceProject.Models.AppConfig;
 
 namespace FinanceApp.Controllers
@@ -18,12 +19,13 @@ namespace FinanceApp.Controllers
 				private readonly AppConfig _config;
 				private readonly IUserRepo _user;
 				private readonly ILogger<GoogleController> _logger;
-
-				public GoogleController(AppConfig config, IUserRepo user, ILogger<GoogleController> logger)
+				private IMemoryCache _cache;
+				public GoogleController(AppConfig config, IUserRepo user, ILogger<GoogleController> logger, IMemoryCache cache)
 				{
 						_config = config;
 						_user = user;
 						_logger = logger;
+						_cache = cache;
 				}
 
 				[HttpPost("auth")]

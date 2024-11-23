@@ -111,9 +111,9 @@ namespace FinanceApp.Data.CosmosRepo
 			{
 
 				nextCompute = loan.Date.AddMonths(1);
-				
-				if (createPayment || !loanProfile.ComputePerDay) 
-				{
+				//
+				// if (createPayment) 
+				// {
 					totalInterest = loanProfile.InterestPerMonth;
 					while (nextCompute <= loan.NextInterestDate)
 					{
@@ -122,7 +122,7 @@ namespace FinanceApp.Data.CosmosRepo
 					}
 					// nextComputeDate = nextDate;
 
-					if (loanProfile.ComputePerDay && dateRef < nextCompute)
+					if (createPayment && loanProfile.ComputePerDay && dateRef < nextCompute)
 					{
 						int noOfDaysInMonth = DateTime.DaysInMonth(nextCompute!.AddMonths(-1).Year, nextCompute.AddMonths(-1).Month);
 						int rebateDays = (nextCompute - dateRef).Days;
@@ -132,18 +132,18 @@ namespace FinanceApp.Data.CosmosRepo
 						// nextComputeDate = nextDate.AddMonths(1);
 					}
 					nextDate = nextCompute;
-
-				}
-				else
-				{
-					totalInterest = 0; // let's just add the previous months' interest
-					while (nextCompute <= loan.NextComputeDate)
-					{
-						nextCompute = nextCompute.AddMonths(1);
-						totalInterest = totalInterest + loanProfile.InterestPerMonth;
-					}
-					nextDate = nextCompute.AddMonths(-1);
-				}
+				//
+				// }
+				// else
+				// {
+				// 	totalInterest = 0; // let's just add the previous months' interest
+				// 	while (nextCompute <= loan.NextComputeDate)
+				// 	{
+				// 		nextCompute = nextCompute.AddMonths(1);
+				// 		totalInterest = totalInterest + loanProfile.InterestPerMonth;
+				// 	}
+				// 	nextDate = nextCompute.AddMonths(-1);
+				// }
 				
 
 				//

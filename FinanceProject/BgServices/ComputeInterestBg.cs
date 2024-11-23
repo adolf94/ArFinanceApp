@@ -21,6 +21,7 @@ namespace FinanceApp.BgServices
 
 				public async Task StartAsync(CancellationToken cancellationToken)
 				{
+						await Task.Yield();
 
 						var scope = _services.CreateScope();
 
@@ -47,7 +48,8 @@ namespace FinanceApp.BgServices
 
 										if (!string.IsNullOrEmpty(user!.MobileNumber) && result.InterestData.Amount > 0)
 										{
-												await sms.SendSms($"Interest worth {result.InterestData.Amount} was added to your loan dated {item.Date.ToString("MMM-dd")}."
+												await sms.SendSms($"Interest worth {result.InterestData.Amount} was added to your loan dated {item.Date.ToString("MMM-dd")}." 
+														
 														//$"for period {result.NewLoanData.LastInterestDate.ToString("MMM-d")} - {result.NewLoanData.NextInterestDate.ToString("MMM-d")}. \n"
 														, user!.MobileNumber, true);
 

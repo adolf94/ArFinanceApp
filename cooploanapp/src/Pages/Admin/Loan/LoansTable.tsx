@@ -37,17 +37,30 @@ const LoanClientRow = ( {client} : {client : User}  )=>{
       let interest = l.interestRecords.reduce((p : number,c: LoanInterest)=>{ return c.amount + p },0)
 
       
-      let computeInterest = generateCompute({principal: total.principal, date:moment(l.date)}, l.loanProfile)
-      if(l.loanProfile.computePerDay && moment().isBefore(l.nextComputeDate)){
-        let additionalInterest = computeInterest(moment(), {
-          balance: principal + interest - payments,
-          date: moment(),
-          interest: interest,
-          principal: principal,
-          totalInterestPercent: l.totalInterestPercent
-        })
-        interest = interest - additionalInterest.amount
+      let computeInterest = generateCompute({principal: total.principal, date:moment(l.date), interestRecords: l.interestRecords, nextInterestDate:l.nextInterestDate}, l.loanProfile)
+      // if(l.loanProfile.computePerDay && moment().isBefore(l.nextComputeDate)){
+      //   let additionalInterest = computeInterest(moment(), {
+      //     balance: principal + interest - payments,
+      //     date: moment(),
+      //     interest: interest,
+      //     principal: principal,
+      //     totalInterestPercent: l.totalInterestPercent
+      //   })
+      //   interest = interest - additionalInterest.amount
+      // }
+      if(moment().isBefore(l.nextInterestDate)){
+        let discount = computeInterest.computeDiscount(moment(), {
+              balance: principal + interest - payments,
+              date: moment(),
+              interest: interest,
+              principal: principal,
+              totalInterestPercent: l.totalInterestPercent
+            })
+           interest = interest - discount.discountAmount
+           
+        
       }
+      
       total.principal = total.principal + l.principal;
       total.interest = total.interest +  interest;
       total.payments = total.payments +  payments;

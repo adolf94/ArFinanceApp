@@ -1,4 +1,4 @@
-import {LoanProfile} from "FinanceApi";
+import {Loan, LoanInterest, LoanProfile} from "FinanceApi";
 import moment from "moment";
 
 interface ComputeInterestVars {
@@ -8,9 +8,20 @@ interface ComputeInterestVars {
     principal: number, //principal balance
     interest: number //interest balance
 }
-export const generateCompute = (form:{date:moment.Moment, principal: number, readonly?: boolean , months?: number}, loanProfile: LoanProfile) => {
 
-    return (nextInterest: moment.Moment, balance: ComputeInterestVars) => {
+
+interface LoanInfo {
+    date: moment.Moment,
+    principal: number,
+    readonly?: boolean,
+    months?: number, 
+    nextInterestDate?:moment.Moment,
+    interestRecords?: LoanInterest[]
+}
+
+export const generateCompute = (form:LoanInfo, loanProfile: LoanProfile) => {
+
+    const computeInterest = (nextInterest: moment.Moment, balance: ComputeInterestVars) => {
         const createDate = moment(form.date);
         const days = nextInterest.diff(createDate, 'day')
         let totalInterest: number;
@@ -18,7 +29,7 @@ export const generateCompute = (form:{date:moment.Moment, principal: number, rea
         //check fixedConditions 
         const sort = loanProfile.fixed!.sort((a, b) => a.maxDays - b.maxDays)
         const useIndex = sort.findIndex(e => e.maxDays > (days));
-        let interestPercent: number;
+        let interestPercent: number;    
         if (useIndex > -1) {
             if (useIndex == 0) {
                 interestPercent = sort[useIndex].interest
@@ -46,6 +57,7 @@ export const generateCompute = (form:{date:moment.Moment, principal: number, rea
                 nextDate = balance.date.clone()
             }
 
+            
 
             interestPercent = totalInterest - balance.totalInterestPercent
             if (interestPercent <= 0) interestPercent = 0
@@ -82,5 +94,47 @@ export const generateCompute = (form:{date:moment.Moment, principal: number, rea
             totalInterestPercent: totalInterest
         };
     }
+    computeInterest.computeDiscount = (_: moment.Moment, __: ComputeInterestVars)  => ({ discountAmount:0})
+    if(form.interestRecords != undefined && form.interestRecords!.length != 0 && moment().isBefore(form.nextInterestDate)){
 
+        computeInterest.computeDiscount   =  (currentDate: moment.Moment, balance: ComputeInterestVars)  =>{
+            //const curDaysInMonth = nextDate.daysInMonth()
+            let nextInterest = moment(form.nextInterestDate);
+            const noOfDaysInMonth = nextInterest.clone().add(-1,'month').daysInMonth();
+            const rebateDays = nextInterest.clone().diff(currentDate.clone().startOf('day'), 'day');
+            const percent = (rebateDays / noOfDaysInMonth) * loanProfile.interestPerMonth!
+            // let interestPercent= balance.totalInterestPercent - percent
+            let interestDiscount = -0;
+
+            switch (loanProfile.interestFactor) {
+                case "principalBalance":
+                    interestDiscount = balance.principal * (percent / 100)
+                    break;
+                case "principalTotal":
+                    interestDiscount = form.principal * (percent / 100)
+                    break;
+                case "totalBalance":
+                    interestDiscount = balance.balance * (percent / 100)
+                    break;
+            }
+
+            let lastInterest = form.interestRecords!.reduce((p :  {index: number , dateEnd:string,dateStart:string } | null,v: LoanInterest, index:number)=>{
+                if(p == null) return {index, dateEnd:v.dateEnd,dateStart:v.dateStart}
+                if(moment(p.dateEnd).isSameOrBefore(v.dateEnd)){
+                    return moment(p.dateStart).isBefore(v.dateStart) ? {index, dateEnd:v.dateEnd,dateStart:v.dateStart}  : p;
+                }
+                return moment(p.dateEnd).isBefore(v.dateEnd) ?  {index, dateEnd:v.dateEnd,dateStart:v.dateStart} : p;
+            }, null  )
+            if(lastInterest == null ) return {
+                discountAmount : 0
+            }
+            form.interestRecords![lastInterest.index].amount =  form.interestRecords![lastInterest.index].amount - interestDiscount;
+            form.interestRecords![lastInterest.index].dateEnd =  currentDate.format("YYYY-MM-DD");
+            return {
+                discountAmount : interestDiscount
+            }
+        }
+    }
+    
+    return computeInterest;
 }
