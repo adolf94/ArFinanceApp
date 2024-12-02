@@ -7,7 +7,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    environment: GITHUB_TOKEN
+    environment: CECL
     steps:
     - uses: actions/checkout@v4
     
