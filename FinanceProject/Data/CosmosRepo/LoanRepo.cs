@@ -209,6 +209,7 @@ namespace FinanceApp.Data.CosmosRepo
 
 			decimal interest = 0;
 			interestPercent = totalInterest - loan.TotalInterestPercent;
+			if (interestPercent < 0) interestPercent = 0;
 			switch (loanProfile.InterestFactor)
 			{
 				case "principalBalance":
@@ -222,21 +223,25 @@ namespace FinanceApp.Data.CosmosRepo
 					break;
 			}
 
-			var newInterestItem = new LoanInterest
+			LoanInterest? newInterestItem = null;
+			if (interest > 0)
 			{
-				DateCreated = DateTime.Now,
-				DateStart = loan.InterestRecords.Any()? loan.InterestRecords.Max(e=>e.DateEnd)
-								: loan.Date, //double check
-				DateEnd = nextDate ,
-				Amount = interest,
-				TotalPercent = totalInterest,
-			};
+				newInterestItem = new LoanInterest
+				{
+					DateCreated = DateTime.Now,
+					DateStart = loan.InterestRecords.Any()? loan.InterestRecords.Max(e=>e.DateEnd)
+						: loan.Date, //double check
+					DateEnd = nextDate ,
+					Amount = interest,
+					TotalPercent = totalInterest,
+				};
+				loan.InterestRecords.Add(newInterestItem);
+				loan.Interests = loan.Interests + newInterestItem.Amount;
+				loan.TotalInterestPercent = totalInterest;
+
+			}
 
 
-
-			loan.InterestRecords.Add(newInterestItem);
-			loan.Interests = loan.Interests + newInterestItem.Amount;
-			loan.TotalInterestPercent = totalInterest;
 			loan.NextComputeDate = nextCompute;
 			loan.LastInterestDate = loan.NextInterestDate.Date;
 			loan.NextInterestDate = nextDate.Date;

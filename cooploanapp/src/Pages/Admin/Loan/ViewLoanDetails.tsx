@@ -1,5 +1,5 @@
 import { AccountBalance, AttachMoney, VolunteerActivism } from "@mui/icons-material"
-import {  CardContent, Chip, Grid2 as Grid, Paper, Skeleton, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@mui/material"
+import {  CardContent,  Grid2 as Grid, Paper, Skeleton, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@mui/material"
 import { useParams } from "react-router-dom"
 import { getByLoanId, LOAN } from "../../../repositories/loan"
 import { useQuery } from "@tanstack/react-query"
@@ -8,7 +8,7 @@ import { FormattedAmount } from "../../../components/NumberInput"
 import moment from "moment"
 import React from "react"
 import {generateCompute} from "../../../components/useComputeInterest";
-import {LoanInterest, LoanPayment} from "FinanceApi";
+import {Loan, LoanInterest, LoanPayment} from "FinanceApi";
 
 
 
@@ -82,14 +82,14 @@ const LoadingFallback = ()=> {
 
 const ViewLoanDetails = () => {
   const {loanid} = useParams()
-  const { data: loan, isLoading: loading } = useQuery({ queryKey: [LOAN,{loanId: loanid}], queryFn: () => getByLoanId(loanid!), enabled:!!loanid && loanid != 'new'})
+  const { data: loan, isLoading: loading } = useQuery<Loan>({ queryKey: [LOAN,{loanId: loanid}], queryFn: () => getByLoanId(loanid!), enabled:!!loanid && loanid != 'new'})
   const [summary, setSummary] = useState({balance:0,interest:0, payments:0})
   const [transactions, setTransactions] = useState<any[]>([])
   useEffect(()=>{
     if(!loan) return
-    let payments = loan.payment.reduce((p : number,c : LoanPayment)=>{return p + c.amount},0)
+    let payments = loan.payment.reduce((p:number,c : LoanPayment)=>{return p + c.amount},0)
     let principal = loan.payment.reduce((p: number,c:LoanPayment)=>{return  p - (c.againstPrincipal? c.amount: 0)},loan.principal)
-    let interest = loan.interestRecords.reduce((p: number,c: LoanPayment)=>{return p + c.amount},0)
+    let interest = loan.interestRecords.reduce((p :number ,c : LoanInterest)=>{return p + c.amount},0)
     let balanceAmount = loan.principal + interest - payments
 
     const balance = {
@@ -281,7 +281,7 @@ const ViewLoanDetails = () => {
             </Grid>
             <Grid size={10} sx={{ textAlign: 'center', pr: 3 }}>
               <Typography gutterBottom variant="h5" component="div">
-                {FormattedAmount(loan.principal + summary.interest)}
+                {FormattedAmount(loan!.principal + summary.interest)}
               </Typography>
               <Typography variant="subtitle1" sx={{ color: 'text.secondary' }}>
                 Total Interest : {FormattedAmount(summary.interest)}
