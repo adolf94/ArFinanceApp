@@ -19,14 +19,13 @@ namespace FinanceApp.Utilities
 						_config = config;
 						_enabled = config.SmsConfig.Enabled;
 						string passkey = Environment.GetEnvironmentVariable("ENV_PASSKEY")!;
-						string user = AesOperation.DecryptString(passkey, config.SmsConfig.Username);
-						string pass = AesOperation.DecryptString(passkey, config.SmsConfig.Password);
+						// string user = AesOperation.DecryptString(passkey, config.SmsConfig.Username);
+							string pass = AesOperation.DecryptString(passkey, config.SmsConfig.Password);
 
 						_cache = cache;
 						_logger = logger;
 
-						var plainTextBytes = System.Text.Encoding.UTF8.GetBytes($"{user}:{pass}");
-						_authorization = "Basic " + System.Convert.ToBase64String(plainTextBytes);
+						_authorization = pass;
 				}
 
 
@@ -49,13 +48,13 @@ namespace FinanceApp.Utilities
 
 
 						var client = new HttpClient();
-						client.DefaultRequestHeaders.Add("Authorization", _authorization);
+						client.DefaultRequestHeaders.Add("x-api-key", _authorization);
 
 
 						var msg = new
 						{
 								message = message + (includeAutomatedWaiver ? "\n---\n This is an automated message(beta)" : ""),
-								phoneNumbers = new[] { "+63" + number }
+								recipients = new[] { "+63" + number }
 						};
 
 

@@ -47,9 +47,11 @@ namespace FinanceApp.Controllers
 
 						}
 
-
+						string clientSecret = _cache.Get<string>("gclientsecret") ?? string.Empty;
+						
+						
 						data.Add("client_id", _config.authConfig.client_id);
-						data.Add("client_secret", _config.authConfig.client_secret);
+						data.Add("client_secret", clientSecret);
 						data.Add("scope", _config.authConfig.scope);
 						data.Add("redirect_uri", app.RedirectUri);
 						data.Add("grant_type", "authorization_code");
