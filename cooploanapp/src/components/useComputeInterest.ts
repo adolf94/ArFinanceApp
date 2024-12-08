@@ -16,7 +16,7 @@ interface LoanInfo {
     readonly?: boolean,
     months?: number, 
     nextInterestDate?:moment.Moment,
-    interestRecords?: LoanInterest[]
+    interestRecords?: (LoanInterest & {originalAmount? : number})[],
 }
 
 export const generateCompute = (form:LoanInfo, loanProfile: LoanProfile) => {
@@ -128,8 +128,10 @@ export const generateCompute = (form:LoanInfo, loanProfile: LoanProfile) => {
             if(lastInterest == null ) return {
                 discountAmount : 0
             }
-            form.interestRecords![lastInterest.index].amount =  form.interestRecords![lastInterest.index].amount - interestDiscount;
-            form.interestRecords![lastInterest.index].dateEnd =  currentDate.format("YYYY-MM-DD");
+            let lastItem = form.interestRecords![lastInterest.index]
+            lastItem.originalAmount =  (lastItem.originalAmount || lastItem.amount) ;
+            lastItem.amount =  (lastItem.originalAmount || lastItem.amount) - interestDiscount;
+            lastItem.dateEnd =  currentDate.format("YYYY-MM-DD");
             return {
                 discountAmount : interestDiscount
             }

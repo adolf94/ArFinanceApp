@@ -37,7 +37,7 @@ const LoanClientRow = ( {client} : {client : User}  )=>{
       let interest = l.interestRecords.reduce((p : number,c: LoanInterest)=>{ return c.amount + p },0)
 
       
-      let computeInterest = generateCompute({principal: total.principal, date:moment(l.date), interestRecords: l.interestRecords, nextInterestDate:l.nextInterestDate}, l.loanProfile)
+      let computeInterest = generateCompute({principal: total.principal, date:moment(l.date), interestRecords: l.interestRecords, nextInterestDate:moment(l.nextInterestDate)}, l.loanProfile)
       // if(l.loanProfile.computePerDay && moment().isBefore(l.nextComputeDate)){
       //   let additionalInterest = computeInterest(moment(), {
       //     balance: principal + interest - payments,
@@ -46,7 +46,7 @@ const LoanClientRow = ( {client} : {client : User}  )=>{
       //     principal: principal,
       //     totalInterestPercent: l.totalInterestPercent
       //   })
-      //   interest = interest - additionalInterest.amount
+      //   interest = interest - additionalInterest.amountSSSSSSSSSSS `````````
       // }
       if(moment().isBefore(l.nextInterestDate)){
         let discount = computeInterest.computeDiscount(moment(), {
@@ -104,7 +104,7 @@ const LoanClientRow = ( {client} : {client : User}  )=>{
       })
     }else{
       let newData = {...ctx.payCtx}
-      newData.items = newData.items.filter(e=>e.id!=item.id)
+      newData.items = newData.items.filter((e:any)=>e.id!=item.id)
       ctx.setPayCtx(newData)
     }
     
@@ -122,7 +122,7 @@ const LoanClientRow = ( {client} : {client : User}  )=>{
     <TableCell></TableCell>
   </TableRow>
   {expand && !loading && (loanCalculation || []).map((l:any)=><TableRow key={l.id} onClick={()=>navigate(`../loan/${l.orig.id}`)}>
-    <TableCell><Checkbox onChange={()=>onClickCheck(l)} checked={ctx.payCtx.items.some(e=>e.id==l.id)}/></TableCell>  
+    <TableCell><Checkbox onChange={()=>onClickCheck(l)} checked={ctx.payCtx.items.some((e:any)=>e.id==l.id)}/></TableCell>  
     <TableCell>{moment(l.date).format("YYYY-MM-DD")}</TableCell>
     <TableCell>{FormattedAmount(l.principal)}</TableCell>
     <TableCell>{FormattedAmount(l.interests)}</TableCell>

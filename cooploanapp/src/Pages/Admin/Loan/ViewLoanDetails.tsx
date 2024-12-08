@@ -101,7 +101,8 @@ const ViewLoanDetails = () => {
 
 
     if(loan.loanProfile.computePerDay && moment().isBefore(loan.nextInterestDate)){
-      const computeInterest = generateCompute(loan, loan.loanProfile)
+      //@ts-ignore
+      const computeInterest = generateCompute({...loan, interestRecords: [...loan.interestRecords]}, loan.loanProfile)
 
       let discount = computeInterest.computeDiscount(moment(), {
         date: moment(),
@@ -224,7 +225,7 @@ const ViewLoanDetails = () => {
           }
 
 
-          return out
+          return {...out}
         })
     setTransactions(records.reverse())
     
@@ -316,20 +317,7 @@ const ViewLoanDetails = () => {
                       <TableCell colSpan={2} sx={{textAlign:'center'}}>{FormattedAmount(item.amount)}</TableCell>
                       <TableCell colSpan={2} sx={{textAlign:'center'}}>{FormattedAmount(item.balance)}</TableCell>
                   </TableRow>
-                  {/* <TableRow sx={{backgroundColor:item.type=='interest'?'#ffbcbc':'unset'}}>
-                      <TableCell>{item.type}</TableCell>
-                      <TableCell sx={{textAlign:'center ', fontSize:'small'}}>
-                        {item.interestAmount === 0 ? <Chip label="0.00" size="small"/> : 
-                              item.interestAmount <0 ? <Chip label={FormattedAmount(item.interestAmount)} color='primary' /> : <Chip label={FormattedAmount(item.interestAmount)} color='error' />}
-                        </TableCell>
-                      <TableCell sx={{textAlign:'center', fontSize:'small'}}>
-                        
-                      {item.principalAmount === 0 ? <Chip label="0.00" size="small"/> : 
-                              item.principalAmount < 0 ? <Chip label={FormattedAmount(item.principalAmount)} color='success' /> : <Chip label={FormattedAmount(item.principalAmount)} color='error' />}
-                       </TableCell>
-                      <TableCell sx={{textAlign:'right', fontSize:'small'}}>{FormattedAmount(item.interestBalance)}</TableCell>
-                      <TableCell sx={{textAlign:'right', fontSize:'small'}}>{FormattedAmount(item.principalBalance)}</TableCell>
-                  </TableRow> */}
+
                 </React.Fragment>)}
             </TableBody>
           </Table>
