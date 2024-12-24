@@ -194,6 +194,9 @@ const  applyRestore = async (dbConfigToApply)=>{
 }
 
 const applyBackup = async (dbConfigToApply)=>{
+
+    let output = destination? `.\\backups\\${destination}` : ".\\data"
+
     return new Promise((res=>{
 
         let migrationJson = {
@@ -210,7 +213,7 @@ const applyBackup = async (dbConfigToApply)=>{
         let operations = metaData.map(e=>{
             return {
                 "SinkSettings": {
-                    "FilePath":  `${__dirname}\\data\\${e.Container}.json`
+                    "FilePath":  `${output}\\${e.Container}.json`
                 },
                 "SourceSettings": {
                     "Container":e.Container,
@@ -490,7 +493,7 @@ const start = async ()=>{
         message: 'Select a database',
         choices: databases
     })
-
+    if(!fs.existsSync(".\\backups")) fs.mkdirSync(".\\backups")
     console.log(whereToConnect)
 
       

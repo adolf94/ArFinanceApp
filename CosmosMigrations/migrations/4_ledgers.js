@@ -35,6 +35,11 @@ const data = {
 		"PartitionKeyPath": "/Id",
 		mapper: e=>e
 	  },
+	{
+		"Container": "AuditLogs",
+		"PartitionKeyPath": "/Guid",
+		mapper: e=>e
+	},
 	  {
 		"Container": "CoopOption",
 		"PartitionKeyPaths":["/AppId","/Year"],
@@ -203,7 +208,7 @@ const data = {
 	  let entry = {
 		EntryId : uid,
 		EntryGroupId : uid,
-		AddedBy : payment.AddedBy,
+		AddedBy : payment.AddedBy  || userId,
 		CreditId : user.AcctReceivableId,
 		DebitId : CashAsset.LedgerAcctId,
 		Amount : payment.Amount,

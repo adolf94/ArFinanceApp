@@ -11,6 +11,7 @@ import moment from "moment"
 import Register, { IdToken } from './Register'
 import { jwtDecode as decodeJwt } from 'jwt-decode'
 import useUserInfo, { useUpdateUserInfo } from "../components/userContext"
+import ProgressiveImage from "../components/ProgressiveImg";
 
 
 const Index = () => {
@@ -134,12 +135,14 @@ const Index = () => {
                 <AnonymousLayout>
                     <Box sx={{ pt: 1, width: "100vw" }} >
                         <Grid container>
-                            <Grid size={{ md: 6, xs: 12 }} >
-
+                            <Grid container size={{ md: 6, xs: 12 }} sx={{justifyContent: 'center'}} >
+                                {window.webConfig.app=="cecl" && <Box sx={{px:5,mt:2}}>
+                                    <ProgressiveImage sx={{maxWidth:'70vw'}} src={`${import.meta.env.BASE_URL}/media/cecl_md.png`} placeholdersrc={`${import.meta.env.BASE_URL}/media/cecl_xs.png`} />
+                                </Box>}
                             </Grid>
                             <Grid size={{ md: 6, xs: 12 }}>
 
-                                {idToken ? <Register token={idToken} /> : <Box sx={{ pt: '200px', px: 4, display: '' }}>
+                                {idToken ? <Register token={idToken} /> : <Box sx={{ pt:{xs:'50px',md:'200px'}, px: 4, display: '' }}>
                                     <Button fullWidth variant="outlined" sx={{ py: 2 }} size="x-large" onClick={() => oauthSignIn()}>
                                         <Google sx={{ mr: 1 }} /> {loginLoading ? <CircularProgress /> : "Login/Register with Google"}</Button>
 
