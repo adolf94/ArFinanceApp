@@ -135,7 +135,7 @@ const data = {
 	  Discriminator:"LedgerAccount",
 	  AddedBy:  userId,
 	  Name: "Interest Income",
-	  Section:"assets",
+	  Section:"income",
 	  Balance:0
 	}
 	

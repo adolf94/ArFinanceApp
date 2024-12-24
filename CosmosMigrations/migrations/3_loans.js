@@ -56,7 +56,7 @@ const data = {
             },
             {
                 "Container": "Loans",
-                "PartitionKeyPaths":["/AppId", "/UserId", "/Status"],
+                "PartitionKeyPaths":["/AppId", "/UserId"],
                 comment : "new",
                 mapper: e=>e
             },
