@@ -13,6 +13,7 @@ namespace FinanceApp.Data
 				public Task<decimal> GetOutstandingBalance(Guid UserId, string appId);
 				public Task<IQueryable<Loan>> GetLoansByMemberId(Guid guid, string appId);
 
+				public Guid InterestIncomeId();
 
 		}
 }

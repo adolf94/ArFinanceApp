@@ -5,10 +5,10 @@ import moment from "moment";
 import numeral from "numeral";
 import { useState } from "react";
 import { Contribution, MemberProfile } from "../../../@types/FinanceApi/memberProfile.js";
-import { User } from "FinanceApi";
 import NewContributionDialog from "./NewContributionDialog";
 import * as React from "react";
 import { Add } from "@mui/icons-material";
+import {User} from "FinanceApi";
 
 interface UserContributionChip {
     index: number,
@@ -73,7 +73,8 @@ const UserContributionChip = ({index, member, forDate, onCreate, type}: UserCont
             userId: member.userId,
             forDate,
             index:index + 1,
-            ...data
+            ...data,
+            destinationAccount: data.destinationAcct.ledgerAcctId
         })
         setAnchorEl(null)
     }
@@ -81,7 +82,7 @@ const UserContributionChip = ({index, member, forDate, onCreate, type}: UserCont
     
     
     if(type=="button") return <>
-        <Button variant="outlined" size="small" onClick={quickAdd} > + 500 </Button>
+        <Button variant="outlined" size="small" onClick={quickAdd} > + {numeral(member.initialAmount + (member.increments! * index)).format("0k")}</Button>
 
         <NewContributionDialog member={member} forDate={forDate} index={index} onConfirm={(data: any)=>add(data)}>
             <Button variant="outlined" size="small" >+</Button>

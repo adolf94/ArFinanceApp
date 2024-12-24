@@ -29,6 +29,9 @@ namespace FinanceApp.Models
 				public List<LoanInterest> InterestRecords { get; set; } = new List<LoanInterest>();
 				public string Status { get; set; } = "Active";
 
+				public Guid SourceAcctId { get; set; }
+				public Guid LedgerEntryId { get; set; }
+
 
 				public class LoanInterest
 				{
@@ -37,6 +40,8 @@ namespace FinanceApp.Models
 						public DateTime DateEnd { get; set; }
 						public decimal Amount { get; set; }
 						public decimal TotalPercent { get; set; }
+						public Guid LedgerEntryId { get; set; }
+
 				}
 				public class PaymentPlan
 				{

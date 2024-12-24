@@ -2,6 +2,7 @@ import { CreateLoanDto } from "FinanceApi"
 import api from "../components/api"
 import { useMutation } from "@tanstack/react-query"
 import {queryClient} from "../App";
+import {updateLedgerCache} from "./ledgerEntries";
 
 
 export const LOAN   = "loan"
@@ -31,7 +32,8 @@ export const useMutateLoan = ()=>{
                 .then(e=>e.data)
         },
         onSuccess: (data)=>{
-            queryClient.invalidateQueries({ queryKey: [LOAN,{userId: data.userId}] })
+            queryClient.invalidateQueries({ queryKey: [LOAN,{userId: data.item.userId}] })
+            updateLedgerCache(data)
         }
     })
 

@@ -1,5 +1,7 @@
 ﻿using FinanceApp.Models;
+using FinanceApp.Models.SubModels;
 using Microsoft.EntityFrameworkCore;
+using UUIDNext;
 using static FinanceApp.Models.Loan;
 
 namespace FinanceApp.Data.CosmosRepo
@@ -7,16 +9,23 @@ namespace FinanceApp.Data.CosmosRepo
 	public class LoanRepo : ILoanRepo
 	{
 		private readonly AppDbContext _context;
+		private readonly ILedgerEntryRepo _ledger;
 
-		public LoanRepo(AppDbContext context)
+		public LoanRepo(AppDbContext context, ILedgerEntryRepo ledger)
 		{
 			_context = context;
+			_ledger = ledger;
 		}
 
 		public async Task<Loan> CreateLoan(Loan loan)
 		{
 
 			await _context.Loans!.AddAsync(loan);
+			
+			
+			
+			
+			
 			await _context.SaveChangesAsync();
 
 			return await Task.FromResult(loan);
@@ -210,22 +219,28 @@ namespace FinanceApp.Data.CosmosRepo
 			decimal interest = 0;
 			interestPercent = totalInterest - loan.TotalInterestPercent;
 			if (interestPercent < 0) interestPercent = 0;
+			decimal interestFactorAmount = 0;
 			switch (loanProfile.InterestFactor)
 			{
 				case "principalBalance":
+					interestFactorAmount = balances.Principal;
 					interest = balances.Principal * (interestPercent / 100);
 					break;
 				case "principalTotal":
 					interest = loan.Principal * (interestPercent / 100);
+					interestFactorAmount = loan.Principal;
 					break;
 				case "totalBalance":
 					interest = balances.Balance * (interestPercent / 100);
+					interestFactorAmount = loan.Principal;
+
 					break;
 			}
 
 			LoanInterest? newInterestItem = null;
 			if (interest > 0)
 			{
+				Guid entryId = Uuid.NewSequential();
 				newInterestItem = new LoanInterest
 				{
 					DateCreated = DateTime.Now,
@@ -234,11 +249,27 @@ namespace FinanceApp.Data.CosmosRepo
 					DateEnd = nextDate ,
 					Amount = interest,
 					TotalPercent = totalInterest,
+					LedgerEntryId = entryId
 				};
 				loan.InterestRecords.Add(newInterestItem);
 				loan.Interests = loan.Interests + newInterestItem.Amount;
 				loan.TotalInterestPercent = totalInterest;
-
+				Guid? debitId = await _context.Users!.Where(e=>e.Id == loan.UserId).Select(e => e.AcctReceivableId).FirstAsync();
+				LedgerEntry entry = new LedgerEntry
+				{
+					AddedBy = loan.UserId,
+					Date = loan.NextInterestDate.Date,
+					Amount = interest,
+					DebitId = debitId!.Value,
+					CreditId = _context.InterestIncomeId,
+					DateAdded = DateTime.Now,
+					MonthGroup = loan.NextInterestDate.ToString("yyyy-MM"),
+					Description = $"Added Interest at {interestPercent}% of {interestFactorAmount} ({loanProfile.InterestFactor})",
+					EntryId = entryId,
+					RelatedEntries = [new LedgerEntryTransaction{TransactionId = loan.Id, Type = EntryTransactionTypes.Loan}],
+					EntryGroupId = entryId					
+				};
+				await _ledger.CreateAsync(entry,false);
 			}
 
 
@@ -257,6 +288,10 @@ namespace FinanceApp.Data.CosmosRepo
 			};
 		}
 
+		public Guid InterestIncomeId()
+		{
+			return _context.InterestIncomeId;
+		}
 
 			public async Task<IQueryable<Loan>> GetLoansByMemberId(Guid guid, string appId)
 			{

@@ -54,6 +54,7 @@ const Index = () => {
             }
 
             setLoading(true);
+            //@ts-ignore
             api.post("/google/auth", { code: decodeURIComponent(hash2Obj.code), app: window.webConfig.app}, { preventAuth: true })
                 .then((e) => {
                     window.localStorage.setItem("refresh_token", e.data.refresh_token);

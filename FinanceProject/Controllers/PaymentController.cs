@@ -45,6 +45,15 @@ namespace FinanceApp.Controllers
 								user!.MobileNumber, true);
 
 
+						var httpResult = new
+						{
+							item = payment,
+							relatedEntities = new
+							{
+								// ledgerAccount = new[] { rcvAcct.Result, srcAcct.Result, income.Result }
+							}
+						};
+
 						return Ok(payment);
 				}
 		}

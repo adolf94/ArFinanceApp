@@ -128,10 +128,10 @@ export const generateCompute = (form:LoanInfo, loanProfile: LoanProfile) => {
             if(lastInterest == null ) return {
                 discountAmount : 0
             }
-            let lastItem = form.interestRecords![lastInterest.index]
-            lastItem.originalAmount =  (lastItem.originalAmount || lastItem.amount) ;
-            lastItem.amount =  (lastItem.originalAmount || lastItem.amount) - interestDiscount;
-            lastItem.dateEnd =  currentDate.format("YYYY-MM-DD");
+            // let lastItem = form.interestRecords![lastInterest.index]
+            // lastItem.originalAmount =  (lastItem.originalAmount || lastItem.amount) ;
+            // lastItem.amount =  (lastItem.originalAmount || lastItem.amount) - interestDiscount;
+            // lastItem.dateEnd =  currentDate.format("YYYY-MM-DD");
             return {
                 discountAmount : interestDiscount
             }

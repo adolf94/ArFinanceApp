@@ -8,7 +8,7 @@ import cron from 'cron-parser'
 import { getMemberProfiles, MEMBER_PROFILE, NewContribution, useMutateMemberProfile } from "../../../repositories/memberProfile"
 import { enqueueSnackbar } from "notistack"
 import { Contribution, MemberProfile } from "../../../@types/FinanceApi/memberProfile"
-import {CoopOption, User} from "FinanceApi"
+import {CoopOption, User, } from "FinanceApi"
 import * as React from "react"
 
 
@@ -75,13 +75,12 @@ const MemberProfiles = ({ clients, year, option, tab }: MemberProfilesProps) => 
       let x = interval.next();
       i++
       items.push({
-        index: 1,
+        index: i,
         date: moment(x.toDate()),
         dateStr: moment(x.toDate()).format("YYYY-MM-DD"),
         label: moment(x.toDate()).format("MMM DD")
       })
     }
-    console.log(items)
     setIterations(items);
 
   }, [option])
@@ -135,14 +134,14 @@ const MemberProfiles = ({ clients, year, option, tab }: MemberProfilesProps) => 
           </TableRow>
         </TableHead>
         <TableBody>
-          {members && membersWithName.map((member: any) => <TableRow>
+          {members && membersWithName.map((member: any, i: number) => <TableRow>
             <TableCell sx={{ whiteSpace: 'nowrap' }} >{member.user.name}</TableCell>
             <TableCell>
               <LinearProgress variant="determinate" sx={{ minWidth: '15vw', height: 7, borderRadius: 4 }} value={(member.contributions.length / option.installmentCount) * 100} />
             </TableCell>
             <TableCell>{member.contributions.length}</TableCell>
             <TableCell>{member.totalContribution}</TableCell>
-            <TableCell>{<UserContributionChip index={1} type="button" forDate={"2024-01-01"} member={member} onCreate={(data: any) => addContribution(data, member)} />}</TableCell>
+            <TableCell>{<UserContributionChip index={member.contributions.length} type="button" forDate={iterations[member.contributions.length]?.dateStr} member={member} onCreate={(data: any) => addContribution(data, member)} />}</TableCell>
             
 
           </TableRow>)}

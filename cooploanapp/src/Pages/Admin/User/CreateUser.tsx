@@ -29,6 +29,7 @@ const CreateUser = () => {
 			}
 			if(form.mobileNumber.length != 10) {
 				enqueueSnackbar("Mobile Number should have 10 digits", {variant:'error'})
+				return
 			}
 			create.mutateAsync(form)
 				.then((res)=>{

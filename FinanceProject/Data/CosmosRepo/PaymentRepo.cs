@@ -1,4 +1,5 @@
 ﻿using FinanceApp.Models;
+using FinanceApp.Models.SubModels;
 using Microsoft.EntityFrameworkCore;
 
 namespace FinanceApp.Data.CosmosRepo;
@@ -7,11 +8,13 @@ public class PaymentRepo : IPaymentRepo
 {
 		private readonly AppDbContext _context;
 		private readonly ILoanRepo _loan;
+		private readonly ILedgerEntryRepo _ledger;
 
-		public PaymentRepo(AppDbContext context, ILoanRepo loan)
+		public PaymentRepo(AppDbContext context, ILoanRepo loan, ILedgerEntryRepo ledger)
 		{
 				_context = context;
 				_loan = loan;
+				_ledger = ledger;
 		}
 
 
@@ -28,17 +31,35 @@ public class PaymentRepo : IPaymentRepo
 				await _context.Payments!.AddAsync(record);
 				//List<LoanPayment> payment = await _context.LoanPayments!.Where(e => e.AppId == record.AppId && e.Date >= record.Date && e.UserId == record.UserId).ToListAsync();
 				//payment.ForEach(e => _context.Remove(e));
+				var user = await _context.Users!.Where(e=>e.Id == record.UserId).Select(e=> new {e.AcctReceivableId, e.Name}).FirstAsync();
+				
+				LedgerEntry entry = new LedgerEntry
+				{
+					AddedBy = record.AddedBy!.Value,
+					Date = record.Date,
+					Amount = record.Amount,
+					DebitId = record.DestinationAcctId,
+					CreditId =  user.AcctReceivableId!.Value,
+					DateAdded = DateTime.Now,
+					MonthGroup = record.Date.ToString("yyyy-MM"),
+					Description = $"Received payment from Client {user.Name}",
+					EntryId = record.LedgerEntryId,
+					RelatedEntries = [new LedgerEntryTransaction{TransactionId = record.Id, Type = EntryTransactionTypes.Payment}],
+
+					EntryGroupId = record.LedgerEntryId					
+				};
+				await _ledger.CreateAsync(entry,false);
 				await _context.SaveChangesAsync();
 
 
 				//get and update affected loans (for interest recalculation)
 				var affectedLoans = await _context.Loans!.Where(e =>
-						e.AppId == record.AppId && e.UserId == record.UserId && e.LastInterestDate > record.Date)
+						e.AppId == record.AppId && e.UserId == record.UserId && e.NextInterestDate > record.Date)
 					.ToListAsync();
 				//rollback Interest charging
 				affectedLoans.ForEach(loan =>
 				{
-						var lastToRetain = loan.InterestRecords.Where(e => e.DateStart <= record.Date)
+						var lastToRetain = loan.InterestRecords.Where(e => e.DateEnd < record.Date)
 					.OrderByDescending(e => e.DateStart)
 					.ThenByDescending(e => e.DateEnd)
 					.FirstOrDefault();
@@ -61,11 +82,15 @@ public class PaymentRepo : IPaymentRepo
 								// }
 						}
 
-						var interestToRemove = loan.InterestRecords.Where(e => e.DateStart > record.Date).ToList();
+						var interestToRemove = loan.InterestRecords.Where(e => e.DateEnd >= record.Date).ToList();
 
 						loan.Status = "Active";
 
-						interestToRemove.ForEach(e => { loan.InterestRecords.Remove(e); });
+						interestToRemove.ForEach(e =>
+						{
+							_ledger.ReverseEntry(e.LedgerEntryId, false).Wait();
+							loan.InterestRecords.Remove(e);
+						});
 				});
 				await _context.SaveChangesAsync();
 
@@ -80,8 +105,8 @@ public class PaymentRepo : IPaymentRepo
 				//int paymentIndex = 0;
 				//PaymentRecord currentPayment = records[paymentIndex];
 				//decimal paymentBalance = currentPayment.Amount;
-
-				for (var loanIndex = 0; loanIndex < loansToApply.Count(); loanIndex++)
+				var loansAffectedCount = loansToApply.Count();
+				for (var loanIndex = 0; loanIndex < loansAffectedCount; loanIndex++)
 				{
 						var loan = loansToApply[loanIndex];
 
@@ -103,7 +128,7 @@ public class PaymentRepo : IPaymentRepo
 
 				var paymentIndex = 0;
 
-				for (var loanIndex = 0; loanIndex < loansToApply.Count(); loanIndex++)
+				for (var loanIndex = 0; loanIndex < loansAffectedCount; loanIndex++)
 				{
 						//hindi babalik to index 0 to for all, 0 to for payments after the lastInterestDate
 						// for ( paymentIndex = 0; paymentIndex < records.Count; paymentIndex++)
@@ -139,7 +164,7 @@ public class PaymentRepo : IPaymentRepo
 										{
 												if (updatedLoan.Interests < paymentBalance)
 												{
-														_context.LoanPayments.Add(new LoanPayment
+														_context.LoanPayments!.Add(new LoanPayment
 														{
 																Date = currentPayment.Date,
 																Amount = updatedLoan.Interests,
@@ -150,12 +175,12 @@ public class PaymentRepo : IPaymentRepo
 																Payment = currentPayment,
 																Loan = loan
 														});
-														paymentBalance = paymentBalance - updatedLoan.Interests;
+														paymentBalance -= updatedLoan.Interests;
 														updatedLoan.Interests = 0;
 												}
 												else
 												{
-														_context.LoanPayments.Add(new LoanPayment
+														_context.LoanPayments!.Add(new LoanPayment
 														{
 																Date = currentPayment.Date,
 																Amount = paymentBalance,
@@ -166,7 +191,7 @@ public class PaymentRepo : IPaymentRepo
 																AppId = loan.AppId,
 																Loan = loan
 														});
-														updatedLoan.Interests = updatedLoan.Interests - paymentBalance;
+														updatedLoan.Interests -= paymentBalance;
 														paymentBalance = 0;
 												}
 										}
@@ -185,7 +210,7 @@ public class PaymentRepo : IPaymentRepo
 																Payment = currentPayment,
 																Loan = loan
 														});
-														paymentBalance = paymentBalance - currentBalance;
+														paymentBalance -= currentBalance;
 														currentBalance = 0;
 												}
 												else
@@ -201,7 +226,7 @@ public class PaymentRepo : IPaymentRepo
 																Payment = currentPayment,
 																Loan = loan
 														});
-														currentBalance = currentBalance - paymentBalance;
+														currentBalance -= paymentBalance;
 														paymentBalance = 0;
 												}
 										}
@@ -257,7 +282,7 @@ public class PaymentRepo : IPaymentRepo
 				while (nextDate < date)
 				{
 						nextDate = nextDate.AddMonths(1);
-						totalInterest = totalInterest + loanProfile.InterestPerMonth;
+						totalInterest += loanProfile.InterestPerMonth;
 				}
 
 
@@ -266,7 +291,7 @@ public class PaymentRepo : IPaymentRepo
 						var noOfDaysInMonth = nextDate.AddMonths(1).AddDays(-1).Day;
 						var rebateDays = (nextDate - date).Days;
 						var percent = rebateDays / noOfDaysInMonth * loanProfile.InterestPerMonth;
-						totalInterest = totalInterest - percent;
+						totalInterest -= percent;
 				}
 
 				return totalInterest;

@@ -4,5 +4,6 @@ window.webConfig =
         "redirectUri": "https://localhost:5173/loans",
         "basePath":"/loans",
         "api": "https://localhost:7129/api",
+        "appName" : "C.E.C.L",
         "app":"loans"
 }

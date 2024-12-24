@@ -6,6 +6,8 @@ using FinanceProject.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using AutoMapper;
+using FinanceApp.Models.SubModels;
 
 namespace FinanceApp.Controllers
 {
@@ -16,11 +18,18 @@ namespace FinanceApp.Controllers
 		{
 				private readonly IMemberProfileRepo _repo;
 				private readonly IUserRepo _user;
+				private readonly IMapper _mapper;
+				private readonly ILedgerEntryRepo _ledger;
+				private readonly ILedgerAcctRepo _ledgerAcct;
 
-				public MemberProfileController(IMemberProfileRepo repo, IUserRepo user)
+				public MemberProfileController(IMemberProfileRepo repo, IUserRepo user, IMapper mapper, ILedgerEntryRepo ledger, ILedgerAcctRepo ledgerAcct)
 				{
 						_repo = repo;
 						_user = user;
+						_mapper = mapper;
+						_ledger = ledger;
+						_ledgerAcct = ledgerAcct;
+						
 				}
 
 				[HttpGet("coopOptions/{year}")]
@@ -83,6 +92,8 @@ namespace FinanceApp.Controllers
 				public async Task<IActionResult> CreateMemberProfile(int year, Guid userId, CreateMemberProfileDto dto)
 				{
 						string? app = HttpContext.User!.FindFirstValue("app")!;
+						string? currentUser = HttpContext.User.FindFirstValue("userId");
+
 						User? user = await _user.GetById(userId);
 						if (user == null) return NotFound();
 
@@ -95,7 +106,7 @@ namespace FinanceApp.Controllers
 
 						if (!user.Roles.Any(role=> role == $"{app.ToUpper()}_{AppRoles.COOP_MEMBER}" || role == AppRoles.COOP_MEMBER))
 						{
-								user.Roles = user.Roles.Append($"{app.ToLower()}_{AppRoles.COOP_MEMBER}").ToArray();
+								user.Roles = user.Roles.Append($"{app.ToUpper()}_{AppRoles.COOP_MEMBER}").ToArray();
 						}
 
 						MemberProfile profile = new MemberProfile
@@ -103,34 +114,82 @@ namespace FinanceApp.Controllers
 								AppId = option!.AppId,
 								Year = option!.Year,
 								UserId = userId,
-								InitialAmount = option!.InitialAmount,
+								InitialAmount = option!.InitialAmount * dto.Shares,
 								Increments = option.Increments,
 								Shares = dto.Shares,
 								InstallmentCount = option.InstallmentCount,
 								FirstInstallment = option.FirstInstallment
 						};
 
+						LedgerAccount loans = new LedgerAccount
+						{
+							AddedBy = Guid.Parse(currentUser!),
+							DateAdded = DateTime.UtcNow,
+							Balance = 0,
+							LedgerAcctId = Guid.NewGuid(),
+							Name = $"Contrib - {user.Name}",
+							Section = "equity"
+						};
+						user.AcctEquityId = loans.LedgerAcctId;
+						await _ledgerAcct.CreateLedgerAccount(loans);	
 						await _repo.PostProfile(profile);
 						return Ok(profile);
 
 				}
 				[HttpPost("users/{userId}/memberProfiles/{year}/contributions")]
-				public async Task<IActionResult> PostContributions(int year, Guid userId, MemberProfile.Contribution contribution)
+				public async Task<IActionResult> PostContributions(int year, Guid userId, [FromBody] NewContributionDto contribution)
 				{
 						string? app = HttpContext.User!.FindFirstValue("app")!;
+						string? currentUser = HttpContext.User.FindFirstValue("userId");
 
 						MemberProfile? item = await _repo.GetMemberProfiles(app, year, userId);
 						if (item == null) return NotFound();
 
+						
+						
+						
 						MemberProfile.Contribution? dbContribution = item.Contributions.FirstOrDefault(e => e.Index == contribution.Index);
 						if (dbContribution != null) return Conflict();
+						MemberProfile.Contribution newItem = _mapper.Map<MemberProfile.Contribution>(contribution);
+						
+						User? user = await _user.GetById(userId);
 
-						item.Contributions.Add(contribution);
+						LedgerEntry entry = new LedgerEntry
+						{
+							EntryGroupId = item.Id,
+							AddedBy = Guid.Parse(currentUser!),
+							CreditId = user!.AcctEquityId!.Value,
+							DebitId = contribution.DestinationAccount,
+							Amount = contribution.Amount,
+							Date = contribution.Date,
+							MonthGroup = contribution.Date.ToString("yyyy-MM"),
+							RelatedEntries =
+							[
+								new LedgerEntryTransaction
+									{ TransactionId = newItem.Id, Type = EntryTransactionTypes.Contribution }
+							],
+							Description = $"Member {user.Name} contribution #{contribution.Index}. Date: {contribution.Date}"
+						};
+
+						newItem.EntryId = entry.EntryId;
+						await _ledger.CreateAsync(entry, false);
+						item.Contributions.Add(newItem);
 
 						await _repo.UpdateProfile(item);
 
-
-						return Ok(item);
+						var debitAcct = await _ledgerAcct.GetOne(entry.DebitId);
+						var creditAcct = await _ledgerAcct.GetOne(entry.CreditId);
+						
+						
+						return Ok(
+						new {
+							status="ok",
+							item,
+							relatedEntities = new {
+								ledgerEntry = new []{ entry },
+								ledgerAccount = new [] {debitAcct, creditAcct } 
+							}	
+						});
 
 				}
 				[HttpGet("users/{userId}/memberProfiles/{year}/contributions")]
@@ -146,4 +205,5 @@ namespace FinanceApp.Controllers
 				}
 
 		}
+
 }

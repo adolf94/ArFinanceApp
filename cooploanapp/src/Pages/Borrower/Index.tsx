@@ -43,18 +43,35 @@ const IndexAuthenticated = () => {
 			let principalBalance =  l.payment.reduce((p: number,c:LoanPayment)=>{return  p - (c.againstPrincipal? c.amount: 0)},l.principal)
 			let balance = l.principal + interest - payments
 			if(l.loanProfile.computePerDay) {
-				const computeInterest = generateCompute({date: moment(l.date), principal:l.principal}, l.loanProfile)
+				const computeInterest = generateCompute({date: moment(l.date), principal:l.principal, interestRecords:[...l.interestRecords], nextInterestDate:moment(l.nextInterestDate)}, l.loanProfile)
+				//
+				// let interestOut = computeInterest(moment(), {
+				// 	date: moment(),
+				// 	balance: balance,
+				// 	totalInterestPercent:l.totalInterestPercent,
+				// 	interest:interest,
+				// 	principal:principalBalance
+				// })
+				//
+				// principalBalance = balance  - interestOut.amount;
+				// interest = interest - interestOut.amount
+				//
 
-				let interestOut = computeInterest(moment(), {
-					date: moment(),
-					balance: balance,
-					totalInterestPercent:l.totalInterestPercent,
-					interest:interest,
-					principal:principalBalance
-				})
 
-				principalBalance = balance  - interestOut.amount;
-				interest = interest - interestOut.amount
+				if(moment().isBefore(l.nextInterestDate)){
+					let discount = computeInterest.computeDiscount(moment(), {
+						balance: balance,
+						date: moment(),
+						interest: interest,
+						principal: principalBalance,
+						totalInterestPercent: l.totalInterestPercent
+					})
+					principalBalance = balance  - discount.discountAmount;
+					interest = interest - discount.discountAmount
+
+
+				}
+				
 			}
 
 

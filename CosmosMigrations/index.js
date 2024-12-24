@@ -3,12 +3,14 @@ const moment = require("moment")
 const { spawn } = require("node:child_process")
 const fs = require("node:fs")
 const os = require("node:os")
-const {select}  = require("@inquirer/prompts")
+const {select, input}  = require("@inquirer/prompts")
+const path = require("node:path");
 
 //variables
 let lastMigration = null
 var connectionString = ""
 var database = ""
+var destination = ""
 
 
 
@@ -85,13 +87,26 @@ const getCurrentMigrationData = async ()=>{
 
         let proc = spawn("./cosmosMigrationTool/dmt.exe", [`--settings=${file}`])
 
-        proc.stdout.pipe(process.stdout)
-        proc.stderr.pipe(process.stderr)
+        proc.stdout.on("data", (data)=>{
+            let output = data.toString();
+            
+            if(output.indexOf("Response status code does not indicate success: NotFound (404)") > 0){
+                console.warn("WARN: __EfMigrations does not exist");
+                return
+            }
+            
+            
+            
+        })
+        proc.stderr.on("data", (data)=>{
+            console.log("ERR")
+            console.log(data.toString())
+        })
+        // proc.on("err")
         proc.on('exit', (code) => {
             console.log(code)
             //read generated file
             let text = fs.readFileSync(os.tmpdir() + "/_efMigrations.json", "utf-8");
-            console.log(text)
             if(text !== "["){
                 let migrations = JSON.parse(text)
                 lastMigration = migrations.reduce((prev, cur, i)=>{
@@ -99,6 +114,8 @@ const getCurrentMigrationData = async ()=>{
                     if(cur.id > prev.id) return cur
                     return prev
                 },null)
+            }else{
+                res(false)
             }
 
             res(lastMigration)
@@ -130,6 +147,7 @@ const readMigrationsConfig =()=>{
 
 
 const  applyRestore = async (dbConfigToApply)=>{
+    let output = destination? `.\\backups\\${destination}` : ".\\data"
 
     return new Promise( async res=>{
 
@@ -147,7 +165,7 @@ const  applyRestore = async (dbConfigToApply)=>{
         let operations = metaData.map(e=>{
             return {
                 "SourceSettings": {
-                    "FilePath":  `${__dirname}\\data\\${e.Container}.json`
+                    "FilePath":  `${output}\\${e.Container}.json`
                 },
                 "SinkSettings": {
                     "Container":e.Container,
@@ -209,11 +227,23 @@ const applyBackup = async (dbConfigToApply)=>{
         fs.writeFileSync(file, JSON.stringify(migrationJson));
         console.log(migrationJson.Operations.map(e=>e.SinkSettings))
         let proc = spawn("./cosmosMigrationTool/dmt.exe", [`--settings=${file}`])
-
-        proc.stdout.pipe(process.stdout)
+        let opIndex = 0
+        proc.stdout.on("data", (data)=>{
+            console.log(data.toString());
+        })
+        
+        
         proc.stderr.pipe(process.stderr)
-        proc.on('exit', (code) => {
+        proc.on('exit', async (code) => {
             res(code)
+
+            let text = fs.readFileSync(`${__dirname}\\data\\__EfMigrations.json`, "utf-8");
+            if(text === "[") {
+                const migrationsData = await readMigrationsConfig();
+                let keys= Object.keys(migrationsData).map(e=>({id:e, Id:e}))
+                fs.writeFileSync(`${__dirname}\\data\\__EfMigrations.json`, JSON.stringify(keys));
+            }
+            
         })
     }))
 
@@ -229,16 +259,18 @@ const backupCurrent = async ()=>{
 }
 
 const Migration = async ()=>{
+    let output = destination? `.\\backups\\${destination}` : ".\\data"
 
     const migrationNow = await getCurrentMigrationData()
 
     const migrationsData = await readMigrationsConfig();
 
     const migrationKeys= Object.keys(migrationsData).sort((a,b)=>(a>b?0:1))
-
+    
     //start process
     //NOTE : if may data na, fetchData muna
-        if(!fs.existsSync(".\\data")) fs.mkdirSync(".\\data")
+        if(!fs.existsSync(output)) fs.mkdirSync(output)
+    console.log(output)
         let migrationIndex = -1;
     if(migrationNow === null){
         // create empty data for first migration array
@@ -249,7 +281,7 @@ const Migration = async ()=>{
         for( var i in firstMigration.migrate.database) {
             let table =  firstMigration.migrate.database[i]
             // console.log(firstMigration)
-            fs.writeFileSync(`${__dirname}\\data\\${table.Container}.json`, "[]")
+            fs.writeFileSync(`${output}\\${table.Container}.json`, "[]")
             console.debug(`${table.Container}.json written with []`)
         }
         console.log("No Migration Exists")
@@ -269,18 +301,30 @@ const Migration = async ()=>{
         console.log(transformMigration)
         let tables = transformMigration.default.migrate.database
         console.log("migration: " + migrationKeys[i] );
-        
+        let tableData = {}
         tables.forEach((table)=>{
             console.log("container: " + table.Container)
             let jsonFile = `${__dirname}\\data\\${table.Container}.json`;
-            if(!fs.existsSync(jsonFile)) return
+            if(!fs.existsSync(jsonFile)) {
+                fs.writeFileSync(`${__dirname}\\data\\${table.Container}.json`, "[]");
+            }
             let jsonText = fs.readFileSync(jsonFile);
             let jsonArr = JSON.parse(jsonText);
             console.log("item Count : " + jsonArr.length)
 
-            jsonArr = jsonArr.map(table.mapper)
+            jsonArr = jsonArr.map(table.mapper || ((e)=>e))
 
-            fs.writeFileSync(`${__dirname}\\data\\${table.Container}.json`, JSON.stringify(jsonArr));
+
+
+            tableData[table.Container] = jsonArr
+        })
+        if(!!transformMigration.default.dataMigration){
+            
+           tableData =   transformMigration.default.dataMigration(tableData)
+            
+        }
+        tables.forEach((table)=>{
+            fs.writeFileSync(`${__dirname}\\data\\${table.Container}.json`, JSON.stringify(tableData[table.Container]));
         })
 
         //addID 
@@ -310,6 +354,8 @@ const Migration = async ()=>{
 
 const BackUpNow = async ()=>{
 
+    let output = destination? `.\\backups\\${destination}` : ".\\data"    
+    
     const migrationNow = await getCurrentMigrationData()
 
     const migrationsData = await readMigrationsConfig();
@@ -318,9 +364,9 @@ const BackUpNow = async ()=>{
 
     //start process
     //NOTE : if may data na, fetchData muna
-        if(!fs.existsSync(".\\data")) fs.mkdirSync(".\\data")
+        if(!fs.existsSync(output)) fs.mkdirSync(output)
         let migrationIndex = -1;
-    if(migrationNow === null){
+    if(migrationNow === false){
         // create empty data for first migration array
         let theIndexFinal = migrationKeys.length - 1
         migrationIndex = migrationKeys.length - 1
@@ -329,7 +375,7 @@ const BackUpNow = async ()=>{
         for( var i in firstMigration.migrate.database) {
             let table =  firstMigration.migrate.database[i]
             // console.log(firstMigration)
-            fs.writeFileSync(`${__dirname}\\data\\${table.Container}.json`, "[]")
+            fs.writeFileSync(path.join(output,`${table.Container}.json`), "[]")
             console.debug(`${table.Container}.json written with []`)
         }
         console.log("No Migration Exists")
@@ -345,7 +391,9 @@ const BackUpNow = async ()=>{
 }
 
 const getCurrentMigrationFromFile = ()=>{
-    let text = fs.readFileSync(`${__dirname}\\data\\__EfMigrations.json`)
+    let output = destination? `.\\backups\\${destination}` : ".\\data"
+
+    let text = fs.readFileSync(path.join(output, "__EfMigrations.json"))
     let lastMigration = null
     if(text !== "["){
         let migrations = JSON.parse(text)
@@ -364,22 +412,23 @@ const OnDemandRestore = async (type)=>{
     const migrationsData = await readMigrationsConfig();
     const migrationKeys= Object.keys(migrationsData).sort((a,b)=>(a>b?0:1))
 
+    let output = destination? `.\\backups\\${destination}` : ".\\data"
     //NOTE : if may data na, fetchData muna
-    if(!fs.existsSync(".\\data")) fs.mkdirSync(".\\data")
+    if(!fs.existsSync(output)) fs.mkdirSync(output)
 
     if(migrationNow === null){
         // create empty data for first migration array
         let theIndexFinal = migrationKeys.length - 1
         migrationIndex = migrationKeys.length - 1
 
-        let firstMigration = migrationsData[migrationKeys[theIndexFinal]].default;
+        let firstMigration = migrationsData[migrationKeys[migrationIndex]].default;
         for( var i in firstMigration.migrate.database) {
             let table =  firstMigration.migrate.database[i]
             // console.log(firstMigration)
-            fs.writeFileSync(`${__dirname}\\data\\${table.Container}.json`, "[]")
+            fs.writeFileSync(path.join(output, "__EfMigrations.json"), "[]")
             console.debug(`${table.Container}.json written with []`)
         }
-        applyRestore(migration);
+        applyRestore(firstMigration);
 
     }else{
         let migration = migrationsData[migrationNow.id].default;
@@ -410,10 +459,14 @@ const start = async ()=>{
               value:'migrate',
               name: "Migration"
           },
-          {
-              value:'backup',
-              name:"Backup only"
-          }
+            {
+                value:'backup',
+                name:"Backup only"
+            },
+            {
+                value:'restore',
+                name:"Restore"
+            }
         ]
       })
 
@@ -438,15 +491,33 @@ const start = async ()=>{
         choices: databases
     })
 
+    console.log(whereToConnect)
 
       
       switch(whatToDo){
         case "migrate":
                 Migration()
             break;
-        case "backup":
+          case "backup":
+            
+            destination = await input({
+                message:"Name the backup:",
+                default: `${whereToConnect.key}_${database}_${moment().format("yyyyMMDDHHmm")}`          
+                
+                
+            })
+            
             BackUpNow()
             break;
+          case "restore":
+              let listOfFolders = fs.readdirSync(__dirname + "/backups")
+                .map(e=>({key:e,value:e}))
+            destination = await select({
+                message : "Select a source folder",
+                choices: listOfFolders
+            })
+              OnDemandRestore("file")
+              break;
       }
 }
 start()

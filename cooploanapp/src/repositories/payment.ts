@@ -4,6 +4,7 @@ import {queryClient} from "../App";
 import {LOAN} from "./loan";
 import { LoanPayment } from "FinanceApi";
 import {LoanPayment} from "FinanceApi";
+import {LEDGER_ENTRY} from "./ledgerEntries";
 
 
 
@@ -17,6 +18,7 @@ export const useMutatePayment = ()=>{
         },
         onSuccess: (data)=>{
             queryClient.invalidateQueries({ queryKey: [LOAN,{userId: data.userId}] })
+            queryClient.invalidateQueries({ queryKey: [LEDGER_ENTRY] })
         }
     })
 

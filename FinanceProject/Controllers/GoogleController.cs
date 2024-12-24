@@ -138,6 +138,7 @@ namespace FinanceApp.Controllers
 								{
 										claims.Add(new Claim(ClaimTypes.Role, e));
 								});
+								HttpContext.User.AddIdentity( new ClaimsIdentity(claims));
 						}
 						else
 						{
@@ -186,7 +187,6 @@ namespace FinanceApp.Controllers
 						var idTokenNew = tokenHandler.CreateToken(idDescriptor);
 						var strIdToken = tokenHandler.WriteToken(idTokenNew);
 						currentToken.id_token = strClaimToken;
-
 						return await Task.FromResult(Ok(currentToken));
 				}
 

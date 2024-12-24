@@ -86,7 +86,6 @@ const AuthenticatedLayoutChild = ({ children, persona, roles, contextValue }: { 
 
     useEffect(() => {
         if(!loggedIn || !roles ) return;
-        console.log(roles)
         if(Array.isArray(roles)){
             if(!roles.some(e=>isInRole(e))) navigate("/Errors/403")
         }
@@ -100,7 +99,8 @@ const AuthenticatedLayoutChild = ({ children, persona, roles, contextValue }: { 
                             <CurrencyExchange
                                 sx={{ mr: 2 }} />
                             <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-                                AR Loan
+                                {  //@ts-ignore
+                                    window.webConfig?.appName}
                             </Typography>
                         </Box>
                         <Box sx={{ display: 'flex' }}>

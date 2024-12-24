@@ -199,6 +199,7 @@ else
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseMiddleware<AppMiddleware>();
+app.UseMiddleware<AuditMiddleware>();
 
 string[] apps = config.Apps.Select((e) => e.Subdirectory).ToArray();
 

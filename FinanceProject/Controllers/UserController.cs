@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using System.Security.Claims;
+using FinanceApp.Models;
 
 namespace FinanceProject.Controllers
 {
@@ -24,9 +25,10 @@ namespace FinanceProject.Controllers
 				private readonly IMapper _mapper;
 				private readonly Sms _sms;
 				private readonly ILogger<UserController> _logger;
+				private readonly ILedgerAcctRepo _ledgerAcct;
 
 				public UserController(IScheduledTransactionRepo schedules, IUserRepo users, ILogger<UserController> logger,
-						PersistentConfig pconfig, IMapper mapper, Sms sms)
+						PersistentConfig pconfig, IMapper mapper, Sms sms, ILedgerAcctRepo ledgeracct)
 				{
 						_schedules = schedules;
 						_pConfig = pconfig;
@@ -34,6 +36,7 @@ namespace FinanceProject.Controllers
 						_mapper = mapper;
 						_sms = sms;
 						_logger = logger;
+						_ledgerAcct = ledgeracct;
 
 				}
 
@@ -41,7 +44,9 @@ namespace FinanceProject.Controllers
 				[Authorize(Roles = "Unregistered,ENROLL_USER")]
 				public async Task<IActionResult> CreateUser(CreateUserDto user)
 				{
-						bool isRegistered = !HttpContext.User.Claims.Any(e => e.Type == ClaimTypes.Role && e.Value == "Unregistered");
+				
+					bool isRegistered = !HttpContext.User.Claims.Any(e => e.Type == ClaimTypes.Role && e.Value == "Unregistered");
+					string? userId = HttpContext.User.FindFirstValue("userId");
 						if (!isRegistered)
 						{
 								string email = HttpContext.User.FindFirstValue(ClaimTypes.Email)!;
@@ -88,6 +93,20 @@ namespace FinanceProject.Controllers
 								{
 										newUser = _mapper.Map<User>(user);
 										newUser.DisbursementAccounts.Add(new DisbursementAccount { AccountId = "0", AccountName = "Cash", BankName = "Cash" });
+
+									
+
+										LedgerAccount ledger = new LedgerAccount
+										{
+											AddedBy = !string.IsNullOrEmpty(userId) ? Guid.Parse(userId) : newUser.Id,
+											DateAdded = DateTime.UtcNow,
+											Balance = 0,
+											LedgerAcctId = Guid.NewGuid(),
+											Name = $"Receivables - {newUser.Name}",
+											Section = "receivables"
+											};
+											newUser.AcctReceivableId = ledger.LedgerAcctId;
+										await _ledgerAcct.CreateLedgerAccount(ledger);
 										await _users.CreateUser(newUser);
 										return Ok(newUser);
 								}
@@ -103,6 +122,12 @@ namespace FinanceProject.Controllers
 										return BadRequest(new { user_exist = "mobile", email = $"", result = -5 });
 								}
 
+
+								if (!isRegistered)
+								{
+									List<Claim> claims = [new Claim("userId", newUser.Id.ToString())];
+									HttpContext.User.AddIdentity(new ClaimsIdentity(claims));
+								}
 
 								newUser.UserName = user.UserName;
 								await _users.UpdateUser(newUser);

@@ -12,7 +12,7 @@ namespace FinanceApp.Dto
 						CreateMap<LoanProfile, NoNavigationLoanProfile>()
 								.ReverseMap();
 
-
+						CreateMap<NewContributionDto, MemberProfile.Contribution>();
 				}
 		}
 }

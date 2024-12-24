@@ -50,7 +50,7 @@ declare module 'FinanceApi' {
         authConfig: GoogleConfig;
         jwtConfig: AppJwtConfig;
         smsConfig: SmsConfiguration;
-        redirectUrl: AppRedirects[];
+        apps: Application[];
     }
 
     // ..\FinanceProject\Models\CoopOption.cs
@@ -81,6 +81,31 @@ declare module 'FinanceApi' {
         currencyCode: string;
     }
 
+    // ..\FinanceProject\Models\LedgerAccounts.cs
+    export interface LedgerAccount {
+        ledgerAcctId: string;
+        dateAdded: string;
+        addedBy: string;
+        name: string;
+        section: string;
+        balance: number;
+    }
+
+    // ..\FinanceProject\Models\LedgerEntry.cs
+    export interface LedgerEntry {
+        entryId: string;
+        entryGroupId: string;
+        date: string;
+        dateAdded: string;
+        addedBy: string;
+        debitId: string;
+        creditId: string;
+        relatedEntries: LedgerEntryTransaction[];
+        description: string;
+        type: number;
+        amount: number;
+    }
+
     // ..\FinanceProject\Models\Loan.cs
     export interface Loan {
         id: string;
@@ -93,6 +118,7 @@ declare module 'FinanceApi' {
         dateClosed?: string;
         nextInterestDate: string;
         lastInterestDate: string;
+        nextComputeDate: string;
         expectedPayments: PaymentPlan[];
         disbursementAccount?: DisbursementAccount;
         principal: number;
@@ -102,6 +128,8 @@ declare module 'FinanceApi' {
         payment: LoanPayment[];
         interestRecords: LoanInterest[];
         status: string;
+        sourceAcctId: string;
+        ledgerEntryId: string;
     }
 
     // ..\FinanceProject\Models\Loan.cs
@@ -136,6 +164,7 @@ declare module 'FinanceApi' {
         appId: string;
         year: number;
         userId: string;
+        id: string;
         initialAmount: number;
         increments: number;
         shares: number;
@@ -154,6 +183,8 @@ declare module 'FinanceApi' {
         method: string;
         referenceId?: string;
         amount: number;
+        destinationAcctId: string;
+        ledgerEntryId: string;
         loanPayments: LoanPayment[];
     }
 
@@ -211,6 +242,9 @@ declare module 'FinanceApi' {
         hasActiveLoans: boolean;
         disbursementAccounts: DisbursementAccount[];
         loanProfile?: LoanProfile;
+        acctReceivableId?: string;
+        liabilitiesId?: string;
+        acctEquityId?: string;
     }
 
     // ..\FinanceProject\Models\Vendor.cs
@@ -236,6 +270,16 @@ declare module 'FinanceApi' {
         accountName: string;
     }
 
+    // ..\FinanceProject\Models\SubModels\LedgerEntryTransaction.cs
+    export interface LedgerEntryTransaction {
+        type: string;
+        transactionId: string;
+    }
+
+    // ..\FinanceProject\Models\SubModels\LedgerEntryTransaction.cs
+    export interface EntryTransactionTypes {
+    }
+
     // ..\FinanceProject\Models\SubModels\LoanProfile.cs
     export interface FixedInterests {
         maxDays: number;
@@ -252,6 +296,7 @@ declare module 'FinanceApi' {
         coborrowerId: string;
         date: string;
         expectedPayments: Loan.PaymentPlan[];
+        sourceAcctId: string;
         loanProfile: NoNavigationLoanProfile;
         disbursementAccount?: DisbursementAccount;
         principal: number;
@@ -291,8 +336,17 @@ declare module 'FinanceApi' {
         audience: string;
     }
 
+    // ..\FinanceProject\Dto\LedgerProfile.cs
+    export interface LedgerProfile extends Profile {
+    }
+
     // ..\FinanceProject\Dto\LoansProfile.cs
     export interface LoansProfile extends Profile {
+    }
+
+    // ..\FinanceProject\Dto\NewContributionDto.cs
+    export interface NewContributionDto extends Contribution {
+        destinationAccount: string;
     }
 
     // ..\FinanceProject\Dto\NewTransactionResponseDto.cs

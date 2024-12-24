@@ -82,11 +82,12 @@ const LoadingFallback = ()=> {
 
 const ViewLoanDetails = () => {
   const {loanid} = useParams()
-  const { data: loan, isLoading: loading } = useQuery<Loan>({ queryKey: [LOAN,{loanId: loanid}], queryFn: () => getByLoanId(loanid!), enabled:!!loanid && loanid != 'new'})
+  const { data: loanResult, isLoading: loading } = useQuery<Loan>({ queryKey: [LOAN,{loanId: loanid}], queryFn: () => getByLoanId(loanid!), enabled:!!loanid && loanid != 'new'})
   const [summary, setSummary] = useState({balance:0,interest:0, payments:0})
   const [transactions, setTransactions] = useState<any[]>([])
   useEffect(()=>{
-    if(!loan) return
+    if(!loanResult) return
+    let loan = {...loanResult, interestRecords:[...loanResult.interestRecords]}
     let payments = loan.payment.reduce((p:number,c : LoanPayment)=>{return p + c.amount},0)
     let principal = loan.payment.reduce((p: number,c:LoanPayment)=>{return  p - (c.againstPrincipal? c.amount: 0)},loan.principal)
     let interest = loan.interestRecords.reduce((p :number ,c : LoanInterest)=>{return p + c.amount},0)
@@ -112,6 +113,21 @@ const ViewLoanDetails = () => {
         principal:principal
       })
       interest = interest - discount.discountAmount
+      balanceAmount = balanceAmount - discount.discountAmount
+
+
+      let lastInterest = loan.interestRecords!.reduce((p :  {index: number , dateEnd:string,dateStart:string } | null,v: LoanInterest, index:number)=>{
+        if(p == null) return {index, dateEnd:v.dateEnd,dateStart:v.dateStart}
+        if(moment(p.dateEnd).isSameOrBefore(v.dateEnd)){
+          return moment(p.dateStart).isBefore(v.dateStart) ? {index, dateEnd:v.dateEnd,dateStart:v.dateStart}  : p;
+        }
+        return moment(p.dateEnd).isBefore(v.dateEnd) ?  {index, dateEnd:v.dateEnd,dateStart:v.dateStart} : p;
+      }, null  )
+      
+      let lastItem = loan.interestRecords![lastInterest!.index]
+      // lastItem.originalAmount =  (lastItem.originalAmount || lastItem.amount) ;
+      lastItem.amount =  lastItem.amount - discount.discountAmount;
+      lastItem.dateEnd =  moment().format("YYYY-MM-DD");
       // balanceAmount = balanceAmount - interestOut.amount
       // interest = interest - interestOut.amount
       //
@@ -229,7 +245,7 @@ const ViewLoanDetails = () => {
         })
     setTransactions(records.reverse())
     
-  },[loan])
+  },[loanResult])
 
 
   if(!loanid || loanid == "new") return <></>
@@ -282,7 +298,7 @@ const ViewLoanDetails = () => {
             </Grid>
             <Grid size={10} sx={{ textAlign: 'center', pr: 3 }}>
               <Typography gutterBottom variant="h5" component="div">
-                {FormattedAmount(loan!.principal + summary.interest)}
+                {FormattedAmount(loanResult!.principal + summary.interest)}
               </Typography>
               <Typography variant="subtitle1" sx={{ color: 'text.secondary' }}>
                 Total Interest : {FormattedAmount(summary.interest)}

@@ -46,7 +46,7 @@ const AdminBody = () => {
   return <Box sx={{width:'100%'}}>
     <SelectPaymentContext.Provider value={{payCtx, setPayCtx}}>
       <Grid container>
-        <Grid size={{sm:12,lg:6}} sx={{pb:2}}>
+        <Grid size={{sm:12,md:6}} sx={{pb:2}}>
           <Paper sx={{p:1}}>
             <Grid container>
               <Grid size={12} container sx={{ justifyContent:'space-between'}}>
@@ -96,7 +96,7 @@ const AdminBody = () => {
             </Grid>s
           </Paper>
         </Grid>
-        <Grid size={{sm:12,lg:6}}>
+        <Grid size={{sm:12,md:6}}>
           <Routes>
             <Route path="/loan/:loanid" element={ <ViewLoanDetails />}></Route>
             <Route path="/journal/*" element={ <JournalEntries />}></Route>

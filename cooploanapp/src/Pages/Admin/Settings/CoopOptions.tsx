@@ -70,7 +70,7 @@ const CoopOption = ()=>{
 
 
       create.mutateAsync({
-        ...form,
+        ...form, 
         year,
         firstInstallment: form.firstInstallment.format("YYYY-MM-DD")
       }).then(()=>refetch())

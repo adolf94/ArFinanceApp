@@ -27,7 +27,7 @@ const SmallTab  = ({value, onChange} :SmallTabsProps)=>{
             aria-label="secondary tabs example"
         >
             <Tab value={value?.value} label={value?.label} />
-            <Tab value="..." label={<MoreHoriz size="large"/>} onClick={(evt)=>setAnchorEl(evt.currentTarget)}/>
+            <Tab value="..." label={<MoreHoriz fontSize="large"/>} onClick={(evt)=>setAnchorEl(evt.currentTarget)}/>
         </Tabs>
         <Menu open={open}
               onClose={()=>setAnchorEl(null)}

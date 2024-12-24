@@ -12,6 +12,8 @@ console.info(`Output basePath: ${process.env?.VITE_LOANS_PATH }`)
 
 export default defineConfig({
     base: process.env?.VITE_LOANS_PATH || "/",
+    
+    server:{host:true},
     build: { sourcemap:true},
     plugins: [react(), mkcert()],
 })
