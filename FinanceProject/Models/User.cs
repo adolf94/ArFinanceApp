@@ -28,6 +28,8 @@ namespace FinanceProject.Models
 				
 				[JsonIgnore]
 				public ICollection<Transaction>? Transactions { get; set; }
+				public string PartitionKey { get; } = "default";
+
 				
 		}
 }

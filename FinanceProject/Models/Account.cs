@@ -21,5 +21,8 @@ namespace FinanceProject.Models
 				public ICollection<Transaction>? TransactionsAsDebit { get; set; }
 				[JsonIgnore]
 				public ICollection<Transaction>? TransactionsAsCredit { get; set; }
+
+
+				public string PartitionKey { get; } = "default";
 		}
 }

@@ -10,5 +10,7 @@
 				public decimal StartBalance { get; set; }
 				public decimal EndBalance { get; set; }
 
+				public string PartitionKey { get; } = "default";
+
 		}
 }

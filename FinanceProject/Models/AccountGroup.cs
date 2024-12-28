@@ -11,5 +11,7 @@
 				public AccountType? AccountType { get; set; } = null;
 
 				public ICollection<Account>? Accounts { get; set; }
+				public string PartitionKey { get; } = "default";
+
 		}
 }

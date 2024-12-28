@@ -86,47 +86,61 @@ namespace FinanceApp.Data.CosmosRepo
 						);
 					builder.Entity<AccountType>()
 						.ToContainer("AccountType")
-						.HasPartitionKey(e => e.Id);
+						.HasPartitionKey(e => e.PartitionKey)
+						.HasKey(c => c.Id);
 
 
 					builder.Entity<AccountBalance>()
 						.ToContainer("AccountBalance")
-						.HasPartitionKey(e => "AccountBalance")
-						.HasKey(e => e.Id);
+						.HasPartitionKey(e => e.PartitionKey)
+						.HasKey(c => c.Id);
 
 
 					builder.Entity<AccountGroup>()
 						.ToContainer("AccountGroup")
-						.HasPartitionKey(e => e.Id);
+						.HasPartitionKey(e => e.PartitionKey)
+						.HasKey(c => c.Id);
 
 					builder.Entity<Account>()
-						.ToContainer("Account").HasPartitionKey(e => "Account")
-						.HasOne(e => e.AccountGroup);
+						.HasPartitionKey(e => e.PartitionKey)
+						.ToContainer("Account")
+						.HasOne(e => e.AccountGroup)
+						;
+					builder.Entity<Account>().HasKey(e => e.Id);
 
 
 					builder.Entity<ScheduledTransactions>()
-						.ToContainer("ScheduledTransactions").HasPartitionKey(e => "ScheduledTransaction")
+						.ToContainer("ScheduledTransactions")
 						.Ignore(e => e.LastTransaction);
+					
+					builder.Entity<ScheduledTransactions>()
+						
+						.HasPartitionKey(e => e.PartitionKey)
+						.HasKey(c => c.Id);
 
 
 
 					builder.Entity<Transaction>()
-						.ToContainer("Transaction").HasPartitionKey(e => "Trasaction")
+						.ToContainer("Transaction")
 						.HasOne(e => e.Credit).WithMany(e => e.TransactionsAsCredit);
 
+					builder.Entity<Transaction>()
+						
+						.HasPartitionKey(e => e.PartitionKey)
+						.HasKey(c => c.Id);
 
 					builder.Entity<Transaction>()
 						.Ignore(e => e.Debit).Ignore(e => e.Credit).Ignore(e => e.AsLastTransaction)
 						.Ignore(e => e.Vendor);
 
 
-					builder.Entity<Vendor>().HasPartitionKey(e => "Vendor")
-						.ToContainer("Vendor")
-						.HasKey(e => e.Id);
+					builder.Entity<Vendor>()
+						.HasPartitionKey(e => e.PartitionKey)
+						.HasKey(c => c.Id);;
 
-					builder.Entity<User>().HasPartitionKey(e => "User")
-						.ToContainer("User")
-						.HasKey(e => e.Id);
+					builder.Entity<User>()
+						.HasPartitionKey(e => e.PartitionKey)
+						.HasKey(c => c.Id);;
 
 
 
@@ -145,8 +159,8 @@ namespace FinanceApp.Data.CosmosRepo
 						.ToContainer("LoanProfiles")
 						.HasKey(e => e.ProfileId);
 
-					builder.Entity<Loan>().HasPartitionKey(e => new { e.AppId  })
-						.ToContainer("Loans");
+					builder.Entity<Loan>().ToContainer("Loans").HasPartitionKey(e => new { e.AppId  })
+						.HasKey(e => e.Id);
 
 					// builder.Entity<Loan>().HasIndex(e => new { e.AppId, e.UserId, e.Date });
 
@@ -156,15 +170,17 @@ namespace FinanceApp.Data.CosmosRepo
 					builder.Entity<MemberProfile>().HasPartitionKey(e => new { e.AppId })
 						.ToContainer("MemberProfiles").HasKey(e => new { e.AppId, e.Year, e.UserId });
 
-					builder.Entity<LedgerAccount>().HasPartitionKey(e => "LedgerAccount ")
-						.ToContainer("LedgerAccounts");
-					builder.Entity<LedgerEntry>().HasPartitionKey(e => "LedgerEntry")
-						.ToContainer("LedgerEntries");
+					builder.Entity<LedgerAccount>().ToContainer("LedgerAccounts").HasPartitionKey(e =>e.PartitionKey).HasKey(e => e.LedgerAcctId)
+						;
+					builder.Entity<LedgerEntry>()
+						.ToContainer("LedgerEntries")
+						.HasPartitionKey(e => e.PartitionKey)
+						.HasKey(e=>e.EntryId);
 					builder.Entity<LedgerAccount>().HasData(
 						new LedgerAccount { LedgerAcctId = InterestIncomeId, Name = "Interest Income", AddedBy = Guid.Parse("742070bd-e68b-45c9-a1f7-021916127731"), Balance = 0, DateAdded = DateTime.Now, Section ="income"}
 					);
 
-					builder.Entity<InputLogs>().HasPartitionKey(e => "InputLogs").ToContainer("AuditLogs");
+					builder.Entity<InputLogs>().HasPartitionKey(e => e.Path).ToContainer("AuditLogs");
 					
 						
 

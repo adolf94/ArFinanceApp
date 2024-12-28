@@ -9,6 +9,7 @@
 				public CoopOptionFrequency Frequency { get; set; } = FrequencyOptions.TwicePerMonth;
 				public decimal Increments { get; set; }
 				public int InstallmentCount { get; set; }
+				public string PartitionKey { get; } = "default";
 
 		}
 

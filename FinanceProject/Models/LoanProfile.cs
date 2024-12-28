@@ -12,6 +12,8 @@ namespace FinanceApp.Models
 				public string InterestFactor { get; set; } = "principalBalance";
 
 				public List<FixedInterests> Fixed { get; set; } = new List<FixedInterests>();
+				public string PartitionKey { get; } = "default";
+
 
 		}
 }
