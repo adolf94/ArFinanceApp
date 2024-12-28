@@ -109,7 +109,7 @@ const data = {
 		  AddedBy : e.Id,
 		  DateAdded : moment().format("YYYY-MM-DDTHH:mm:ss"),
 		  Balance : 0,
-		  LedgerAcctId : uuid(),
+		  LedgerAcctId : uuid7(),
 		  Discriminator:"LedgerAccount",
 		  Name : `Rcvb - ${e.Name}`,
 		  Section : "receivables"
@@ -135,7 +135,7 @@ const data = {
 	  Discriminator:"LedgerAccount",
 	  AddedBy:  userId,
 	  Name: "Interest Income",
-	  Section:"assets",
+	  Section:"income",
 	  Balance:0
 	}
 	
@@ -191,7 +191,7 @@ const data = {
 			[
 			  { TransactionId : loan.Id, Type : "loan" }
 			],
-		  Description : `$"Added Interest (${loan.LoanProfile.InterestFactor})"`
+		  Description : `Added Interest (${loan.LoanProfile.InterestFactor})`
 		}
 		addLedgerEntry(intEntry)
 		

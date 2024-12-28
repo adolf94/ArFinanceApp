@@ -91,7 +91,7 @@ namespace FinanceApp.Data.CosmosRepo
 
 					builder.Entity<AccountBalance>()
 						.ToContainer("AccountBalance")
-						.HasPartitionKey(e => new { e.Year, e.Month, e.AccountId })
+						.HasPartitionKey(e => "AccountBalance")
 						.HasKey(e => e.Id);
 
 
@@ -100,71 +100,71 @@ namespace FinanceApp.Data.CosmosRepo
 						.HasPartitionKey(e => e.Id);
 
 					builder.Entity<Account>()
-						.ToContainer("Account").HasPartitionKey(e => e.Id)
+						.ToContainer("Account").HasPartitionKey(e => "Account")
 						.HasOne(e => e.AccountGroup);
 
 
 					builder.Entity<ScheduledTransactions>()
-						.ToContainer("ScheduledTransactions").HasPartitionKey(e => e.Id)
+						.ToContainer("ScheduledTransactions").HasPartitionKey(e => "ScheduledTransaction")
 						.Ignore(e => e.LastTransaction);
 
 
 
 					builder.Entity<Transaction>()
-						.ToContainer("Transaction").HasPartitionKey(e => e.Id)
+						.ToContainer("Transaction").HasPartitionKey(e => "Trasaction")
 						.HasOne(e => e.Credit).WithMany(e => e.TransactionsAsCredit);
 
 
-					builder.Entity<Transaction>().HasPartitionKey(e => e.Id)
+					builder.Entity<Transaction>()
 						.Ignore(e => e.Debit).Ignore(e => e.Credit).Ignore(e => e.AsLastTransaction)
 						.Ignore(e => e.Vendor);
 
 
-					builder.Entity<Vendor>().HasPartitionKey(e => e.Id)
+					builder.Entity<Vendor>().HasPartitionKey(e => "Vendor")
 						.ToContainer("Vendor")
 						.HasKey(e => e.Id);
 
-					builder.Entity<User>().HasPartitionKey(e => e.Id)
+					builder.Entity<User>().HasPartitionKey(e => "User")
 						.ToContainer("User")
 						.HasKey(e => e.Id);
 
 
 
-					builder.Entity<LoanPayment>().HasPartitionKey(e => new { e.AppId, e.UserId, e.LoanId })
+					builder.Entity<LoanPayment>().HasPartitionKey(e => new { e.AppId })
 						.ToContainer("LoanPayments")
 						.HasKey(e => new { e.LoanId, e.PaymentId, e.AgainstPrincipal });
 					//builder.Entity<LoanPayment>().HasIndex(e => new { e.AppId, e.UserId, e.Date });
 
-					builder.Entity<PaymentRecord>().HasPartitionKey(e => new { e.AppId, e.UserId, e.Id })
+					builder.Entity<PaymentRecord>().HasPartitionKey(e => new { e.AppId })
 
 						.ToContainer("Payments");
 
 
 
-					builder.Entity<LoanProfile>().HasPartitionKey(e => new { e.AppId, e.ProfileId })
+					builder.Entity<LoanProfile>().HasPartitionKey(e => new { e.AppId})
 						.ToContainer("LoanProfiles")
 						.HasKey(e => e.ProfileId);
 
-					builder.Entity<Loan>().HasPartitionKey(e => new { e.AppId, e.UserId, e.Status })
+					builder.Entity<Loan>().HasPartitionKey(e => new { e.AppId  })
 						.ToContainer("Loans");
 
 					// builder.Entity<Loan>().HasIndex(e => new { e.AppId, e.UserId, e.Date });
 
-					builder.Entity<CoopOption>().HasPartitionKey(e => new { e.AppId, e.Year })
+					builder.Entity<CoopOption>().HasPartitionKey(e => new { e.AppId })
 						.ToContainer("CoopOption").HasKey(e => new { e.AppId, e.Year });
 
-					builder.Entity<MemberProfile>().HasPartitionKey(e => new { e.AppId, e.Year, e.UserId })
+					builder.Entity<MemberProfile>().HasPartitionKey(e => new { e.AppId })
 						.ToContainer("MemberProfiles").HasKey(e => new { e.AppId, e.Year, e.UserId });
 
-					builder.Entity<LedgerAccount>().HasPartitionKey(e => new { e.Section, e.LedgerAcctId })
+					builder.Entity<LedgerAccount>().HasPartitionKey(e => "LedgerAccount ")
 						.ToContainer("LedgerAccounts");
-					builder.Entity<LedgerEntry>().HasPartitionKey(e => new { e.MonthGroup})
+					builder.Entity<LedgerEntry>().HasPartitionKey(e => "LedgerEntry")
 						.ToContainer("LedgerEntries");
 					builder.Entity<LedgerAccount>().HasData(
 						new LedgerAccount { LedgerAcctId = InterestIncomeId, Name = "Interest Income", AddedBy = Guid.Parse("742070bd-e68b-45c9-a1f7-021916127731"), Balance = 0, DateAdded = DateTime.Now, Section ="income"}
 					);
 
-					builder.Entity<InputLogs>().HasPartitionKey(e => e.Guid).ToContainer("AuditLogs");
+					builder.Entity<InputLogs>().HasPartitionKey(e => "InputLogs").ToContainer("AuditLogs");
 					
 						
 
