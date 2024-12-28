@@ -31,6 +31,8 @@ namespace FinanceApp.Models
 
 				public Guid SourceAcctId { get; set; }
 				public Guid LedgerEntryId { get; set; }
+				public string PartitionKey { get; } = "default";
+
 
 
 				public class LoanInterest

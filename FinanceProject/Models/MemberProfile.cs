@@ -16,6 +16,8 @@ namespace FinanceApp.Models
 				public DateTime FirstInstallment { get; set; }
 
 				public List<Contribution> Contributions { get; set; } = new List<Contribution>();
+				public string PartitionKey { get; } = "default";
+
 
 
 				public class Contribution

@@ -19,6 +19,8 @@ namespace FinanceApp.Models
 				public Guid LedgerEntryId { get; set; } = Uuid.NewSequential();
 
 				public List<LoanPayment> LoanPayments { get; set; } = new List<LoanPayment>();
+				public string PartitionKey { get; } = "default";
+
 		}
 
 }

@@ -28,5 +28,7 @@ namespace FinanceProject.Models
 				// Note for credit card balance : adjust the view to NEXT month (checked na? NO)
 				public DateTime DateStart { get; set; }
 				public decimal Balance { get; set; }
+				
+				public string PartitionKey { get; } = "default";
 		}
 }

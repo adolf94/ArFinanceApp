@@ -22,5 +22,7 @@ namespace FinanceApp.Models
 				public Guid UserId { get; set; }
 				public decimal Amount { get; set; }
 				public bool AgainstPrincipal { get; set; }
+				public string PartitionKey { get; } = "default";
+
 		}
 }

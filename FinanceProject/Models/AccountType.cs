@@ -7,5 +7,7 @@
 				public string? Name { get; set; }
 				public bool Enabled { get; set; }
 				public bool ShouldResetPeriodically { get; set; }
+				public string PartitionKey { get; } = "default";
+
 		}
 }
