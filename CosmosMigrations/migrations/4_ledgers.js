@@ -172,7 +172,8 @@ const data = {
 		  ],
 		Description : `Loan Principal for Client ${user.Name}. Date: ${loan.Date}`
 	  }
-	  db.Loans[i].LedgerEntryId = newEntry.EntryId;
+		db.Loans[i].LedgerEntryId = newEntry.EntryId;
+		db.Loans[i].SourceAcctId =  CashAsset.LedgerAcctId;
 	  addLedgerEntry(newEntry)
 	  
 	  loan.InterestRecords.forEach((interest, i)=>{

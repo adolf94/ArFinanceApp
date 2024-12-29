@@ -1,4 +1,4 @@
-import {Box, CardContent, FormControl, Grid2 as Grid, InputLabel,  Paper, Typography, Select, MenuItem, Button, IconButton } from "@mui/material"
+import {Box, CardContent, FormControl, Grid2 as Grid, InputLabel,  Paper, Typography, Select, MenuItem, Button, IconButton, CircularProgress } from "@mui/material"
 import { useQuery } from "@tanstack/react-query"
 import moment from "moment";
 import {getLedgerEntries, getLedgerEntriesBy, LEDGER_ENTRY} from "../../../repositories/ledgerEntries";
@@ -52,6 +52,12 @@ const JournalEntries = ()=>{
                         <Grid size={4}>To(Debit)</Grid>
                         <Grid size={2}>Amount</Grid>
                     </Grid>
+                    {isLoading && <Grid sx={{pt:3}} container justifyContent="center">
+                        <Grid size={2}>
+                            <CircularProgress />
+                        </Grid>
+                        
+                    </Grid>}
                     {(entries||[]).map(e=><><Grid container sx={{pt:1}}>
                         <Grid size={{xs:12, md:2}}>
                             <Typography variant="body1">{moment(e.date).format("YYYY-MM-DD")}</Typography>

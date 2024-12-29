@@ -33,7 +33,7 @@ public class PaymentRepo : IPaymentRepo
 				//payment.ForEach(e => _context.Remove(e));
 				var user = await _context.Users!.Where(e=>e.Id == record.UserId).Select(e=> new {e.AcctReceivableId, e.Name}).FirstAsync();
 				
-				LedgerEntry entry = new LedgerEntry
+				LedgerEntry entry = new LedgerEntry()
 				{
 					AddedBy = record.AddedBy!.Value,
 					Date = record.Date,
@@ -128,6 +128,7 @@ public class PaymentRepo : IPaymentRepo
 
 				var paymentIndex = 0;
 
+
 				for (var loanIndex = 0; loanIndex < loansAffectedCount; loanIndex++)
 				{
 						//hindi babalik to index 0 to for all, 0 to for payments after the lastInterestDate
@@ -135,7 +136,8 @@ public class PaymentRepo : IPaymentRepo
 						// {
 						var breakFlag = false;
 						var loan = loansToApply[loanIndex];
-
+						var balanceAdjusted = false;
+						
 						while (!breakFlag && paymentIndex < records.Count())
 						{
 								var updatedLoan = loan;
@@ -143,6 +145,7 @@ public class PaymentRepo : IPaymentRepo
 								var currentPayment = records[paymentIndex];
 								var nextDate = loan.NextInterestDate;
 								var paymentBalance = currentPayment.Amount - currentPayment.LoanPayments.Sum(e => e.Amount);
+								 balanceAdjusted = true;
 
 								while (nextDate < currentPayment.Date)
 								{
@@ -250,6 +253,24 @@ public class PaymentRepo : IPaymentRepo
 
 								paymentIndex++;
 						}
+
+						if (loan.Status == "Active" && !balanceAdjusted )
+						{
+							
+							loan.Payment = await _context.LoanPayments!.Where(e => e.LoanId == loan.Id).ToListAsync();
+							var currentPayments = loan.Payment.Where(e => e.AgainstPrincipal).Sum(e => e.Amount);
+							var currentBalance = loan.Principal - currentPayments;
+
+							if (currentBalance == 0)
+							{
+								loan.Status = "Closed";
+								await _context.SaveChangesAsync();
+
+							}
+
+						} 
+						
+						
 						if (loan.Status != "Closed")
 						{
 								var nextDatePost = loan.NextComputeDate;

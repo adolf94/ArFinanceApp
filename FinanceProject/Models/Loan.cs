@@ -32,8 +32,6 @@ namespace FinanceApp.Models
 
 				public Guid SourceAcctId { get; set; }
 				public Guid LedgerEntryId { get; set; }
-				[MaxLength(100)]
-				public string PartitionKey { get; init; } = "default";
 
 
 

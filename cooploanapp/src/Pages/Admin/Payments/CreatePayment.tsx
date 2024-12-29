@@ -162,7 +162,7 @@ const CreatePayment = () => {
       </Grid>
     </DialogContent>
     <DialogActions>
-      <Button variant="contained" onClick={doCreate}>Submit</Button>
+      <Button variant="contained" disabled={create.isPending} onClick={doCreate}>Submit</Button>
     </DialogActions>
     <NewAccount open={showNewLedgerAcct} onCancel={()=>setShowNewLedgerAcct(false)} onCreate={(value)=>{ setForm({...form,destinationAcct:value})}}><Box></Box></NewAccount>
     
