@@ -14,8 +14,6 @@ namespace FinanceApp.Models
 
 				public List<FixedInterests> Fixed { get; set; } = new List<FixedInterests>();
 				
-				[MaxLength(100)]
-				public string PartitionKey { get; init; } = "default";
 
 
 		}

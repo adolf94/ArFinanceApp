@@ -21,8 +21,6 @@ namespace FinanceApp.Models
 
 				public List<LoanPayment> LoanPayments { get; set; } = new List<LoanPayment>();
 				
-				[MaxLength(100)]
-				public string PartitionKey { get; init; } = "default";
 
 		}
 

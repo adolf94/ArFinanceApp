@@ -18,9 +18,6 @@ namespace FinanceApp.Models
 
 				public List<Contribution> Contributions { get; set; } = new List<Contribution>();
 				
-				[MaxLength(100)]
-				public string PartitionKey { get; init; } = "default";
-
 
 
 				public class Contribution

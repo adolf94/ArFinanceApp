@@ -94,12 +94,17 @@ api.interceptors.response.use(
             if(err.response.status === 500){
                 enqueueSnackbar("Something went wrong!", {variant:'error'})
             }
-            
+
             if(err.response.status === 400){
                 enqueueSnackbar("Please check inputs", {variant:'error'})
             }
+
+
+            if(err.response.status === 403){
+                enqueueSnackbar("You may not have access to do this. Contact system admin", {variant:'error'})
+            }
+            
         }else{
-            console.log(err)
             enqueueSnackbar("API Might be off", {variant:'error'})
         }
         return Promise.reject(err)

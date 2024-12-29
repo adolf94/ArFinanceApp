@@ -11,8 +11,6 @@ namespace FinanceApp.Models
 				public CoopOptionFrequency Frequency { get; set; } = FrequencyOptions.TwicePerMonth;
 				public decimal Increments { get; set; }
 				public int InstallmentCount { get; set; }
-				[MaxLength(100)]
-				public string PartitionKey { get; init; } = "default";
 
 		}
 

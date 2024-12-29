@@ -74,7 +74,9 @@ const Index = () => {
                     if (err.response.status === 403) {
                         navigate("/errors/403")
                     }
-                });
+                    setLoading(false);
+
+            });
         });
     };
 
