@@ -1,4 +1,5 @@
 ﻿
+using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
 namespace FinanceProject.Models
@@ -23,6 +24,7 @@ namespace FinanceProject.Models
 				public ICollection<Transaction>? TransactionsAsCredit { get; set; }
 
 
-				public string PartitionKey { get; } = "default";
+				[MaxLength(100)]
+				public string PartitionKey { get; init; } = "default";
 		}
 }

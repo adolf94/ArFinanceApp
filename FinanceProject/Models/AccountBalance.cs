@@ -29,6 +29,6 @@ namespace FinanceProject.Models
 				public DateTime DateStart { get; set; }
 				public decimal Balance { get; set; }
 				
-				public string PartitionKey { get; } = "default";
+				public string PartitionKey { get; init; } = "default";
 		}
 }

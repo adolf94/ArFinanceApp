@@ -13,6 +13,7 @@ public class InputLogs
 	public string IpAddress { get; set; } = string.Empty;
 	public string StatusCode { get; set; } = string.Empty;
 	public Guid? UserId { get; set; }
-	public string PartitionKey { get; } = "default";
+	[MaxLength(100)]
+	public string PartitionKey { get; init; } = "default";
 
 }

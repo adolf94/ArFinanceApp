@@ -25,7 +25,9 @@ namespace FinanceProject.Models
 				public Transaction? LastTransaction { get; set; }
 				[JsonIgnore]
 				public IEnumerable<Transaction>? Transactions { get; set; }
-				public string PartitionKey { get; } = "default";
+				
+				[MaxLength(100)]
+				public string PartitionKey { get; init; } = "default";
 
 		}
 }

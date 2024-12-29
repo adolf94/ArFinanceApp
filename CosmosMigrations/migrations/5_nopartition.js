@@ -113,7 +113,7 @@ const data = {
 	  },
 	  {
 		"Container":"Vendor",
-		"PartitionKeyPath":"/Id",
+		"PartitionKeyPath":"/PartitionKey",
 		mapper: e=> (
 		  {...e, PartitionKey:'default', id:e.Id}
 		)

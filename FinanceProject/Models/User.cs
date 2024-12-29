@@ -1,4 +1,5 @@
-﻿using FinanceApp.Models;
+﻿using System.ComponentModel.DataAnnotations;
+using FinanceApp.Models;
 using FinanceApp.Models.SubModels;
 using Newtonsoft.Json;
 
@@ -28,8 +29,9 @@ namespace FinanceProject.Models
 				
 				[JsonIgnore]
 				public ICollection<Transaction>? Transactions { get; set; }
-				public string PartitionKey { get; } = "default";
-
+				
+				[MaxLength(100)]
+				public string PartitionKey { get; init; } = "default";
 				
 		}
 }

@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace FinanceApp.Models
 {
@@ -22,7 +23,8 @@ namespace FinanceApp.Models
 				public Guid UserId { get; set; }
 				public decimal Amount { get; set; }
 				public bool AgainstPrincipal { get; set; }
-				public string PartitionKey { get; } = "default";
+				[MaxLength(100)]
+				public string PartitionKey { get; init; } = "default";
 
 		}
 }

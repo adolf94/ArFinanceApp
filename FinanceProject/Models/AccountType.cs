@@ -1,4 +1,6 @@
-﻿namespace FinanceProject.Models
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace FinanceProject.Models
 {
 		public class AccountType
 		{
@@ -7,7 +9,8 @@
 				public string? Name { get; set; }
 				public bool Enabled { get; set; }
 				public bool ShouldResetPeriodically { get; set; }
-				public string PartitionKey { get; } = "default";
+				[MaxLength(100)]
+				public string PartitionKey { get; init; } = "default";
 
 		}
 }

@@ -1,4 +1,5 @@
-﻿using FinanceApp.Models.SubModels;
+﻿using System.ComponentModel.DataAnnotations;
+using FinanceApp.Models.SubModels;
 
 namespace FinanceApp.Models
 {
@@ -31,7 +32,8 @@ namespace FinanceApp.Models
 
 				public Guid SourceAcctId { get; set; }
 				public Guid LedgerEntryId { get; set; }
-				public string PartitionKey { get; } = "default";
+				[MaxLength(100)]
+				public string PartitionKey { get; init; } = "default";
 
 
 

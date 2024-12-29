@@ -1,4 +1,6 @@
-﻿namespace FinanceApp.Models
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace FinanceApp.Models
 {
 		public class CoopOption
 		{
@@ -9,7 +11,8 @@
 				public CoopOptionFrequency Frequency { get; set; } = FrequencyOptions.TwicePerMonth;
 				public decimal Increments { get; set; }
 				public int InstallmentCount { get; set; }
-				public string PartitionKey { get; } = "default";
+				[MaxLength(100)]
+				public string PartitionKey { get; init; } = "default";
 
 		}
 

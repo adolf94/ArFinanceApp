@@ -1,4 +1,5 @@
-﻿using FinanceApp.Models.SubModels;
+﻿using System.ComponentModel.DataAnnotations;
+using FinanceApp.Models.SubModels;
 
 namespace FinanceApp.Models
 {
@@ -12,7 +13,9 @@ namespace FinanceApp.Models
 				public string InterestFactor { get; set; } = "principalBalance";
 
 				public List<FixedInterests> Fixed { get; set; } = new List<FixedInterests>();
-				public string PartitionKey { get; } = "default";
+				
+				[MaxLength(100)]
+				public string PartitionKey { get; init; } = "default";
 
 
 		}

@@ -27,6 +27,7 @@ public class LedgerEntry
 	[MaxLength(250)]
 	public string Description { get; set; } = string.Empty;
 	public decimal Amount { get; set; } = 0;
-	public string PartitionKey { get; } = "default";
+	[MaxLength(100)]
+	public string PartitionKey { get; init; } = "default";
 
 }

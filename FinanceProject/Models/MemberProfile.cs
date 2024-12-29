@@ -1,4 +1,5 @@
-﻿using UUIDNext;
+﻿using System.ComponentModel.DataAnnotations;
+using UUIDNext;
 
 namespace FinanceApp.Models
 {
@@ -16,7 +17,9 @@ namespace FinanceApp.Models
 				public DateTime FirstInstallment { get; set; }
 
 				public List<Contribution> Contributions { get; set; } = new List<Contribution>();
-				public string PartitionKey { get; } = "default";
+				
+				[MaxLength(100)]
+				public string PartitionKey { get; init; } = "default";
 
 
 

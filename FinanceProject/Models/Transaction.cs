@@ -1,4 +1,6 @@
-﻿namespace FinanceProject.Models
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace FinanceProject.Models
 {
 		public class Transaction
 		{
@@ -25,7 +27,9 @@
 				public ScheduledTransactions? Schedule { get; set; }
 				public ScheduledTransactions? AsLastTransaction { get; set; }
 				public string Description { get; set; }
-				public string PartitionKey { get; } = "default";
+				
+				[MaxLength(100)]
+				public string PartitionKey { get; init; } = "default";
 
 		}
 }

@@ -1,4 +1,6 @@
-﻿namespace FinanceProject.Models
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace FinanceProject.Models
 {
 		public class AccountGroup
 		{
@@ -11,7 +13,8 @@
 				public AccountType? AccountType { get; set; } = null;
 
 				public ICollection<Account>? Accounts { get; set; }
-				public string PartitionKey { get; } = "default";
+				[MaxLength(100)]
+				public string PartitionKey { get; init; } = "default";
 
 		}
 }

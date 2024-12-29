@@ -12,6 +12,7 @@ public class LedgerAccount
 	public string Name { get; set; }
 	public string Section { get; set; }
 	public decimal Balance { get; set; } = 0;
-	public string PartitionKey { get; } = "default";
+	[MaxLength(100)]
+	public string PartitionKey { get; init; } = "default";
 
 }

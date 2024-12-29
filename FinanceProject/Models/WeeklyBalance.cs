@@ -1,4 +1,6 @@
-﻿namespace FinanceProject.Models
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace FinanceProject.Models
 {
 		public class WeeklyBalance
 		{
@@ -10,7 +12,9 @@
 				public decimal StartBalance { get; set; }
 				public decimal EndBalance { get; set; }
 
-				public string PartitionKey { get; } = "default";
+				
+				[MaxLength(100)]
+				public string PartitionKey { get; init; } = "default";
 
 		}
 }
