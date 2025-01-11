@@ -10,6 +10,7 @@ import moment from "moment"
 export interface IdToken extends JwtPayload {
 		email: string,
 		name :string ,
+		unique_name:string,
 		userId?: string,
 		role: string[] | string
 }
@@ -50,6 +51,7 @@ const SmsOtpButton = ({ requestOtp, nextOtp }: SmsOtpButtonProps) => {
 const Register = ({ token }: {token: string}) => {
 		const [form, setForm] = useState({
 				name: '',
+				googleName:"",
 				userName: '',
 				mobileNumber: '',
 				otpGuid: '',
@@ -66,7 +68,8 @@ const Register = ({ token }: {token: string}) => {
 						if (jsonToken) {
 								setForm((form) => ({
 										...form,
-										name: jsonToken.name,
+										googleName:jsonToken.unique_name,
+										name: jsonToken.unique_name,
 										userName: jsonToken.email
 								}))
 						}

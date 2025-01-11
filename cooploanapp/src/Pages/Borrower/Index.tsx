@@ -20,7 +20,7 @@ import {generateCompute} from "../../components/useComputeInterest";
 const IndexAuthenticated = () => {
 		const { user } = useUserInfo();
 		const navigate = useNavigate();
-	const { data: loans, isLoading: loading } = useQuery({ queryKey: [LOAN, { userId: user.userId }], queryFn: () => getByUserId(user.userId!) })
+	const { data: loans, isLoading: loading } = useQuery({ queryKey: [LOAN, { userId: user.userId }], queryFn: () => getByUserId(user.userId!) , enabled: !!user?.userId})
 	const [view, setView] = useState("tiles")
 	const [total, setTotal] = useState<any>({})
 	const [loanCalculation, setLoanCalculated] = useState<any>([])

@@ -21,7 +21,7 @@ namespace FinanceProject.Models
 				public bool HasActiveLoans { get; set; } = false;
 				public List<DisbursementAccount> DisbursementAccounts { get; set; } = new List<DisbursementAccount>();
 				public LoanProfile? LoanProfile { get; set; } = null;
-
+				public string GoogleName { get; set; } = "";
 				public Guid? AcctReceivableId { get; set; }
 				public Guid? LiabilitiesId { get; set; }
 				public Guid? AcctEquityId { get; set; }

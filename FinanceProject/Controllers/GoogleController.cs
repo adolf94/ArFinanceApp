@@ -129,14 +129,20 @@ namespace FinanceApp.Controllers
 						{
 								claims.Add(new Claim("userId", user!.Id.ToString()));
 								claims.Add(new Claim("app", tokenBody.App));
+								claims.Add(new Claim("type", "access_token"));
 
 								idClaims.Add(new Claim("userId", user!.Id.ToString()));
 								idClaims.Add(new Claim(ClaimTypes.Name, user.Name));
+								idClaims.Add(new Claim("type", "id_token"));
 									
-								claims.Add(new Claim(ClaimTypes.Role, "Registered"));
+								claims.Add(new Claim(ClaimTypes.Role, "Registered"));								idClaims.Add(new Claim(ClaimTypes.Name, user.Name));
+								idClaims.Add(new Claim(ClaimTypes.Role, "Registered"));
+
 								user.Roles.ToList().ForEach(e =>
 								{
-										claims.Add(new Claim(ClaimTypes.Role, e));
+									idClaims.Add(new Claim(ClaimTypes.Role, e));
+
+									claims.Add(new Claim(ClaimTypes.Role, e));
 								});
 								HttpContext.User.AddIdentity( new ClaimsIdentity(claims));
 						}
@@ -144,6 +150,7 @@ namespace FinanceApp.Controllers
 						{
 								_logger.LogInformation($"{emailClaim!.Value} has no linked user");
 								claims.Add(new Claim(ClaimTypes.Role, "Unregistered"));
+								idClaims.Add(new Claim(ClaimTypes.Role, "Unregistered"));
 						}
 
 

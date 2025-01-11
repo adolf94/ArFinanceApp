@@ -54,7 +54,6 @@ const Index = () => {
         onSuccess: codeResponse => {
             setLoading(true);
 
-            console.log(codeResponse)
             api.post("/google/auth", { code: codeResponse.code, app: window.webConfig.app}, { preventAuth: true })
                 .then((e) => {
                     window.localStorage.setItem("refresh_token", e.data.refresh_token);
@@ -101,19 +100,27 @@ const Index = () => {
 
 
     useEffect(() => {
-        if (user) {
-            console.log(user)
+        
+        if(searchParams.get("logout")){
+            setIsLoggedIn(false)
+            updateUser({})
+            setSearchParams({})
+            window.sessionStorage.clear();
+            window.localStorage.clear();
+            return;
+        }
+        
+        if (!!user?.userId) {
             setIsLoggedIn(true)
             return;
         }
 
 
-        console.log(location)
         
         let idToken = window.localStorage.getItem("id_token") || ""
         if(idToken) handleToken(idToken)
        
-    }, []);
+    }, [searchParams]);
 
 
     return <>

@@ -1,8 +1,8 @@
-import { AppBar, Box, Grid2 as Grid, Toolbar, Typography, Avatar, Button, Menu, MenuItem } from '@mui/material';
+import { AppBar, Box, Grid2 as Grid, Toolbar, Typography, Avatar, Button, Menu, MenuItem, Divider } from '@mui/material';
 import { CurrencyExchange, ArrowDropDown } from '@mui/icons-material';
 import { ReactNode, useEffect, useState } from 'react';
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import {createSearchParams, useNavigate } from 'react-router-dom';
 import moment from 'moment';
 import useUserInfo, { UserContextValue, UserContext, useUpdateUserInfo } from './userContext';
 import { oauthSignIn } from './googlelogin';
@@ -77,13 +77,13 @@ const PictureMenu = ()=>{
         setAnchorEl(null);
     };
 
-    console.log(user)
     
     return <Box>
         <Avatar
             sx={{cursor: 'pointer'}}
             aria-haspopup="true"
             aria-expanded={open ? 'true' : undefined}
+            src={user?.picture}
             onClick={handleClick}
         >A</Avatar>
         <Menu
@@ -91,18 +91,21 @@ const PictureMenu = ()=>{
             open={open}
             onClose={handleClose}
             anchorOrigin={{
-                vertical: 'top',
-                horizontal: 'left',
+                vertical: 'bottom',
+                horizontal: 'right',
             }}
             transformOrigin={{
                 vertical: 'top',
-                horizontal: 'left',
+                horizontal: 'right',
             }}
         >
-            <MenuItem>{user.name}</MenuItem>
-            {isInRole("COOP_MEMBER") && <MenuItem onClick={() => navigate("/member")}>Member</MenuItem>}
-            {isInRole("MANAGE_LOAN") && <MenuItem onClick={() => navigate("/admin")}>Admin</MenuItem> }
-        </Menu>
+            <MenuItem sx={{fontWeight:'bold'}}>{user.name}</MenuItem>
+            <Divider />
+            <MenuItem onClick={()=>{
+                navigate({pathname:"/",
+                    search: "logout=true"})
+            }}>Logout</MenuItem>
+       </Menu>
     </Box>
 }
 
@@ -118,6 +121,7 @@ const AuthenticatedLayoutChild = ({ children, persona, roles, contextValue }: { 
         //check if token is valid
         if(loggedIn) return
         const token = window.sessionStorage.getItem("access_token");
+        const idToken = window.localStorage.getItem("id_token");
         
         const postTokenFn = (token : string)=>{
             const tokenJson = JSON.parse(window.atob(token!.split(".")[1]));
@@ -128,9 +132,10 @@ const AuthenticatedLayoutChild = ({ children, persona, roles, contextValue }: { 
                     navigate("/", { state: { nextUrl: `${pathname}${search}` } });
                 }
                 return
-            }   
+            }
+            const idJson = JSON.parse(window.atob(idToken!.split(".")[1]));
             
-            updateUser(tokenJson);
+            updateUser(idJson);
             setLoggedIn(true)
         }
         
