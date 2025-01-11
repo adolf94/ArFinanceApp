@@ -1,6 +1,7 @@
 import { AppBar, Box, Grid2 as Grid, Toolbar, Typography, Avatar } from '@mui/material';
 import { CurrencyExchange } from '@mui/icons-material';
 import { ReactNode } from 'react';
+import NavigateSetter from "./NavigateSetter";
 
 
 interface AnonymousLayoutProps {
@@ -10,6 +11,7 @@ const AnonymousLayout = ({ children }: AnonymousLayoutProps) => {
 
 
     return <>
+        <NavigateSetter />
         <Box flexGrow={1}>
             <AppBar position="static" sx={{ bgColor: 'white' }}>
                 <Toolbar>

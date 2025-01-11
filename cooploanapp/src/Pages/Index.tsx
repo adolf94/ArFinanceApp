@@ -3,7 +3,7 @@ import AnonymousLayout from "../components/AnonLayout"
 import { useEffect, useState } from "react"
 import { Google } from '@mui/icons-material'
 import { Box, Button, CircularProgress, Grid2 as Grid } from "@mui/material"
-import { useNavigate, useSearchParams } from "react-router-dom"
+import {useLocation, useNavigate, useSearchParams } from "react-router-dom"
 import { oauthSignIn } from "../components/googlelogin"
 import api from "../components/api"
 import IndexAuthenticated from "./Borrower/Index"
@@ -12,6 +12,8 @@ import Register, { IdToken } from './Register'
 import { jwtDecode as decodeJwt } from 'jwt-decode'
 import useUserInfo, { useUpdateUserInfo } from "../components/userContext"
 import ProgressiveImage from "../components/ProgressiveImg";
+import { useGoogleLogin } from "@react-oauth/google"
+import app from "../App";
 
 
 const Index = () => {
@@ -19,67 +21,75 @@ const Index = () => {
     const [loginLoading, setLoading] = useState(false)
     const [idToken, setIdToken] = useState('')
     const navigate = useNavigate()
+    const location = useLocation()
     const [searchParams, setSearchParams] = useSearchParams();
     const updateUser = useUpdateUserInfo()
     const { user } = useUserInfo()
 
+    
+    const handleToken = (idToken : string)=>{
+        const tokenJson = decodeJwt<IdToken>(idToken);
+        if (moment().add(1, "minute").isAfter(tokenJson.exp! * 1000)) return
+        if (isInRole(tokenJson, "unregistered")) {
+            setIdToken(idToken as string)
+            return;
+        }
+        //validate first
 
-    const handleGoogleRedirect = () => {
-        return new Promise((res, rej) => {
-            console.log(searchParams)
-            const str = window.location.search;
-            if (str === "") {
-
-                res("")
-                return;
-            };
-
-            const hash2Obj: any = str
-                .substring(1)
-                .split("&")
-                .map((v) => v.split(`=`, 1).concat(v.split(`=`).slice(1).join(`=`)))
-                .reduce((pre, [key, value]) => ({ ...pre, [key]: value }), {});
-
-            if (!hash2Obj.state) return res("no_state");
-            const stateFromStorage = sessionStorage.getItem("googleLoginState");
-            if (decodeURIComponent(hash2Obj.state) !== stateFromStorage) {
-                console.debug("state did not match");
-                setSearchParams({})
-                return rej("state_mismatch");
-            }
-
-            if (!!hash2Obj?.error && hash2Obj.error === "interaction_required") {
-                console.debug("interaction_required")
-                oauthSignIn("consent");
-                return;
-            }
-
+        if (idToken != "") window.localStorage.setItem("id_token", idToken);
+        if (idToken === "") {
+            idToken = window.localStorage.getItem("id_token") || ""
+        }
+        if (idToken === "") return
+        const userInfo = decodeJwt<IdToken>(idToken)
+        //@ts-ignore
+        updateUser(userInfo)
+        setIsLoggedIn(true)
+        if(!location?.state) return
+        navigate(location?.state.nextUrl.replace(window.webConfig.basePath, ""))
+    }
+    
+    const loginGoogle = useGoogleLogin({
+        redirect_uri: window.webConfig.redirectUri,
+        onSuccess: codeResponse => {
             setLoading(true);
-            //@ts-ignore
-            api.post("/google/auth", { code: decodeURIComponent(hash2Obj.code), app: window.webConfig.app}, { preventAuth: true })
+
+            console.log(codeResponse)
+            api.post("/google/auth", { code: codeResponse.code, app: window.webConfig.app}, { preventAuth: true })
                 .then((e) => {
                     window.localStorage.setItem("refresh_token", e.data.refresh_token);
                     window.sessionStorage.setItem("access_token", e.data.access_token);
-
-                    res(e.data.id_token);
+            
+                    return e.data;
                 }).catch(err => {
                     if (!err.response?.status) {
                         console.log(err)
-                        return navigate("/errors/Down")
+                        return navigate.push("/errors/Down")
                     }
                     if (err.response.status === 401 && !!err.response.headers["X-GLogin-Error"]) {
                         console.debug("INVALID CODE")
-                        oauthSignIn();
                     }
                     if (err.response.status === 403) {
-                        navigate("/errors/403")
+                        navigate.push("/errors/403")
                     }
+
+                })
+                .then(res=>{
+                    window.localStorage.setItem("id_token", res.id_token);
+
+                    handleToken(res.id_token)
                     setLoading(false);
+                });
 
-            });
-        });
-    };
 
+
+        },
+        flow: 'auth-code',
+    });
+    
+    
+    
+    
     const isInRole = (jwt: IdToken, role: string) => {
 
         if (Array.isArray(jwt.role)) {
@@ -98,36 +108,11 @@ const Index = () => {
         }
 
 
-        handleGoogleRedirect().then((e: string) => {
-            setLoading(false);
-            setSearchParams({})
-
-            const token = window.sessionStorage.getItem("access_token");
-            if (!token) return
-            const tokenJson = decodeJwt<IdToken>(token);
-            if (moment().add(1, "minute").isAfter(tokenJson.exp! * 1000)) return
-            if (isInRole(tokenJson, "unregistered")) {
-                setIdToken(e as string)
-                return;
-            }
-            //validate first
-
-            if (e != "") window.localStorage.setItem("id_token", e);
-            if (e === "") {
-                e = window.localStorage.getItem("id_token") || ""
-            }
-            if (e === "") return
-            const userInfo = decodeJwt<IdToken>(e)
-            //@ts-ignore
-            updateUser(userInfo)
-            setIsLoggedIn(true)
-
-            const stateFromStorage = sessionStorage.getItem("googleLoginState");
-            if(!stateFromStorage) return
-            const state = JSON.parse(window.atob(stateFromStorage!))
-            navigate(state.currentPath.replace(window.webConfig.basePath, ""))
-            sessionStorage.removeItem("googleLoginState")
-        });
+        console.log(location)
+        
+        let idToken = window.localStorage.getItem("id_token") || ""
+        if(idToken) handleToken(idToken)
+       
     }, []);
 
 
@@ -145,7 +130,7 @@ const Index = () => {
                             <Grid size={{ md: 6, xs: 12 }}>
 
                                 {idToken ? <Register token={idToken} /> : <Box sx={{ pt:{xs:'50px',md:'200px'}, px: 4, display: '' }}>
-                                    <Button fullWidth variant="outlined" sx={{ py: 2 }} size="x-large" onClick={() => oauthSignIn()}>
+                                    <Button fullWidth variant="outlined" sx={{ py: 2 }} size="x-large" onClick={() => loginGoogle()}>
                                         <Google sx={{ mr: 1 }} /> {loginLoading ? <CircularProgress /> : "Login/Register with Google"}</Button>
 
                                 </Box>}

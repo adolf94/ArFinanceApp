@@ -4,6 +4,9 @@ import { oauthSignIn } from "./googlelogin";
 import { memoize as mm } from "underscore";
 import { jwtDecode, JwtPayload } from "jwt-decode";
 import { enqueueSnackbar } from "notistack";
+import {getTokenProvider} from "./GetTokenProvider";
+import { v4 } from "uuid";
+import {navigate} from "./NavigateSetter";
 
 
 interface IdToken extends JwtPayload {
@@ -12,11 +15,29 @@ interface IdToken extends JwtPayload {
 }
 
 
+
+const redirectToLogin = ()=>{
+
+
+    const { protocal, host, pathname, search } = window.location;
+    const state = {
+        currentPath: `${pathname}${search}`,
+        uid: v4(),
+    }
+    
+    window.localStorage.setItem("googleLoginState", JSON.stringify(state));
+    navigate.push("/", { state: { nextUrl: state.currentPath } });
+}
+
+
 const getTokenFromApi = mm(
     () => {
         const token = window.localStorage.getItem("refresh_token");
 
-        if (!token) return oauthSignIn();
+        if (!token) return getTokenProvider.getToken((data)=>{
+            
+            console.log(data);
+        });
         return axios
             .post(`${window.webConfig.api}/google/auth/refresh`, {
                 refresh_token: token,
@@ -30,11 +51,12 @@ const getTokenFromApi = mm(
             })
             .catch((e) => {
                 console.log(e);
-                oauthSignIn();
+                redirectToLogin()
             });
     },
     (e) => moment().format("yyyyMMddHHmm"),
 );
+
 
 export const getToken = async (force: boolean) => {
     let token = window.sessionStorage.getItem("access_token");
@@ -64,24 +86,6 @@ api.interceptors.request.use(async (config: AxiosRequestConfig) => {
 
 api.interceptors.response.use(
     async (data) => {
-        //const headerTransId = data.headers["x-last-trans"];
-        //if (!data.config?.noLastTrans && !!headerTransId) {
-        //    const lastTransId = localStorage.getItem("last_transaction");
-        //    const stgTransId = localStorage.getItem("stg_transaction");
-        //    if (!!lastTransId && headerTransId !== lastTransId && stgTransId !== headerTransId) {
-        //        //Do fetch new data
-        //        queryClient.prefetchQuery({ queryKey: [TRANSACTION, { after: lastTransId }], queryFn: () => getAfterTransaction(lastTransId) })
-        //    }
-        //}
-        //if (!headerTransId) {
-        //    console.debug("no last-trans found " + data.config.url);
-        //}
-
-
-        //queryClient
-
-
-
         return data;
     },
     (err) => {

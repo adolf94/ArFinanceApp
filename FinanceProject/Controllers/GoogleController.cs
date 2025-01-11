@@ -53,10 +53,9 @@ namespace FinanceApp.Controllers
 						data.Add("client_id", _config.authConfig.client_id);
 						data.Add("client_secret", clientSecret);
 						data.Add("scope", _config.authConfig.scope);
-						data.Add("redirect_uri", app.RedirectUri);
+						data.Add("redirect_uri", "postmessage");
 						data.Add("grant_type", "authorization_code");
 						data.Add("code", tokenBody.Code);
-
 						FormUrlEncodedContent content = new FormUrlEncodedContent(data);
 						HttpResponseMessage resp = await client.PostAsync("https://oauth2.googleapis.com/token", content);
 						string result = await resp.Content.ReadAsStringAsync();
@@ -92,7 +91,7 @@ namespace FinanceApp.Controllers
 												return StatusCode(500);
 								}
 						}
-						int tokenLifetime = 5;
+						int tokenLifetime = 60;
 						GoogleClaimResponse? currentToken = JsonSerializer.Deserialize<GoogleClaimResponse>(result);
 						if (string.IsNullOrEmpty(currentToken!.refresh_token))
 						{
@@ -132,7 +131,8 @@ namespace FinanceApp.Controllers
 								claims.Add(new Claim("app", tokenBody.App));
 
 								idClaims.Add(new Claim("userId", user!.Id.ToString()));
-
+								idClaims.Add(new Claim(ClaimTypes.Name, user.Name));
+									
 								claims.Add(new Claim(ClaimTypes.Role, "Registered"));
 								user.Roles.ToList().ForEach(e =>
 								{
@@ -186,7 +186,7 @@ namespace FinanceApp.Controllers
 
 						var idTokenNew = tokenHandler.CreateToken(idDescriptor);
 						var strIdToken = tokenHandler.WriteToken(idTokenNew);
-						currentToken.id_token = strClaimToken;
+						currentToken.id_token = strIdToken;
 						return await Task.FromResult(Ok(currentToken));
 				}
 
