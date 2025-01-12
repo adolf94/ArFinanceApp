@@ -245,6 +245,7 @@ declare module 'FinanceApi' {
         acctReceivableId?: string;
         liabilitiesId?: string;
         acctEquityId?: string;
+        googleName?:string;
     }
 
     // ..\FinanceProject\Models\Vendor.cs
