@@ -141,78 +141,7 @@ namespace FinanceApp.Data.CosmosRepo
 						// nextComputeDate = nextDate.AddMonths(1);
 					}
 					nextDate = nextCompute;
-				//
-				// }
-				// else
-				// {
-				// 	totalInterest = 0; // let's just add the previous months' interest
-				// 	while (nextCompute <= loan.NextComputeDate)
-				// 	{
-				// 		nextCompute = nextCompute.AddMonths(1);
-				// 		totalInterest = totalInterest + loanProfile.InterestPerMonth;
-				// 	}
-				// 	nextDate = nextCompute.AddMonths(-1);
-				// }
-				
-
-				//
-				// nextDate = createDate.clone().add(1, 'month');
-				// totalInterest = loanProfile.interestPerMonth!;
-				//
-				// while (nextDate.isSameOrBefore(nextInterest)) {
-				// 	nextDate.add(1, 'month')
-				// 	totalInterest = totalInterest + loanProfile.interestPerMonth!;
-				// }
-				//
-				// if (loanProfile.computePerDay && balance.date.isBefore(nextDate)) {
-				// 	//const curDaysInMonth = nextDate.daysInMonth()
-				// 	const noOfDaysInMonth = nextDate.clone().add(-1,'month').daysInMonth();
-				// 	const rebateDays = nextDate.clone().diff(balance.date.clone(), 'day');
-				// 	const percent = (rebateDays / noOfDaysInMonth) * loanProfile.interestPerMonth!
-				// 	totalInterest = totalInterest - percent
-				// 	nextDate = balance.date.clone()
-				// }
-
-
-				// 		nextDate = loan.Date.AddMonths(1);
-				//
-				// 		nextComputeDate = nextDate;
-				// 		if (createPayment || !loanProfile.ComputePerDay)
-				// 		{
-				// 				totalInterest = loanProfile.InterestPerMonth;
-				// 				while (nextDate <= loan.NextInterestDate && loan.LastInterestDate < dateRef)
-				// 				{
-				// 						nextDate = nextDate.AddMonths(1);
-				// 						totalInterest = totalInterest + loanProfile.InterestPerMonth;
-				//
-				// 				}
-				// 				nextComputeDate = nextDate;
-				//
-				// 				if (loanProfile.ComputePerDay && dateRef < nextDate)
-				// 				{
-				//
-				// 						int noOfDaysInMonth = nextDate.AddMonths(1).AddDays(-1).Day;
-				// 						int rebateDays = (nextDate - dateRef).Days;
-				// 						decimal percent = (rebateDays / noOfDaysInMonth) * loanProfile.InterestPerMonth;
-				// 						totalInterest = totalInterest - percent;
-				// 						nextDate = dateRef;
-				// 						nextComputeDate = nextDate.AddMonths(1);
-				// 				}
-				// 		}
-				// 		else
-				// 		{
-				// 				totalInterest = 0;
-				// 				while (nextComputeDate <= loan.NextInterestDate)
-				// 				{
-				// 						nextComputeDate = nextComputeDate.AddMonths(1);
-				// 						totalInterest = totalInterest + loanProfile.InterestPerMonth;
-				// 				}
-				// 				nextDate = nextComputeDate.AddMonths(-1);
-				// 		}
-				//
-				//
-				//
-				// }
+			
 
 			}
 

@@ -6,6 +6,7 @@ import AccountName from "./AccountName";
 import {FormattedAmount} from "../../../components/NumberInput";
 import { useState } from "react";
 import {AddTask, FilterList, Event } from "@mui/icons-material";
+import NewEntry from "./NewEntry";
 
 
 const dates = Array.from(Array(12).keys()).map(key=>{
@@ -27,7 +28,9 @@ const JournalEntries = ()=>{
                 <CardContent>
                     <Grid container sx={{py:2}} justifyContent="space-between">
                         <Grid>
-                            <Button variant="outlined">Add Ledger Entry</Button>
+                            <NewEntry>
+                                <Button variant="outlined">Add Ledger Entry</Button>
+                            </NewEntry>
                         </Grid>
                         <Grid container sx={{px:2}}>
                             <Grid >
