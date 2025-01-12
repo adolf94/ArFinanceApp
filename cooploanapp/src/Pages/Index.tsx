@@ -27,22 +27,25 @@ const Index = () => {
     const { user } = useUserInfo()
 
     
-    const handleToken = (idToken : string)=>{
-        const tokenJson = decodeJwt<IdToken>(idToken);
-        if (moment().add(1, "minute").isAfter(tokenJson.exp! * 1000)) return
-        if (isInRole(tokenJson, "unregistered")) {
+    const handleToken = ()=>{
+        let access = window.sessionStorage.getItem("access_token");
+        let idToken = window.localStorage.getItem("id_token");
+
+        if(!access) return
+
+        const userInfo = decodeJwt<IdToken>(idToken);
+        const accessInfo = decodeJwt<IdToken>(access);
+        
+        if (moment().add(1, "minute").isAfter(accessInfo.exp! * 1000)) return
+        if (isInRole(accessInfo, "unregistered")) {
             setIdToken(idToken as string)
             return;
         }
         //validate first
 
-        if (idToken != "") window.localStorage.setItem("id_token", idToken);
-        if (idToken === "") {
-            idToken = window.localStorage.getItem("id_token") || ""
-        }
         if (idToken === "") return
-        const userInfo = decodeJwt<IdToken>(idToken)
         //@ts-ignore
+        if(moment().add(1, "minute").isAfter(userInfo.exp * 1000)) return
         updateUser(userInfo)
         setIsLoggedIn(true)
         if(!location?.state) return
@@ -75,7 +78,7 @@ const Index = () => {
                 })
                 .then(res=>{
                     window.localStorage.setItem("id_token", res.id_token);
-
+                    
                     handleToken(res.id_token)
                     setLoading(false);
                 });
@@ -104,21 +107,15 @@ const Index = () => {
         if(searchParams.get("logout")){
             setIsLoggedIn(false)
             updateUser({})
+            setIdToken("")
             setSearchParams({})
             window.sessionStorage.clear();
             window.localStorage.clear();
             return;
         }
         
-        if (!!user?.userId) {
-            setIsLoggedIn(true)
-            return;
-        }
 
-
-        
-        let idToken = window.localStorage.getItem("id_token") || ""
-        if(idToken) handleToken(idToken)
+        handleToken()
        
     }, [searchParams]);
 
@@ -136,7 +133,10 @@ const Index = () => {
                             </Grid>
                             <Grid size={{ md: 6, xs: 12 }}>
 
-                                {idToken ? <Register token={idToken} /> : <Box sx={{ pt:{xs:'50px',md:'200px'}, px: 4, display: '' }}>
+                                {idToken ? <Register token={idToken} setSearch={(d)=>{
+                                    console.log(d)
+                                    setSearchParams(d)
+                                }} /> : <Box sx={{ pt:{xs:'50px',md:'200px'}, px: 4, display: '' }}>
                                     <Button fullWidth variant="outlined" sx={{ py: 2 }} size="x-large" onClick={() => loginGoogle()}>
                                         <Google sx={{ mr: 1 }} /> {loginLoading ? <CircularProgress /> : "Login/Register with Google"}</Button>
 

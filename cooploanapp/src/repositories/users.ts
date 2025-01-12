@@ -21,7 +21,7 @@ export const getUserById = (userId : string)=>{
 
     return api.get(`/user/${userId}`)
         .then(res=>{
-            return res.data
+            return res.data as User
         })
 
 }
@@ -30,6 +30,18 @@ export const useMutateUser = (id?:string)=>{
     const create = useMutation({
         mutationFn:(user:Partial<User>)=>{
             return api.post("/user", user)
+                .then(res=>{
+                    return res.data
+                })
+        },
+        onSuccess : (data)=>{
+            queryClient.invalidateQueries({queryKey:[USER,{userId:data.id}]})
+        }
+    })
+
+    const update = useMutation({
+        mutationFn:(user:Partial<User>)=>{
+            return api.put(`/user/${user.id}`, user)
                 .then(res=>{
                     return res.data
                 })
@@ -52,5 +64,5 @@ export const useMutateUser = (id?:string)=>{
     })
 
 
-    return {create, addDisbursement};
+    return {create,update, addDisbursement};
 }

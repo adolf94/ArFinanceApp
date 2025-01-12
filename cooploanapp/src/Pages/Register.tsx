@@ -5,6 +5,9 @@ import { oauthSignIn } from "../components/googlelogin"
 import api from "../components/api"
 import { jwtDecode, JwtPayload } from "jwt-decode"
 import moment from "moment"
+import {navigate} from "../components/NavigateSetter";
+import { useConfirm } from "material-ui-confirm"
+import { useNavigate } from "react-router-dom"
 
 
 export interface IdToken extends JwtPayload {
@@ -12,6 +15,7 @@ export interface IdToken extends JwtPayload {
 		name :string ,
 		unique_name:string,
 		userId?: string,
+		picture:string,
 		role: string[] | string
 }
 
@@ -48,7 +52,7 @@ const SmsOtpButton = ({ requestOtp, nextOtp }: SmsOtpButtonProps) => {
 				</Button>
 }
 
-const Register = ({ token }: {token: string}) => {
+const Register = ({ token, setSearch }: {token: string, setSearch:any}) => {
 		const [form, setForm] = useState({
 				name: '',
 				googleName:"",
@@ -57,7 +61,8 @@ const Register = ({ token }: {token: string}) => {
 				otpGuid: '',
 				otpCode:''
 		})
-
+		const confirm = useConfirm()
+		const navigate = useNavigate()
 		const [otpState, setOtpState] = useState(moment())
 
 
@@ -68,8 +73,8 @@ const Register = ({ token }: {token: string}) => {
 						if (jsonToken) {
 								setForm((form) => ({
 										...form,
-										googleName:jsonToken.unique_name,
-										name: jsonToken.unique_name,
+										googleName:jsonToken.name,
+										name: jsonToken.name,
 										userName: jsonToken.email
 								}))
 						}
@@ -81,6 +86,8 @@ const Register = ({ token }: {token: string}) => {
 
 
 		const registerClicked = () => {
+
+
 				const { name, userName, mobileNumber} = form
 				if (!name || !userName || !mobileNumber) {
 						enqueueSnackbar("Please check your provided inputs", { autoHideDuration: 3000, anchorOrigin: {horizontal:'right', vertical:'bottom'} ,variant: 'error' })
@@ -88,7 +95,13 @@ const Register = ({ token }: {token: string}) => {
 				}
 				api.post("/user", form)
 						.then(() => {
-								oauthSignIn();
+
+							confirm({
+								title: "Registration Successful",
+								description: "Please login again with your Google Account"
+							}).finally(()=>{
+								setSearch({logout:true})
+							})
 						}).catch(err => {
 
 								if (err.response.status == 400) {

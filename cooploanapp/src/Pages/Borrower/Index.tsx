@@ -215,54 +215,6 @@ const IndexAuthenticated = () => {
 							</CardContent>
 						</Card>
 						
-						{/*<Card>*/}
-						{/*	<CardContent sx={{ p: 2, paddingBottom: '8px!important' }}>*/}
-						{/*		/!*<CardContent sx={{}}>*!/*/}
-						{/*		<Grid container sx={{ justifyContent: "space-between", pb: 1 }}>*/}
-						{/*			<Box>*/}
-						{/*				<Typography variant="caption" gutterBottom={false}>*/}
-						{/*					Date Created: {moment(loan.date).format("MMM DD")}*/}
-						{/*				</Typography>*/}
-						{/*				<Typography variant="h5" component="div" gutterBottom={false}>*/}
-						{/*					P {FormattedAmount(loan.balance)}*/}
-						{/*				</Typography>*/}
-						{/*				<Typography variant="caption" gutterBottom={false}>*/}
-						{/*					Balance*/}
-						{/*				</Typography>*/}
-						{/*			</Box>*/}
-						{/*			<Box>*/}
-						{/*				*/}
-						{/*				/!*Due: {moment(loan.nextInterest).format("MMM DD")}*!/*/}
-						
-						{/*				<Typography variant="caption" gutterBottom={false}>*/}
-						{/*					Next Payment*/}
-						{/*				</Typography>*/}
-						{/*				<Typography variant="h5" gutterBottom={false}>*/}
-						{/*					{FormattedAmount(loan.nextPayment?.amount)}*/}
-						{/*				</Typography>*/}
-						{/*				<Typography variant="caption" gutterBottom={false}>*/}
-						{/*					Before {moment(loan.nextPayment?.date).format("MMM DD")}*/}
-						
-						{/*				</Typography>*/}
-						{/*			</Box>*/}
-						{/*		</Grid>*/}
-						{/*		<Grid sx={{ pb: 1, justifyContent:'start' }}>*/}
-						{/*			<Grid sx={{display:'flex',flexWrap:'wrap'}}>*/}
-						{/*				<Box sx={{textAlign:'center'}}>*/}
-						{/*					<Chip size="small" color="primary" label={`Principal: ${FormattedAmount(loan.principal)}`}  />*/}
-						{/*					<Chip size="small" color="warning" label={`Interest: ${FormattedAmount(loan.interests)}`}  />*/}
-						{/*					<Chip size="small" color="success" label={`Payments: ${FormattedAmount(loan.payments)}`}  />*/}
-						{/*				</Box>*/}
-						{/*			</Grid>*/}
-						{/*			<Grid>*/}
-						{/*			</Grid>*/}
-						{/*		</Grid>*/}
-						{/*	</CardContent>*/}
-						{/*	<CardActions sx={{ justifyContent: 'end' }}>*/}
-						{/*							<Button onClick={() => navigate("./loan/" + loan.orig.id)}> More Details </Button>*/}
-						{/*	</CardActions>*/}
-						{/*</Card>*/}
-						
 					</Grid>)}
 
 

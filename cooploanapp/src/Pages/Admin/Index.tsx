@@ -16,6 +16,7 @@ import { Outlet, Route, Routes, useNavigate } from "react-router-dom";
 import CreateLoan from "./Loan/Create";
 import AdminBody from "./Loan/AdminBody";
 import CreatePayment from "./Payments/CreatePayment";
+import EditUser from "./User/EditUser";
 
 const Admin = () => {
 	const navigate = useNavigate();
@@ -75,6 +76,7 @@ const Admin = () => {
 			</Grid>
 			<Routes>
 				<Route path="/user/new" element={<CreateUser />}></Route>
+				<Route path="/user/:userId" element={<EditUser />}></Route>
 				<Route path="/payment/new" element={<CreatePayment />}></Route>
 				<Route path="/loan/new" element={<CreateLoan />}></Route>
 				<Route path="*" element={<Outlet />}></Route>

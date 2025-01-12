@@ -34,25 +34,40 @@ const getTokenFromApi = mm(
     () => {
         const token = window.localStorage.getItem("refresh_token");
 
-        if (!token) return getTokenProvider.getToken((data)=>{
+        
+        return new Promise((res,rej)=>{
+
+            if (!token) return getTokenProvider.getToken((codeResponse)=>{
+                return api.post("/google/auth", { code: codeResponse.code, app: window.webConfig.app}, { preventAuth: true })
+                    .then((e) => {
+                        window.localStorage.setItem("refresh_token", e.data.refresh_token);
+                        window.sessionStorage.setItem("access_token", e.data.access_token);
+
+                        return res(e.data);
+                    })
+            })
+
+            return axios
+                .post(`${window.webConfig.api}/google/auth/refresh`, {
+                    refresh_token: token,
+                })
+                .then((e) => {
+                    window.sessionStorage.setItem("access_token", e.data.access_token);
+                    if(e.data.refresh_token) {
+                        window.localStorage.setItem("refresh_token", e.data.refresh_token);
+                    }
+                    return e.data.access_token;
+                })
+                .catch((e) => {
+                    window.localStorage.removeItem("refresh_token");
+                    redirectToLogin()
+                    rej({msg:"redirected to login"})
+                });
             
-            console.log(data);
-        });
-        return axios
-            .post(`${window.webConfig.api}/google/auth/refresh`, {
-                refresh_token: token,
-            })
-            .then((e) => {
-                window.sessionStorage.setItem("access_token", e.data.access_token);
-                if(e.data.refresh_token) {
-                    window.localStorage.setItem("refresh_token", e.data.refresh_token);
-                }
-                return e.data.access_token;
-            })
-            .catch((e) => {
-                console.log(e);
-                redirectToLogin()
-            });
+        })
+        
+        
+       
     },
     (e) => moment().format("yyyyMMddHHmm"),
 );

@@ -18,6 +18,7 @@ const CreateUser = () => {
 				userName: '',
 				mobileNumber: '',
 				azureId: uid(),
+				googleName:"",
 				name:''
 		})
 		const {create} = useMutateUser();
@@ -58,7 +59,7 @@ const CreateUser = () => {
 														<TextField label="Name" fullWidth value={form.name} onChange={(evt) => setForm({ ...form, name: evt.target.value })} />
 												</Grid>
 												<Grid size={12} sx={{ p: 1 }}>
-														<TextField label="Email" fullWidth value={form.userName} onChange={(evt) => setForm({ ...form, userName: evt.target.value })} />
+														<TextField label="Email" fullWidth value={form.emailAddress} onChange={(evt) => setForm({ ...form, userName: evt.target.value, emailAddress:evt.target.value })} />
 												</Grid>
 												<Grid size={12} sx={{ p: 1 }}>
 													<TextField label="Mobile Number" value={form.mobileNumber} fullWidth

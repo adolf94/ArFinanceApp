@@ -25,25 +25,29 @@ const JournalEntries = ()=>{
         <Grid size={12} sx={{px:{sm:0,md:1}}}>
             <Paper>
                 <CardContent>
-                    <Grid container padding={2} justifyContent="end">
-                        <Grid  sx={{px:2}}>
-                            <Button size="small" variant={filterBy=="dateAdded"?"outlined":"contained"} onClick={()=>setFilterBy("eventDate")}><Event /></Button>
-                            <Button size="small" variant={filterBy=="dateAdded"?"contained":"outlined"} onClick={()=>setFilterBy("dateAdded")}><AddTask /></Button>
-                            {/*<Button size="sm">Date</Button>*/}
-                            {/*<Button size="sm">Date Post</Button>*/}
+                    <Grid container sx={{py:2}} justifyContent="space-between">
+                        <Grid>
+                            <Button variant="outlined">Add Ledger Entry</Button>
                         </Grid>
-                        <Grid >
-                            <FormControl >
-                                <InputLabel id="demo-simple-select-label">Year</InputLabel>
-                                <Select
-                                    value={month}
-                                    label="Month"
-                                    size="small"
-                                    onChange={(evt) => setMonth(evt.target.value)}
-                                >
-                                    {dates.map(e => <MenuItem value={e.value}>{e.label}</MenuItem>)}
-                                </Select>
-                            </FormControl>
+                        <Grid container sx={{px:2}}>
+                            <Grid >
+                                <Button size="small" variant={filterBy=="dateAdded"?"outlined":"contained"} onClick={()=>setFilterBy("eventDate")}><Event /></Button>
+                                <Button size="small" variant={filterBy=="dateAdded"?"contained":"outlined"} onClick={()=>setFilterBy("dateAdded")}><AddTask /></Button>
+    
+                            </Grid>
+                            <Grid >
+                                <FormControl >
+                                    <InputLabel id="demo-simple-select-label">Year</InputLabel>
+                                    <Select
+                                        value={month}
+                                        label="Month"
+                                        size="small"
+                                        onChange={(evt) => setMonth(evt.target.value)}
+                                    >
+                                        {dates.map(e => <MenuItem value={e.value}>{e.label}</MenuItem>)}
+                                    </Select>
+                                </FormControl>
+                            </Grid>
                         </Grid>
                     </Grid>
                     <Grid container sx={{display:{md:'flex',xs:"none"}}}>
