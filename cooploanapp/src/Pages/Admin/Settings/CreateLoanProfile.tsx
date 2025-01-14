@@ -200,7 +200,7 @@ const CreateLoanProfile = ({ children }: {children : ReactElement}) => {
                         
                     </Grid>
                     <Grid>
-                        <Button onClick={saveProfile}> Create </Button>
+                        <Button onClick={saveProfile} disabled={create.isPending}> Create </Button>
                     </Grid>
                     
                 </Grid>
