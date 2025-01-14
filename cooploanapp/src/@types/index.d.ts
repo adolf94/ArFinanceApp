@@ -11,6 +11,7 @@ declare module 'FinanceApi' {
         currBalance: number;
         periodStartDay: number;
         resetEndOfPeriod: boolean;
+        partitionKey: string;
     }
 
     // ..\FinanceProject\Models\AccountBalance.cs
@@ -21,6 +22,7 @@ declare module 'FinanceApi' {
         month: number;
         dateStart: string;
         balance: number;
+        partitionKey: string;
     }
 
     // ..\FinanceProject\Models\AccountGroup.cs
@@ -32,6 +34,7 @@ declare module 'FinanceApi' {
         accountTypeId: string;
         accountType?: AccountType;
         accounts?: Account[];
+        partitionKey: string;
     }
 
     // ..\FinanceProject\Models\AccountType.cs
@@ -40,6 +43,7 @@ declare module 'FinanceApi' {
         name?: string;
         enabled: boolean;
         shouldResetPeriodically: boolean;
+        partitionKey: string;
     }
 
     // ..\FinanceProject\Models\AppConfig.cs
@@ -81,6 +85,18 @@ declare module 'FinanceApi' {
         currencyCode: string;
     }
 
+    // ..\FinanceProject\Models\InputLogs.cs
+    export interface InputLogs {
+        guid: string;
+        dateLogged: string;
+        path: string;
+        email: string;
+        ipAddress: string;
+        statusCode: string;
+        userId?: string;
+        partitionKey: string;
+    }
+
     // ..\FinanceProject\Models\LedgerAccounts.cs
     export interface LedgerAccount {
         ledgerAcctId: string;
@@ -89,12 +105,14 @@ declare module 'FinanceApi' {
         name: string;
         section: string;
         balance: number;
+        partitionKey: string;
     }
 
     // ..\FinanceProject\Models\LedgerEntry.cs
     export interface LedgerEntry {
         entryId: string;
         entryGroupId: string;
+        monthGroup: string;
         date: string;
         dateAdded: string;
         addedBy: string;
@@ -102,7 +120,6 @@ declare module 'FinanceApi' {
         creditId: string;
         relatedEntries: LedgerEntryTransaction[];
         description: string;
-        type: number;
         amount: number;
     }
 
@@ -180,6 +197,7 @@ declare module 'FinanceApi' {
         userId: string;
         date: string;
         dateAdded: string;
+        addedBy?: string;
         method: string;
         referenceId?: string;
         amount: number;
@@ -191,6 +209,7 @@ declare module 'FinanceApi' {
     // ..\FinanceProject\Models\Role.cs
     export interface Role {
         roleName: string;
+        partitionKey: string;
     }
 
     // ..\FinanceProject\Models\ScheduledTransactions.cs
@@ -207,6 +226,7 @@ declare module 'FinanceApi' {
         enabled: boolean;
         lastTransactionId?: string;
         lastTransaction?: Transaction;
+        partitionKey: string;
     }
 
     // ..\FinanceProject\Models\Transaction.cs
@@ -228,6 +248,7 @@ declare module 'FinanceApi' {
         schedule?: ScheduledTransactions;
         asLastTransaction?: ScheduledTransactions;
         description: string;
+        partitionKey: string;
     }
 
     // ..\FinanceProject\Models\User.cs
@@ -242,10 +263,11 @@ declare module 'FinanceApi' {
         hasActiveLoans: boolean;
         disbursementAccounts: DisbursementAccount[];
         loanProfile?: LoanProfile;
+        googleName: string;
         acctReceivableId?: string;
         liabilitiesId?: string;
         acctEquityId?: string;
-        googleName?:string;
+        partitionKey: string;
     }
 
     // ..\FinanceProject\Models\Vendor.cs
@@ -253,6 +275,7 @@ declare module 'FinanceApi' {
         id: string;
         name?: string;
         enabled: boolean;
+        partitionKey: string;
     }
 
     // ..\FinanceProject\Models\WeeklyBalance.cs
@@ -262,6 +285,7 @@ declare module 'FinanceApi' {
         startDate: string;
         startBalance: number;
         endBalance: number;
+        partitionKey: string;
     }
 
     // ..\FinanceProject\Models\SubModels\DisbursementAccount.cs
@@ -325,6 +349,7 @@ declare module 'FinanceApi' {
         id: string;
         userName?: string;
         name: string;
+        googleName?: string;
         mobileNumber: string;
         otpCode?: number;
         otpGuid?: string;
@@ -346,8 +371,17 @@ declare module 'FinanceApi' {
     }
 
     // ..\FinanceProject\Dto\NewContributionDto.cs
-    export interface NewContributionDto extends Contribution {
+    export interface NewContributionDto extends MemberProfile.Contribution {
         destinationAccount: string;
+    }
+
+    // ..\FinanceProject\Dto\NewLedgerEntryDto.cs
+    export interface NewLedgerEntryDto {
+        date: string;
+        debitId: string;
+        creditId: string;
+        description: string;
+        amount: number;
     }
 
     // ..\FinanceProject\Dto\NewTransactionResponseDto.cs

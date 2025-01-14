@@ -48,6 +48,9 @@ public class LedgerEntryController: ControllerBase
 		item.Amount = entry.Amount;
 		item.AddedBy = Guid.Parse(id!);
 		item.Description = entry.Description;
+		item.MonthGroup = entry.Date.ToString("yyyy-MM");
+		item.DebitId = entry.DebitId;
+		item.CreditId = entry.CreditId;
 
 		LedgerAccount? credit =await  _accts.GetOne(entry.CreditId);
 		if (credit == null) return BadRequest();
@@ -61,8 +64,19 @@ public class LedgerEntryController: ControllerBase
 
 		await _repo.CreateAsync(item,true);
 
+		
 
-		return Ok(item);
+		return Ok(new
+		{
+			RelatedEntities = new
+			{
+				LedgerEntry = new []{item},
+				LedgerAccount = new []
+				{
+					debit, credit
+				},
+			}
+		});
 
 	}
 	

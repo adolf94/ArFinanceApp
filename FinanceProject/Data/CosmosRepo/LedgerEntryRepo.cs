@@ -18,10 +18,10 @@ public class LedgerEntryRepo : ILedgerEntryRepo
 		
 		//Update the accounts
 		
-		LedgerAccount credit = await _context.LedgerAccounts!.Where(e=>e.LedgerAcctId == entry.CreditId).FirstAsync();
+		LedgerAccount? credit = await _context.LedgerAccounts!.Where(e=>e.LedgerAcctId == entry.CreditId).FirstOrDefaultAsync();
 		credit!.Balance = credit.Balance - entry.Amount;
 		
-		LedgerAccount debit = await _context.LedgerAccounts!.Where(e => e.LedgerAcctId == entry.DebitId).FirstAsync();
+		LedgerAccount? debit = await _context.LedgerAccounts!.Where(e => e.LedgerAcctId == entry.DebitId).FirstOrDefaultAsync();
 		debit!.Balance = debit.Balance + entry.Amount;
 		
 		

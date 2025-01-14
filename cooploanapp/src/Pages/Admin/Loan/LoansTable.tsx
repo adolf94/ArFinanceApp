@@ -38,7 +38,7 @@ const LoanClientRow = ( {client} : {client : User}  )=>{
 
       
       let computeInterest = generateCompute({principal: total.principal, date:moment(l.date), interestRecords: [...l.interestRecords], nextInterestDate:moment(l.nextInterestDate)}, l.loanProfile)
-      if(moment().isBefore(l.nextInterestDate)){
+      if(moment().isBefore(l.nextInterestDate) && l.loanProfile.computePerDay){
         let discount = computeInterest.computeDiscount(moment(), {
               balance: principal + interest - payments,
               date: moment(),
