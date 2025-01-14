@@ -8,6 +8,12 @@ import {
     DialogTitle,
     Grid2 as Grid,
     InputAdornment,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
     TextField
 } from "@mui/material";
 import React, {useEffect, useState} from "react";
@@ -77,56 +83,82 @@ const EditUser = () => {
                 <Box sx={{width: '100%'}}>
 
                     <Grid container sx={{p: 1}}>
-                        <Grid size={12} sx={{p: 1}}>
-                            <TextField label="Name" fullWidth value={form.name}
-                                       onChange={(evt) => setForm({...form, name: evt.target.value})}/>
-                        </Grid>
-                        <Grid size={12} sx={{p: 1}}>
-                            <TextField label="Email" fullWidth value={form.emailAddress} onChange={(evt) => setForm({
-                                ...form,
-                                userName: evt.target.value,
-                                emailAddress: evt.target.value
-                            })}/>
-                        </Grid>
-                        <Grid size={12} sx={{p: 1}}>
-                            <TextField label="Mobile Number" value={form.mobileNumber} fullWidth
-                                       slotProps={{
-                                           input: {
-                                               startAdornment: (
-                                                   <InputAdornment position="start">
-                                                       +63
-                                                   </InputAdornment>
-                                               ),
-                                           },
-                                       }}
-                                       onBlur={evt => {
-                                           const len = evt.target.value.length;
-                                           const number = len <= 10 ? evt.target.value : evt.target.value.substring(len - 10);
-                                           setForm({...form, mobileNumber: number})
+                        <Grid size={{xs:12,md:6}}>
 
-                                       }}
-                                       onChange={evt => setForm({...form, mobileNumber: evt.target.value})}
-                            />
-                        </Grid>
+                            <Grid size={12} sx={{p: 1}}>
+                                <TextField label="Name" fullWidth value={form.name}
+                                           onChange={(evt) => setForm({...form, name: evt.target.value})}/>
+                            </Grid>
+                            <Grid size={12} sx={{p: 1}}>
+                                <TextField label="Email" fullWidth value={form.emailAddress} onChange={(evt) => setForm({
+                                    ...form,
+                                    userName: evt.target.value,
+                                    emailAddress: evt.target.value
+                                })}/>
+                            </Grid>
+                            <Grid size={12} sx={{p: 1}}>
+                                <TextField label="Mobile Number" value={form.mobileNumber} fullWidth
+                                           slotProps={{
+                                               input: {
+                                                   startAdornment: (
+                                                       <InputAdornment position="start">
+                                                           +63
+                                                       </InputAdornment>
+                                                   ),
+                                               },
+                                           }}
+                                           onBlur={evt => {
+                                               const len = evt.target.value.length;
+                                               const number = len <= 10 ? evt.target.value : evt.target.value.substring(len - 10);
+                                               setForm({...form, mobileNumber: number})
 
-                        <Grid size={12} sx={{p: 1}}>
-                            <Box sx={{width: '100%'}}>
-                                <Autocomplete
-                                    value={form.loanProfile}
-                                    onChange={(_event, newValue) => {
-                                        setForm({...form, loanProfile: newValue!});
-                                    }}
-                                    getOptionKey={e => e.profileId}
-                                    getOptionLabel={e => e.loanProfileName}
-                                    loading={loading}
-                                    fullWidth
-                                    options={profiles || []}
-                                    renderInput={(params) => <TextField {...params} label="Default Loan Profile"/>}
+                                           }}
+                                           onChange={evt => setForm({...form, mobileNumber: evt.target.value})}
                                 />
+                            </Grid>
 
-                            </Box>
+                            <Grid size={12} sx={{p: 1}}>
+                                <Box sx={{width: '100%'}}>
+                                    <Autocomplete
+                                        value={form.loanProfile}
+                                        onChange={(_event, newValue) => {
+                                            setForm({...form, loanProfile: newValue!});
+                                        }}
+                                        getOptionKey={e => e.profileId}
+                                        getOptionLabel={e => e.loanProfileName}
+                                        loading={loading}
+                                        fullWidth
+                                        options={profiles || []}
+                                        renderInput={(params) => <TextField {...params} label="Default Loan Profile"/>}
+                                    />
+
+                                </Box>
+                            </Grid>
+
                         </Grid>
 
+                        <Grid size={{xs:12,md:6}}>
+                            <TableContainer>
+                                <Table>
+                                    <TableHead>
+                                        <TableRow>
+                                            <TableCell>Bank</TableCell>
+                                            <TableCell>Number</TableCell>
+                                            <TableCell>Name</TableCell>
+                                            <TableCell>QR</TableCell>
+                                        </TableRow>
+                                    </TableHead>
+                                    <TableBody>
+                                        <TableRow>
+                                            <TableCell>Bank</TableCell>
+                                            <TableCell>Number</TableCell>
+                                            <TableCell>Name</TableCell>
+                                            <TableCell>QR</TableCell>
+                                        </TableRow>
+                                    </TableBody>
+                                </Table>
+                            </TableContainer>
+                        </Grid>
                     </Grid>
                 </Box>
             </DialogContent>
