@@ -35,7 +35,7 @@ namespace FinanceApp.Data.CosmosRepo
 				public AppDbContext(DbContextOptions<AppDbContext> options, IConfiguration config) : base(options)
 				{
 						_configuration = config;
-							base.Database.EnsureCreatedAsync().Wait();
+							// base.Database.EnsureCreatedAsync().Wait();
 				}
 
 

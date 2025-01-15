@@ -7,6 +7,7 @@ import {
     DialogContent,
     DialogTitle,
     Grid2 as Grid,
+    IconButton,
     InputAdornment,
     Table,
     TableBody,
@@ -20,6 +21,7 @@ import React, {useEffect, useState} from "react";
 import {getAll, LOAN_PROFILE} from "../../../repositories/loanProfiles";
 import {useQuery} from "@tanstack/react-query";
 import {LoanProfile, User} from "FinanceApi";
+import {QrCode, Delete} from "@mui/icons-material"
 import {getUserById, useMutateUser, USER} from "../../../repositories/users";
 import {v4 as uid} from 'uuid'
 import {enqueueSnackbar} from "notistack";
@@ -77,7 +79,7 @@ const EditUser = () => {
 
 
     return <React.Fragment>
-        <Dialog open={!isLoading} maxWidth="sm" fullWidth onClose={() => navigate(-1)}>
+        <Dialog open={!isLoading} maxWidth="md" fullWidth onClose={() => navigate(-1)}>
             <DialogTitle>Create new User</DialogTitle>
             <DialogContent>
                 <Box sx={{width: '100%'}}>
@@ -145,16 +147,23 @@ const EditUser = () => {
                                             <TableCell>Bank</TableCell>
                                             <TableCell>Number</TableCell>
                                             <TableCell>Name</TableCell>
-                                            <TableCell>QR</TableCell>
+                                            <TableCell>QR/Actions</TableCell>
                                         </TableRow>
                                     </TableHead>
                                     <TableBody>
-                                        <TableRow>
-                                            <TableCell>Bank</TableCell>
-                                            <TableCell>Number</TableCell>
-                                            <TableCell>Name</TableCell>
-                                            <TableCell>QR</TableCell>
-                                        </TableRow>
+                                        {
+                                            
+                                            !isLoading && user!.disbursementAccounts.map(e=><TableRow>
+                                                <TableCell>{e.bankName}</TableCell>
+                                                <TableCell>{e.accountId}</TableCell>
+                                                <TableCell>{e.accountName}</TableCell>
+                                                <TableCell>
+                                                    <IconButton><QrCode /></IconButton>
+                                                    <IconButton><Delete /></IconButton>
+                                                </TableCell>
+                                            </TableRow>)
+                                        }
+                                        
                                     </TableBody>
                                 </Table>
                             </TableContainer>
