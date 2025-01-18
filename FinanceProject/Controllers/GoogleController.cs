@@ -53,7 +53,7 @@ namespace FinanceApp.Controllers
 						data.Add("client_id", _config.authConfig.client_id);
 						data.Add("client_secret", clientSecret);
 						data.Add("scope", _config.authConfig.scope);
-						data.Add("redirect_uri", "postmessage");
+						data.Add("redirect_uri", app.RedirectUri);
 						data.Add("grant_type", "authorization_code");
 						data.Add("code", tokenBody.Code);
 						FormUrlEncodedContent content = new FormUrlEncodedContent(data);

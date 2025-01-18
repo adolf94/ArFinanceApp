@@ -67,6 +67,7 @@ namespace FinanceApp.Data.CosmosRepo
 						);
 
 					builder.Entity<AccountGroup>()
+						
 						.HasData(
 							new
 							{
