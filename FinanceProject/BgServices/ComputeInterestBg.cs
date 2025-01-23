@@ -34,6 +34,7 @@ namespace FinanceApp.BgServices
 
 					ILoanRepo repo = scope.ServiceProvider.GetRequiredService<ILoanRepo>();
 					IUserRepo _user = scope.ServiceProvider.GetRequiredService<IUserRepo>();
+					IPaymentRepo _payments = scope.ServiceProvider.GetRequiredService<IPaymentRepo>();
 					Sms sms = scope.ServiceProvider.GetRequiredService<Sms>();
 
 					//Writing to disk instead of sql query every run
@@ -51,6 +52,10 @@ namespace FinanceApp.BgServices
 							Loan item = enumerable.ToList()[i];
 
 							User? user = await _user.GetById(item.UserId);
+							var payments = await _payments.GetLoanPaymentsAsync(item.Id);
+							item.Payment = payments.ToList();
+							
+							
 							var result = await repo.ComputeInterests(item, DateTime.Now);
 
 							if (!string.IsNullOrEmpty(user!.MobileNumber) && result.InterestData.Amount > 0)

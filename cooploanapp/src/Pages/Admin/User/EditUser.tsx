@@ -110,8 +110,10 @@ const EditUser = () => {
                                                },
                                            }}
                                            onBlur={evt => {
-                                               const len = evt.target.value.length;
-                                               const number = len <= 10 ? evt.target.value : evt.target.value.substring(len - 10);
+                                               // @ts-ignore
+                                               let number = evt.target.value.matchAll(/[0-9]/g).toArray().join("");
+                                               const len = number.length;
+                                               if (len > 10) number = number.substring(len-10);
                                                setForm({...form, mobileNumber: number})
 
                                            }}

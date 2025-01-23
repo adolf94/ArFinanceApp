@@ -289,6 +289,10 @@ public class PaymentRepo : IPaymentRepo
 				}
 		}
 
+		public async Task<IEnumerable<LoanPayment>> GetLoanPaymentsAsync(Guid loanId)
+		{
+			return await _context.LoanPayments!.Where(e => e.LoanId == loanId).ToListAsync();
+		}
 		public decimal ComputeInterestPercent(LoanProfile loanProfile, DateTime startDate, DateTime date)
 		{
 				var days = (date - startDate).TotalDays;

@@ -68,9 +68,9 @@ namespace FinanceApp.Data.CosmosRepo
 			{
 				Principal = loan.Principal - loan.Payment.Where(e => e.AgainstPrincipal == true).Sum(e => e.Amount),
 				Interests = loan.InterestRecords.Sum(e => e.Amount),
-				Payments = loan.Payment.Where(e => e.AgainstPrincipal == true).Sum(e => e.Amount),
-				Balance = loan.Principal + loan.Interests -
-				          loan.Payment.Where(e => e.AgainstPrincipal == true).Sum(e => e.Amount)
+				Payments = loan.Payment.Sum(e => e.Amount),
+				Balance = loan.Principal + loan.InterestRecords.Sum(e => e.Amount) 
+							-loan.Payment.Sum(e => e.Amount)
 			};
 			DateTime StartDate = loan.Date;
 			double days = (loan.NextInterestDate - StartDate).TotalDays;
