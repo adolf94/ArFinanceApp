@@ -1,0 +1,13 @@
+{
+	"folders": [
+		{
+			"path": "ScheduledFunctions"
+		},
+		{
+			"path": "FinanceHooks"
+		}
+	],
+	"settings": {
+		"debug.internalConsoleOptions": "neverOpen"
+	}
+}
