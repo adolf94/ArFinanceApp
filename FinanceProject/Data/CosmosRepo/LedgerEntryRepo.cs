@@ -6,21 +6,27 @@ namespace FinanceApp.Data.CosmosRepo;
 public class LedgerEntryRepo : ILedgerEntryRepo
 {
 	private readonly AppDbContext _context;
+	private readonly ILogger<LedgerEntryRepo> _logger;
 
-	public LedgerEntryRepo(AppDbContext context)
+	public LedgerEntryRepo(AppDbContext context, ILogger<LedgerEntryRepo> logger)
 	{
 		_context = context;
+		_logger = logger;
 	}
 
 	public async Task<LedgerEntry> CreateAsync(LedgerEntry entry, bool saveChanges = true)
 	{
 		_context.LedgerEntries!.Add(entry);
-		
+		_logger.LogDebug($"========= Add Entry Id : {entry.EntryId} =========");
+		_logger.LogDebug($"Description	: {entry.Description}");
+		_logger.LogDebug($"Amount		: {entry.Amount}");
 		//Update the accounts
 		
 		LedgerAccount? credit = await _context.LedgerAccounts!.Where(e=>e.LedgerAcctId == entry.CreditId).FirstOrDefaultAsync();
+		var prevCreditBalance = credit.Balance;
 		credit!.Balance = credit.Balance - entry.Amount;
-		
+		_logger.LogDebug($"{credit.Name}: {prevCreditBalance} ==> {credit.Balance}");
+
 		LedgerAccount? debit = await _context.LedgerAccounts!.Where(e => e.LedgerAcctId == entry.DebitId).FirstOrDefaultAsync();
 		debit!.Balance = debit.Balance + entry.Amount;
 		
@@ -40,12 +46,11 @@ public class LedgerEntryRepo : ILedgerEntryRepo
 
 		if(entry == null) return false;
 		//Update the accounts
-		
 		LedgerAccount credit = await _context.LedgerAccounts!.Where(e=>e.LedgerAcctId == entry.CreditId).FirstAsync();
-		credit!.Balance = credit.Balance - entry.Amount;
+		credit!.Balance = credit.Balance + entry.Amount;
 		
 		LedgerAccount debit = await _context.LedgerAccounts!.Where(e => e.LedgerAcctId == entry.DebitId).FirstAsync();
-		debit!.Balance = debit.Balance + entry.Amount;
+		debit!.Balance = debit.Balance - entry.Amount;
 
 		_context.LedgerEntries!.Remove(entry);
 		
