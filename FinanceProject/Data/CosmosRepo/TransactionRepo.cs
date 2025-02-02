@@ -19,14 +19,13 @@ namespace FinanceApp.Data.CosmosRepo
 				}
 
 
-				public Transaction CreateTransaction(CreateTransactionDto item)
+				public Transaction CreateTransaction(Transaction item)
 				{
 
 
-						Transaction tran = _mapper.Map<Transaction>(item);
-						_context.Transactions!.AddAsync(tran).AsTask().Wait();
+						_context.Transactions!.AddAsync(item).AsTask().Wait();
 						_context.SaveChangesAsync().Wait();
-						return tran;
+						return item;
 
 				}
 

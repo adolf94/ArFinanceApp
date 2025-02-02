@@ -1,10 +1,11 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using UUIDNext;
 
 namespace FinanceProject.Models
 {
 		public class Transaction
 		{
-				public Guid Id { get; set; } = new Guid();
+				public Guid Id { get; set; } = Uuid.NewSequential();
 
 				public string Type { get; set; } = "";
 

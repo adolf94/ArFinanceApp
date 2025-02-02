@@ -15,7 +15,7 @@ namespace FinanceProject.Dto
 								;
 						
 						CreateMap<AccountCreateDto, Account>()
-							.ForMember(e=>e.PartitionKey, opt=>opt.MapFrom((e)=>"default"))
+							.ForMember(e=>e.PartitionKey, opt=>opt.MapFrom((e)=>"default"));
 						
 				}
 				

@@ -77,15 +77,15 @@ namespace FinanceApp.Data.CosmosRepo
 
 								DateTime forAcctBalance = e.NextTransactionDate;
 								CrontabSchedule scd = CrontabSchedule.Parse(e.CronExpression);
-								while (forAcctBalance > DateTime.UtcNow)
-								{
-										_balances.CreateAccountBalances(forAcctBalance);
-										forAcctBalance = scd.GetNextOccurrence(forAcctBalance);
-								}
+								// while (forAcctBalance > DateTime.UtcNow)
+								// {
+								// 		_balances.CreateAccountBalances(forAcctBalance);
+								// 		forAcctBalance = scd.GetNextOccurrence(forAcctBalance);
+								// }
 
-
-								using (var transaction = _context.Database.BeginTransaction())
-								{
+								//
+								// using (var transaction = _context.Database.BeginTransaction())
+								// {
 										try
 										{
 												DateTime nextTransaction = e.NextTransactionDate;
@@ -95,22 +95,31 @@ namespace FinanceApp.Data.CosmosRepo
 
 														Transaction tr = _context.Transactions!.Find(e.LastTransactionId)!;
 
-														_accounts.UpdateCreditAcct(tr.CreditId, tr.Amount);
-														_accounts.UpdateDebitAcct(tr.DebitId, tr.Amount);
+														var cr = _accounts.UpdateCreditAcct(tr.CreditId, tr.Amount);
+														var dr = _accounts.UpdateDebitAcct(tr.DebitId, tr.Amount);
+														Guid id = Guid.CreateVersion7();
 
-														_balances.UpdateCreditAcct(tr.CreditId, tr.Amount, nextTransaction);
-														_balances.UpdateDebitAcct(tr.DebitId, tr.Amount, nextTransaction);
+														var crBal =  _balances.CreateBalances(cr,
+															nextTransaction).GetAwaiter().GetResult();
+														var drBal = _balances.CreateBalances(dr,
+															nextTransaction).GetAwaiter().GetResult();
+														
+														_balances.UpdateCrAccount(tr.CreditId, tr.Amount,id, nextTransaction);
+														_balances.UpdateDrAccount(tr.DebitId, tr.Amount,id, nextTransaction);
 
-														CreateTransactionDto newTr = new CreateTransactionDto
+														Transaction newTr = new Transaction()
 														{
-																Id = Guid.NewGuid(),
+																Id = id,
 																CreditId = tr.CreditId,
 																DebitId = tr.DebitId,
 																Amount = tr.Amount,
 																Date = nextTransaction,
 																VendorId = tr.VendorId,
-																Description = $"{e.LastTransactionIndex + 1} of {e.TotalOccurence}. "
-
+																Description = $"{e.LastTransactionIndex + 1} of {e.TotalOccurence}. ",
+																BalanceRefs = new []{
+																	new BalanceAccount(){ AccountBalanceKey = crBal.Id, AccountId = tr.CreditId , IsDebit = false },
+																	new BalanceAccount(){ AccountBalanceKey = drBal.Id, AccountId = tr.CreditId , IsDebit = true }
+																}.ToList()
 														};
 
 														_transactions.CreateTransaction(newTr);
@@ -124,16 +133,16 @@ namespace FinanceApp.Data.CosmosRepo
 												}
 												_context.SaveChanges();
 
-												transaction.Commit();
+												// transaction.Commit();
 										}
 										catch (Exception ex)
 										{
-												transaction.Rollback();
+												// transaction.Rollback();
 												errorOccured = true;
 												_conf.ScheduleHasErrors = true;
 												break;
 										}
-								}
+								// }
 						};
 						if (!errorOccured)
 						{
