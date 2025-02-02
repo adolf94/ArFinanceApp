@@ -31,5 +31,14 @@ namespace FinanceProject.Models
 				[MaxLength(100)]
 				public string PartitionKey { get; init; } = "default";
 
+				public List<BalanceAccount> BalanceRefs { get; set; } = new List<BalanceAccount>();
+
+		}
+
+		public class BalanceAccount
+		{
+			public string AccountBalanceKey { get; set; } = "";
+			public Guid AccountId { get; set; }
+			public bool IsDebit { get; set; }
 		}
 }

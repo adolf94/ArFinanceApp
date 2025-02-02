@@ -1,4 +1,6 @@
-﻿using FinanceProject.Data;
+﻿using AutoMapper;
+using FinanceApp.Dto;
+using FinanceProject.Data;
 using FinanceProject.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -11,9 +13,12 @@ namespace FinanceProject.Controllers
 		public class AccountController : ControllerBase
 		{
 				private readonly IAccountRepo _repo;
-				public AccountController(IAccountRepo repo)
+				private readonly IMapper _mapper;
+
+				public AccountController(IAccountRepo repo, IMapper mapper)
 				{
 						_repo = repo;
+						_mapper = mapper;
 				}
 
 				[HttpGet("accounts")]
@@ -31,8 +36,12 @@ namespace FinanceProject.Controllers
 						return await Task.FromResult(Ok(accounts));
 				}
 				[HttpPost("accounts")]
-				public async Task<IActionResult> Create(Account type)
+				public async Task<IActionResult> Create(AccountCreateDto type)
 				{
+
+						Account acct = _mapper.Map<Account>(type);
+					
+					
 						_repo.Create(type);
 						return await Task.FromResult(CreatedAtAction("GetOne", new { id = type.Id }, type));
 

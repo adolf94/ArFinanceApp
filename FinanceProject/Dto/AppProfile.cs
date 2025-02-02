@@ -13,7 +13,12 @@ namespace FinanceProject.Dto
 						CreateMap<CreateUserDto, User>()
 								.ForMember(e=>e.EmailAddress, opt=>opt.MapFrom(e=>e.UserName))
 								;
+						
+						CreateMap<AccountCreateDto, Account>()
+							.ForMember(e=>e.PartitionKey, opt=>opt.MapFrom((e)=>"default"))
+						
 				}
+				
 
 
 		}
