@@ -104,12 +104,16 @@ const data = {
   dataMigration:(db)=>{
 	let userId = db.User[0].Id
 	let receivables = db.User.reduce((prev,e,i)=>{
+		let uid = uuid7()
 	  	let ledgerAccount = {
+
+			PartitionKey: "default",
+			id: "LedgerAccount|" + uid,
 
 		  AddedBy : e.Id,
 		  DateAdded : moment().format("YYYY-MM-DDTHH:mm:ss"),
 		  Balance : 0,
-		  LedgerAcctId : uuid7(),
+		  LedgerAcctId : uid,
 		  Discriminator:"LedgerAccount",
 		  Name : `Rcvb - ${e.Name}`,
 		  Section : "receivables"
@@ -121,18 +125,24 @@ const data = {
 	
 	//Add default AssetId 
 	let CashAsset = {
+		id: "LedgerAccount|0193d2dd-3bfe-7990-99a2-b6e8ebec289b",
 	  LedgerAcctId: '0193d2dd-3bfe-7990-99a2-b6e8ebec289b',
 	  DateAdded: moment().toISOString(),
 	  AddedBy:  userId,
-	  Discriminator:"LedgerAccount",
+		PartitionKey: "default",
+
+		Discriminator:"LedgerAccount",
 	  Name: "Cash",
 	  Section:"assets",
 	  Balance:0
 	}
 	let IncomeAsset = {
+		id: "LedgerAccount|742070bd-e68b-45c9-a1f7-021916127731",
 	  LedgerAcctId: "742070bd-e68b-45c9-a1f7-021916127731",
 	  DateAdded : moment().toISOString(),
-	  Discriminator:"LedgerAccount",
+		PartitionKey: "default",
+
+		Discriminator:"LedgerAccount",
 	  AddedBy:  userId,
 	  Name: "Interest Income",
 	  Section:"income",
@@ -155,9 +165,12 @@ const data = {
 	
 	db.Loans.forEach((loan, i)=>{
 	  let user = db.User.find(e=>loan.UserId === e.Id)
+		let uid = uuid7();
 	  let newEntry = {
-		EntryId : uuid7(),
-		EntryGroupId : uuid7(),
+		  id:`LedgerEntry|${uid}`,
+		EntryId :uid,
+		  PartitionKey: "default",
+		EntryGroupId :uid,
 		AddedBy : loan.CreatedBy,
 		CreditId : CashAsset.LedgerAcctId,
 		DebitId :user.AcctReceivableId,
@@ -178,9 +191,13 @@ const data = {
 	  
 	  loan.InterestRecords.forEach((interest, i)=>{
 
-		let intEntry = {
-		  EntryId : uuid7(),
-		  EntryGroupId : loan.LedgerEntryId,
+		  let uid = uuid7();
+		  let intEntry = {
+			  id:`LedgerEntry|${uid}`,
+			  EntryId :uid,
+			  PartitionKey: "default",
+
+			  EntryGroupId : loan.LedgerEntryId,
 		  AddedBy : loan.CreatedBy,
 		  CreditId : IncomeAsset.LedgerAcctId,
 		  DebitId :user.AcctReceivableId,
@@ -207,7 +224,9 @@ const data = {
 	  let user = db.User.find(e=>payment.UserId === e.Id)
 	  let uid = uuid7()
 	  let entry = {
-		EntryId : uid,
+		  id:`LedgerEntry|${uid}`,
+		PartitionKey:"default",
+		  EntryId : uid,
 		EntryGroupId : uid,
 		AddedBy : payment.AddedBy  || userId,
 		CreditId : user.AcctReceivableId,

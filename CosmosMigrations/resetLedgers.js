@@ -1,15 +1,15 @@
 const migrationinfo = require('./migrations/4_ledgers');
+const lastMigrate = require('./migrations/5_nopartition');
 const fs = require("node:fs");
 const os = require("node:os");
 const {spawn} = require("node:child_process");
 const path = require("node:path");
+require("dotenv").config({ path: `.env.local`, override: true });
 
 let tables = migrationinfo.migrate.database
 
 
 let tableData = {}
-
-tables.forEach(table => {
 
   tables.forEach((table)=>{
 	console.log("container: " + table.Container)
@@ -42,12 +42,12 @@ tables.forEach(table => {
 	  Source: "json",
 	  Sink: "cosmos-nosql",
 	  SinkSettings: {
-		"ConnectionString": TMP_CONN,
-		"Database":TMP_DB
+		"ConnectionString": process.env.TMP_CONN,
+		"Database":process.env.TMP_DB
 	  }
 	}
 
-	let metaData = migrationinfo.migrate.database
+	let metaData = lastMigrate.migrate.database
 
 	let operations = metaData.map(e=>{
 	  return {
@@ -56,7 +56,7 @@ tables.forEach(table => {
 		},
 		"SinkSettings": {
 		  "Container":e.Container,
-		  "Database": TMP_DB,
+		  "Database": process.env.TMP_DB,
 		  "RecreateContainer" :true,
 		  "PartitionKeyPath" : e.PartitionKeyPath ,
 		  "PartitionKeyPaths" :e.PartitionKeyPaths
@@ -77,8 +77,6 @@ tables.forEach(table => {
 	internalProc.on('exit', (code) => {
 	  res(code)
 	})
-  })
-  
   
   
 })

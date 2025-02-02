@@ -27,8 +27,21 @@ namespace FinanceProject.Models
 				// Technically DateStart is DateEnd of last period
 				// Note for credit card balance : adjust the view to NEXT month (checked na? NO)
 				public DateTime DateStart { get; set; }
+				public DateTime DateEnd { get; set; }
 				public decimal Balance { get; set; }
 				
 				public string PartitionKey { get; init; } = "default";
+				
+				
+				public List<BalanceTransactions> Transactions { get; set; } = new List<BalanceTransactions>();
+				
+				
+				
+		}
+
+		public class BalanceTransactions
+		{
+			public Guid TransactionId { get; set; }
+			public decimal Amount { get; set; }
 		}
 }
