@@ -18,31 +18,47 @@ namespace FinanceApp.Data.CosmosRepo
 				{
 						try
 						{
-								_context.Accounts!.AddAsync(group).AsTask().Wait();
-								_context.SaveChangesAsync().Wait();
-
-								_context.AccountBalances!.AddAsync(new AccountBalance
+							group.MinMonth = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
+							group.MaxMonth = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
+							var adjId = UUIDNext.Uuid.NewSequential();
+							var baltransactions = new List<BalanceTransactions>();
+							if (group.Balance != 0)
+							{
+								_context.Transactions!.AddAsync(new Transaction
 								{
-										AccountId = group.Id,
-										Balance = 0m,
-										DateStart = new DateTime(DateTime.Now.Year, DateTime.Now.Month, group.PeriodStartDay),
-										Year = DateTime.Now.Year,
-										Month = DateTime.Now.Month,
+									DebitId = group.Id,
+									CreditId = new Guid("747b7bd2-1a50-4e7c-8b27-01e5fa8fd6a4"),
+									Amount = group.Balance,
+									Description = "Modified Balance",
+									Date = DateTime.Now,
+									DateAdded = DateTime.Now,
+									Id = adjId
+									
 								}).AsTask().Wait();
-								if (group.Balance != 0)
+								baltransactions.Add(new BalanceTransactions()
 								{
-										_context.Transactions!.AddAsync(new Transaction
-										{
-												DebitId = group.Id,
-												CreditId = new Guid("747b7bd2-1a50-4e7c-8b27-01e5fa8fd6a4"),
-												Amount = group.Balance,
-												Description = "Modified Balance",
-												Date = DateTime.Now,
-												DateAdded = DateTime.Now
-										}).AsTask().Wait();
-								}
-								_context.SaveChangesAsync().Wait();
-								return true;
+									TransactionId = adjId,
+									Amount = group.Balance
+								});
+							}
+							
+							var initialAcctBal = new AccountBalance
+							{
+								AccountId = group.Id,
+								Balance = group.Balance,
+								DateStart = new DateTime(DateTime.Now.Year, DateTime.Now.Month, group.PeriodStartDay),
+								DateEnd = new DateTime(DateTime.Now.Year, DateTime.Now.Month, group.PeriodStartDay).AddDays(1),
+								Year = DateTime.Now.Year,
+								Month = DateTime.Now.Month,
+								Transactions = baltransactions
+							};
+							
+							
+							_context.AccountBalances!.AddAsync(initialAcctBal).AsTask().Wait();
+							_context.Accounts!.AddAsync(group).AsTask().Wait();
+							_context.SaveChangesAsync().Wait();
+
+							return true;
 						}
 						catch (Exception ex)
 						{

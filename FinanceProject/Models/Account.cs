@@ -6,7 +6,7 @@ namespace FinanceProject.Models
 {
 		public class Account
 		{
-				public Guid Id { get; set; } = new Guid();
+				public Guid Id { get; set; } = Guid.CreateVersion7();
 				public string? Name { get; set; }
 				public bool Enabled { get; set; } = true;
 				public Guid? AccountGroupId { get; set; }

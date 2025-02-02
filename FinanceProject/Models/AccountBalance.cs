@@ -28,12 +28,15 @@ namespace FinanceProject.Models
 				// Note for credit card balance : adjust the view to NEXT month (checked na? NO)
 				public DateTime DateStart { get; set; }
 				public DateTime DateEnd { get; set; }
-				public decimal Balance { get; set; }
+
+
+				public decimal EndingBalance { get; set; } = 0;
+				public decimal Balance { get; set; } = 0;
 				
 				public string PartitionKey { get; init; } = "default";
 				
 				
-				public List<BalanceTransactions> Transactions { get; set; } = new List<BalanceTransactions>();
+				public List<BalanceTransactions> Transactions { get; set; } = new ();
 				
 				
 				

@@ -42,8 +42,8 @@ namespace FinanceProject.Controllers
 						Account acct = _mapper.Map<Account>(type);
 					
 					
-						_repo.Create(type);
-						return await Task.FromResult(CreatedAtAction("GetOne", new { id = type.Id }, type));
+						_repo.Create(acct);
+						return await Task.FromResult(CreatedAtAction("GetOne", new { id = acct.Id }, acct));
 
 				}
 		}

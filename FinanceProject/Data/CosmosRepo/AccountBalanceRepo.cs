@@ -102,6 +102,103 @@ namespace FinanceApp.Data.CosmosRepo
 						}
 						_cache.Set(acc_bal_key, "t");
 				}
+
+
+
+				public async Task<AccountBalance> CreateBalances(Account acct, DateTime month)
+				{
+					DateTime currentPeriod = new DateTime(month.Year, month.Month, 1);
+					DateTime prevPeriod = new DateTime(month.Year, month.Month, 1).AddMonths(-1);
+
+					
+					
+					List<AccountBalance> balancesToAdd = new List<AccountBalance>();
+					if (prevPeriod < acct.MinMonth)
+					{
+						//Create account balanced previous months
+						DateTime period = prevPeriod;
+						while (period < acct.MinMonth)
+						{
+							var newBalance = new AccountBalance()
+							{
+								AccountId = acct.Id,
+								Year = period.Year,
+								Month = period.Month,
+								DateStart = new DateTime(period.Year, period.Month, acct.PeriodStartDay),
+								DateEnd = new DateTime(period.Year, period.Month, acct.PeriodStartDay).AddMonths(1),
+							};
+							balancesToAdd.Add(newBalance);
+							period = period.AddMonths(1);
+						}
+					}
+					if (prevPeriod < acct.MinMonth)
+					{
+						//Create account balanced previous months
+						DateTime period = prevPeriod;
+						while (period < acct.MinMonth)
+						{
+							var newBalance = new AccountBalance()
+							{
+								AccountId = acct.Id,
+								Year = period.Year,
+								Month = period.Month,
+								DateStart = new DateTime(period.Year, period.Month, acct.PeriodStartDay),
+								DateEnd = new DateTime(period.Year, period.Month, acct.PeriodStartDay).AddMonths(1),
+							};
+							balancesToAdd.Add(newBalance);
+							period = period.AddMonths(1);
+						}
+					}
+
+					if (currentPeriod > acct.MaxMonth)
+					{
+						
+						DateTime period = acct.MaxMonth.AddMonths(1);
+						while (period >= acct.MinMonth)
+						{
+							var newBalance = new AccountBalance()
+							{
+								AccountId = acct.Id,
+								Year = period.Year,
+								Month = period.Month,
+								Balance = acct.Balance,
+								EndingBalance = acct.Balance,
+								DateStart = new DateTime(period.Year, period.Month, acct.PeriodStartDay),
+								DateEnd = new DateTime(period.Year, period.Month, acct.PeriodStartDay).AddMonths(1),
+							};
+							balancesToAdd.Add(newBalance);
+							period = period.AddMonths(1);
+						}
+					}
+
+					if (balancesToAdd.Any())
+					{
+						await _context.AccountBalances!.AddRangeAsync(balancesToAdd);
+						await _context.SaveChangesAsync();
+					}
+
+					var item = await _context.AccountBalances!.FirstOrDefaultAsync(e =>
+						e.Id == $"{month.Year}/{month.Month}/{acct.Id}");
+					
+					return item;
+
+				}
+				
+
+				public async Task<IEnumerable<AccountBalance>> UpdateCrAccount(Guid creditId, decimal amount, DateTime month)
+				{
+					Account? acct = await _context.Accounts!.Where(e => e.Id == creditId).FirstOrDefaultAsync();
+					if (acct == null) throw new Exception("Account not found");
+					bool isPrevPeriod = acct.PeriodStartDay < month.Day;
+					List<AccountBalance> balance = new List<AccountBalance>();
+					DateTime currentPeriod = new DateTime(month.Year, month.Month, 1);
+					DateTime prevPeriod = new DateTime(month.Year, month.Month, 1).AddMonths(-1);
+					
+					
+				}
+				
+				
+				
 				public IEnumerable<AccountBalance> UpdateCreditAcct(Guid creditId, decimal amount, DateTime date)
 				{
 
