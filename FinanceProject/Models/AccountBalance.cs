@@ -10,7 +10,7 @@ namespace FinanceProject.Models
 				{
 						get
 						{
-								return $"{Year}/{Month}/{AccountId}";
+								return $"{Year}|{Month:D2}|{AccountId}";
 						}
 						set
 						{

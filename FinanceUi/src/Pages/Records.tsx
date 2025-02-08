@@ -103,36 +103,37 @@ const Records = () => {
     };
     let rec = (records || [])
       .sort((a, b) => (a.date > b.date ? -1 : 1))
-      .reduce<RecordViewTransaction[]>((prev, current, index) => {
-        let date = prev.find(
-          (e) => e.dateGroup == moment(current.date).format("yyyy-MM-DD"),
-        );
-        if (!date) {
-          date = {
-            dateGroup: moment(current.date).format("yyyy-MM-DD"),
-            day: moment(current.date).date(),
-            dayOfWeek: moment(current.date).format("ddd"),
-            items: [],
-            income: 0,
-            expenses: 0,
-          };
-          prev.push(date);
-        }
-        date.items.push(current);
-        switch (current.type) {
-          case "expense":
-            date.expenses += current.amount;
-            totals.expense += current.amount;
-            totals.total -= current.amount;
-            break;
-          case "income":
-            date.income += current.amount;
-            totals.income += current.amount;
-            totals.total += current.amount;
-            break;
-        }
-        return prev;
-      }, []);
+      .reduce((prev : RecordViewTransaction[], current :Transaction ) => {
+              let date = prev.find(
+                  (e) => e.dateGroup == moment(current.date).format("yyyy-MM-DD"),
+              );
+              if (!date) {
+                  date = {
+                      dateGroup: moment(current.date).format("yyyy-MM-DD"),
+                      day: moment(current.date).date(),
+                      dayOfWeek: moment(current.date).format("ddd"),
+                      items: [],
+                      income: 0,
+                      expenses: 0,
+                  };
+                  prev.push(date);
+              }
+              date.items.push(current);
+              switch (current.type) {
+                  case "expense":
+                      date.expenses += current.amount;
+                      totals.expense += current.amount;
+                      totals.total -= current.amount;
+                      break;
+                  case "income":
+                      date.income += current.amount;
+                      totals.income += current.amount;
+                      totals.total += current.amount;
+                      break;
+              }
+              return prev;
+          },
+          []);
     setTotals(totals);
     setDailies(rec);
   }, [records]);
@@ -165,7 +166,9 @@ const Records = () => {
       <Grid container spacing={1}>
         <Grid item md={4} sx={{ display: { xs: "none", md: "block" } }}>
           <Paper sx={{ mt: 3 }}>
-            <AccountsPage />
+              <Box sx={{ my: 1, maxHeight: "80vh", overflow: "overlay" }}>
+                <AccountsPage />
+              </Box>
           </Paper>
         </Grid>
         <Grid item xs={12} md={8}>

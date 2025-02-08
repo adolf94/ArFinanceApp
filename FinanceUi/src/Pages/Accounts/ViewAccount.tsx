@@ -239,7 +239,7 @@ const ViewAccount = () => {
                   sx={{ px: 1, alignSelf: "center" }}
                   variant="transactionHeaderDate"
                 >
-                  {numeral(data.totals.total + acctBalance?.balance).format(
+                  {numeral(acctBalance?.endingBalance).format(
                     "0,0.00",
                   )}
                 </Typography>

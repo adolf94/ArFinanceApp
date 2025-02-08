@@ -79,14 +79,14 @@ namespace FinanceApp.Data.CosmosRepo
 
 				public async Task<AccountBalance?> GetOne(Account acct, DateTime date)
 				{
-					if (acct.MaxMonth < date || acct.MinMonth < date)
+					if (acct.MaxMonth < date || acct.MinMonth > date)
 					{
 						return new AccountBalance()
 						{
-							Id = $"{date.Year}/{date.Month}/{acct.Id}",
+							Id = $"{date:YYYY|MM}/{acct.Id}",
 							AccountId = acct.Id,
-							Balance = acct.MinMonth < date? 0  : acct.Balance,
-							EndingBalance = acct.MinMonth < date? 0 : acct.Balance,
+							Balance = acct.MinMonth > date? 0  : acct.Balance,
+							EndingBalance = acct.MinMonth > date? 0 : acct.Balance,
 							Account = acct,
 							DateStart = new DateTime(date.Year, date.Month, acct.PeriodStartDay),
 							DateEnd = new DateTime(date.Year, date.Month, acct.PeriodStartDay).AddMonths(1),
@@ -98,8 +98,9 @@ namespace FinanceApp.Data.CosmosRepo
 					}
 					else
 					{
-						return await _context.AccountBalances!.Where(e => e.Id == $"{date.Year}/{date.Month}/{acct.Id}")
+						var item = await _context.AccountBalances!.Where(e => e.Id == $"{date.Year}|{date.Month:D2}|{acct.Id}")
 							.FirstOrDefaultAsync();
+						return item;
 					}
 				}
 				
@@ -210,8 +211,8 @@ namespace FinanceApp.Data.CosmosRepo
 						await _context.SaveChangesAsync();
 					}
 
-					string balanceKey = isPrevPeriod?$"{prevPeriod.Year}/{prevPeriod.Month}/{acct.Id}" 
-									: $"{currentPeriod.Year}/{currentPeriod.Month}/{acct.Id}"  ;
+					string balanceKey = isPrevPeriod?$"{prevPeriod.Year}|{prevPeriod.Month}|{acct.Id}" 
+									: $"{currentPeriod.Year}|{currentPeriod.Month}|{acct.Id}"  ;
 					
 					
 					var item = await _context.AccountBalances!.FirstOrDefaultAsync(e =>
@@ -304,16 +305,6 @@ namespace FinanceApp.Data.CosmosRepo
 
 				}
 
-				public async Task RemoveTransactionInBalance(Guid acctId, Guid transaction, DateTime date)
-				{
-					// ReSharper disable once EntityFramework.NPlusOne.IncompleteDataQuery
-					var bal = await _context.AccountBalances!
-						.Where(e => e.Id == $"{date.Year}/{date.Month}/{acctId}")
-						.FirstOrDefaultAsync();
-					if (bal == null) return;
-					var item = bal.Transactions!.FirstOrDefault(e => e.TransactionId == transaction);
-					if(item != null) bal.Transactions.Remove(item);
-				}
 
 
 				public AccountBalance? GetByAccountWithDate(Guid account, DateTime date)
