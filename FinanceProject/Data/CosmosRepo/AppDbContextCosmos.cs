@@ -27,6 +27,7 @@ namespace FinanceApp.Data.CosmosRepo
 				public DbSet<LedgerAccount>? LedgerAccounts { get; set; }
 				public DbSet<LedgerEntry>? LedgerEntries { get; set; }
 				public DbSet<InputLogs>? AuditLogs { get; set; }
+				public DbSet<HookMessage>? HookMessages { get; set; }
 
 				public Guid InterestIncomeId { get; set; } = Guid.Parse("742070bd-e68b-45c9-a1f7-021916127731");
 				
@@ -35,7 +36,7 @@ namespace FinanceApp.Data.CosmosRepo
 				public AppDbContext(DbContextOptions<AppDbContext> options, IConfiguration config) : base(options)
 				{
 						_configuration = config;
-							// base.Database.EnsureCreatedAsync().Wait();
+							base.Database.EnsureCreatedAsync().Wait();
 				}
 
 
@@ -120,7 +121,11 @@ namespace FinanceApp.Data.CosmosRepo
 						.HasPartitionKey(e => e.PartitionKey)
 						.HasKey(c => c.Id);
 
-
+	
+					builder.Entity<HookMessage>()
+						.ToContainer("HookMessages")
+						.HasPartitionKey(e => e.PartitionKey)
+						.HasKey(c => c.Id);
 
 					builder.Entity<Transaction>()
 						.ToContainer("Transaction")

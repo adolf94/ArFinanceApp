@@ -70,8 +70,7 @@ def send_loan_reminder_3d(myTimer: func.TimerRequest) -> None:
         isSuccess = send_sms(user.mobileNumber, msg)
 
         if(isSuccess):
-            loan["LastReminder"] = today
-            container.upsert_item(paymentToRemind)
+            loan["LastReminder"] = today  
             continue
 
         # Principal = loan.Principal - loan.Payment.Where(e => e.AgainstPrincipal == true).Sum(e => e.Amount),
