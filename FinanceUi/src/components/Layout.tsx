@@ -1,6 +1,5 @@
 import React, { Component } from "react";
 import { Box, Grid } from "@mui/material";
-import { NavMenu } from "./NavMenu";
 import BottomAppBar from "./BottomAppBar";
 import { Route, Routes } from "react-router-dom";
 

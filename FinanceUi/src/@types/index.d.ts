@@ -96,12 +96,15 @@ declare module 'FinanceApi' {
         currencyCode: string;
     }
 
-    // ..\FinanceProject\Models\HookMessages.cs
-    export interface HookMessages {
+    // ..\FinanceProject\Models\HookMessage.cs
+    export interface HookMessage {
         id: string;
         date: string;
         type: string;
         rawMsg: string;
+        partitionKey: string;
+        jsonData?: JObject;
+        extractedData?: JObject;
         isHtml: boolean;
     }
 

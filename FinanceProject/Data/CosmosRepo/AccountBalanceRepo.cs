@@ -180,6 +180,7 @@ namespace FinanceApp.Data.CosmosRepo
 								DateEnd = new DateTime(period.Year, period.Month, acct.PeriodStartDay).AddMonths(1),
 							};
 							balancesToAdd.Add(newBalance);
+							acct.MinMonth = period;
 							period = period.AddMonths(1);
 						}
 					}
@@ -188,7 +189,7 @@ namespace FinanceApp.Data.CosmosRepo
 					{
 						
 						DateTime period = acct.MaxMonth.AddMonths(1);
-						while (period >= acct.MinMonth)
+						while (period <= currentPeriod)
 						{
 							var newBalance = new AccountBalance()
 							{
@@ -201,6 +202,7 @@ namespace FinanceApp.Data.CosmosRepo
 								DateEnd = new DateTime(period.Year, period.Month, acct.PeriodStartDay).AddMonths(1),
 							};
 							balancesToAdd.Add(newBalance);
+							acct.MaxMonth = period;
 							period = period.AddMonths(1);
 						}
 					}
@@ -211,8 +213,8 @@ namespace FinanceApp.Data.CosmosRepo
 						await _context.SaveChangesAsync();
 					}
 
-					string balanceKey = isPrevPeriod?$"{prevPeriod.Year}|{prevPeriod.Month}|{acct.Id}" 
-									: $"{currentPeriod.Year}|{currentPeriod.Month}|{acct.Id}"  ;
+					string balanceKey = isPrevPeriod?$"{prevPeriod.Year}|{prevPeriod.Month:D2}|{acct.Id}" 
+									: $"{currentPeriod.Year}|{currentPeriod.Month:D2}|{acct.Id}"  ;
 					
 					
 					var item = await _context.AccountBalances!.FirstOrDefaultAsync(e =>

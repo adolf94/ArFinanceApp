@@ -4,6 +4,7 @@ import { oauthSignIn } from "../common/GoogleLogin";
 import { memoize as mm } from "underscore";
 import { queryClient } from "../App";
 import { getAfterTransaction, TRANSACTION } from "../repositories/transactions";
+import { enqueueSnackbar } from "notistack";
 
 
 
@@ -79,6 +80,9 @@ api.interceptors.response.use(
             if (err.response.status === 401 && !err.request.retryGetToken) {
                 console.debug("retry with getToken");
                 return api({ ...err.request, retryGetToken: true })
+            }
+            if(err.response.status === 500){
+                enqueueSnackbar("Something went wrong!. Contact Developer", {variant:"error", autoHideDuration: 3000});
             }
         }
     return Promise.reject(err)
