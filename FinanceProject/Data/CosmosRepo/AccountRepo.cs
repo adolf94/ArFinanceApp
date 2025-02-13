@@ -42,14 +42,11 @@ namespace FinanceApp.Data.CosmosRepo
 								});
 							}
 							
-							var initialAcctBal = new AccountBalance
+							var initialAcctBal = new AccountBalance(DateTime.Now.Year,DateTime.Now.Month,group.Id,group.PeriodStartDay)
 							{
 								AccountId = group.Id,
 								Balance = group.Balance,
-								DateStart = new DateTime(DateTime.Now.Year, DateTime.Now.Month, group.PeriodStartDay),
-								DateEnd = new DateTime(DateTime.Now.Year, DateTime.Now.Month, group.PeriodStartDay).AddDays(1),
-								Year = DateTime.Now.Year,
-								Month = DateTime.Now.Month,
+								DateEnd = new DateTime(DateTime.Now.Year, DateTime.Now.Month, group.PeriodStartDay).AddMonths(1),
 								Transactions = baltransactions
 							};
 							

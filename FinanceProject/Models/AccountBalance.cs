@@ -5,18 +5,35 @@ namespace FinanceProject.Models
 {
 		public class AccountBalance
 		{
-				[Key]
-				public string Id
-				{
-						get
-						{
-								return $"{Year}|{Month:D2}|{AccountId}";
-						}
-						set
-						{
-								return;
-						}
-				}
+			public AccountBalance()
+			{
+				
+			}
+
+			public AccountBalance(int year, int month, Guid acctId)
+			{
+				Year = year;
+				Month = month;
+				AccountId = acctId;
+				Id = $"{Year}|{Month:D2}|{AccountId}";
+				DateStart = new DateTime(year, month, 1);
+				DateEnd = new DateTime(year, month, 1).AddMonths(1);
+				PartitionKey = "default";
+			}
+			
+			public AccountBalance(int year, int month, Guid acctId, int startDate)
+			{
+				Year = year;
+				Month = month;
+				AccountId = acctId;
+				Id = $"{Year}|{Month:D2}|{AccountId}";
+				DateStart = new DateTime(year, month, startDate);
+				DateEnd = new DateTime(year, month, startDate).AddMonths(1);
+				PartitionKey = "default";
+			}
+
+			[Key] public string Id { get; set; } = "";
+
 				public Guid AccountId { get; set; }
 				[JsonIgnore]
 				public Account? Account { get; set; }

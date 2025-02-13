@@ -18,7 +18,7 @@ namespace FinanceApp.Data.CosmosRepo
 						_logger = logger;
 				}
 
-
+				//Deprecate
 				public async Task<AccountBalance?> CreateAccountBalanceOne(DateTime date, Account acc, bool SaveChanges)
 				{
 
@@ -38,13 +38,10 @@ namespace FinanceApp.Data.CosmosRepo
 								// less than Current period kasi we just need the current month start
 								.Select(t => (t.CreditId == acc.Id ? t.Amount : t.DebitId == acc.Id ? -t.Amount : 0)).SumAsync();
 
-								currentBal = new AccountBalance
+								currentBal = new AccountBalance( date.Year, date.Month, acc.Id,acc.PeriodStartDay)
 								{
 										AccountId = acc.Id,
-										Balance = prevTotal,
-										Year = date.Year,
-										Month = date.Month,
-										DateStart = new DateTime(date.Year, date.Month, acc.PeriodStartDay)
+										Balance = prevTotal
 								};
 						}
 						else
@@ -59,7 +56,7 @@ namespace FinanceApp.Data.CosmosRepo
 								decimal balanceToSave = monthTotal;
 								//add natin if d naman magrereset (save natin running balance)
 								if (!acc.ResetEndOfPeriod) balanceToSave = balanceLastMonth + monthTotal;
-								currentBal = new AccountBalance
+								currentBal = new AccountBalance( date.Year, date.Month, acc.Id,acc.PeriodStartDay)
 								{
 										AccountId = acc.Id,
 										Balance = balanceToSave,
@@ -81,17 +78,11 @@ namespace FinanceApp.Data.CosmosRepo
 				{
 					if (acct.MaxMonth < date || acct.MinMonth > date)
 					{
-						return new AccountBalance()
+						return new AccountBalance( date.Year, date.Month, acct.Id,acct.PeriodStartDay)
 						{
-							Id = $"{date:YYYY|MM}/{acct.Id}",
-							AccountId = acct.Id,
 							Balance = acct.MinMonth > date? 0  : acct.Balance,
 							EndingBalance = acct.MinMonth > date? 0 : acct.Balance,
 							Account = acct,
-							DateStart = new DateTime(date.Year, date.Month, acct.PeriodStartDay),
-							DateEnd = new DateTime(date.Year, date.Month, acct.PeriodStartDay).AddMonths(1),
-							Year = date.Year,
-							Month = date.Month,
 							PartitionKey = "default",
 							Transactions = new List<BalanceTransactions>()
 						};
@@ -107,6 +98,7 @@ namespace FinanceApp.Data.CosmosRepo
 				
 				
 				
+				//Deprecate
 				public async Task CreateAccountBalances(DateTime date)
 				{
 						string acc_bal_key = $"acc_bal_{date.Year}_{date.Month}";
@@ -153,32 +145,7 @@ namespace FinanceApp.Data.CosmosRepo
 						DateTime period = prevPeriod;
 						while (period < acct.MinMonth)
 						{
-							var newBalance = new AccountBalance()
-							{
-								AccountId = acct.Id,
-								Year = period.Year,
-								Month = period.Month,
-								DateStart = new DateTime(period.Year, period.Month, acct.PeriodStartDay),
-								DateEnd = new DateTime(period.Year, period.Month, acct.PeriodStartDay).AddMonths(1),
-							};
-							balancesToAdd.Add(newBalance);
-							period = period.AddMonths(1);
-						}
-					}
-					if (prevPeriod < acct.MinMonth)
-					{
-						//Create account balanced previous months
-						DateTime period = prevPeriod;
-						while (period < acct.MinMonth)
-						{
-							var newBalance = new AccountBalance()
-							{
-								AccountId = acct.Id,
-								Year = period.Year,
-								Month = period.Month,
-								DateStart = new DateTime(period.Year, period.Month, acct.PeriodStartDay),
-								DateEnd = new DateTime(period.Year, period.Month, acct.PeriodStartDay).AddMonths(1),
-							};
+							var newBalance = new AccountBalance(period.Year,period.Month,acct.Id,acct.PeriodStartDay);
 							balancesToAdd.Add(newBalance);
 							acct.MinMonth = period;
 							period = period.AddMonths(1);
@@ -191,15 +158,10 @@ namespace FinanceApp.Data.CosmosRepo
 						DateTime period = acct.MaxMonth.AddMonths(1);
 						while (period <= currentPeriod)
 						{
-							var newBalance = new AccountBalance()
+							var newBalance = new AccountBalance(period.Year,period.Month,acct.Id,acct.PeriodStartDay)
 							{
-								AccountId = acct.Id,
-								Year = period.Year,
-								Month = period.Month,
 								Balance = acct.ResetEndOfPeriod ? 0 : acct.Balance,
 								EndingBalance = acct.ResetEndOfPeriod ? 0 : acct.Balance,
-								DateStart = new DateTime(period.Year, period.Month, acct.PeriodStartDay),
-								DateEnd = new DateTime(period.Year, period.Month, acct.PeriodStartDay).AddMonths(1),
 							};
 							balancesToAdd.Add(newBalance);
 							acct.MaxMonth = period;
