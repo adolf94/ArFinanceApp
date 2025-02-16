@@ -55,8 +55,8 @@ def handle_bpi_notif(data:dict):
         return {
             "matchedConfig" : "notif_bpi_receive_from_bpi",
             "success" : True,
-            "ownAcct": match[0][2],
-            "amount": match[0][3]
+            "ownAcct": match[0][1],
+            "amount": match[0][2]
         }
     
 
@@ -80,11 +80,11 @@ def handle_vybe_notif(data:dict):
             return {
                 "matchedConfig" : "notif_vybe_transfer_bank",
                 "success" : True,
-                "reference":match[0][6],
-                "recipientBank":match[0][3],
-                "recipientAcct": match[0][4],
-                "newBalance": match[0][5],
-                "amount": match[0][2]
+                "reference":match[0][5],
+                "recipientBank":match[0][2],
+                "recipientAcct": match[0][3],
+                "newBalance": match[0][4],
+                "amount": match[0][1]
             }
         
 
@@ -102,15 +102,15 @@ def handle_vybe_notif(data:dict):
                 "matchedConfig" : "notif_vybe_pay",
                 "success" : True,
                 #2 : Name
-                "recipientName": match[0][3],
-                "reference": match[0][5],
-                "amount": match[0][4]
+                "recipientName": match[0][2],
+                "reference": match[0][4],
+                "amount": match[0][3]
             }
         
         case "Top Up":
             #You have received Php 20,000.00 from BPI Online on 2024/12/28 07:21:49 PM. Your new wallet balance is Php 20,351.00. Ref. no. 1735384905620.
-            reg = "You have received Php ([0-9\.,]+) from ([A-Za-z ]+) on *([0-9PMAMN\/ :]+). Your new wallet balance is Php ([0-9,\.]+). Ref. no. ([0-9]+)."
-
+            reg = "(You have received Php ([0-9\.,]+) from ([A-Za-z ]+) on *([0-9PMAMN\/ :]+). Your new wallet balance is Php ([0-9,\.]+). Ref. no. ([0-9]+).)"
+            match = re.findall(reg, data["notif_msg"])
             if(len(match) == 0):
                 return {
                     "matchedConfig" : "notif_vybe_cashin",
@@ -120,12 +120,21 @@ def handle_vybe_notif(data:dict):
                 "matchedConfig" : "notif_vybe_cashin",
                 "success" : True,
                 #2 : Name
-                "dateTime": match[0][4],
-                "newBalance": match[0][5],
-                "reference": match[0][6],
-                "senderBank":match[0][3],
-                "amount": match[0][2]
+                "dateTime": match[0][3],
+                "newBalance": match[0][4],
+                "reference": match[0][5],
+                "senderBank":match[0][2],
+                "amount": match[0][1]
             }
+        
+
+        case _:
+            return {
+                "matchedConfig":"notif_vybe",
+                "success": False
+            }
+
+
 
 def handle_gcash_notif(data : dict):
 
