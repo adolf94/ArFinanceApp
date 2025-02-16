@@ -21,6 +21,7 @@ import { createTheme, ThemeProvider } from "@mui/material/styles";
 import history, { NavigateSetter } from "./components/History";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { oauthSignIn } from "./common/GoogleLogin";
+import { lightGreen, purple, indigo} from '@mui/material/colors';
 
 export const queryClient = new QueryClient({
   defaultOptions: {
@@ -41,6 +42,11 @@ const theme = createTheme({
       fontWeight: "600",
     },
   },
+    palette: {
+        primary: indigo,
+        secondary: lightGreen,
+    },
+    
 });
 
 const localStoragePersister = createSyncStoragePersister({

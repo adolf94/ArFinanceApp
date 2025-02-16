@@ -493,7 +493,7 @@ const NewRecordForm = (props: NewRecordFormProps) => {
                 variant="standard"
                 value={formData.amount}
                 onChange={(e) => setFormData({ ...formData, amount: e })}
-                onFocus={() =>
+                onClick={() =>
                   setSelectProps((prev) => ({ ...prev, dest: "amount" }))
                 }
                 onKeyUp={(evt)=>{

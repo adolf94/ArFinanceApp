@@ -9,15 +9,12 @@
   CircularProgress
 } from "@mui/material";
 import react, { useEffect, useState } from "react";
-import api from "../../components/api";
-import useDropdown from "../../components/useDropdown";
 
 import { useMutateType } from "../../repositories/accountTypes";
 
 const NewAccountType = (props) => {
   const { show, handleClose } = props;
   const [value, setValue] = useState("");
-  const { accountTypes, set } = useDropdown();
     const mutateType = useMutateType();
 
   const createNewAccountType = () => {

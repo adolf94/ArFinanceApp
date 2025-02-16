@@ -45,7 +45,7 @@ function AcctGroupListItem<T>({ acct, onClick, internalKey, idSelected }: { acct
     
 
     return <ListItemButton
-        selected={item.id === idSelected || ""}
+        selected={item.id === (idSelected || "")}
         onClick={() => onClick(acct)}
     >
         <Box element="span" sx={{fontWeight:'bold'}}>{acct.name.slice(0, acct.hotkey.length)}</Box>
@@ -86,7 +86,7 @@ function SelectAccount(props: SelectAccountProps<any>) {
 
         setAcct(value);
         props.onChange({ ...value });
-        if(acct !==null && acct?.id === value?.id) props.onClose()
+        if(value !== null && acct !==null && acct?.id === value?.id ) props.onClose()
     };
 
     const accountGroups = useMemo(()=>{
@@ -205,7 +205,8 @@ function SelectAccount(props: SelectAccountProps<any>) {
         })
         
         if(!acctGMatch){
-           //startFromScratch
+           //startFromScratch 
+            setAcctGroup(null)
             if(hotkey.length > 1)setHotkey(hotkey.slice(-1))
             return
         }
@@ -249,6 +250,7 @@ function SelectAccount(props: SelectAccountProps<any>) {
             return
         }
 
+        setValue(null)
         setHotkey(hotkey.slice(-1))
         return;
     }, [hotkey]);  

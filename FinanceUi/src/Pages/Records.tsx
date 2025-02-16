@@ -13,7 +13,8 @@ import {
     Tab,
     Tabs,
     Toolbar,
-    colors
+    colors,
+    Button
 } from "@mui/material";
 import { createContext, useState } from "react";
 import AccountsPage from "./Accounts";
@@ -146,7 +147,7 @@ const Records = () => {
 
   return (
     <>
-      <AppBar position="static">
+      <AppBar position="static"  color="primary">
         <Toolbar>
           <IconButton onClick={() => setMonth(month.clone().add(-1, "month"))}>
             <FontAwesomeIcon
@@ -166,7 +167,14 @@ const Records = () => {
       <Grid container spacing={1}>
         <Grid item md={4} sx={{ display: { xs: "none", md: "block" } }}>
           <Paper sx={{ mt: 3 }}>
-              <Box sx={{ my: 1, maxHeight: "80vh", overflow: "overlay" }}>
+              <Link to="/transactions/new">
+                  <Box sx={{px:2}}>
+                      <Button variant="contained" fullWidth color="primary">
+                          <Add/> Add Record
+                      </Button>
+                  </Box>
+              </Link>
+              <Box sx={{ my: 1, maxHeight: "75vh", overflow: "overlay" }}>
                 <AccountsPage />
               </Box>
           </Paper>
@@ -199,7 +207,7 @@ const Records = () => {
         </Grid>
       </Grid>
       <Link to="/transactions/new">
-        <Fab color="primary" sx={fabGreenStyle}>
+        <Fab color="primary" sx={{...fabGreenStyle,display:{md:'none'}}} >
             <Add fontSize="large"/> 
         </Fab>
       </Link>
