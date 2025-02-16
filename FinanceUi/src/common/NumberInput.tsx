@@ -41,6 +41,9 @@ const NumberInput = (props: any) => {
       //}}
       {...props}
       onKeyPress={(event) => {
+        if(props.onKeyPress && props.onKeyPress(event)) {
+            return;
+        }
         if (!/[-0-9.,]/.test(event.key)) {
           event.preventDefault();
         }

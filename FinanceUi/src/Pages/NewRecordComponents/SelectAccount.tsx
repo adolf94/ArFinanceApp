@@ -266,7 +266,6 @@ function SelectAccount(props: SelectAccountProps<any>) {
       }
         let eventFn = (evt)=>{
             if(evt.keyCode === 13){
-                console.log("Enter Clicked")
                 if(!!acct) {
                     props.onChange({ ...acct });
                     props.onClose()
@@ -359,7 +358,7 @@ function SelectAccount(props: SelectAccountProps<any>) {
             </List>
           </Grid>
           <Grid item xs={6}>
-            <List>
+            <List>=
               {(accounts || [])
                 .filter((e) => acctGroup && e.accountGroupId === acctGroup?.id)
                 .map((f) => (

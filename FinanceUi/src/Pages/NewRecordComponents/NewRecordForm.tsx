@@ -493,9 +493,31 @@ const NewRecordForm = (props: NewRecordFormProps) => {
                 variant="standard"
                 value={formData.amount}
                 onChange={(e) => setFormData({ ...formData, amount: e })}
-                onClick={() =>
+                onFocus={() =>
                   setSelectProps((prev) => ({ ...prev, dest: "amount" }))
                 }
+                onKeyUp={(evt)=>{
+                  switch (evt.key) {
+                    case "/":
+                    case "*":
+                    case "+":
+                    case "-":
+                    case "=":
+                      setSelectProps((prev) => ({
+                        ...selectAccountProps,
+                        show: true,
+                        dest: "amount",
+                        operation:evt.key
+                      }))
+                      evt.target.blur();
+                      evt.preventDefault();
+                      return true
+                    default:
+                      return false
+                  }
+                }}
+                
+                
                 InputProps={{
                   endAdornment: (
                     <IconButton
@@ -504,6 +526,7 @@ const NewRecordForm = (props: NewRecordFormProps) => {
                           ...selectAccountProps,
                           show: true,
                           dest: "amount",
+                          operation:""
                         }))
                       }
                     >
@@ -632,6 +655,7 @@ const NewRecordForm = (props: NewRecordFormProps) => {
             setSelectProps({ ...selectAccountProps, show: false, dest: "" })
           }
           value={formData.amount}
+          operation={selectAccountProps.operation || ""}
           selectType="calculate"
           internalKey="amount"
         />

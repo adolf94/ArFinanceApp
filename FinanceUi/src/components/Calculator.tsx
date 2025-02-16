@@ -23,24 +23,27 @@ const Calculator = (props) => {
   const [equalClicked, setEqualClicked] = useState(false);
 
   useEffect(() => {
-    setResult(props.value);
-  }, [props.value]);
+
+    setFormula((props.value||"0") + props.operation);
+    setResult((props.value||"0") );
+  }, [props.value, props.operation]);
 
   const append = (val) => {
-    let newFormula;
-
-    if (equalClicked) {
-      if (Number.isNaN(Number.parseInt(val))) {
-        newFormula = result + val;
+    setFormula((formula)=>{
+      let newFormula;
+      if (equalClicked) {
+        if (Number.isNaN(Number.parseInt(val))) {
+          newFormula = result + val;
+        } else {
+          newFormula = val;
+        }
       } else {
-        newFormula = val;
+        newFormula = formula + val;
       }
-    } else {
-      newFormula = formula + val;
-    }
-    setFormula(newFormula);
-    evalu(newFormula);
-    setEqualClicked(false);
+      evalu(newFormula);
+      setEqualClicked(false);
+      return newFormula;
+    })
   };
 
   const backspace = () => {
@@ -57,7 +60,7 @@ const Calculator = (props) => {
       setResult(newResult);
     } catch (ex) {}
   };
-
+  
   const onEqual = () => {
     evalu(formula);
     setEqualClicked(true);
@@ -67,6 +70,29 @@ const Calculator = (props) => {
     props.onChange(result);
     props.onClose();
   };
+
+  useEffect(() => {
+    console.debug("calculator Keys added!")
+    let eventFn = (evt)=>{
+
+      console.log(evt.code)
+      if(evt.key === "=") return onEqual();
+      if(evt.key === "Backspace") return backspace();
+      if(evt.key === "Delete") return backspace();
+      if(evt.key === "Enter") return onDone();
+      if(evt.key === "Escape") return setFormula("");
+      let listenTo = [".","-","+","/","*","=","1","2","3","4","5","6","7","8","9", "0"];
+      if(!listenTo.includes(evt.key)) return
+      append(evt.key);
+    }
+    window.addEventListener("keydown", eventFn);
+    
+    return ()=> {
+      console.debug("calculator Keys removed!")
+
+      window.removeEventListener("keydown", eventFn)
+    }
+  }, [formula,equalClicked]);
 
   return (
     <>
