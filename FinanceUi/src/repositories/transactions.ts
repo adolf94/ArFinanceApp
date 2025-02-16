@@ -148,7 +148,7 @@ export const fetchTransactionsByMonth = (year: number, month: number, persistLas
   console.debug("fetchTransactionsByMonth", { year, month });
 
     return api<Transaction[]>("transactions", { params: { year, month }, noLastTrans: persistLast }).then(
-      (e) => {
+      (e : AxiosResponse<Transaction[]>) => {
 
         const lastTransId = localStorage.getItem("last_transaction");
 

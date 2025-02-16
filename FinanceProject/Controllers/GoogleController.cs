@@ -91,7 +91,7 @@ namespace FinanceApp.Controllers
 												return StatusCode(500);
 								}
 						}
-						int tokenLifetime = 60;
+						int tokenLifetime = 300;
 						GoogleClaimResponse? currentToken = JsonSerializer.Deserialize<GoogleClaimResponse>(result);
 						if (string.IsNullOrEmpty(currentToken!.refresh_token))
 						{
@@ -229,7 +229,7 @@ namespace FinanceApp.Controllers
 
 						GoogleClaimResponse? currentToken = JsonSerializer.Deserialize<GoogleClaimResponse>(result);
 
-						int tokenLifetime = 5;
+						int tokenLifetime = 300;
 						if (string.IsNullOrEmpty(currentToken!.refresh_token))
 						{
 								_logger.LogWarning("No refresh token was received!");
