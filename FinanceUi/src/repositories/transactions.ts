@@ -225,7 +225,7 @@ export const fetchByAcctMonth = async (
     })
     
     if(acct.periodStartDay != 1){
-        let nextMonth =moment([year,month,1]).add("month",1);
+        let nextMonth =moment([year,month - 1 ,1]).add(1,"month");
         let nextMonthTransactions = await queryClient.ensureQueryData({
             queryKey: [TRANSACTION, { year: nextMonth.year(), month : nextMonth.month() + 1 }],
             queryFn: () => fetchTransactionsByMonth(nextMonth.year(),  nextMonth.month() + 1 ),
@@ -234,7 +234,7 @@ export const fetchByAcctMonth = async (
     
     return  await Promise.all(balanceData.transactions.map(e=>{
         return queryClient.ensureQueryData({
-            queryKey:[TRANSACTION,{transactionId:e.transactionId}],
+            queryKey:[TRANSACTION,{id:e.transactionId}],
             queryFn: ()=>fetchTransactionById(e.transactionId)
         }) 
     }))
@@ -243,7 +243,7 @@ export const fetchByAcctMonth = async (
 };
 
 
-export const fetchTransactionById = (transId) => {
+export const fetchTransactionById = (transId: string) => {
   return api<Transaction>("transactions/" + transId).then(async (e) => {
     let item = e.data;
 

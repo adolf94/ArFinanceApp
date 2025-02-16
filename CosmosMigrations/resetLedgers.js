@@ -1,5 +1,5 @@
-const migrationinfo = require('./migrations/4_ledgers');
-const lastMigrate = require('./migrations/5_nopartition');
+const migrationinfo = require('./migrations/6_balrearch');
+const lastMigrate = require('./migrations/6_balrearch');
 const fs = require("node:fs");
 const os = require("node:os");
 const {spawn} = require("node:child_process");
