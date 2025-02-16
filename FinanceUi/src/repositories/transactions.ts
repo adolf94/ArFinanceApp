@@ -1,11 +1,11 @@
 import { useMutation } from "@tanstack/react-query";
 import api from "../components/api";
 import {
-  Account,
-  CreateTransactionDto,
-  NewTransactionResponseDto,
-  Transaction,
-  Vendor,
+    Account, AccountBalance,
+    CreateTransactionDto,
+    NewTransactionResponseDto,
+    Transaction,
+    Vendor,
 } from "FinanceApi";
 import { queryClient } from "../App";
 import moment from "moment";
@@ -14,7 +14,10 @@ import { ACCOUNT, fetchAccounts, fetchByAccountId } from "./accounts";
 import { AxiosResponse } from "axios";
 import replaceById from "../common/replaceById";
 import { enqueueSnackbar } from "notistack";
-import { useNavigate } from "react-router-dom";
+import db from '../components/LocalDb/index'
+import {ACCOUNT_BALANCE, getBalancesByDate} from "./accountBalance.js";
+import numeral from "numeral";
+
 
 export const TRANSACTION = "transaction";
 
@@ -157,37 +160,37 @@ export const fetchTransactionsByMonth = (year: number, month: number, persistLas
           return item;
         }),
       ).then(async (records) => {
-        let nextPeriodMonth = moment({ year, month: month, day: 1 }).add(
-          1,
-          "month",
-        );
-        let accounts = await queryClient.ensureQueryData<Account[]>({
-          queryKey: [ACCOUNT],
-          queryFn: () => fetchAccounts(),
-        });
-        let nextMonth = await queryClient.getQueryData([
-          TRANSACTION,
-          { year: nextPeriodMonth.year(), month: nextPeriodMonth.month() + 1 },
-        ]);
+        // let nextPeriodMonth = moment({ year, month: month, day: 1 }).add(
+        //   1,
+        //   "month",
+        // );
+        // let accounts = await queryClient.ensureQueryData<Account[]>({
+        //   queryKey: [ACCOUNT],
+        //   queryFn: () => fetchAccounts(),
+        // });
+        // let nextMonth = await queryClient.getQueryData([
+        //   TRANSACTION,
+        //   { year: nextPeriodMonth.year(), month: nextPeriodMonth.month() + 1 },
+        // ]);
 
-        accounts.forEach((account) => {
-          if (!nextMonth || account.periodStartDay !== 1) return;
-          const from = moment({
-            year,
-            month: month,
-            day: account.periodStartDay,
-          });
-
-          queryClient.setQueryData(
-            [TRANSACTION, { accountId: account.id, month, year }],
-            records.filter(
-              (e) =>
-                (e.creditId === account.id || e.debitId === account.id) &&
-                moment(e.date).isAfter(from) &&
-                moment(e.date).isBefore(nextPeriodMonth),
-            ),
-          );
-        });
+        // accounts.forEach((account) => {
+        //   if (!nextMonth || account.periodStartDay !== 1) return;
+        //   const from = moment({
+        //     year,
+        //     month: month,
+        //     day: account.periodStartDay,
+        //   });
+        //
+        //   queryClient.setQueryData(
+        //     [TRANSACTION, { accountId: account.id, month, year }],
+        //     records.filter(
+        //       (e) =>
+        //         (e.creditId === account.id || e.debitId === account.id) &&
+        //         moment(e.date).isAfter(from) &&
+        //         moment(e.date).isBefore(nextPeriodMonth),
+        //     ),
+        //   );
+        // });
 
         return records;
       });
@@ -195,62 +198,48 @@ export const fetchTransactionsByMonth = (year: number, month: number, persistLas
   );
 };
 
-export const fetchByAcctMonth = (
+export const fetchByAcctMonth = async (
   acctId: string,
   year: number,
   month: number,
 ) => {
-  console.debug("fetchByAcctMonth", { acctId, year, month });
-  let dateCurrent = moment();
-  let dateNextMonth = moment();
-  return queryClient
-    .ensureQueryData({
-      queryKey: [ACCOUNT, { id: acctId }],
-      queryFn: () => fetchByAccountId(acctId),
-      networkMode: "always",
+    let monthStr =  moment([year,month - 1,1]).format('yyyy-MM-01')
+    let acct = await queryClient
+        .ensureQueryData<Account>({
+            queryKey: [ACCOUNT, { id: acctId }],
+            queryFn: () => fetchByAccountId(acctId),
+            networkMode: "always",
+        })
+    
+    let currentMonthTransactions = await queryClient.ensureQueryData({
+        queryKey: [TRANSACTION, { year, month }],
+        queryFn: () => fetchTransactionsByMonth(year, month),
     })
-    .then((acct) => {
-      dateCurrent = moment([year, month - 1, acct.periodStartDay]);
-      dateNextMonth = dateCurrent.clone().add(1, "month");
-      console.debug("dateCurrent", dateCurrent.toISOString());
-      return Promise.all([
-        queryClient.ensureQueryData({
-          queryKey: [TRANSACTION, { year, month }],
-          queryFn: () => fetchTransactionsByMonth(year, month),
-        }),
-        acct.periodLastDate === 1
-          ? []
-          : queryClient.ensureQueryData({
-              queryKey: [
-                TRANSACTION,
-                {
-                  year: dateNextMonth.year(),
-                  month: dateNextMonth.month() + 1,
-                },
-              ],
-              queryFn: () =>
-                fetchTransactionsByMonth(
-                  dateNextMonth.year(),
-                  dateNextMonth.month() + 1,
-                ),
-            }),
-      ]);
+
+    let balanceData = await queryClient.ensureQueryData<AccountBalance>({
+        queryKey:[
+            ACCOUNT_BALANCE,
+            { accountId: acctId, date:monthStr},
+        ],
+        queryFn: ()=>getBalancesByDate( monthStr, acctId)
     })
-      .then((result) => {
-      
+    
+    if(acct.periodStartDay != 1){
+        let nextMonth =moment([year,month,1]).add("month",1);
+        let nextMonthTransactions = await queryClient.ensureQueryData({
+            queryKey: [TRANSACTION, { year: nextMonth.year(), month : nextMonth.month() + 1 }],
+            queryFn: () => fetchTransactionsByMonth(nextMonth.year(),  nextMonth.month() + 1 ),
+        })
+    }
+    
+    return  await Promise.all(balanceData.transactions.map(e=>{
+        return queryClient.ensureQueryData({
+            queryKey:[TRANSACTION,{transactionId:e.transactionId}],
+            queryFn: ()=>fetchTransactionById(e.transactionId)
+        }) 
+    }))
+    
 
-
-
-      return [...result[0], ...result[1]].filter((tr) => {
-
-
-
-        return (
-          moment(tr.date).isBetween(dateCurrent, dateNextMonth) &&
-          [tr.creditId, tr.debitId].includes(acctId)
-        );
-      });
-    });
 };
 
 
@@ -283,6 +272,9 @@ export const ensureTransactionAcctData = async (item) => {
         queryKey: [ACCOUNT, { id: item.debitId }],
         queryFn: () => fetchByAccountId(item.debitId)
     })
+    
+    db.transactions.put(item)
+    
 
     return item;
 

@@ -16,6 +16,7 @@ const getTokenFromApi = mm(
     return axios
       .post(`${window.webConfig.api}/google/auth/refresh`, {
         refresh_token: token,
+          app: 'finance'
       })
       .then((e) => {
         window.sessionStorage.setItem("access_token", e.data.access_token);
