@@ -157,7 +157,7 @@ namespace FinanceProject.Controllers
 						});
 						
 						accounts[dto.DebitId] = _account.UpdateDebitAcct(dto.DebitId, dto.Amount);
-						var debitBal = await _bal.CreateBalances(accounts[dto.CreditId], dto.Date);
+						var debitBal = await _bal.CreateBalances(accounts[dto.DebitId], dto.Date);
 
 						transaction.BalanceRefs.Add(new BalanceAccount
 						{

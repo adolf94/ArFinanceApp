@@ -14,6 +14,7 @@
     <UserSecretsId>78cecb07-4d73-4553-babc-b0486a5d687e</UserSecretsId>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     <OutputType>Exe</OutputType>
+    <Configurations>Debug;Release;Debug_new</Configurations>
   </PropertyGroup>
 
   <ItemGroup>
