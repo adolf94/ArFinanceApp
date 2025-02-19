@@ -89,13 +89,17 @@ namespace FinanceApp.Data.CosmosRepo
 						var creditTask = _context.Accounts!.Where(e => e.Id == creditId).FirstOrDefaultAsync();
 						creditTask.Wait();
 						var credit = creditTask.Result;
+						
 						if (credit == null)
 						{
 								throw new InvalidOperationException("Account was not found");
+								
 						}
 						else
 						{
-								credit.Balance += -amount;
+								credit.Balance -= amount;
+								
+								
 								//_context.Entry(credit).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
 						}
 
@@ -112,7 +116,7 @@ namespace FinanceApp.Data.CosmosRepo
 								if (!All) query = query.Where(e => e.Enabled == true);
 								var queryTask = query.ToArrayAsync();
 								queryTask.Wait();
-								return queryTask.Result;
+								return queryTask.Result;	
 						}
 						catch (Exception ex)
 						{

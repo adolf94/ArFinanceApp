@@ -146,7 +146,6 @@ namespace FinanceProject.Controllers
 
 
 						accounts[dto.CreditId] = _account.UpdateCreditAcct(dto.CreditId, dto.Amount);
-						accounts[dto.DebitId] = _account.UpdateDebitAcct(dto.DebitId, dto.Amount);
 						var creditBal = await _bal.CreateBalances(accounts[dto.CreditId], dto.Date);
 						transaction.BalanceRefs.Clear();
 						transaction.BalanceRefs.Add(new BalanceAccount

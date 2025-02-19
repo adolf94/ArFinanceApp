@@ -301,7 +301,7 @@ const ViewAccount = () => {
                 </List>
               </Paper>
           }
-          {data.dates.map((data) => (
+          {data.dates.sort((a,b)=>a.dateGroup<b.dateGroup?1:-1).map((data) => (
               <Paper key={data.dateGroup} sx={{ my: 1 }}>
               <List>
                 <ListItem
