@@ -232,7 +232,7 @@ namespace FinanceApp.Data.CosmosRepo
 						services.AddScoped<ILedgerAcctRepo, LedgerAcctRepo>();
 						services.AddScoped<ILedgerEntryRepo, LedgerEntryRepo>();
 						services.AddScoped<IAuditLogsRepo, AuditLogsRepo>();
-
+						services.AddScoped<IHookMessagesRepo, HookMessagesRepo>();
 
 						return services;
 				}

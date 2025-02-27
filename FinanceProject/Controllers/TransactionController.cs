@@ -78,7 +78,6 @@ namespace FinanceProject.Controllers
 						});
 
 						
-
 						var crBal = await _bal.UpdateCrAccount(dto.CreditId, dto.Amount, item.Id, dto.Date);
 									crBal.ToList().ForEach(bal =>
 												balances[bal.Id] = bal); 
@@ -136,17 +135,17 @@ namespace FinanceProject.Controllers
 						accounts[transaction.DebitId] = _account.UpdateDebitAcct(transaction.DebitId, -transaction.Amount);
 
 						var revCr = await _bal.UpdateCrAccount(transaction.CreditId, -transaction.Amount,
-							transaction.Id, transaction.Date, true);
+							transaction.Id, transaction.Date, true, false);
 						revCr.ToList().ForEach(bal =>
 												balances[bal.Id] = bal);
 						var revDr = await _bal.UpdateDrAccount(transaction.DebitId, -transaction.Amount,
-							transaction.Id, transaction.Date, true);
+							transaction.Id, transaction.Date, true, false);
 						revDr.ToList().ForEach(bal =>
 												balances[bal.Id] = bal);
 
 
 						accounts[dto.CreditId] = _account.UpdateCreditAcct(dto.CreditId, dto.Amount);
-						var creditBal = await _bal.CreateBalances(accounts[dto.CreditId], dto.Date);
+						var creditBal = await _bal.CreateBalances(accounts[dto.CreditId], dto.Date, false);
 						transaction.BalanceRefs.Clear();
 						transaction.BalanceRefs.Add(new BalanceAccount
 						{
@@ -156,7 +155,7 @@ namespace FinanceProject.Controllers
 						});
 						
 						accounts[dto.DebitId] = _account.UpdateDebitAcct(dto.DebitId, dto.Amount);
-						var debitBal = await _bal.CreateBalances(accounts[dto.DebitId], dto.Date);
+						var debitBal = await _bal.CreateBalances(accounts[dto.DebitId], dto.Date, false);
 
 						transaction.BalanceRefs.Add(new BalanceAccount
 						{
@@ -165,7 +164,8 @@ namespace FinanceProject.Controllers
 							IsDebit = true
 						});
 
-						var crBal = await _bal.UpdateCrAccount(dto.CreditId, dto.Amount, transaction.Id, dto.Date);
+						var crBal = await _bal.UpdateCrAccount(dto.CreditId, dto.Amount, 
+							transaction.Id, dto.Date);
 						crBal.ToList().ForEach(bal =>
 							balances[bal.Id] = bal); 
 						var drBal = await _bal.UpdateDrAccount(dto.DebitId, dto.Amount, transaction.Id, dto.Date);

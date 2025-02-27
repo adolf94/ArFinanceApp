@@ -50,6 +50,11 @@ const data = {
 		mapper: e=>e
 	  },
 	  {
+		"Container": "HookMessages",
+		"PartitionKeyPaths": ["/PartitionKey"],
+		mapper: e=>e
+	  },
+	  {
 		"Container": "LedgerEntries",
 		"PartitionKeyPath": "/MonthGroup",
 		mapper: e=>e

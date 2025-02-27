@@ -129,7 +129,7 @@ namespace FinanceApp.Data.CosmosRepo
 
 
 
-				public async Task<AccountBalance> CreateBalances(Account acct, DateTime month)
+				public async Task<AccountBalance> CreateBalances(Account acct, DateTime month, bool save = true)
 
 				{
 					DateTime currentPeriod = new DateTime(month.Year, month.Month, 1);
@@ -172,7 +172,7 @@ namespace FinanceApp.Data.CosmosRepo
 					if (balancesToAdd.Any())
 					{
 						await _context.AccountBalances!.AddRangeAsync(balancesToAdd);
-						await _context.SaveChangesAsync();
+						if(save) await _context.SaveChangesAsync();
 					}
 
 					string balanceKey = isPrevPeriod?$"{prevPeriod.Year}|{prevPeriod.Month:D2}|{acct.Id}" 
@@ -188,7 +188,7 @@ namespace FinanceApp.Data.CosmosRepo
 
 
 				public async Task<IEnumerable<AccountBalance>> UpdateCrAccount(Guid creditId, decimal amount,
-					Guid transaction, DateTime date, bool reverse = false)
+					Guid transaction, DateTime date, bool reverse = false, bool save = true)
 				{
 					Account? acct = await _context.Accounts!.Where(e => e.Id == creditId).FirstOrDefaultAsync();
 					if (acct == null) throw new Exception("Account not found");
@@ -224,12 +224,13 @@ namespace FinanceApp.Data.CosmosRepo
 						}).ToArray());
 					}
 					
-					await _context.SaveChangesAsync();
+					if(save)await _context.SaveChangesAsync();
 					return balance;
 
 				}
 
-				public async Task<IEnumerable<AccountBalance>> UpdateDrAccount(Guid debitId, decimal amount, Guid transaction, DateTime date, bool reverse = false)
+				public async Task<IEnumerable<AccountBalance>> UpdateDrAccount(Guid debitId, decimal amount, 
+					Guid transaction, DateTime date, bool reverse = false, bool save = true)
 				{
 					Account? acct = await _context.Accounts!.Where(e => e.Id == debitId).FirstOrDefaultAsync();
 					if (acct == null) throw new Exception("Account not found");
@@ -264,7 +265,8 @@ namespace FinanceApp.Data.CosmosRepo
 						}).ToArray());
 					}
 					
-					await _context.SaveChangesAsync();
+					if(save)await _context.SaveChangesAsync();
+
 					return balance;
 
 				}
