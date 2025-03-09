@@ -11,6 +11,7 @@ export class Layout extends Component {
         <Routes>
             <Route path="errors/403" element={<Box sx={{alignItems:'center'} }>User has no access!</Box>} />
             <Route path="errors/Down" element={<Box sx={{ alignItems: 'center'} }>API is down?</Box>} />
+            
             <Route path="*" element={<>
                 <Grid container sx={{ pb: '56px' }}>{this.props.children}</Grid>
                 <BottomAppBar />

@@ -57,6 +57,9 @@ const NewRecordForm = (props: NewRecordFormProps) => {
   const mutateSchedule = useMutateSchedule();
     const navigate = useNavigate();
   const { transId } = useParams();
+
+  const [query, setQuery] = useSearchParams();
+
   const type = props.formData.type;
   const theme = useTheme();
   const sm = useMediaQuery(theme.breakpoints.down("lg"));
@@ -270,7 +273,8 @@ const NewRecordForm = (props: NewRecordFormProps) => {
               <DateTimePicker
                 //renderInput={(params) => <TextField {...params} value={moment(params.value).toLocaleString()} fullWidth variant="standard" onClick={() => view.setViewContext({ type: null, groupId: "892f20e5-b8dc-42b6-10c9-08dabb20ff77", onChange: () => { } })} />}*/}
                 value={formData.date}
-                onChange={(newValue: any) => {
+                onChange={(newValue) => {
+                  if(newValue.isMoment())
                   setFormData((prevData) => {
                     if (schedule.enabled) {
                       schedule.cronExpression = moment(newValue).format(
@@ -409,7 +413,7 @@ const NewRecordForm = (props: NewRecordFormProps) => {
                     ? formData.debit?.name || ""
                     : formData.credit?.name || ""
                 }
-                onClick={() =>
+                onFocus={() =>
                   setSelectProps({
                     ...selectAccountProps,
                     show: true,
@@ -469,7 +473,7 @@ const NewRecordForm = (props: NewRecordFormProps) => {
                     ? formData.credit?.name || ""
                     : formData.debit?.name || ""
                 }
-                onClick={() =>
+                onFocus={() =>
                   setSelectProps({
                     ...selectAccountProps,
                     show: true,
@@ -501,7 +505,6 @@ const NewRecordForm = (props: NewRecordFormProps) => {
                     case "/":
                     case "*":
                     case "+":
-                    case "-":
                     case "=":
                       setSelectProps((prev) => ({
                         ...selectAccountProps,

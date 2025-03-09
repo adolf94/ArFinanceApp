@@ -31,6 +31,7 @@ import {
 } from "../repositories/transactions";
 import Calendar from "./RecordsComponents/Calendar";
 import Daily from "./RecordsComponents/Daily";
+import UserPanel from "../components/UserPanel.js";
 
 interface RecordViewTransaction {
   dateGroup: string;
@@ -149,19 +150,25 @@ const Records = () => {
     <>
       <AppBar position="static"  color="primary">
         <Toolbar>
-          <IconButton onClick={() => setMonth(month.clone().add(-1, "month"))}>
-            <FontAwesomeIcon
-              icon={faChevronLeft}
-              
-            />
-          </IconButton>
-          <span className="my-1">{month.format("MMM yyyy")}</span>
-          <IconButton onClick={() => setMonth(month.clone().add(1, "month"))}>
-            <FontAwesomeIcon
-              icon={faChevronRight}
-              
-            />
-          </IconButton>
+            <Grid container sx={{justifyContent: "space-between"}}>
+                <Grid>
+                    <IconButton onClick={() => setMonth(month.clone().add(-1, "month"))}>
+                        <FontAwesomeIcon
+                            icon={faChevronLeft}
+                        />
+                    </IconButton>
+                    <span className="my-1">{month.format("MMM yyyy")}</span>
+                    <IconButton onClick={() => setMonth(month.clone().add(1, "month"))}>
+                        <FontAwesomeIcon
+                            icon={faChevronRight}
+                        />
+                    </IconButton>
+                </Grid>
+                <Grid>
+                    <UserPanel />
+                </Grid>
+            </Grid>
+         
         </Toolbar>
       </AppBar>
       <Grid container spacing={1}>
