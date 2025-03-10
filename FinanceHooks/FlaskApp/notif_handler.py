@@ -71,7 +71,6 @@ def handle_vybe_notif(data:dict):
             #You have transferred Php 500.00 to WISE PILIPINAS, INC. account ending in XXXXXX7612. Your new balance is Php 9,851.00. Ref. No. IB00325c75188e1
             reg = "(You have transferred Php ([0-9\.,]*) to ([A-Za-z,\. ]+) account ending in (X+[0-9a-zA-Z]+). Your new balance is Php ([0-9\.,]+). Ref. No. ([a-zA-Z0-9]+))"
             match = re.findall(reg, data["notif_msg"])
-
             if(len(match) == 0):
                 return {
                     "matchedConfig" : "notif_vybe_transfer_bank",

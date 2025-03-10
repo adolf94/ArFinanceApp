@@ -55,6 +55,7 @@ def phone_hook():
         "RawMsg":data["notif_msg"],
         "Type":"notif",
         "PartitionKey":"default",
+        "Discriminator": "HookMessage"
         "IsHtml":False
     }
 
