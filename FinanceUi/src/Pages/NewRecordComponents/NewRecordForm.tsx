@@ -23,7 +23,7 @@ import {
 import { SelectAccountContext } from "../NewRecord";
 //import { makeStyles } from '@mui/styles'
 import { DateTimePicker } from "@mui/x-date-pickers";
-import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
+import { Link, useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import moment from "moment";
 import SelectAccount from "./SelectAccount";
 import { useQuery } from "@tanstack/react-query";
@@ -274,7 +274,7 @@ const NewRecordForm = (props: NewRecordFormProps) => {
                 //renderInput={(params) => <TextField {...params} value={moment(params.value).toLocaleString()} fullWidth variant="standard" onClick={() => view.setViewContext({ type: null, groupId: "892f20e5-b8dc-42b6-10c9-08dabb20ff77", onChange: () => { } })} />}*/}
                 value={formData.date}
                 onChange={(newValue) => {
-                  if(newValue.isMoment())
+                  if(moment.isMoment(newValue))
                   setFormData((prevData) => {
                     if (schedule.enabled) {
                       schedule.cronExpression = moment(newValue).format(
