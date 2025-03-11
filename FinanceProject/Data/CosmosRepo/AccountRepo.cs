@@ -21,7 +21,7 @@ namespace FinanceApp.Data.CosmosRepo
 							group.MinMonth = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
 							group.MaxMonth = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
 							var adjId = UUIDNext.Uuid.NewSequential();
-							var baltransactions = new List<BalanceTransactions>();
+							var baltransactions = new List<AccountBalance.BalanceTransaction>();
 							if (group.Balance != 0)
 							{
 								_context.Transactions!.AddAsync(new Transaction
@@ -35,7 +35,7 @@ namespace FinanceApp.Data.CosmosRepo
 									Id = adjId
 									
 								}).AsTask().Wait();
-								baltransactions.Add(new BalanceTransactions()
+								baltransactions.Add(new AccountBalance.BalanceTransaction()
 								{
 									TransactionId = adjId,
 									Amount = group.Balance

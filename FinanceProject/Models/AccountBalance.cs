@@ -53,15 +53,14 @@ namespace FinanceProject.Models
 				public string PartitionKey { get; init; } = "default";
 				
 				
-				public List<BalanceTransactions> Transactions { get; set; } = new ();
+				public List<BalanceTransaction> Transactions { get; set; } = new ();
 				
-				
+				public class BalanceTransaction
+				{
+					public Guid TransactionId { get; set; }
+					public decimal Amount { get; set; }
+				}
 				
 		}
 
-		public class BalanceTransactions
-		{
-			public Guid TransactionId { get; set; }
-			public decimal Amount { get; set; }
-		}
 }

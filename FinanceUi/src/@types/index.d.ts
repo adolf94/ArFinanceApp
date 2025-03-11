@@ -27,13 +27,7 @@ declare module 'FinanceApi' {
         endingBalance: number;
         balance: number;
         partitionKey: string;
-        transactions: BalanceTransactions[];
-    }
-
-    // ..\FinanceProject\Models\AccountBalance.cs
-    export interface BalanceTransactions {
-        transactionId: string;
-        amount: number;
+        transactions: BalanceTransaction[];
     }
 
     // ..\FinanceProject\Models\AccountGroup.cs

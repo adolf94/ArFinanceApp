@@ -84,7 +84,7 @@ namespace FinanceApp.Data.CosmosRepo
 							EndingBalance = acct.MinMonth > date? 0 : acct.Balance,
 							Account = acct,
 							PartitionKey = "default",
-							Transactions = new List<BalanceTransactions>()
+							Transactions = new List<AccountBalance.BalanceTransaction>()
 						};
 					}
 					else
@@ -203,7 +203,7 @@ namespace FinanceApp.Data.CosmosRepo
 					}
 					else
 					{
-						bal.Transactions.Add(new BalanceTransactions()
+						bal.Transactions.Add(new AccountBalance.BalanceTransaction()
 						{
 							TransactionId = transaction,
 							Amount = -amount
@@ -245,7 +245,7 @@ namespace FinanceApp.Data.CosmosRepo
 					}
 					else
 					{
-						bal.Transactions.Add(new BalanceTransactions()
+						bal.Transactions.Add(new AccountBalance.BalanceTransaction()
 						{
 							TransactionId = transaction,
 							Amount = -amount
