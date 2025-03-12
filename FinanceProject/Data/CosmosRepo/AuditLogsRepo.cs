@@ -3,6 +3,7 @@ using System.Text;
 using FinanceApp.Models;
 using Microsoft.Azure.Cosmos;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using UUIDNext;
 
@@ -60,6 +61,7 @@ public class AuditLogsRepo : IAuditLogsRepo
 			IpAddress = req.HttpContext.Connection.RemoteIpAddress!.ToString(),
 			Email = upn ?? "",
 			Body = jsonObj,
+			Response = new {},
 			id = auditLogId,
 			StatusCode = "0"
 		};
@@ -81,7 +83,7 @@ public class AuditLogsRepo : IAuditLogsRepo
 		return auditLogId;
 	}
 
-	public async Task<bool> UpdateStatus(HttpContext ctx, int status)
+	public async Task<bool> UpdateStatus(HttpContext ctx, MemoryStream body, int status)
 	{
 
 		if (string.IsNullOrEmpty( _currentItem["UserId"]?.Value<string>() ) && ctx.User.FindFirst("userId") != null)
@@ -90,6 +92,14 @@ public class AuditLogsRepo : IAuditLogsRepo
 		}
 		
 		_currentItem["StatusCode"] = status.ToString();
+		body.Position = 0;
+		string jsonString =  new StreamReader(body, Encoding.UTF8).ReadToEnd();
+
+		if (!string.IsNullOrEmpty(jsonString) &&  !ctx.Request.Path.Value!.StartsWith("/api/google/auth"))
+		{
+			JObject jsonObj = JObject.Parse(jsonString);
+			_currentItem["Response"] = jsonObj;
+		}
 		
 		await _table.UpsertItemAsync(_currentItem);
 		
