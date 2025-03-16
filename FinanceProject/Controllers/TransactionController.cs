@@ -168,7 +168,8 @@ namespace FinanceProject.Controllers
 							transaction.Id, dto.Date, save:false);
 						crBal.ToList().ForEach(bal =>
 							balances[bal.Id] = bal); 
-						var drBal = await _bal.UpdateDrAccount(dto.DebitId, dto.Amount, transaction.Id, dto.Date, save:false);
+						var drBal = await _bal.UpdateDrAccount(dto.DebitId, dto.Amount,
+							transaction.Id, dto.Date, save:false);
 						drBal.ToList().ForEach(bal =>
 							balances[bal.Id] = bal);
 

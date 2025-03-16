@@ -240,7 +240,7 @@ const applyBackup = async (dbConfigToApply)=>{
         proc.on('exit', async (code) => {
             res(code)
 
-            let text = fs.readFileSync(`$${output}\\__EfMigrations.json`, "utf-8");
+            let text = fs.readFileSync(`${output}\\__EfMigrations.json`, "utf-8");
             if(text === "[") {
                 const migrationsData = await readMigrationsConfig();
                 let keys= Object.keys(migrationsData).map(e=>({id:e, Id:e}))
