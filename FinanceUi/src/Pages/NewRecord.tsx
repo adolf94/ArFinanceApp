@@ -25,7 +25,7 @@ import moment from "moment";
 import { ChevronLeft } from "@mui/icons-material";
 import { ScheduledTransactions, Transaction } from "FinanceApi";
 import { useQueryClient } from "@tanstack/react-query";
-import { v4 } from 'uuid'
+import { v4,v7 } from 'uuid'
 import {
   TRANSACTION,
   fetchTransactionById,
@@ -56,7 +56,7 @@ const defaultValue = {
 const NewRecordPage = (props) => {
   const [formData, setFormData] = useState<
     Partial<Transaction | ScheduledTransactions>
-      >({ ...defaultValue, id: v4() });
+      >({ ...defaultValue, id: v7() });
   const theme = useTheme();
   const con = useRef();
   const queryClient = useQueryClient();
@@ -64,7 +64,9 @@ const NewRecordPage = (props) => {
   const [query, setQuery] = useSearchParams();
   const navigate = useNavigate();
     const { state } = useLocation() as { state: any };
-
+  const resetFormData = ()=>{
+    setFormData({ ...defaultValue, id: v7() })
+  }
     useEffect(() => {
         getToken();
     (async () => {
@@ -137,6 +139,7 @@ useEffect(() => {
           <Grid item xs={12} lg={6}>
             <NewRecordForm
               formData={formData}
+              resetFormData={resetFormData}
               selectPortal={con.current}
               setFormData={setFormData}
             />

@@ -3,6 +3,7 @@
   useContext,
   SetStateAction,
   useEffect,
+  useMemo,
 } from "react";
 import {
   List,
@@ -31,12 +32,12 @@ import { v4 as uuid } from "uuid";
 import { Calculate, Repeat as IcoRepeat } from "@mui/icons-material";
 import { ScheduledTransactions, Transaction } from "FinanceApi";
 import { useMutateTransaction } from "../../repositories/transactions";
+import {useConfirm} from 'material-ui-confirm'
 import NumberInput from "../../common/NumberInput";
 import DropdownSelect from "../../common/Select";
 import cron from "cron-parser";
 import { useMutateSchedule } from "../../repositories/scheduledTasks";
 import VendorTextField from "./VendorTextField";
-
 
 const cronOptions = [
   { name: "Monthly", cron: "0 0 DD * *" },
@@ -47,16 +48,18 @@ const cronOptions = [
 interface NewRecordFormProps {
   formData: Partial<Transaction>;
   setFormData: React.Dispatch<Omit<SetStateAction<Transaction>, "id">>;
+  resetFormData : ()=>void;
   selectPortal: Element;
 }
 
 const NewRecordForm = (props: NewRecordFormProps) => {
-  const { formData, setFormData } = props;
+  const { formData, setFormData, resetFormData } = props;
   const view = useContext<any>(SelectAccountContext);
   const mutateTransaction = useMutateTransaction();
   const mutateSchedule = useMutateSchedule();
     const navigate = useNavigate();
   const { transId } = useParams();
+  const confirm = useConfirm()
 
   const [query, setQuery] = useSearchParams();
 
@@ -66,6 +69,14 @@ const NewRecordForm = (props: NewRecordFormProps) => {
   const [iteration, setIteration] = useState(12);
   const [selectedIteration, setSelectedIteration] = useState<any>();
 
+  const [selectAccountProps, setSelectProps] = useState({
+    show: false,
+    value: null,
+    onChange: () => {},
+    selectType: "account",
+    dest: "",
+    typeId: "",
+  });
   const [schedule, setSchedule] = useState<Partial<ScheduledTransactions>>({
     enabled: false,
     cronId: "",
@@ -73,18 +84,53 @@ const NewRecordForm = (props: NewRecordFormProps) => {
     endDate: "",
     dateCreated: moment().toISOString(),
     id: uuid(),
-      lastTransactionDate: moment().toISOString(),
+    lastTransactionDate: moment().toISOString(),
   });
 
-  const isSubmittable = () => {
-    const { creditId, debitId, vendorId } = formData;
+
+
+  const isSubmittable = useMemo((() => {
+    const { creditId, debitId, vendorId, amount} = formData;
     if (!(creditId && debitId && vendorId)) return false;
     if (schedule.enabled) {
       const { cronExpression, endDate } = schedule;
       if (!(cronExpression && endDate)) return false;
     }
+    if(amount === null || amount === undefined) return false;
     return true;
-    };
+  }),[formData]);
+  useEffect(() => {
+    const fn = (evt)=>{
+      if(evt.code === "Backquote" && evt.altKey){
+        setFormData((prevValue)=>{
+  
+          let types = ["transfer", "expense", "income"];
+          let currentIndex = types.indexOf(prevValue.type);
+          let newIndex = currentIndex == 0 ? types.length - 1 : currentIndex - 1;
+          
+          prevValue.type =types[newIndex]
+          return {...prevValue}
+        })
+      }
+      console.log(evt.code)
+      if(evt.code === "KeyS" && evt.altKey){
+        isSubmittable && submitTransaction(false)
+      }
+
+    }
+    window.addEventListener("keyup",fn );
+    return ()=>{
+      window.removeEventListener("keyup", fn)
+    }
+
+  }, [isSubmittable]);
+  
+  
+  
+
+  
+
+  
 
 
   const setType = (type) => {
@@ -153,7 +199,9 @@ const NewRecordForm = (props: NewRecordFormProps) => {
       });
   };
 
-  const submitTransaction = async () => {
+  const submitTransaction = async (redirectToHome : boolean) => {
+    
+    
     const newItem: Partial<Transaction> = {
       id: formData.id,
       addByUserId: "1668b555-9788-40ed-a6e8-feeabe9538f6",
@@ -169,23 +217,39 @@ const NewRecordForm = (props: NewRecordFormProps) => {
       scheduleId: formData.scheduleId,
     };
 
-    if (transId === "new") {
-      let responseSched;
-      if (schedule.enabled) {
-        responseSched = await mutateSchedule.create(schedule);
+    const confirmedTransaction = async ()=>{
+      if (transId === "new") {
+        let responseSched;
+        if (schedule.enabled) {
+          responseSched = await mutateSchedule.create(schedule);
         }
 
 
-      localStorage.setItem("stg_transaction", formData.id)
+        localStorage.setItem("stg_transaction", formData.id)
+        console.log(newItem)
 
-      mutateTransaction
-        .create({ ...newItem, scheduleId: responseSched?.id })
-        
+        mutateTransaction
+            .create({ ...newItem, scheduleId: responseSched?.id })
+
+        if(redirectToHome) return navigate(`../records/${moment(newItem.date).format("YYYY-MM")}/daily`);
+        if(!redirectToHome) {
+          resetFormData()
+        }
+
+      } else {
+        mutateTransaction.update(newItem)
         navigate(`../records/${moment(newItem.date).format("YYYY-MM")}/daily`);
-    } else {
-      mutateTransaction.update(newItem)
-        navigate(`../records/${moment(newItem.date).format("YYYY-MM")}/daily`);
+      }
+      
     }
+
+
+    if(Number.parseInt(formData.amount) === 0) return confirm({description: "Are you sure you want to submit with no amount?"})
+        .then(e=>{
+          confirmedTransaction()
+        })
+
+    confirmedTransaction();
   };
 
   const getCronIterations = (date?: string) => {
@@ -213,15 +277,10 @@ const NewRecordForm = (props: NewRecordFormProps) => {
     return items;
   };
 
-  const [selectAccountProps, setSelectProps] = useState({
-    show: false,
-    value: null,
-    onChange: () => {},
-    selectType: "account",
-    dest: "",
-    typeId: "",
-  });
-
+  useEffect(()=>{
+    console.log(selectAccountProps.show)
+  }, [selectAccountProps.show])
+  
   const nextScheduledTrans = () => {
     let sched = cron.parseExpression(schedule.cronExpression, {
       currentDate: moment(formData.date).toDate(),
@@ -413,13 +472,14 @@ const NewRecordForm = (props: NewRecordFormProps) => {
                     ? formData.debit?.name || ""
                     : formData.credit?.name || ""
                 }
-                onFocus={() =>
+                onFocus={(evt) =>{
+                  evt.target.blur()
                   setSelectProps({
                     ...selectAccountProps,
                     show: true,
                     dest: "source",
                   })
-                }
+                }}
               />
             </Grid>
           </Grid>
@@ -443,13 +503,14 @@ const NewRecordForm = (props: NewRecordFormProps) => {
                     vendorId: value.id,
                   })
                 }
-                onClick={() =>
+                onClick={(evt) =>{
                   setSelectProps({
                     ...selectAccountProps,
                     show: true,
+                    targeted: evt.target,
                     dest: "vendor",
                   })
-                }
+                }}
               />
             </Grid>
           </Grid>
@@ -473,12 +534,14 @@ const NewRecordForm = (props: NewRecordFormProps) => {
                     ? formData.credit?.name || ""
                     : formData.debit?.name || ""
                 }
-                onFocus={() =>
+                onFocus={(evt) =>{
+                  evt.target.blur()
                   setSelectProps({
                     ...selectAccountProps,
                     show: true,
                     dest: "destination",
                   })
+                }
                 }
               />
             </Grid>
@@ -496,7 +559,7 @@ const NewRecordForm = (props: NewRecordFormProps) => {
                 fullWidth
                 variant="standard"
                 value={formData.amount}
-                onChange={(e) => setFormData({ ...formData, amount: e })}
+                onChange={(e) => setFormData({ ...formData, amount: e || 0 })}
                 onClick={() =>
                   setSelectProps((prev) => ({ ...prev, dest: "amount" }))
                 }
@@ -506,6 +569,8 @@ const NewRecordForm = (props: NewRecordFormProps) => {
                     case "*":
                     case "+":
                     case "=":
+                      console.debug("Called Focus");
+                      
                       setSelectProps((prev) => ({
                         ...selectAccountProps,
                         show: true,
@@ -555,19 +620,30 @@ const NewRecordForm = (props: NewRecordFormProps) => {
         </ListItem>
         <ListItem>
           <Grid container spacing={2}>
-            <Grid item xs={8}>
+            <Grid item xs={transId=="new"?4:8}>
               <Button
-                fullWidth
-                variant="contained"
-                disabled={mutateTransaction.createExt.isPending || mutateTransaction.updateExt.isPending || !isSubmittable()}
-                onClick={submitTransaction}
+                  fullWidth
+                  variant="contained"
+                  disabled={mutateTransaction.createExt.isPending || mutateTransaction.updateExt.isPending || !isSubmittable}
+                  onClick={()=>submitTransaction(true)}
 
               >
-                {mutateTransaction.createExt.isPending || mutateTransaction.updateExt.isPending ? <CircularProgress /> 
-                : "Confirm"}
+                {mutateTransaction.createExt.isPending || mutateTransaction.updateExt.isPending ? <CircularProgress />
+                    : "Confirm"}
               </Button>
             </Grid>
-            <Grid item xs={4}>
+            {transId == 'new' && <Grid item xs={5}>
+              <Button
+                  fullWidth
+                  variant="contained"
+                  disabled={mutateTransaction.createExt.isPending || mutateTransaction.updateExt.isPending || !isSubmittable}
+                  onClick={()=>submitTransaction(false)}
+
+              >
+                Submit and New
+              </Button>
+            </Grid>}
+            <Grid item xs={transId=="new"?3:4}>
               <Link to="/records">
                 <Button fullWidth variant="outlined">
                   Cancel

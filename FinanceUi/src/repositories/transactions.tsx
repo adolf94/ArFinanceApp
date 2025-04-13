@@ -13,10 +13,12 @@ import { VENDOR, fetchVendorById } from "./vendors";
 import { ACCOUNT, fetchAccounts, fetchByAccountId } from "./accounts";
 import { AxiosResponse } from "axios";
 import replaceById from "../common/replaceById";
-import { enqueueSnackbar } from "notistack";
+import {closeSnackbar, enqueueSnackbar } from "notistack";
 import db from '../components/LocalDb/index'
 import {ACCOUNT_BALANCE, getBalancesByDate} from "./accountBalance.js";
 import numeral from "numeral";
+import { useState } from "react";
+import { CircularProgress } from "@mui/material";
 
 
 export const TRANSACTION = "transaction";
@@ -282,8 +284,14 @@ export const ensureTransactionAcctData = async (item) => {
 
 
 export const useMutateTransaction = () => {
+  const [snackbarId, setSnackbarId] = useState();  
+    
+    
   const create = useMutation({
       mutationFn: (data: Partial<Transaction>) => {
+          console.log(data)
+          let id = enqueueSnackbar(<><CircularProgress /> Saving... </>, {persist:true, variant:'info'})
+          setSnackbarId(id)
           return api
               .post<NewTransactionResponseDto>("transactions", data, { noLastTrans:true})
             .then(async (e: AxiosResponse<NewTransactionResponseDto>) => {
@@ -316,9 +324,11 @@ export const useMutateTransaction = () => {
         onSuccess: async (item: Transaction, vars, ctx) => {
          enqueueSnackbar("Saved!", {variant : 'info'})  
           addToTransactions(item, true);
+             closeSnackbar(snackbarId);
       },
       onError: (err, newTodo, context) => {
          context.doRollback()
+          closeSnackbar(snackbarId);
       },
   });
 

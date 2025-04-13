@@ -533,7 +533,6 @@ function SelectAccount(props: SelectAccountProps<any>) {
       <Grid item xs={12} sx={{ px: 2, pt: 1 }}>
         <Grid container sx={{ display: "flex", justifyItems: "center" }}>
           <Grid item sx={{ flexGrow: 1 }}>
-              {hotkey}
             {props.selectType == "vendor" ? (
               <TextField
                 value={searchQuery}
@@ -567,8 +566,8 @@ function SelectAccount(props: SelectAccountProps<any>) {
                       onClick={() => setAcctGroup(e)}
                       key={i}
                     >
-                        <Box component="span">{e.commonStartName}</Box>
-                        <Box component="span" sx={{fontWeight:'bold'}}>{ e.hotkeyName.slice(e.hotkeyStart, e.hotkey.length)}</Box>
+                        <Box component="span">{e.hotkeyName.slice(0,e.hotkeyStart)}</Box>
+                        <Box component="span" sx={{fontWeight:'bold'}}>{ e.hotkeyName.slice(e.hotkeyStart, e.hotkeyStart+e.hotkey.length)}</Box>
                         <Box component="span">{e.hotkeyName.slice(e.hotkeyStart + e.hotkey.length)}</Box>
                         
                         
@@ -585,7 +584,7 @@ function SelectAccount(props: SelectAccountProps<any>) {
             </List>
           </Grid>
           <Grid item xs={6}>
-            <List>=
+            <List>
               {(accounts || [])
                 .filter((e) => acctGroup && e.accountGroupId === acctGroup?.id)
                 .map((f) => (

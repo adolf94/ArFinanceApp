@@ -105,13 +105,14 @@ const VendorTextField = (props) => {
                     value={displayValue()}
                     variant="standard"
                     onFocus={() => {
-                        setFocused(true);
+                        // setFocused(true);
+                        
                         setInternalValue("");
                     }}
                     onBlur={() => {
-                        setFocused(false);
+                        // setFocused(false);
                     }}
-                    onChange={(e) => onTyped(e.target.value)}
+                    // onChange={(e) => onTyped(e.target.value)}
                     sx={{ input: { color: "black" }, label: { color: "black" } }}
                 />
             </Box>
