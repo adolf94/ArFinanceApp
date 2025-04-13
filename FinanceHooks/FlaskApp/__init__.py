@@ -35,9 +35,7 @@ def hello(name: str):
 def phone_hook(): 
     id=uuid7( as_type='str')
     headeApiKey = request.headers.get("x-api-key", type=str)
-    print(headeApiKey)
-    # headeApiKey = request.headers.get("x-api-key", type=str)
-    # if(headeApiKey == None or headeApiKey != apiKey ): return Response(status=401)
+    if(headeApiKey == None or headeApiKey != apiKey ): return Response(status=401)
 
     data = request.get_json()
     print(data)
@@ -51,11 +49,12 @@ def phone_hook():
         "id": "HookMessage|" + id,  
         "Date": datetime.datetime.now(datetime.UTC).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "JsonData": data,
-        "ExtractedData": extracted,
+        "ExtractedData": extracted["data"],
+        "Location": extracted["location"],
         "RawMsg":data["notif_msg"],
         "Type":"notif",
         "PartitionKey":"default",
-        "Discriminator": "HookMessage"
+        "Discriminator": "HookMessage",
         "IsHtml":False
     }
 
