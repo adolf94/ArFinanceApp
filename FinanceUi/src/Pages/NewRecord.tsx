@@ -42,7 +42,7 @@ export const SelectAccountContext = createContext({});
 //    left: "50%",
 //    transform: "translate(-50%, -50%)"
 //  }
-//});
+//});/
 
 const defaultValue = {
   type: "expense",
@@ -65,7 +65,7 @@ const NewRecordPage = (props) => {
   const navigate = useNavigate();
     const { state } = useLocation() as { state: any };
   const resetFormData = ()=>{
-    setFormData({ ...defaultValue, id: v7() })
+    setFormData({ ...defaultValue,credit:formData.credit, date: formData.date, id: v7*() })
   }
     useEffect(() => {
         getToken();
