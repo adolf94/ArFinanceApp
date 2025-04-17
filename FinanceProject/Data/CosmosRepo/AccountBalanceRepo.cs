@@ -38,7 +38,7 @@ namespace FinanceApp.Data.CosmosRepo
 								// less than Current period kasi we just need the current month start
 								.Select(t => (t.CreditId == acc.Id ? t.Amount : t.DebitId == acc.Id ? -t.Amount : 0)).SumAsync();
 
-								currentBal = new AccountBalance( date.Year, date.Month, acc.Id,acc.PeriodStartDay)
+								currentBal = new AccountBalance(date.Year, date.Month, acc.Id, acc.PeriodStartDay)
 								{
 										AccountId = acc.Id,
 										Balance = prevTotal
@@ -56,7 +56,7 @@ namespace FinanceApp.Data.CosmosRepo
 								decimal balanceToSave = monthTotal;
 								//add natin if d naman magrereset (save natin running balance)
 								if (!acc.ResetEndOfPeriod) balanceToSave = balanceLastMonth + monthTotal;
-								currentBal = new AccountBalance( date.Year, date.Month, acc.Id,acc.PeriodStartDay)
+								currentBal = new AccountBalance(date.Year, date.Month, acc.Id, acc.PeriodStartDay)
 								{
 										AccountId = acc.Id,
 										Balance = balanceToSave,
@@ -76,28 +76,28 @@ namespace FinanceApp.Data.CosmosRepo
 
 				public async Task<AccountBalance?> GetOne(Account acct, DateTime date)
 				{
-					if (acct.MaxMonth < date || acct.MinMonth > date)
-					{
-						return new AccountBalance( date.Year, date.Month, acct.Id,acct.PeriodStartDay)
+						if (acct.MaxMonth < date || acct.MinMonth > date)
 						{
-							Balance = acct.MinMonth > date? 0  : acct.Balance,
-							EndingBalance = acct.MinMonth > date? 0 : acct.Balance,
-							Account = acct,
-							PartitionKey = "default",
-							Transactions = new List<AccountBalance.BalanceTransaction>()
-						};
-					}
-					else
-					{
-						var item = await _context.AccountBalances!.Where(e => e.Id == $"{date.Year}|{date.Month:D2}|{acct.Id}")
-							.FirstOrDefaultAsync();
-						return item;
-					}
+								return new AccountBalance(date.Year, date.Month, acct.Id, acct.PeriodStartDay)
+								{
+										Balance = acct.MinMonth > date ? 0 : acct.Balance,
+										EndingBalance = acct.MinMonth > date ? 0 : acct.Balance,
+										Account = acct,
+										PartitionKey = "default",
+										Transactions = new List<AccountBalance.BalanceTransaction>()
+								};
+						}
+						else
+						{
+								var item = await _context.AccountBalances!.Where(e => e.Id == $"{date.Year}|{date.Month:D2}|{acct.Id}")
+									.FirstOrDefaultAsync();
+								return item;
+						}
 				}
-				
-				
-				
-				
+
+
+
+
 				//Deprecate
 				public async Task CreateAccountBalances(DateTime date)
 				{
@@ -132,57 +132,57 @@ namespace FinanceApp.Data.CosmosRepo
 				public async Task<AccountBalance> CreateBalances(Account acct, DateTime month, bool save = true)
 
 				{
-					DateTime currentPeriod = new DateTime(month.Year, month.Month, 1);
-					DateTime prevPeriod = new DateTime(month.Year, month.Month, 1).AddMonths(-1);
-					bool isPrevPeriod = acct.PeriodStartDay >= month.Day;
+						DateTime currentPeriod = new DateTime(month.Year, month.Month, 1);
+						DateTime prevPeriod = new DateTime(month.Year, month.Month, 1).AddMonths(-1);
+						bool isPrevPeriod = acct.PeriodStartDay >= month.Day;
 
-					
-					
-					List<AccountBalance> balancesToAdd = new List<AccountBalance>();
-					if (prevPeriod < acct.MinMonth)
-					{
-						//Create account balanced previous months
-						DateTime period = prevPeriod;
-						while (period < acct.MinMonth)
+
+
+						List<AccountBalance> balancesToAdd = new List<AccountBalance>();
+						if (prevPeriod < acct.MinMonth)
 						{
-							var newBalance = new AccountBalance(period.Year,period.Month,acct.Id,acct.PeriodStartDay);
-							balancesToAdd.Add(newBalance);
-							acct.MinMonth = period;
-							period = period.AddMonths(1);
+								//Create account balanced previous months
+								DateTime period = acct.MinMonth.AddMonths(-1);
+								while (period >= prevPeriod)
+								{
+										var newBalance = new AccountBalance(period.Year, period.Month, acct.Id, acct.PeriodStartDay);
+										balancesToAdd.Add(newBalance);
+										acct.MinMonth = period;
+										period = period.AddMonths(-1);
+								}
 						}
-					}
 
-					if (currentPeriod > acct.MaxMonth)
-					{
-						
-						DateTime period = acct.MaxMonth.AddMonths(1);
-						while (period <= currentPeriod)
+						if (currentPeriod > acct.MaxMonth)
 						{
-							var newBalance = new AccountBalance(period.Year,period.Month,acct.Id,acct.PeriodStartDay)
-							{
-								Balance = acct.ResetEndOfPeriod ? 0 : acct.Balance,
-								EndingBalance = acct.ResetEndOfPeriod ? 0 : acct.Balance,
-							};
-							balancesToAdd.Add(newBalance);
-							acct.MaxMonth = period;
-							period = period.AddMonths(1);
+
+								DateTime period = acct.MaxMonth.AddMonths(1);
+								while (period <= currentPeriod)
+								{
+										var newBalance = new AccountBalance(period.Year, period.Month, acct.Id, acct.PeriodStartDay)
+										{
+												Balance = acct.ResetEndOfPeriod ? 0 : acct.Balance,
+												EndingBalance = acct.ResetEndOfPeriod ? 0 : acct.Balance,
+										};
+										balancesToAdd.Add(newBalance);
+										acct.MaxMonth = period;
+										period = period.AddMonths(1);
+								}
 						}
-					}
 
-					if (balancesToAdd.Any())
-					{
-						await _context.AccountBalances!.AddRangeAsync(balancesToAdd);
-						if(save) await _context.SaveChangesAsync();
-					}
+						if (balancesToAdd.Any())
+						{
+								await _context.AccountBalances!.AddRangeAsync(balancesToAdd);
+								if (save) await _context.SaveChangesAsync();
+						}
 
-					string balanceKey = isPrevPeriod?$"{prevPeriod.Year}|{prevPeriod.Month:D2}|{acct.Id}" 
-									: $"{currentPeriod.Year}|{currentPeriod.Month:D2}|{acct.Id}"  ;
-					
-					
-					var item = await _context.AccountBalances!.FirstOrDefaultAsync(e =>
-						e.Id == balanceKey);
-					
-					return item!;
+						string balanceKey = isPrevPeriod ? $"{prevPeriod.Year}|{prevPeriod.Month:D2}|{acct.Id}"
+										: $"{currentPeriod.Year}|{currentPeriod.Month:D2}|{acct.Id}";
+
+
+						var item = await _context.AccountBalances!.FirstOrDefaultAsync(e =>
+							e.Id == balanceKey);
+
+						return item!;
 
 				}
 
@@ -190,84 +190,84 @@ namespace FinanceApp.Data.CosmosRepo
 				public async Task<IEnumerable<AccountBalance>> UpdateCrAccount(Guid creditId, decimal amount,
 					Guid transaction, DateTime date, bool reverse = false, bool save = true)
 				{
-					Account? acct = await _context.Accounts!.Where(e => e.Id == creditId).FirstOrDefaultAsync();
-					if (acct == null) throw new Exception("Account not found");
-					List<AccountBalance> balance = new List<AccountBalance>();
+						Account? acct = await _context.Accounts!.Where(e => e.Id == creditId).FirstOrDefaultAsync();
+						if (acct == null) throw new Exception("Account not found");
+						List<AccountBalance> balance = new List<AccountBalance>();
 
-					AccountBalance bal = await CreateBalances(acct, date);
-					bal.EndingBalance -= amount;
+						AccountBalance bal = await CreateBalances(acct, date);
+						bal.EndingBalance -= amount;
 
-					if (reverse)
-					{
-						bal.Transactions = bal.Transactions.Where(e=>e.TransactionId != transaction).ToList();
-					}
-					else
-					{
-						bal.Transactions.Add(new AccountBalance.BalanceTransaction()
+						if (reverse)
 						{
-							TransactionId = transaction,
-							Amount = -amount
-						});
-					}
-					
-					balance.Add(bal);
-					if (!acct.ResetEndOfPeriod)
-					{
-						var balances =await _context.AccountBalances!.Where(e => e.AccountId == creditId && e.DateStart > date)
-							.ToListAsync();
-						
-						balance.AddRange(balances.Select(b =>
+								bal.Transactions = bal.Transactions.Where(e => e.TransactionId != transaction).ToList();
+						}
+						else
 						{
-							b.Balance -= amount;
-							b.EndingBalance -= amount;
-							return b;
-						}).ToArray());
-					}
-					
-					if(save)await _context.SaveChangesAsync();
-					return balance;
+								bal.Transactions.Add(new AccountBalance.BalanceTransaction()
+								{
+										TransactionId = transaction,
+										Amount = -amount
+								});
+						}
+
+						balance.Add(bal);
+						if (!acct.ResetEndOfPeriod)
+						{
+								var balances = await _context.AccountBalances!.Where(e => e.AccountId == creditId && e.DateStart > date)
+									.ToListAsync();
+
+								balance.AddRange(balances.Select(b =>
+								{
+										b.Balance -= amount;
+										b.EndingBalance -= amount;
+										return b;
+								}).ToArray());
+						}
+
+						if (save) await _context.SaveChangesAsync();
+						return balance;
 
 				}
 
-				public async Task<IEnumerable<AccountBalance>> UpdateDrAccount(Guid debitId, decimal amount, 
+				public async Task<IEnumerable<AccountBalance>> UpdateDrAccount(Guid debitId, decimal amount,
 					Guid transaction, DateTime date, bool reverse = false, bool save = true)
 				{
-					Account? acct = await _context.Accounts!.Where(e => e.Id == debitId).FirstOrDefaultAsync();
-					if (acct == null) throw new Exception("Account not found");
-					List<AccountBalance> balance = new List<AccountBalance>();
+						Account? acct = await _context.Accounts!.Where(e => e.Id == debitId).FirstOrDefaultAsync();
+						if (acct == null) throw new Exception("Account not found");
+						List<AccountBalance> balance = new List<AccountBalance>();
 
-					AccountBalance bal = await CreateBalances(acct, date);
-					bal.EndingBalance += amount;
+						AccountBalance bal = await CreateBalances(acct, date);
+						bal.EndingBalance += amount;
 
-					if (reverse)
-					{
-						bal.Transactions = bal.Transactions.Where(e=>e.TransactionId != transaction).ToList();
-					}
-					else
-					{
-						bal.Transactions.Add(new AccountBalance.BalanceTransaction()
+						if (reverse)
 						{
-							TransactionId = transaction,
-							Amount = -amount
-						});
-					}
-					balance.Add(bal);
-					if (!acct.ResetEndOfPeriod)
-					{
-						var balances =await _context.AccountBalances!.Where(e => e.AccountId == debitId && e.DateStart > date)
-							.ToListAsync();
-						
-						balance.AddRange(balances.Select(b =>
+								bal.Transactions = bal.Transactions.Where(e => e.TransactionId != transaction).ToList();
+						}
+						else
 						{
-							b.Balance += amount;
-							b.EndingBalance += amount;
-							return b;
-						}).ToArray());
-					}
-					
-					if(save)await _context.SaveChangesAsync();
+								bal.Transactions.Add(new AccountBalance.BalanceTransaction()
+								{
+										TransactionId = transaction,
+										Amount = -amount
+								});
+						}
+						balance.Add(bal);
+						if (!acct.ResetEndOfPeriod)
+						{
+								var balances = await _context.AccountBalances!.Where(e => e.AccountId == debitId && e.DateStart > date)
+									.ToListAsync();
 
-					return balance;
+								balance.AddRange(balances.Select(b =>
+								{
+										b.Balance += amount;
+										b.EndingBalance += amount;
+										return b;
+								}).ToArray());
+						}
+
+						if (save) await _context.SaveChangesAsync();
+
+						return balance;
 
 				}
 

@@ -4,10 +4,14 @@ import React, { useEffect, useState } from "react";
 
 const NumberInput = (props: any) => {
   const [value, setValue] = useState("");
+  const [isFocused, setIsFocused] = useState(false);
 
   useEffect(() => {
     if (!/([0-9\.])*/.test(props.value) && /\.{2,}/.test(props.value)) {
       return;
+    }
+    if(isFocused && numeral(props.value || "0").value() == numeral(value).value()){
+      return
     }
     setValue(
       numeral((props.value || "0").toString().replace(",", "")).format(
@@ -25,9 +29,11 @@ const NumberInput = (props: any) => {
       return;
     }
     setValue(evt.target.value);
+    props.onChange(evt.target.value)
   };
 
   return (
+    <>
     <TextField
       inputProps={{
         min: 0,
@@ -42,7 +48,6 @@ const NumberInput = (props: any) => {
       {...props}
       onKeyPress={(event) => {
         if(props.onKeyPress && props.onKeyPress(event)) {
-            return;
         }
         if (!/[-0-9.,]/.test(event.key)) {
           event.preventDefault();
@@ -51,18 +56,21 @@ const NumberInput = (props: any) => {
           event.preventDefault();
       }}
       onBlur={(evt) => {
+        setIsFocused(false);
           props.onChange(numeral(value.replace(",", "")).value());
         if(evt.target.value==="") setValue("0.00")
       }}
           onFocus={() => {
+            setIsFocused(true);
               if (Number.parseFloat(value) === 0) setValue("");
-        }}
+          }}
       value={value}
       onChange={onChange}
+      helperText={isFocused.toString()}
       //value={numeral(formData.amount).format("0,0.00")} onBlur={(e) => setFormData({ ...formData, amount: numeral(e.target.value).value() })}
       //onChange={(e) => setFormData({ ...formData, amount: numeral(e.target.value).value() })}
       //onClick={() => setSelectProps((prev) => ({ ...prev, dest: "amount" }))}
-    />
+    />{isFocused}</>
   );
 };
 

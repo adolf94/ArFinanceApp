@@ -289,7 +289,7 @@ export const useMutateTransaction = () => {
     
   const create = useMutation({
       mutationFn: (data: Partial<Transaction>) => {
-          console.log(data)
+        
           let id = enqueueSnackbar(<><CircularProgress /> Saving... </>, {persist:true, variant:'info'})
           setSnackbarId(id)
           return api
