@@ -123,7 +123,7 @@ const NewRecordForm = (props: NewRecordFormProps) => {
       window.removeEventListener("keyup", fn)
     }
 
-  }, [isSubmittable]);
+  }, [isSubmittable, formData]);
   
   
   
