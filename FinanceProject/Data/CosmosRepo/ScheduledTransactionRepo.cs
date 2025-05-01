@@ -113,7 +113,7 @@ namespace FinanceApp.Data.CosmosRepo
 																Amount = tr.Amount,
 																Date = nextTransaction,
 																VendorId = tr.VendorId,
-																EpochUpdated = new DateTimeOffset().ToUnixTimeSeconds(),
+																EpochUpdated = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds(),
 																Description = $"{e.LastTransactionIndex + 1} of {e.TotalOccurence}. ",
 																BalanceRefs = new[]{
 																										new BalanceAccount(){ AccountBalanceKey = crBal.Id, AccountId = tr.CreditId , IsDebit = false },
