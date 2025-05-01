@@ -23,6 +23,7 @@ export function useOfflineData<T>(inputs : UseOfflineDataParams<T>, keys : any[]
         let mode = "offline"
         let fetching = false
         let fetched = false
+        setData(inputs.defaultData)
         //if (!isLoading) return;
         //const fetch = () => {
             //fetching = true

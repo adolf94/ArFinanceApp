@@ -430,7 +430,7 @@ export const ensureTransactionAcctData = async (item) => {
 
 
 export const useMutateTransaction = () => {
-  const [snackbarId, setSnackbarId] = useState();  
+  const [snackbarId, setSnackbarId] = useState<string>("");  
     
     
   const create = useMutation({
@@ -448,6 +448,21 @@ export const useMutateTransaction = () => {
                 let accounts = e.data.accounts;
                 accounts.forEach(e => {
                     queryClient.setQueryData([ACCOUNT, { id: e.id }], e);
+                    db.accounts.put(e)
+                })
+
+
+                e.data.balances.forEach(e =>{
+                    let item = db.accountBalances.where("id").equals(e.id)
+                        .first()
+                        //dont insert if not existing,
+                    if(!!item) db.accountBalances.put(e)
+                })
+                e.data.monthly.forEach(e => {
+                    let item = db.accountBalances.where("monthKey").equals(e.monthKey)
+                        .first()
+                    //dont insert if not existing,
+                    if (!!item) db.monthTransactions.put(e)
                 })
 
                 item = await ensureTransactionAcctData(item);
@@ -518,6 +533,18 @@ export const useMutateTransaction = () => {
           });
 
 
+            e.data.balances.forEach(e => {
+                let item = db.accountBalances.where("id").equals(e.id)
+                    .first()
+                //dont insert if not existing,
+                if (!!item) db.accountBalances.put(e)
+            })
+            e.data.monthly.forEach(e => {
+                let item = db.accountBalances.where("monthKey").equals(e.monthKey)
+                    .first()
+                //dont insert if not existing,
+                if (!!item) db.monthTransactions.put(e)
+            })
           return item;
         })
       },
