@@ -1,9 +1,8 @@
 import { useMutation } from "@tanstack/react-query";
 import api from "../components/api";
 import {
-    Account, AccountBalance,
+    Account, 
     CreateTransactionDto,
-    MonthlyTransaction,
     NewTransactionResponseDto,
     Transaction,
     Vendor,
@@ -15,7 +14,7 @@ import { ACCOUNT, fetchAccounts, fetchByAccountId } from "./accounts";
 import { AxiosResponse } from "axios";
 import replaceById from "../common/replaceById";
 import {closeSnackbar, enqueueSnackbar } from "notistack";
-import db from '../components/LocalDb/AppDb'
+import db, { AccountBalance, MonthlyTransaction } from '../components/LocalDb/AppDb'
 import {ACCOUNT_BALANCE, getBalancesByDate} from "./accountBalance.js";
 import numeral from "numeral";
 import { useState } from "react";
@@ -160,16 +159,16 @@ export const fetchTransactionsByMonthKey = async (year: number, month: number, o
     if (offline && !hasData) return Promise.reject({message: 'no data available'})
   if(offline && hasData) {
     return Promise.all( monthData.transactions.map((tr)=>{
-      return db.transactions.where("id").equals(tr.transactionId).first()
+      return db.transactions.where("id").equals(tr.id).first()
     }))
   }
 
   const revalidateData = (origData : Transaction[], item : MonthlyTransaction) : Promise<Transaction[]> => {
     return Promise.all(item.transactions.map(d=>{
-        let data = origData.find(e=>e.id == d.transactionId)
-        if(data && data.epochUpdated == d.epochUpdated) return data
+        let data = origData.find(e=>e.id === d.id)
+        if(data && data.epochUpdated === d.epochUpdated) return data
 
-        return api(`transactions/${d.transactionId}`)
+        return api(`transactions/${d.id}`)
           .then(res=>res.data)
     }))
 
@@ -216,16 +215,16 @@ export const fetchByAccountMonthKey = async (
   
     if(offline && !hasData) return []
     if(offline && hasData) {
-      return Promise.all( accountBalance.transactions.map(tr=>{
-        return db.transactions.where("id").equals(tr.id).first()
+      return Promise.all( accountBalance.transactions.map((tr)=>{
+        return db.transactions.where("id").equals(tr.transactionId).first()
       })).then(items=>items.filter(e=>!!e))
     }
 
 
     const revalidateData = (origData : Transaction[], item : AccountBalance) : Promise<Transaction[]> => {
       return Promise.all(item.transactions.map(d=>{
-          let data = origData.find(e=>e.id == d.transactionId)
-          if(data && data.epochUpdated == d.epochUpdated) return data
+          let data = origData.find(e=>e.id === d.transactionId)
+          if(data && data.epochUpdated === d.epochUpdated) return data
   
           return api(`transactions/${d.transactionId}`)
             .then(res=>res.data)

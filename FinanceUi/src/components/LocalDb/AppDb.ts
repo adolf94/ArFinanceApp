@@ -1,9 +1,16 @@
 import Dexie, {  EntityTable } from 'dexie';
-import { Account, AccountBalance, MonthlyTransaction as MTransactionFromApi, Transaction } from 'FinanceApi';
+import { Account, AccountBalance as AccountBalanceApi, MonthlyTransaction as MTransactionFromApi, Transaction } from 'FinanceApi';
 
 
 
-interface MonthlyTransaction extends MTransactionFromApi {
+export interface MonthlyTransaction extends MTransactionFromApi {
+    transactions: {
+        id: string,
+        epochUpdated: Number
+    }[]
+}
+
+export interface AccountBalance extends AccountBalanceApi {
     transactions: {
         transactionId: string,
         epochUpdated: Number
@@ -15,7 +22,7 @@ interface MonthlyTransaction extends MTransactionFromApi {
 const db = new Dexie('FinanceApp') as Dexie & {
     transactions: EntityTable<Transaction, 'id'>,
     monthTransactions: EntityTable<MonthlyTransaction & {dateUpdated : Date}, 'monthKey'>,
-    accountBalances: EntityTable<AccountBalance & { dateUpdated: Date }, 'id'>,
+    accountBalances: EntityTable<  AccountBalance & { dateUpdated: Date }, 'id'>,
     accounts: EntityTable<Account & { dateUpdated: Date }, 'id'>
   };
   
