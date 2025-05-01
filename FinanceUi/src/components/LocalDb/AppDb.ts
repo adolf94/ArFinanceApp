@@ -1,5 +1,14 @@
 import Dexie, {  EntityTable } from 'dexie';
-import { Account, AccountBalance, MonthlyTransaction, Transaction } from 'FinanceApi';
+import { Account, AccountBalance, MonthlyTransaction as MTransactionFromApi, Transaction } from 'FinanceApi';
+
+
+
+interface MonthlyTransaction extends MTransactionFromApi {
+    transactions: {
+        transactionId: string,
+        epochUpdated: Number
+    }[]
+}
 
 
 

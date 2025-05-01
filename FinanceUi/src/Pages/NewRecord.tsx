@@ -106,7 +106,7 @@ const NewRecordPage = (props) => {
         fetchTransactionById(transId)
           .then(e=>{
             setFormData((prev)=>{
-              if(prev.id == e.id && prev.epochUpdated == e.epochUpdated) return prev
+              if(prev.id === e.id && prev.epochUpdated === e.epochUpdated) return prev
               return e
             })
           })

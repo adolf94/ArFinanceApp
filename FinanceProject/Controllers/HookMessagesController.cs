@@ -27,7 +27,6 @@ public class HookMessagesController : ControllerBase
 	{
 		
 		var items = await _repo.GetHookMessagesAsync();
-
 		return Ok(items);
 
 

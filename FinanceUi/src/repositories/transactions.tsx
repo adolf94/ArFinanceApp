@@ -159,17 +159,17 @@ export const fetchTransactionsByMonthKey = async (year: number, month: number, o
 
     if (offline && !hasData) return Promise.reject({message: 'no data available'})
   if(offline && hasData) {
-    return Promise.all( monthData.transactions.map(tr=>{
-      return db.transactions.where("id").equals(tr.id).first()
+    return Promise.all( monthData.transactions.map((tr)=>{
+      return db.transactions.where("id").equals(tr.transactionId).first()
     }))
   }
 
   const revalidateData = (origData : Transaction[], item : MonthlyTransaction) : Promise<Transaction[]> => {
     return Promise.all(item.transactions.map(d=>{
-        let data = origData.find(e=>e.id == d.id)
+        let data = origData.find(e=>e.id == d.transactionId)
         if(data && data.epochUpdated == d.epochUpdated) return data
 
-        return api(`transactions/${d.id}`)
+        return api(`transactions/${d.transactionId}`)
           .then(res=>res.data)
     }))
 
@@ -177,7 +177,7 @@ export const fetchTransactionsByMonthKey = async (year: number, month: number, o
   
   let monthlytransaction = await queryClient.ensureQueryData({
     queryKey: [MONTHLY_TRANSACTION, {monthKey: key}],
-    queryFn: ()=>api.get(`monthlytransaction/${key}`).then(e=>e.data)
+    queryFn: ()=>api.get(`monthlytransaction/${key}`).then((e:MonthlyTransaction)=>e.data)
   }) 
   let transactions = [] as Transaction[]
   if(!hasData){

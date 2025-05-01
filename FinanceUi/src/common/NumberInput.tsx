@@ -29,7 +29,7 @@ const NumberInput = (props: any) => {
       return;
     }
     setValue(evt.target.value);
-    props.onChange(numeral(props.value || "0").value())
+      props.onChange(numeral(evt.target.value || "0").value())
   };
 
   return (

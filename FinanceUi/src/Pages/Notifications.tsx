@@ -1,7 +1,8 @@
-import { AppBar, Grid as Grid, IconButton, List, ListItem, ListItemText, Paper, Toolbar, Typography } from "@mui/material";
+import { AppBar, Grid, IconButton, List, ListItem, ListItemText, Paper, Toolbar, Typography } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
 import UserPanel from "../components/UserPanel.js";
 import {getHooksMessages, HOOK_MESSAGES} from "../repositories/hookMessages.js";
+import HooksAccordion from "./Notifications/HooksAccordion.jsx";
 
 
 const Notifications = ()=>{
@@ -36,11 +37,7 @@ const Notifications = ()=>{
             <Grid md={9}>
                 <Paper>
                     <List>
-                        {!hookLoading && hookMessages.map(e=><ListItem>
-                            <ListItemText>
-                                {e.rawMsg}
-                            </ListItemText>
-                        </ListItem>)}
+                        {!hookLoading && hookMessages.map(e => <HooksAccordion notif={ e} />)}
                         
                     </List>
                 </Paper>
