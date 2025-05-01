@@ -13,36 +13,41 @@ interface UseOfflineDataParams<T> {
 
 
 export function useOfflineData<T>(inputs : UseOfflineDataParams<T>, keys : any[]){
-    if(!!inputs.defaultData) inputs.defaultData = null
+    if(!!inputs.defaultData) inputs.defaultData = null as T | null
     const [data,setData] = useState<T>(inputs.defaultData)
     const [isLoading, setLoading] = useState<boolean>(true)
-    const [isFetching, setFetching] = useState<boolean>(true)
+    const [isFetching, setFetching] = useState<boolean>(false)
     const [fetched, setFetched] = useState<boolean>(false)
 
     useEffect(()=>{
         let mode = "offline"
         let fetched = false
+        let fetching = isFetching
         setLoading(true)
-        const fetch = ()=>inputs.getOnlineData().then((data) => {
-            setData(data)
-            mode = "online"
-            fetched = true
-            setFetching(false)
-        }).catch(() => {
-            setFetching(false)
-            setLoading(false)
-        })
-
+        //const fetch = () => {
+            fetching = true
+            setFetching(true)
+            inputs.getOnlineData().then((data) => {
+                setData(data)
+                mode = "online"
+                fetched = true
+                fetching = false
+                setFetching(false)
+                setLoading(false)
+            }).catch(() => {
+                setFetching(false)
+                setLoading(false)
+            })
         
         inputs.initialData().then((data)=>{
             setLoading(false)
             if (mode === "offline") setData(data)
-            if (!isFetching && !fetched && !inputs.offlineOnly ) fetch()
+            //if (!fetching && !fetched && !inputs.offlineOnly ) fetch()
         })
 
 
 
-    },keys)
+    },[keys])
 
     return {
         data,
