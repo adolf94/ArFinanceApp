@@ -157,7 +157,7 @@ export const fetchTransactionsByMonthKey = async (year: number, month: number, o
   let monthData = await db.monthTransactions.where("monthKey").equals( key ).first();
   let hasData = !!monthData
 
-  if(offline && !hasData) return []
+    if (offline && !hasData) return Promise.reject({message: 'no data available'})
   if(offline && hasData) {
     return Promise.all( monthData.transactions.map(tr=>{
       return db.transactions.where("id").equals(tr.id).first()
