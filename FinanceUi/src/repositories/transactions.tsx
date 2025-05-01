@@ -3,6 +3,7 @@ import api from "../components/api";
 import {
     Account, AccountBalance,
     CreateTransactionDto,
+    MonthlyTransaction,
     NewTransactionResponseDto,
     Transaction,
     Vendor,
@@ -14,7 +15,7 @@ import { ACCOUNT, fetchAccounts, fetchByAccountId } from "./accounts";
 import { AxiosResponse } from "axios";
 import replaceById from "../common/replaceById";
 import {closeSnackbar, enqueueSnackbar } from "notistack";
-import db from '../components/LocalDb/index'
+import db from '../components/LocalDb/AppDb'
 import {ACCOUNT_BALANCE, getBalancesByDate} from "./accountBalance.js";
 import numeral from "numeral";
 import { useState } from "react";
@@ -22,6 +23,9 @@ import { CircularProgress } from "@mui/material";
 
 
 export const TRANSACTION = "transaction";
+
+
+export const MONTHLY_TRANSACTION = "monthly_transaction";
 
 
 export const temporaryAddTransaction = async (item) => {
@@ -146,8 +150,150 @@ export const addToTransactions = (item: Transaction, replace: boolean) => {
 
 };
 
+export const fetchTransactionsByMonthKey = async (year: number, month: number, offline: boolean) => {
+  console.debug("fetchTransactionsByMonthKey",  { year, month });
+  let key = moment([year, month,1]).format("YYYY-MM-01")
+
+  let monthData = await db.monthTransactions.where("monthKey").equals( key ).first();
+  let hasData = !!monthData
+
+  if(offline && !hasData) return []
+  if(offline && hasData) {
+    return Promise.all( monthData.transactions.map(tr=>{
+      return db.transactions.where("id").equals(tr.id).first()
+    }))
+  }
+
+  const revalidateData = (origData : Transaction[], item : MonthlyTransaction) : Promise<Transaction[]> => {
+    return Promise.all(item.transactions.map(d=>{
+        let data = origData.find(e=>e.id == d.id)
+        if(data && data.epochUpdated == d.epochUpdated) return data
+
+        return api(`transactions/${d.id}`)
+          .then(res=>res.data)
+    }))
+
+  }
+  
+  let monthlytransaction = await queryClient.ensureQueryData({
+    queryKey: [MONTHLY_TRANSACTION, {monthKey: key}],
+    queryFn: ()=>api.get(`monthlytransaction/${key}`).then(e=>e.data)
+  }) 
+  let transactions = [] as Transaction[]
+  if(!hasData){
+     transactions = await api<Transaction[]>("transactions", { params: { year, month : month + 1 }, noLastTrans: false })
+        .then(res=>res.data) as Transaction[]
+  }else{
+    transactions = await Promise.all(monthlytransaction.transactions.map(
+      (item)=>db.transactions.where("id").equals(item.id).first()
+    )).then(items=>items.filter(e=>!!e))
+  }
+
+
+
+  let revalidatedData = await revalidateData(transactions , monthlytransaction)
+  db.monthTransactions.put(monthlytransaction)
+  
+  let output = await Promise.all(revalidatedData.map(e=>ensureTransactionAcctData(e)))
+      
+  return output;
+
+
+
+}
+
+export const fetchByAccountMonthKey = async (
+  acctId: string,
+  year: number,
+  month: number,
+  offline: boolean = false
+)=>{
+    console.debug("fetchTransactionsByMonthKey",  { year, month });
+    let date = moment([year, month - 1,1])
+  
+    let accountBalance = await db.accountBalances.where("id").equals( `${date.format("YYYY|MM")}|${acctId}` ).first();
+    let hasData = !!accountBalance
+  
+    if(offline && !hasData) return []
+    if(offline && hasData) {
+      return Promise.all( accountBalance.transactions.map(tr=>{
+        return db.transactions.where("id").equals(tr.id).first()
+      })).then(items=>items.filter(e=>!!e))
+    }
+
+
+    const revalidateData = (origData : Transaction[], item : AccountBalance) : Promise<Transaction[]> => {
+      return Promise.all(item.transactions.map(d=>{
+          let data = origData.find(e=>e.id == d.transactionId)
+          if(data && data.epochUpdated == d.epochUpdated) return data
+  
+          return api(`transactions/${d.transactionId}`)
+            .then(res=>res.data)
+      }))
+  
+    }
+    accountBalance = await queryClient.ensureQueryData({
+      queryKey: [ACCOUNT_BALANCE,{accountId: acctId, date: moment([year,month,1]).format("yyyy-MM-01")}], 
+      queryFn: ()=>getBalancesByDate(moment([year,month,1]).format("yyyy-MM-01"), acctId)
+    })
+    let transactions = [] as Transaction[]
+    
+    if(!hasData){
+        let KEY1 = date.format("YYYY-MM-01")
+        let MT1 = await db.monthTransactions.where("monthKey").equals( KEY1 ).first();
+        
+        if(!MT1){
+           await api<Transaction[]>("transactions", { params: { year, month  }, noLastTrans: false })
+            .then(res=>res.data as Transaction[])
+            .then(items=>Promise.all(items.map(e=>ensureTransactionAcctData(e)))) 
+
+
+
+            await queryClient.ensureQueryData({
+              queryKey: [MONTHLY_TRANSACTION, {monthKey: KEY1}],
+              queryFn: ()=>api.get(`monthlytransaction/${KEY1}`).then(e=>e.data)
+            }) 
+            .then((m)=>db.monthTransactions.put(m))
+        }
+        let date0 = date.clone().add(-1,'month')
+        let key0 = date0.format("YYYY-MM-01")
+        let mt0 = await db.monthTransactions.where("monthKey").equals( key0 ).first();
+
+        if(!mt0){
+          let data = await api<Transaction[]>("transactions", { params: { year: date0.year(), month: date0.month() + 1  }, noLastTrans: false })
+            .then(res=>res.data as Transaction[])
+            .then(items=>Promise.all(items.map(e=>ensureTransactionAcctData(e)))) 
+            
+
+            
+            await queryClient.ensureQueryData({
+              queryKey: [MONTHLY_TRANSACTION, {monthKey: key0}],
+              queryFn: ()=>api.get(`monthlytransaction/${key0}`).then(e=>e.data)
+            }) 
+            .then((m)=>db.monthTransactions.put(m))
+        }
+    }
+ 
+      transactions = await Promise.all(accountBalance.transactions.map(
+        (item)=>db.transactions.where("id").equals(item.transactionId).first()
+      )).then(items=>items.filter(e=>!!e))
+
+    let revalidatedData = await revalidateData(transactions , accountBalance)
+    db.accountBalances.put(accountBalance)
+    
+    let output = await Promise.all(revalidatedData.map(e=>ensureTransactionAcctData(e)))
+        
+    return output;
+  
+}
+
+
+
+
+
+
 export const fetchTransactionsByMonth = (year: number, month: number, persistLast? : string ) => {
-  console.debug("fetchTransactionsByMonth", { year, month });
+ 
 
     return api<Transaction[]>("transactions", { params: { year, month }, noLastTrans: persistLast }).then(
       (e : AxiosResponse<Transaction[]>) => {

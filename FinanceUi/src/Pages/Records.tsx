@@ -26,12 +26,12 @@ import moment from "moment";
 import { useEffect } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import {
-    TRANSACTION,
-    fetchTransactionsByMonth,
+    fetchTransactionsByMonthKey,
 } from "../repositories/transactions";
 import Calendar from "./RecordsComponents/Calendar";
 import Daily from "./RecordsComponents/Daily";
 import UserPanel from "../components/UserPanel.js";
+import { useOfflineData } from "../components/LocalDb/useOfflineData";
 
 interface RecordViewTransaction {
   dateGroup: string;
@@ -70,14 +70,23 @@ const Records = () => {
   const { view, monthStr } = useParams();
   const month = moment(monthStr);
     const navigate = useNavigate();
-    const { data: records, isLoading: loadingRecords  } = useQuery({
-    queryKey: [
-      TRANSACTION,
-      { month: month.get("month") + 1, year: month.get("year") },
-    ],
-    queryFn: () =>
-      fetchTransactionsByMonth(month.get("year"), month.get("month") + 1),
-  });
+  //   const { data: records, isLoading: loadingRecords  } = useQuery({
+  //   queryKey: [
+  //     TRANSACTION,
+  //     { month: month.get("month") , year: month.get("year") },
+  //   ],
+  //   queryFn: () =>
+  //     fetchTransactionsByMonthKey(month.get("year"), month.get("month"), false),
+  //   placeholderData:[]
+  // });
+
+  const {data:records, loading:loadingRecords} = useOfflineData<Transaction[]>({
+    getOnlineData: () =>
+          fetchTransactionsByMonthKey(month.get("year"), month.get("month"), false),
+    initialData:() =>
+      fetchTransactionsByMonthKey(month.get("year"), month.get("month"), true),
+    defaultData: []
+  },[monthStr])
 
   const [dailies, setDailies] = useState([]);
 

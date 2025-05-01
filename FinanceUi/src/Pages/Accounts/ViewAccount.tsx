@@ -27,6 +27,7 @@ import {
   TRANSACTION,
   fetchTransactionsByMonth,
   fetchByAcctMonth,
+  fetchByAccountMonthKey,
 } from "../../repositories/transactions";
 import { useNavigate, useParams } from "react-router";
 import { Link } from 'react-router-dom'
@@ -38,6 +39,7 @@ import {
 } from "../../repositories/accountBalance";
 import numeral from "numeral";
 import TransactionListItem from "../RecordsComponents/TransactionListItem.js";
+import { useOfflineData } from "../../components/LocalDb/useOfflineData";
 
 
 const fabGreenStyle = {
@@ -67,13 +69,11 @@ interface TransactionWithRunningBal extends Transaction {
 const ViewAccount = () => {
   const { acctId } = useParams();
   const [month, setMonth] = useState(moment());
-  const { data: records, isLoading:recordsLoading } = useQuery({
-    queryKey: [
-      TRANSACTION,
-      { accountId: acctId, month: month.month() + 1, year: month.year() },
-    ],
-    queryFn: () => fetchByAcctMonth(acctId, month.year(), month.month() + 1),
-  });
+  const { data: records, isFetching:recordsLoading } = useOfflineData({
+    defaultData:[],
+    getOnlineData: () => fetchByAccountMonthKey(acctId, month.year(), month.month() + 1, false),
+    initialData: ()=> fetchByAccountMonthKey(acctId, month.year(), month.month() + 1, true)
+  },[month.year(), month.month() + 1]);   
   const { data: account } = useQuery({
     queryKey: [ACCOUNT, { id: acctId }],
     queryFn: () => fetchByAccountId(acctId),

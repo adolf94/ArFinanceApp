@@ -58,6 +58,7 @@ namespace FinanceProject.Models
 				public class BalanceTransaction
 				{
 					public Guid TransactionId { get; set; }
+					public long EpochUpdated { get; set; } 
 					public decimal Amount { get; set; }
 				}
 				

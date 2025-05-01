@@ -32,6 +32,8 @@ import {
 } from "../repositories/transactions";
 import { ACCOUNT, fetchByAccountId } from "../repositories/accounts";
 import { getToken } from "../components/api";
+import { useOfflineData } from "../components/LocalDb/useOfflineData";
+import db from "../components/LocalDb";
 
 export const SelectAccountContext = createContext({});
 //const useStyles = makeStyles({
@@ -88,12 +90,29 @@ const NewRecordPage = (props) => {
           : null;
           setFormData({ ...defaultValue, id: v4(), date, credit, creditId: credit?.id });
       } else {
-        queryClient
-          .fetchQuery({
-            queryKey: [TRANSACTION, { id: transId }],
-            queryFn: () => fetchTransactionById(transId),
+        // queryClient
+        //   .fetchQuery({
+        //     queryKey: [TRANSACTION, { id: transId }],
+        //     queryFn: () => fetchTransactionById(transId),
+        //   })
+        //   .then((e) => setFormData(e));
+        let type = "offline"
+        db.transactions.filter(e=>e.id == transId)
+          .first().then(tr=>{
+            if(type == "online") return
+            setFormData(tr)
           })
-          .then((e) => setFormData(e));
+
+        fetchTransactionById(transId)
+          .then(e=>{
+            setFormData((prev)=>{
+              if(prev.id == e.id && prev.epochUpdated == e.epochUpdated) return prev
+              return e
+            })
+          })
+
+
+
       }
     })();
   }, [transId, query, queryClient]);

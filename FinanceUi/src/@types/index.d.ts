@@ -207,6 +207,13 @@ declare module 'FinanceApi' {
         contributions: Contribution[];
     }
 
+    // ..\FinanceProject\Models\MonthlyTransaction.cs
+    export interface MonthlyTransaction {
+        monthKey: string;
+        partitionKey: string;
+        transactions: TransactionRef[];
+    }
+
     // ..\FinanceProject\Models\PaymentRecord.cs
     export interface PaymentRecord {
         id: string;
@@ -249,6 +256,7 @@ declare module 'FinanceApi' {
     // ..\FinanceProject\Models\Transaction.cs
     export interface Transaction {
         id: string;
+        epochUpdated: number;
         type: string;
         creditId: string;
         credit?: Account;

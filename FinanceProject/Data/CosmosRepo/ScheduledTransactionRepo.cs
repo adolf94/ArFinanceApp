@@ -3,6 +3,7 @@ using FinanceProject.Data;
 using FinanceProject.Dto;
 using FinanceProject.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using NCrontab;
 
 namespace FinanceApp.Data.CosmosRepo
@@ -103,24 +104,25 @@ namespace FinanceApp.Data.CosmosRepo
 															nextTransaction).GetAwaiter().GetResult();
 														var drBal = _balances.CreateBalances(dr,
 															nextTransaction).GetAwaiter().GetResult();
-														
-														_balances.UpdateCrAccount(tr.CreditId, tr.Amount,id, nextTransaction);
-														_balances.UpdateDrAccount(tr.DebitId, tr.Amount,id, nextTransaction);
 
-														Transaction newTr = new Transaction()
-														{
+															Transaction newTr = new Transaction()
+															{
 																Id = id,
 																CreditId = tr.CreditId,
 																DebitId = tr.DebitId,
 																Amount = tr.Amount,
 																Date = nextTransaction,
 																VendorId = tr.VendorId,
+																EpochUpdated = new DateTimeOffset().ToUnixTimeSeconds(),
 																Description = $"{e.LastTransactionIndex + 1} of {e.TotalOccurence}. ",
-																BalanceRefs = new []{
-																	new BalanceAccount(){ AccountBalanceKey = crBal.Id, AccountId = tr.CreditId , IsDebit = false },
-																	new BalanceAccount(){ AccountBalanceKey = drBal.Id, AccountId = tr.CreditId , IsDebit = true }
-																}.ToList()
-														};
+																BalanceRefs = new[]{
+																										new BalanceAccount(){ AccountBalanceKey = crBal.Id, AccountId = tr.CreditId , IsDebit = false },
+																										new BalanceAccount(){ AccountBalanceKey = drBal.Id, AccountId = tr.CreditId , IsDebit = true }
+																									}.ToList()
+															};
+														_balances.UpdateCrAccount(newTr);
+														_balances.UpdateDrAccount(newTr);
+
 
 														_transactions.CreateTransaction(newTr);
 

@@ -1,5 +1,5 @@
-﻿import Dexie from "dexie";
-import AppDB from "./AppDb.js";
+﻿
+import db from "./AppDb.js";
 
 
 
@@ -14,5 +14,4 @@ import AppDB from "./AppDb.js";
 //   users: "&id, userName,azureId",
 //   transactions:"&id, creditId, debitId, isSaved,  addedByUserId, vendorId",
 // });
-let db = new AppDB();
 export default db;

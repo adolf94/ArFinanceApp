@@ -28,6 +28,7 @@ namespace FinanceApp.Data.CosmosRepo
 				public DbSet<LedgerEntry>? LedgerEntries { get; set; }
 				public DbSet<InputLogs>? AuditLogs { get; set; }
 				public DbSet<HookMessage>? HookMessages { get; set; }
+				public DbSet<MonthlyTransaction> MonthTransactions { get; set; }
 
 				public Guid InterestIncomeId { get; set; } = Guid.Parse("742070bd-e68b-45c9-a1f7-021916127731");
 				
@@ -111,6 +112,9 @@ namespace FinanceApp.Data.CosmosRepo
 						.HasKey(e => e.Id);
 					builder.Entity<Account>().HasOne(e => e.AccountGroup);
 
+					builder.Entity<MonthlyTransaction>().ToContainer("MonthTransactions")
+						.HasPartitionKey(e => e.PartitionKey)
+						.HasKey(e => e.MonthKey);
 
 					builder.Entity<ScheduledTransactions>()
 						.ToContainer("ScheduledTransactions")
@@ -120,6 +124,7 @@ namespace FinanceApp.Data.CosmosRepo
 						
 						.HasPartitionKey(e => e.PartitionKey)
 						.HasKey(c => c.Id);
+
 
 	
 					builder.Entity<HookMessage>()
@@ -233,6 +238,7 @@ namespace FinanceApp.Data.CosmosRepo
 						services.AddScoped<ILedgerEntryRepo, LedgerEntryRepo>();
 						services.AddScoped<IAuditLogsRepo, AuditLogsRepo>();
 						services.AddScoped<IHookMessagesRepo, HookMessagesRepo>();
+						services.AddScoped< IMonthlyTransactionRepo , MonthlyTransactionRepo>();
 
 						return services;
 				}
