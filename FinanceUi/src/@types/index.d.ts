@@ -274,6 +274,7 @@ declare module 'FinanceApi' {
         asLastTransaction?: ScheduledTransactions;
         description: string;
         partitionKey: string;
+        monthKey: string;
         balanceRefs: BalanceAccount[];
     }
 
@@ -412,6 +413,7 @@ declare module 'FinanceApi' {
         transaction?: Transaction;
         accounts: Account[];
         balances: AccountBalance[];
+        monthly: MonthlyTransaction[];
     }
 
     // ..\FinanceProject\Dto\UserWithClaims.cs

@@ -16,7 +16,7 @@ import {
     colors,
     Button
 } from "@mui/material";
-import { createContext, useState } from "react";
+import { createContext, useState, useMemo } from "react";
 import AccountsPage from "./Accounts";
 
 import { Add } from "@mui/icons-material";
@@ -79,14 +79,15 @@ const Records = () => {
   //     fetchTransactionsByMonthKey(month.get("year"), month.get("month"), false),
   //   placeholderData:[]
   // });
+    //const records = useMemo(()=>[],[])
 
-  const {data:records, loading:loadingRecords} = useOfflineData<Transaction[]>({
-    getOnlineData: () =>
-          fetchTransactionsByMonthKey(month.get("year"), month.get("month"), false),
-    initialData:() =>
-      fetchTransactionsByMonthKey(month.get("year"), month.get("month"), true),
-    defaultData: []
-  },[monthStr])
+    const { data: records, isLoading:loadingRecords } = useOfflineData({
+        defaultData: [],
+        initialData: ()=>fetchTransactionsByMonthKey(month.get("year"), month.get("month"), false),
+        getOnlineData: ()=>fetchTransactionsByMonthKey(month.get("year"), month.get("month"), true)
+    }, [monthStr])
+
+
 
   const [dailies, setDailies] = useState([]);
 
@@ -95,6 +96,43 @@ const Records = () => {
     expense: 0,
     total: 0,
   });
+
+    //useEffect(() => {
+    //    console.debug("called useOfflineData useEffect " )
+    //    let mode = "offline"
+    //    //if (!isLoading) return;
+    //    //setLoading(true)
+    //    //const fetch = () => {
+    //    //fetching = true
+    //    ////setFetching(true)
+    //    //inputs.getOnlineData().then((data) => {
+    //    //    setData(data)
+    //    //    mode = "online"
+    //    //    setFetching(false)
+    //    //    setLoading(false)
+    //    //}).catch(() => {
+    //    //    //setFetching(false)
+    //    //    //setLoading(false)
+    //    //})
+    //    if (mode === "online") return;
+    //    fetchTransactionsByMonthKey(month.get("year"), month.get("month"), false).then((data) => {
+    //        setRecords(data)
+    //        mode = "online"
+    //        setLoading(false)
+    //    })
+
+    //    fetchTransactionsByMonthKey(month.get("year"), month.get("month"), true).then((data) => {
+    //        setLoading(false)
+    //        if (mode === "offline") setRecords(data)
+    //        //if (!fetching && !fetched && !inputs.offlineOnly ) fetch()
+    //    })
+
+
+
+    //}, [monthStr])
+
+
+
 
     const setMonth = (newDate) => {
         navigate(`../records/${moment(newDate).format("YYYY-MM")}/${view}`)

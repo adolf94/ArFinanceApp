@@ -13,41 +13,54 @@ interface UseOfflineDataParams<T> {
 
 
 export function useOfflineData<T>(inputs : UseOfflineDataParams<T>, keys : any[]){
-    if(!!inputs.defaultData) inputs.defaultData = null as T | null
+    if(!!inputs.defaultData) inputs.defaultData = null as T 
     const [data,setData] = useState<T>(inputs.defaultData)
     const [isLoading, setLoading] = useState<boolean>(true)
     const [isFetching, setFetching] = useState<boolean>(false)
-    const [fetched, setFetched] = useState<boolean>(false)
 
-    useEffect(()=>{
+    useEffect(() => {
+        console.debug("called useOfflineData useEffect " + keys.join(","))
         let mode = "offline"
+        let fetching = false
         let fetched = false
-        let fetching = isFetching
-        setLoading(true)
+        //if (!isLoading) return;
         //const fetch = () => {
+            //fetching = true
+            ////setFetching(true)
+            //inputs.getOnlineData().then((data) => {
+            //    setData(data)
+            //    mode = "online"
+            //    setFetching(false)
+            //    setLoading(false)
+            //}).catch(() => {
+            //    //setFetching(false)
+            //    //setLoading(false)
+        //})
+        const fetch = () => {
             fetching = true
-            setFetching(true)
             inputs.getOnlineData().then((data) => {
                 setData(data)
                 mode = "online"
-                fetched = true
                 fetching = false
+                fetched = true
                 setFetching(false)
                 setLoading(false)
-            }).catch(() => {
+            }).catch((ex) => {
                 setFetching(false)
                 setLoading(false)
+                throw ex;
             })
+        }
         
         inputs.initialData().then((data)=>{
             setLoading(false)
             if (mode === "offline") setData(data)
-            //if (!fetching && !fetched && !inputs.offlineOnly ) fetch()
+            if (!fetching && !fetched && !inputs.offlineOnly ) fetch()
         })
 
 
 
-    },[keys])
+    },keys)
 
     return {
         data,
