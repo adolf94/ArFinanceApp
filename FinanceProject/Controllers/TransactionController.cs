@@ -179,7 +179,7 @@ namespace FinanceProject.Controllers
             drBal.ToList().ForEach(bal =>
                 balances[bal.Id] = bal);
 
-            var bal2 = await _monthly.AddToMonthlyTransaction(transaction, false, true);
+            var bal2 = await _monthly.AddToMonthlyTransaction(transaction, save:false, remove: false);
             monthly[bal2.MonthKey] = bal2;
 
             transaction.MonthKey = bal2.MonthKey;

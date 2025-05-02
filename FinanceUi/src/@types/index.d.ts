@@ -98,7 +98,7 @@ declare module 'FinanceApi' {
         rawMsg: string;
         partitionKey: string;
         jsonData?: JObject;
-        extractedData?: JObject;
+        extractedData?: ExtractedDataModel;
         isHtml: boolean;
     }
 

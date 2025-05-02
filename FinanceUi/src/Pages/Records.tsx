@@ -83,8 +83,9 @@ const Records = () => {
 
     const { data: records, isLoading:loadingRecords } = useOfflineData({
         defaultData: [],
-        initialData: ()=>fetchTransactionsByMonthKey(month.get("year"), month.get("month"), false),
-        getOnlineData: ()=>fetchTransactionsByMonthKey(month.get("year"), month.get("month"), true)
+        offlineOnly : false,
+        initialData: ()=>fetchTransactionsByMonthKey(month.get("year"), month.get("month"), true),
+        getOnlineData: ()=>fetchTransactionsByMonthKey(month.get("year"), month.get("month"), false)
     }, [monthStr])
 
 

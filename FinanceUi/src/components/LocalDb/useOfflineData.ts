@@ -58,8 +58,9 @@ export function useOfflineData<T>(inputs : UseOfflineDataParams<T>, keys : any[]
             setLoading(false)
             if (mode === "offline") setData(data)
             if (!fetching && !fetched && !inputs.offlineOnly ) fetch()
-        }).catch(() => {
+        }).catch((ex) => {
             fetch()
+            throw ex
         })
 
 

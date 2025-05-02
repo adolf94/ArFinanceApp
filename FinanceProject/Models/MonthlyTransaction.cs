@@ -1,4 +1,6 @@
-﻿namespace FinanceApp.Models
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace FinanceApp.Models
 {
     public class MonthlyTransaction
     {
@@ -11,6 +13,7 @@
          
         public class TransactionRef
         {
+            [Key]
             public Guid Id { get; set; }
             public long EpochUpdated { get; set; }
         }
