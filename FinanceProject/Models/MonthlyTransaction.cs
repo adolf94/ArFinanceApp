@@ -13,7 +13,6 @@ namespace FinanceApp.Models
          
         public class TransactionRef
         {
-            [Key]
             public Guid Id { get; set; }
             public long EpochUpdated { get; set; }
         }

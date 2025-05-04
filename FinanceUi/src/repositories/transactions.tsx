@@ -455,13 +455,24 @@ export const useMutateTransaction = () => {
                     let item = db.accountBalances.where("id").equals(e.id)
                         .first()
                         //dont insert if not existing,
-                    if(!!item) db.accountBalances.put(e)
+                      queryClient.setQueryData([MONTHLY_TRANSACTION, {monthKey: e.monthKey}], e)
+
+                    if(!!item) {
+                      queryClient.setQueryData([
+                            ACCOUNT_BALANCE,
+                            { accountId: e.accountId, date: moment(e.dateStart).format("YYYY-MM-dd") }]
+                            , e)
+                      db.accountBalances.put(e)
+                    }
                 })
                 e.data.monthly.forEach(e => {
                     let item = db.accountBalances.where("monthKey").equals(e.monthKey)
                         .first()
                     //dont insert if not existing,
-                    if (!!item) db.monthTransactions.put(e)
+                    if (!!item) {
+                      queryClient.setQueryData([MONTHLY_TRANSACTION, {monthKey: e.monthKey}], e)
+                      db.monthTransactions.put(e)
+                    }
                 })
 
                 item = await ensureTransactionAcctData(item);
@@ -532,18 +543,30 @@ export const useMutateTransaction = () => {
           });
 
 
-            e.data.balances.forEach(e => {
-                let item = db.accountBalances.where("id").equals(e.id)
-                    .first()
+          e.data.balances.forEach(e =>{
+            let item = db.accountBalances.where("id").equals(e.id)
+                .first()
                 //dont insert if not existing,
-                if (!!item) db.accountBalances.put(e)
-            })
-            e.data.monthly.forEach(e => {
-                let item = db.accountBalances.where("monthKey").equals(e.monthKey)
-                    .first()
-                //dont insert if not existing,
-                if (!!item) db.monthTransactions.put(e)
-            })
+              queryClient.setQueryData([MONTHLY_TRANSACTION, {monthKey: e.monthKey}], e)
+
+              if(!!item) {
+                queryClient.setQueryData([
+                      ACCOUNT_BALANCE,
+                      { accountId: e.accountId, date: moment(e.dateStart).format("YYYY-MM-dd") }]
+                      , e)
+                db.accountBalances.put(e)
+              }
+          })
+          e.data.monthly.forEach(e => {
+              let item = db.accountBalances.where("monthKey").equals(e.monthKey)
+                  .first()
+              //dont insert if not existing,
+              if (!!item) {
+                queryClient.setQueryData([MONTHLY_TRANSACTION, {monthKey: e.monthKey}], e)
+                db.monthTransactions.put(e)
+              }
+          })
+
           return item;
         })
       },

@@ -10,6 +10,7 @@ using FinanceProject.Models;
 using FinanceProject.Utilities;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
@@ -23,6 +24,15 @@ var builder = WebApplication.CreateBuilder(args);
 var Configuration = builder.Configuration;
 // Add services to the container.
 AppConfig config = builder.Configuration.GetSection("AppConfig").Get<AppConfig>()!;
+
+
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders =
+        ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+});
+
+
 
 
 
@@ -196,6 +206,7 @@ else
 }
 
 
+app.UseForwardedHeaders();
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseMiddleware<AppMiddleware>();

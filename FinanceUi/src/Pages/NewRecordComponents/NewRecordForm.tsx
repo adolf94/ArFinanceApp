@@ -20,6 +20,7 @@ import {
   useMediaQuery,
   IconButton,
   CircularProgress,
+  Chip,
 } from "@mui/material";
 import { SelectAccountContext } from "../NewRecord";
 //import { makeStyles } from '@mui/styles'
@@ -27,17 +28,23 @@ import { DateTimePicker } from "@mui/x-date-pickers";
 import { Link, useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import moment from "moment";
 import SelectAccount from "./SelectAccount";
-import { useQuery } from "@tanstack/react-query";
-import { v4 as uuid } from "uuid";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { v4 as uuid, v7 } from "uuid";
 import { Calculate, Repeat as IcoRepeat } from "@mui/icons-material";
-import { ScheduledTransactions, Transaction } from "FinanceApi";
-import { useMutateTransaction } from "../../repositories/transactions";
+import { Account, ScheduledTransactions, Transaction } from "FinanceApi";
+import { fetchTransactionById, useMutateTransaction } from "../../repositories/transactions";
 import {useConfirm} from 'material-ui-confirm'
 import NumberInput from "../../common/NumberInput";
 import DropdownSelect from "../../common/Select";
 import cron from "cron-parser";
 import { useMutateSchedule } from "../../repositories/scheduledTasks";
 import VendorTextField from "./VendorTextField";
+import { getToken } from "../../components/api";
+import { getOneHookMsg, HOOK_MESSAGES } from "../../repositories/hookMessages";
+import { ACCOUNT, fetchByAccountId } from "../../repositories/accounts";
+import db from "../../components/LocalDb/AppDb";
+import hookMappings from  "../Notifications/hooksMapping.json"
+import selectionByHook from "../Notifications/selectionByHook";
 
 const cronOptions = [
   { name: "Monthly", cron: "0 0 DD * *" },
@@ -46,14 +53,48 @@ const cronOptions = [
 ];
 
 interface NewRecordFormProps {
-  formData: Partial<Transaction>;
-  setFormData: React.Dispatch<Omit<SetStateAction<Transaction>, "id">>;
-  resetFormData : ()=>void;
+  // formData: Partial<Transaction>;
+  // hookData:any,    
+  // setHookData:(data:any)=>any,
+  // setFormData: React.Dispatch<Omit<SetStateAction<Transaction>, "id">>;
+  // resetFormData : ()=>void;
   selectPortal: Element;
 }
 
+
+
+const defaultValue = {
+  type: "expense",
+  date: moment().toISOString(),
+  credit: null,
+  debit: null,
+  amount: null,
+  vendor: null,
+  description: "",
+};
+
+const defaultHooksValue = {
+  hook: null,
+  selectedConfig: null,
+  configs:[]
+}
+
+
+
+
+
 const NewRecordForm = (props: NewRecordFormProps) => {
-  const { formData, setFormData, resetFormData } = props;
+  const queryClient = useQueryClient();
+
+  
+  const [formData, setFormData] = useState<
+      Partial<Transaction | ScheduledTransactions>
+        >({ ...defaultValue, id: v7() });
+  const [hooks, setHooks] = useState(defaultHooksValue)
+
+
+
+
   const view = useContext<any>(SelectAccountContext);
   const mutateTransaction = useMutateTransaction();
   const mutateSchedule = useMutateSchedule();
@@ -63,11 +104,12 @@ const NewRecordForm = (props: NewRecordFormProps) => {
 
   const [query, setQuery] = useSearchParams();
 
-  const type = props.formData.type;
+  const type = formData.type;
   const theme = useTheme();
   const sm = useMediaQuery(theme.breakpoints.down("lg"));
   const [iteration, setIteration] = useState(12);
   const [selectedIteration, setSelectedIteration] = useState<any>();
+    const { state } = useLocation() as { state: any };
 
   const [selectAccountProps, setSelectProps] = useState({
     show: false,
@@ -83,7 +125,7 @@ const NewRecordForm = (props: NewRecordFormProps) => {
     cronExpression: "",
     endDate: "",
     dateCreated: moment().toISOString(),
-    id: uuid(),
+    id: v7(),
     lastTransactionDate: moment().toISOString(),
   });
 
@@ -99,6 +141,16 @@ const NewRecordForm = (props: NewRecordFormProps) => {
     if(amount === null || amount === undefined) return false;
     return true;
   }),[formData]);
+
+  
+  useEffect(() => {
+      //when state is included on routing / navigate
+      if (!!state?.credit) {
+          setFormData(prev => ({ ...prev, credit: state.credit, creditId: state.credit?.id }))
+      }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state?.credit, setFormData])
+  
   useEffect(() => {
     const fn = (evt)=>{
       if(evt.code === "Backquote" && evt.altKey){
@@ -126,9 +178,100 @@ const NewRecordForm = (props: NewRecordFormProps) => {
   }, [isSubmittable, formData]);
   
   
+    const resetFormData = ()=>{
+      setFormData({ ...defaultValue,credit:formData.credit, creditId:formData.creditId, date: formData.date, id: v7() })
+    }
   
 
-  
+    useEffect(() => {
+        getToken();
+      (async () => {
+        if (
+          transId == "new"
+        ) {
+          let date = query.get("date")
+            ? moment(query.get("date"))
+                .hour(moment().hour())
+                .minute(moment().minute())
+                .toISOString()
+            : moment().toISOString();
+
+          let hookId = query.get("hookId")
+          if(!!hookId){
+              let configs = []
+              let hook = await queryClient.ensureQueryData({
+                queryKey: [HOOK_MESSAGES, { id: hookId }],
+                queryFn: () => getOneHookMsg(hookId),
+              })
+              if(!!hook) {
+                configs = hookMappings.filter(e=>e.config==hook.extractedData?.matchedConfig)
+              }
+
+              setHooks({configs,hook, selectedConfig: null})
+          }
+          
+
+          let credit = query.get("creditId")
+            ? await queryClient.ensureQueryData({
+                queryKey: [ACCOUNT, { id: query.get("creditId") }],
+                queryFn: () => fetchByAccountId(query.get("creditId")),
+              })
+            : null;
+            setFormData({ ...defaultValue, id: v7(), date, credit, creditId: credit?.id });
+        } else {
+          // queryClient
+          //   .fetchQuery({
+          //     queryKey: [TRANSACTION, { id: transId }],
+          //     queryFn: () => fetchTransactionById(transId),
+          //   })
+          //   .then((e) => setFormData(e));
+          let type = "offline"
+          db.transactions.filter(e=>e.id == transId)
+            .first().then(tr=>{
+              if(type == "online") return
+              setFormData(tr)
+            })
+
+          fetchTransactionById(transId)
+            .then(e=>{
+              setFormData((prev)=>{
+                if(prev.id === e.id && prev.epochUpdated === e.epochUpdated) return prev
+                return e
+              })
+            })
+
+
+
+        }
+      })();
+  }, [transId, query, queryClient]);
+
+  useEffect(()=>{
+    (async()=>{
+      if(!hooks.selectedConfig) return
+      const {hook, selectedConfig} = hooks
+      let amount = hooks.hook.extractedData.amount;
+      let vendor = selectionByHook(selectedConfig.vendor, hook, selectedConfig.type, "vendor")
+      let credit = selectionByHook(selectedConfig.credit, hook, selectedConfig.type, "vendor")
+      let debit = selectionByHook(selectedConfig.debit, hook, selectedConfig.type, "vendor")
+      let datetime = moment(hook.data).toISOString();
+      await Promise.all([vendor,credit,debit])
+      .then(([vendor,credit,debit])=>{
+        setFormData({
+          ...formData,
+          type:selectedConfig.type,
+          amount,
+          debit,
+          debitId: debit?.id,
+          credit,
+          creditId: credit?.id,
+          vendor,
+          vendorId:vendor?.id
+        })
+      })
+
+    })()
+  }, [hooks.selectedConfig])
 
   
 
@@ -320,6 +463,21 @@ const NewRecordForm = (props: NewRecordFormProps) => {
               >
                 Transfer
               </Button>
+            </Grid>
+          </Grid>
+        </ListItem>
+        <ListItem>
+          <Grid container sx={{textAlign:'right'}}>
+            <Grid item xs={4}></Grid>
+            <Grid item xs={8}>
+              {hooks.configs.map(e=>
+                <Chip  color="primary" size="small" label={e.displayName}
+                  variant={hooks.selectedConfig?.subConfig == e.subConfig? "filled":"outlined"}
+                  sx={{mx:1}}
+                  onClick={()=>setHooks({...hooks,selectedConfig:e})}
+                />)
+              }
+ 
             </Grid>
           </Grid>
         </ListItem>

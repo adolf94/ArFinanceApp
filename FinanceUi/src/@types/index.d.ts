@@ -97,9 +97,19 @@ declare module 'FinanceApi' {
         type: string;
         rawMsg: string;
         partitionKey: string;
-        jsonData?: JObject;
-        extractedData?: ExtractedDataModel;
+        jsonData?: Record<string, string>;
+        extractedData?: Record<string, string>;
         isHtml: boolean;
+    }
+
+    // ..\FinanceProject\Models\HookReference.cs
+    export interface HookReference {
+        id: string;
+        referenceName: string;
+        vendorId: string;
+        type: string;
+        accountId: string;
+        hits: number;
     }
 
     // ..\FinanceProject\Models\InputLogs.cs
@@ -273,8 +283,8 @@ declare module 'FinanceApi' {
         schedule?: ScheduledTransactions;
         asLastTransaction?: ScheduledTransactions;
         description: string;
-        partitionKey: string;
         monthKey: string;
+        partitionKey: string;
         balanceRefs: BalanceAccount[];
     }
 

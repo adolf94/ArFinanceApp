@@ -28,6 +28,7 @@ const AppRoutes: (PathRouteProps | IndexRouteProps | LayoutRouteProps)[] = [
   },
   {
     path: "/transactions/:transId",
+    
     element: <NewRecordPage />,
   },
   {

@@ -11,5 +11,16 @@ export const getHooksMessages = ()=>{
             return response.data;
         })
     
-    
+}
+
+
+export const getOneHookMsg = (id:string)=>{
+
+    return api.get(`/hookMessages/${id}`)
+        .then((response:any) => {
+            
+            return response.data;
+        })
+
+
 }

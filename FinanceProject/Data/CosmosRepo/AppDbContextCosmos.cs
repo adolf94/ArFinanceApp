@@ -29,6 +29,7 @@ namespace FinanceApp.Data.CosmosRepo
 				public DbSet<InputLogs>? AuditLogs { get; set; }
 				public DbSet<HookMessage>? HookMessages { get; set; }
 				public DbSet<MonthlyTransaction> MonthTransactions { get; set; }
+				public DbSet<HookReference> HookReferences { get; set; }
 
 				public Guid InterestIncomeId { get; set; } = Guid.Parse("742070bd-e68b-45c9-a1f7-021916127731");
 				
@@ -239,6 +240,7 @@ namespace FinanceApp.Data.CosmosRepo
 						services.AddScoped<IAuditLogsRepo, AuditLogsRepo>();
 						services.AddScoped<IHookMessagesRepo, HookMessagesRepo>();
 						services.AddScoped< IMonthlyTransactionRepo , MonthlyTransactionRepo>();
+						services.AddScoped<IHookReferenceRepo, HookReferenceRepo>();
 
 						return services;
 				}

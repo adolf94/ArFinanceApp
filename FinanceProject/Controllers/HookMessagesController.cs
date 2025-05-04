@@ -23,15 +23,21 @@ public class HookMessagesController : ControllerBase
 
 
 	[HttpGet("hookmessages")]
-	public async Task<ActionResult> GetHookMessages()
+	public async Task<IActionResult> GetHookMessages()
 	{
 		
 		var items = await _repo.GetHookMessagesAsync();
 		return Ok(items);
-
-
 	}
-	
+
+	[HttpGet("hookmessages/{id}")]
+	public async Task<IActionResult> GetOneHookMessage(Guid id)
+	{
+
+        var item = await _repo.GetOneHook(id);
+		if (item == null) return NotFound();
+        return Ok(item);
+    }
 	
 }
 

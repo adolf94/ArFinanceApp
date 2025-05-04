@@ -30,10 +30,10 @@ namespace FinanceProject.Models
         public ScheduledTransactions? AsLastTransaction { get; set; }
 
         public string Description { get; set; }
+        public string MonthKey { get; set; } = "";
 
         [MaxLength(100)]
         public string PartitionKey { get; init; } = "default";
-        public string MonthKey { get; set; } = "";
         public List<BalanceAccount> BalanceRefs { get; set; } = new List<BalanceAccount>();
 
     }
