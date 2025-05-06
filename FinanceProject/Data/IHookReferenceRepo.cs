@@ -1,4 +1,5 @@
-﻿using FinanceApp.Models;
+﻿using FinanceApp.Dto;
+using FinanceApp.Models;
 
 namespace FinanceApp.Data
 {
@@ -6,6 +7,7 @@ namespace FinanceApp.Data
     {
         public Task<IEnumerable<HookReference>> GetByName(string name);
 
+        public Task<HookReference> RecordReference(HookRefLogDto dto);
 
     }
 }

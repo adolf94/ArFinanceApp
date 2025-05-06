@@ -106,10 +106,12 @@ declare module 'FinanceApi' {
     export interface HookReference {
         id: string;
         referenceName: string;
-        vendorId: string;
+        vendorId?: string;
         type: string;
-        accountId: string;
+        accountId?: string;
         hits: number;
+        partitionKey: string;
+        configHits: Record<string, number>;
     }
 
     // ..\FinanceProject\Models\InputLogs.cs
@@ -284,6 +286,7 @@ declare module 'FinanceApi' {
         asLastTransaction?: ScheduledTransactions;
         description: string;
         monthKey: string;
+        hookId?: string;
         partitionKey: string;
         balanceRefs: BalanceAccount[];
     }
@@ -394,6 +397,15 @@ declare module 'FinanceApi' {
         email: string;
         name: string;
         audience: string;
+    }
+
+    // ..\FinanceProject\Dto\HookRefLogDto.cs
+    export interface HookRefLogDto {
+        referenceName: string;
+        vendorId?: string;
+        type: string;
+        accountId?: string;
+        subConfig: string;
     }
 
     // ..\FinanceProject\Dto\LedgerProfile.cs

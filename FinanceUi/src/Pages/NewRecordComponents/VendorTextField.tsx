@@ -90,7 +90,10 @@ const VendorTextField = (props) => {
                             props.onChange(newValue);
                         }
                     }}
-                    renderInput={(params) => <TextField {...params} variant="standard" />}
+                    renderInput={(params) => <TextField {...props}
+                    {...params}
+
+                    variant="standard" />}
                 />
             </Box>
             <Box sx={{ display: { sx: "block", lg: "none" } }}>
@@ -112,6 +115,7 @@ const VendorTextField = (props) => {
                     onBlur={() => {
                         // setFocused(false);
                     }}
+                    InputProps={props.InputProps}
                     // onChange={(e) => onTyped(e.target.value)}
                     sx={{ input: { color: "black" }, label: { color: "black" } }}
                 />

@@ -14,3 +14,11 @@ export const getReferencesByName = (name)=>{
         return data.data
     })
 }
+
+
+export const logReferenceInstance = (data : any)=>{
+    return api.put("hookReference", data)
+        .then((res)=>{
+            return res.data
+        })
+}

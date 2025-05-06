@@ -1,4 +1,5 @@
 ﻿using FinanceApp.Data;
+using FinanceApp.Dto;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -17,9 +18,19 @@ namespace FinanceApp.Controllers
         }
 
         [HttpGet("hookReference")]
-        public async Task<IActionResult> GetHookReferences([FromQuery]GetHookReferenceQueryParams @params)
+        public async Task<IActionResult> GetHookReferences([FromQuery] GetHookReferenceQueryParams @params)
         {
-           var items = await _repo.GetByName(@params.ReferenceName);
+            var items = await _repo.GetByName(@params.ReferenceName);
+
+
+            return Ok(items);
+
+        }
+
+        [HttpPut("hookReference")]
+        public async Task<IActionResult> LogHookReference([FromBody] HookRefLogDto dto)
+        {
+            var items = await _repo.RecordReference(dto);
 
 
             return Ok(items);
@@ -28,7 +39,7 @@ namespace FinanceApp.Controllers
 
 
     }
-    
+
     public class GetHookReferenceQueryParams
     {
         public string ReferenceName { get; set; } = "";

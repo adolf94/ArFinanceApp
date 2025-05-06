@@ -15,9 +15,9 @@ const LayerIcon = React.forwardRef((props:any,ref)=>{
     <Box sx={{display:'inline-block', height:"1em", width:'1em',
     position:'relative', textAlign:'center', verticalAlign:'-.125em'}}>
         {props.children}
-        {!!props.bottonIcon && 
+        {!!props.bottomIcon && 
             <Box component="span" sx={{position:'absolute', bottom:'-1rem',right:"-0.75rem"}}>
-                {React.cloneElement(props.bottonIcon, {size:'small'})}
+                {React.cloneElement(props.bottomIcon, {size:'small'})}
             </Box>}
     </Box>
     </Box>

@@ -21,6 +21,7 @@ import {
   IconButton,
   CircularProgress,
   Chip,
+  InputAdornment
 } from "@mui/material";
 import { SelectAccountContext } from "../NewRecord";
 //import { makeStyles } from '@mui/styles'
@@ -44,7 +45,8 @@ import { getOneHookMsg, HOOK_MESSAGES } from "../../repositories/hookMessages";
 import { ACCOUNT, fetchByAccountId } from "../../repositories/accounts";
 import db from "../../components/LocalDb/AppDb";
 import hookMappings from  "../Notifications/hooksMapping.json"
-import selectionByHook from "../Notifications/selectionByHook";
+import selectionByHook, { getReferenceName } from "../Notifications/selectionByHook";
+import { logReferenceInstance } from "../../repositories/hookReference";
 
 const cronOptions = [
   { name: "Monthly", cron: "0 0 DD * *" },
@@ -76,7 +78,12 @@ const defaultValue = {
 const defaultHooksValue = {
   hook: null,
   selectedConfig: null,
-  configs:[]
+  configs:[],
+  references:{
+    vendor: "",
+    debit:"",
+    credit:""
+  }
 }
 
 
@@ -88,7 +95,7 @@ const NewRecordForm = (props: NewRecordFormProps) => {
 
   
   const [formData, setFormData] = useState<
-      Partial<Transaction | ScheduledTransactions>
+      Partial<Transaction & ScheduledTransactions>
         >({ ...defaultValue, id: v7() });
   const [hooks, setHooks] = useState(defaultHooksValue)
 
@@ -180,6 +187,8 @@ const NewRecordForm = (props: NewRecordFormProps) => {
   
     const resetFormData = ()=>{
       setFormData({ ...defaultValue,credit:formData.credit, creditId:formData.creditId, date: formData.date, id: v7() })
+      setHooks(defaultHooksValue)
+      setQuery({})
     }
   
 
@@ -247,19 +256,62 @@ const NewRecordForm = (props: NewRecordFormProps) => {
   }, [transId, query, queryClient]);
 
   useEffect(()=>{
-    (async()=>{
-      if(!hooks.selectedConfig) return
-      const {hook, selectedConfig} = hooks
-      let amount = hooks.hook.extractedData.amount;
-      let vendor = selectionByHook(selectedConfig.vendor, hook, selectedConfig.type, "vendor")
-      let credit = selectionByHook(selectedConfig.credit, hook, selectedConfig.type, "vendor")
-      let debit = selectionByHook(selectedConfig.debit, hook, selectedConfig.type, "vendor")
-      let datetime = moment(hook.data).toISOString();
-      await Promise.all([vendor,credit,debit])
-      .then(([vendor,credit,debit])=>{
+    
+  }, [hooks.selectedConfig])
+
+  const onSelectedConfigChange = async (data)=>{
+
+      if(!data) return
+      let selectedConfig = data
+      const {hook} = hooks
+      let amount = hook.extractedData.amount;
+
+
+      const isCreditRefSameAsVendor = selectedConfig.vendor == selectedConfig.credit
+      const isDebitRefSameAsVendor = selectedConfig.vendor == selectedConfig.debit
+      let vendor, credit, debit
+
+      let references = {
+        vendor : getReferenceName(selectedConfig.vendor, hook),
+        credit : getReferenceName(selectedConfig.credit, hook),
+        debit : getReferenceName(selectedConfig.debit, hook)
+      }
+
+
+
+      vendor = (!isCreditRefSameAsVendor&&!isDebitRefSameAsVendor) ?selectionByHook(selectedConfig.debit, hook, selectedConfig.type, 
+        [ "vendor"]) : null
+
+
+      let creditVendor = selectionByHook(selectedConfig.credit, hook, selectedConfig.type, 
+        [ "account", ...(isCreditRefSameAsVendor?["vendor"]:[]) ])
+      
+      let debitVendor = selectionByHook(selectedConfig.debit, hook, selectedConfig.type, 
+          [ "account", ...(isDebitRefSameAsVendor?["vendor"]:[]) ])
+          
+
+      setHooks({...hooks,references, selectedConfig})
+
+      await creditVendor.then(d=>{
+        if(isCreditRefSameAsVendor) {
+          [credit, vendor] = d
+        } else { [credit] = d}
+      })
+      
+      await debitVendor.then(d=>{
+        if(isDebitRefSameAsVendor) {
+          [debit, vendor] = d
+        } else { [debit] = d}
+      })
+      // let vendor = selectionByHook(selectedConfig.vendor, hook, selectedConfig.type, "vendor")
+      // let credit = selectionByHook(selectedConfig.credit, hook, selectedConfig.type, "account")
+      // let debit = selectionByHook(selectedConfig.debit, hook, selectedConfig.type, "account")
+      let datetime = moment(hook.date).toISOString();
+
         setFormData({
           ...formData,
           type:selectedConfig.type,
+          date: datetime,
           amount,
           debit,
           debitId: debit?.id,
@@ -268,12 +320,8 @@ const NewRecordForm = (props: NewRecordFormProps) => {
           vendor,
           vendorId:vendor?.id
         })
-      })
 
-    })()
-  }, [hooks.selectedConfig])
-
-  
+  }
 
 
   const setType = (type) => {
@@ -342,6 +390,9 @@ const NewRecordForm = (props: NewRecordFormProps) => {
       });
   };
 
+
+  
+
   const submitTransaction = async (redirectToHome : boolean) => {
     
     
@@ -371,10 +422,51 @@ const NewRecordForm = (props: NewRecordFormProps) => {
         localStorage.setItem("stg_transaction", formData.id)
         console.log(newItem)
 
-        mutateTransaction
-            .create({ ...newItem, scheduleId: responseSched?.id })
+        let conf = hooks.selectedConfig
+        if(conf){
+          newItem.hookId = hooks.hook.Id
+          const isCreditRefSameAsVendor = conf.vendor == conf.credit
+          const isDebitRefSameAsVendor = conf.vendor == conf.debit
 
-        if(redirectToHome) return navigate(`../records/${moment(newItem.date).format("YYYY-MM")}/daily`);
+          let crediRef = {
+            referenceName : getReferenceName(conf.credit, hooks.hook),
+            accountId: formData.creditId,
+            vendorId: isCreditRefSameAsVendor ? formData.vendorId : null,
+            type:formData.type,
+            subConfig:hooks.selectedConfig.subConfig
+
+          }
+
+          let debitRef = {
+            referenceName : getReferenceName(conf.debit, hooks.hook),
+            accountId: formData.debitId,
+            vendorId: isDebitRefSameAsVendor ? formData.vendorId : null,
+            type:formData.type,
+            subConfig:hooks.selectedConfig.subConfig
+
+          }
+
+          let vendorRef = (!isCreditRefSameAsVendor && !isDebitRefSameAsVendor) ? {
+              
+            referenceName : getReferenceName(conf.vendor, hooks.hook),
+            accountId: null,
+            vendorId: formData.vendorId ,
+            type:formData.type,
+            subConfig:hooks.selectedConfig.subConfig
+          }: null
+          
+          logReferenceInstance(crediRef)
+          logReferenceInstance(debitRef)
+          !!vendorRef && logReferenceInstance(vendorRef)
+        }
+
+        mutateTransaction
+            .create({ ...newItem, scheduleId: responseSched?.id }) 
+
+        if(redirectToHome) {
+          if(!!query.hookId) navigate(-1)
+          if(!query.hookId) navigate(`../records/${moment(newItem.date).format("YYYY-MM")}/daily`)
+        };
         if(!redirectToHome) {
           resetFormData()
         }
@@ -474,7 +566,7 @@ const NewRecordForm = (props: NewRecordFormProps) => {
                 <Chip  color="primary" size="small" label={e.displayName}
                   variant={hooks.selectedConfig?.subConfig == e.subConfig? "filled":"outlined"}
                   sx={{mx:1}}
-                  onClick={()=>setHooks({...hooks,selectedConfig:e})}
+                  onClick={()=>onSelectedConfigChange(e)}
                 />)
               }
  
@@ -638,6 +730,16 @@ const NewRecordForm = (props: NewRecordFormProps) => {
                     dest: "source",
                   })
                 }}
+                helperText={!!hooks.selectedConfig?type === "income"
+                  ? hooks.references?.debit 
+                  : hooks.references?.credit : ""}
+                
+                // slotProps={{
+                //   input: {
+                //     startAdornment: <InputAdornment position="start">kg</InputAdornment>,
+                //   },
+                // }}
+
               />
             </Grid>
           </Grid>
@@ -669,6 +771,8 @@ const NewRecordForm = (props: NewRecordFormProps) => {
                     dest: "vendor",
                   })
                 }}
+                
+                helperText={!!hooks.selectedConfig? hooks.references?.vendor : ""} 
               />
             </Grid>
           </Grid>
@@ -699,8 +803,11 @@ const NewRecordForm = (props: NewRecordFormProps) => {
                     show: true,
                     dest: "destination",
                   })
-                }
-                }
+                }}
+                
+                helperText={!!hooks.selectedConfig? type === "income"
+                  ? hooks.references?.credit 
+                  : hooks.references?.debit : ""} 
               />
             </Grid>
           </Grid>
