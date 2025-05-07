@@ -1,17 +1,18 @@
 import { Notifications } from "@mui/icons-material";
 import {Avatar, Box, IconButton } from "@mui/material";
+import { useNavigate } from "react-router-dom";
 
 
 const UserPanel = ()=>{
     
-    
+    const navigate = useNavigate()
     
     
     
     return (
         <Box display="flex">
             <Box sx={{px:2}}>
-                <IconButton >
+                <IconButton onClick={()=>navigate("/notifications")}>
                     <Notifications />
                 </IconButton>
             </Box>

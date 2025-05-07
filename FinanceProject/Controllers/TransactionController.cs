@@ -182,6 +182,7 @@ namespace FinanceProject.Controllers
             var bal2 = await _monthly.AddToMonthlyTransaction(transaction, save:false, remove: false);
             monthly[bal2.MonthKey] = bal2;
 
+
             transaction.MonthKey = bal2.MonthKey;
 
             response.Accounts = accounts.Values.ToList();

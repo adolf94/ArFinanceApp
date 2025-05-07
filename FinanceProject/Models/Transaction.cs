@@ -31,7 +31,8 @@ namespace FinanceProject.Models
 
         public string Description { get; set; }
         public string MonthKey { get; set; } = "";
-        public string? HookId { get; set; }
+        public List<string> Notifications { get; set; } = new List<string>();
+
 
         [MaxLength(100)]
         public string PartitionKey { get; init; } = "default";

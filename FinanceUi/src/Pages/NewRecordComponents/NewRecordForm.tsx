@@ -47,6 +47,7 @@ import db from "../../components/LocalDb/AppDb";
 import hookMappings from  "../Notifications/hooksMapping.json"
 import selectionByHook, { getReferenceName } from "../Notifications/selectionByHook";
 import { logReferenceInstance } from "../../repositories/hookReference";
+import useSubmitTransaction from "./useSubmitTransaction";
 
 const cronOptions = [
   { name: "Monthly", cron: "0 0 DD * *" },
@@ -135,7 +136,20 @@ const NewRecordForm = (props: NewRecordFormProps) => {
     id: v7(),
     lastTransactionDate: moment().toISOString(),
   });
+  
+  const resetFormData = ()=>{
+    setFormData({ ...defaultValue,credit:formData.credit, creditId:formData.creditId, date: formData.date, id: v7() })
+    setHooks(defaultHooksValue)
+    setQuery({})
+  }
 
+  const submitTransaction = useSubmitTransaction({
+    transaction:formData, 
+    schedule, 
+    onConfirm: resetFormData, 
+    notification:hooks.hook,  
+    hookConfig:hooks.selectedConfig
+  })
 
 
   const isSubmittable = useMemo((() => {
@@ -184,12 +198,6 @@ const NewRecordForm = (props: NewRecordFormProps) => {
 
   }, [isSubmittable, formData]);
   
-  
-    const resetFormData = ()=>{
-      setFormData({ ...defaultValue,credit:formData.credit, creditId:formData.creditId, date: formData.date, id: v7() })
-      setHooks(defaultHooksValue)
-      setQuery({})
-    }
   
 
     useEffect(() => {
@@ -255,9 +263,7 @@ const NewRecordForm = (props: NewRecordFormProps) => {
       })();
   }, [transId, query, queryClient]);
 
-  useEffect(()=>{
-    
-  }, [hooks.selectedConfig])
+
 
   const onSelectedConfigChange = async (data)=>{
 
@@ -318,7 +324,8 @@ const NewRecordForm = (props: NewRecordFormProps) => {
           credit,
           creditId: credit?.id,
           vendor,
-          vendorId:vendor?.id
+          vendorId:vendor?.id,
+          description: hook.rawMsg
         })
 
   }
@@ -393,100 +400,6 @@ const NewRecordForm = (props: NewRecordFormProps) => {
 
   
 
-  const submitTransaction = async (redirectToHome : boolean) => {
-    
-    
-    const newItem: Partial<Transaction> = {
-      id: formData.id,
-      addByUserId: "1668b555-9788-40ed-a6e8-feeabe9538f6",
-      creditId: formData.creditId,
-      debitId: formData.debitId,
-      amount: formData.amount,
-        vendorId: formData.vendorId,
-      vendor:formData.vendor,
-      date: moment(formData.date).toISOString(),
-      dateAdded: moment().toISOString(),
-      description: formData.description || "",
-      type: formData.type,
-      scheduleId: formData.scheduleId,
-    };
-
-    const confirmedTransaction = async ()=>{
-      if (transId === "new") {
-        let responseSched;
-        if (schedule.enabled) {
-          responseSched = await mutateSchedule.create(schedule);
-        }
-
-
-        localStorage.setItem("stg_transaction", formData.id)
-        console.log(newItem)
-
-        let conf = hooks.selectedConfig
-        if(conf){
-          newItem.hookId = hooks.hook.Id
-          const isCreditRefSameAsVendor = conf.vendor == conf.credit
-          const isDebitRefSameAsVendor = conf.vendor == conf.debit
-
-          let crediRef = {
-            referenceName : getReferenceName(conf.credit, hooks.hook),
-            accountId: formData.creditId,
-            vendorId: isCreditRefSameAsVendor ? formData.vendorId : null,
-            type:formData.type,
-            subConfig:hooks.selectedConfig.subConfig
-
-          }
-
-          let debitRef = {
-            referenceName : getReferenceName(conf.debit, hooks.hook),
-            accountId: formData.debitId,
-            vendorId: isDebitRefSameAsVendor ? formData.vendorId : null,
-            type:formData.type,
-            subConfig:hooks.selectedConfig.subConfig
-
-          }
-
-          let vendorRef = (!isCreditRefSameAsVendor && !isDebitRefSameAsVendor) ? {
-              
-            referenceName : getReferenceName(conf.vendor, hooks.hook),
-            accountId: null,
-            vendorId: formData.vendorId ,
-            type:formData.type,
-            subConfig:hooks.selectedConfig.subConfig
-          }: null
-          
-          logReferenceInstance(crediRef)
-          logReferenceInstance(debitRef)
-          !!vendorRef && logReferenceInstance(vendorRef)
-        }
-
-        mutateTransaction
-            .create({ ...newItem, scheduleId: responseSched?.id }) 
-
-        if(redirectToHome) {
-          if(!!query.hookId) navigate(-1)
-          if(!query.hookId) navigate(`../records/${moment(newItem.date).format("YYYY-MM")}/daily`)
-        };
-        if(!redirectToHome) {
-          resetFormData()
-        }
-
-      } else {
-        mutateTransaction.update(newItem)
-        navigate(`../records/${moment(newItem.date).format("YYYY-MM")}/daily`);
-      }
-      
-    }
-
-
-    if(Number.parseInt(formData.amount) === 0) return confirm({description: "Are you sure you want to submit with no amount?"})
-        .then(e=>{
-          confirmedTransaction()
-        })
-
-    confirmedTransaction();
-  };
-
   const getCronIterations = (date?: string) => {
     if (!schedule.cronExpression) return [];
     if (!date) date = formData.date;
@@ -560,7 +473,7 @@ const NewRecordForm = (props: NewRecordFormProps) => {
         </ListItem>
         <ListItem>
           <Grid container sx={{textAlign:'right'}}>
-            <Grid item xs={4}></Grid>
+            <Grid item xs={4}sx={{textAlign:'left'}}><Chip label="Source data" size="small" clickable={true} color="primary"/></Grid>
             <Grid item xs={8}>
               {hooks.configs.map(e=>
                 <Chip  color="primary" size="small" label={e.displayName}

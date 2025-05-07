@@ -10,6 +10,8 @@
 				public DateTime Date { get; set; }
 				public string Type { get; set; }
 
+				public List<string> Notifications { get; set; } = new List<string>();
+
 				public string Description { get; set; } = string.Empty;
 		}
 }

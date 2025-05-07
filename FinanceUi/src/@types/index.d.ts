@@ -100,6 +100,8 @@ declare module 'FinanceApi' {
         jsonData?: Record<string, string>;
         extractedData?: Record<string, string>;
         isHtml: boolean;
+        status?: string;
+        transactionId?: string;
     }
 
     // ..\FinanceProject\Models\HookReference.cs
@@ -286,7 +288,7 @@ declare module 'FinanceApi' {
         asLastTransaction?: ScheduledTransactions;
         description: string;
         monthKey: string;
-        hookId?: string;
+        notifications: string[];
         partitionKey: string;
         balanceRefs: BalanceAccount[];
     }
@@ -378,6 +380,7 @@ declare module 'FinanceApi' {
         amount: number;
         date: string;
         type: string;
+        notifications: string[];
         description: string;
     }
 

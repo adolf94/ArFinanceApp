@@ -6,6 +6,7 @@ import configs from './hooksMapping.json';
 import selectionByHook, { getReferenceName } from "./selectionByHook";
 import moment from "moment";
 import { useNavigate } from "react-router-dom";
+import useSubmitTransaction from "../NewRecordComponents/useSubmitTransaction";
 
 const camelToSpace = (str:string)=>{
     return str.replace(/([A-Z])/g, ' $1')
@@ -82,70 +83,77 @@ const HooksAccordion = ({notif }) => {
     })
 
     const navigate = useNavigate()
+    const submitTransaction = useSubmitTransaction({transaction:formData, schedule:null, notification: notif, hookConfig: selected, onConfirm:()=>{
+        
+    }} )
+
+
     useEffect(()=>{
         setConfs(()=>{
             return configs.filter(e=>e.config == notif.extractedData?.matchedConfig )
         })
     },[notif.extractedData?.matchedConfig])
 
+    const updateSelected = async (selectedConfig)=>{
+        setSelected(selectedConfig)
+        let hook = notif
+        let amount = hook.extractedData.amount;
+  
+  
+        const isCreditRefSameAsVendor = selectedConfig.vendor == selectedConfig.credit
+        const isDebitRefSameAsVendor = selectedConfig.vendor == selectedConfig.debit
+        let vendor, credit, debit
+  
+        let references = {
+          vendor : getReferenceName(selectedConfig.vendor, hook),
+          credit : getReferenceName(selectedConfig.credit, hook),
+          debit : getReferenceName(selectedConfig.debit, hook)
+        }
+  
+  
+  
+        vendor = (!isCreditRefSameAsVendor&&!isDebitRefSameAsVendor) ?selectionByHook(selectedConfig.debit, hook, selectedConfig.type, 
+          [ "vendor"]) : null
+  
+  
+        let creditVendor = selectionByHook(selectedConfig.credit, hook, selectedConfig.type, 
+          [ "account", ...(isCreditRefSameAsVendor?["vendor"]:[]) ])
+        
+        let debitVendor = selectionByHook(selectedConfig.debit, hook, selectedConfig.type, 
+            [ "account", ...(isDebitRefSameAsVendor?["vendor"]:[]) ])
+            
+  
+          setReference(reference)
+  
+        await creditVendor.then(d=>{
+          if(isCreditRefSameAsVendor) {
+            [credit, vendor] = d
+          } else { [credit] = d}
+        })
+        
+        await debitVendor.then(d=>{
+          if(isDebitRefSameAsVendor) {
+            [debit, vendor] = d
+          } else { [debit] = d}
+        })
+        // let vendor = selectionByHook(selectedConfig.vendor, hook, selectedConfig.type, "vendor")
+        // let credit = selectionByHook(selectedConfig.credit, hook, selectedConfig.type, "account")
+        // let debit = selectionByHook(selectedConfig.debit, hook, selectedConfig.type, "account")
+        let datetime = moment(hook.date).toISOString();
+          setFormData({
+            ...formData,
+            type:selectedConfig.type,
+            date: datetime,
+            amount,
+            debit,
+            credit,
+            vendor,
+          })
+  
+
+    }
   useEffect(()=>{
     (async()=>{
-      let selectedConfig = selected;
-      if(!selectedConfig) return
-      let hook = notif
-      let amount = hook.extractedData.amount;
-
-
-      const isCreditRefSameAsVendor = selectedConfig.vendor == selectedConfig.credit
-      const isDebitRefSameAsVendor = selectedConfig.vendor == selectedConfig.debit
-      let vendor, credit, debit
-
-      let references = {
-        vendor : getReferenceName(selectedConfig.vendor, hook),
-        credit : getReferenceName(selectedConfig.credit, hook),
-        debit : getReferenceName(selectedConfig.debit, hook)
-      }
-
-
-
-      vendor = (!isCreditRefSameAsVendor&&!isDebitRefSameAsVendor) ?selectionByHook(selectedConfig.debit, hook, selectedConfig.type, 
-        [ "vendor"]) : null
-
-
-      let creditVendor = selectionByHook(selectedConfig.credit, hook, selectedConfig.type, 
-        [ "account", ...(isCreditRefSameAsVendor?["vendor"]:[]) ])
-      
-      let debitVendor = selectionByHook(selectedConfig.debit, hook, selectedConfig.type, 
-          [ "account", ...(isDebitRefSameAsVendor?["vendor"]:[]) ])
-          
-
-        setReference(reference)
-
-      await creditVendor.then(d=>{
-        if(isCreditRefSameAsVendor) {
-          [credit, vendor] = d
-        } else { [credit] = d}
-      })
-      
-      await debitVendor.then(d=>{
-        if(isDebitRefSameAsVendor) {
-          [debit, vendor] = d
-        } else { [debit] = d}
-      })
-      // let vendor = selectionByHook(selectedConfig.vendor, hook, selectedConfig.type, "vendor")
-      // let credit = selectionByHook(selectedConfig.credit, hook, selectedConfig.type, "account")
-      // let debit = selectionByHook(selectedConfig.debit, hook, selectedConfig.type, "account")
-      let datetime = moment(hook.date).toISOString();
-        setFormData({
-          ...formData,
-          type:selectedConfig.type,
-          date: datetime,
-          amount,
-          debit,
-          credit,
-          vendor,
-        })
-
     })()
   }, [selected])
 
@@ -154,7 +162,7 @@ const HooksAccordion = ({notif }) => {
 
 
     return <>
-        <Accordion>
+        <Accordion  slotProps={{ transition: { unmountOnExit: true } }}>
             <AccordionSummary
                 expandIcon={<ArrowDownward />}
                 aria-controls="panel1-content"
@@ -201,7 +209,7 @@ const HooksAccordion = ({notif }) => {
                     <Grid container md={6} sx={{justifyContent:"flex-start"}}>
                         <Grid sm={12} sx={{textAlign:'center'}}>
                             {confs.map(e=><Chip label={e.displayName} color="primary" clickable
-                            onClick={()=>setSelected(e)}
+                            onClick={()=>updateSelected(e)}
                             variant={selected?.subConfig == e.subConfig ? "filled" : "outlined"}></Chip>)}
                         </Grid>
                         <Grid item sm={12}>

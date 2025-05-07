@@ -1,4 +1,5 @@
 using AutoMapper;
+using Azure.Monitor.OpenTelemetry.AspNetCore;
 using FinanceApp.BgServices;
 using FinanceApp.Data.CosmosRepo;
 using FinanceApp.Dto;
@@ -34,6 +35,10 @@ builder.Services.Configure<ForwardedHeadersOptions>(options =>
 
 
 
+builder.Services.AddOpenTelemetry().UseAzureMonitor(e =>
+{
+	e.ConnectionString = builder.Configuration.GetSection("InsightsLogging").GetValue<string>("ConnectionString");
+});
 
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -146,6 +151,7 @@ builder.Services.AddRateLimiter(e =>
 builder.Services.AddHostedService<OnStartupBgSvc>();
 builder.Services.AddHostedService<ComputeInterestBg>();
 builder.Services.AddAuthorization();
+builder.Services.AddApplicationInsightsTelemetry();
 
 
 

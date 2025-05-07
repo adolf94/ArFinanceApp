@@ -13,9 +13,11 @@ public class HookMessage
     public Dictionary<string, string>? JsonData { get; set; }
 	public Dictionary<string, string>? ExtractedData { get; set; }
 	public bool IsHtml { get; set; } =false;
+    public string? Status { get; set; } = "New";
+    public Guid? TransactionId { get; set; }
 
 
-	public class ExtractedDataModel
+    public class ExtractedDataModel
     {
 		public string matchedConfig { get; set; } = "";
 		public string senderName { get; set; } = "";

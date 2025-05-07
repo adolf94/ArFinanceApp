@@ -53,7 +53,7 @@ const data = {
       {
         "Container": "HookMessages",
         "PartitionKeyPaths": ["/PartitionKey"],
-        mapper: e=>e
+          mapper: e => ({ ...e, Status: "New", TransactionId:null})
       },
       {
         "Container": "LedgerEntries",
@@ -85,7 +85,7 @@ const data = {
       {
         "Container":"Transaction",
         "PartitionKeyPath":"/PartitionKey",
-        mapper: e=> ({...e, MonthKey : moment(e.Date).format("YYYY-MM-01")})
+          mapper: e => ({ ...e, MonthKey: moment(e.Date).format("YYYY-MM-01"), Notifications :[]})
       },
       {
         "Container":"User",
@@ -106,8 +106,6 @@ const data = {
     ]
   },
   dataMigration:(db)=>{
-    
-    
     
     
     return db
