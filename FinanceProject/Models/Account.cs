@@ -6,9 +6,9 @@ namespace FinanceProject.Models
 {
 		public class Account
 		{
-				public Guid Id { get; set; } = new Guid();
+				public Guid Id { get; set; } = Guid.CreateVersion7();
 				public string? Name { get; set; }
-				public bool Enabled { get; set; }
+				public bool Enabled { get; set; } = true;
 				public Guid? AccountGroupId { get; set; }
 				public AccountGroup? AccountGroup { get; set; }
 				public decimal ForeignExchange { get; set; }
@@ -16,7 +16,10 @@ namespace FinanceProject.Models
 				public decimal CurrBalance { get; set; }
 				public int PeriodStartDay { get; set; } = 1;
 				public bool ResetEndOfPeriod { get; set; } = false;
-
+				
+				
+				public DateTime MinMonth { get; set; }
+				public DateTime MaxMonth { get; set; } 
 
 				[JsonIgnore]
 				public ICollection<Transaction>? TransactionsAsDebit { get; set; }

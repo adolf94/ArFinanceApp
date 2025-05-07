@@ -16,9 +16,6 @@
 } from "@mui/material";
 import React from "react";
 import { useEffect, useState } from "react";
-import api from "../../components/api";
-import useDropdown from "../../components/useDropdown";
-import db from "../../components/LocalDb";
 import { ACCOUNT_TYPE, fetchTypes } from "../../repositories/accountTypes";
 import { useQuery } from "@tanstack/react-query";
 import { useMutateGroups } from "../../repositories/accountgroups";
@@ -32,7 +29,6 @@ const NewAccountGroup = (props: any) => {
     queryFn: fetchTypes,
   });
   const mutateGroups = useMutateGroups();
-  const { accountGroups, set } = useDropdown();
   const [form, setForm] = useState<Partial<AccountGroup>>({
     name: "",
     accountTypeId: "",

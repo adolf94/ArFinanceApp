@@ -96,7 +96,9 @@ const Accounts = (props) => {
         <CircularProgress />
         </Box>}
       <List onLoad={() => {}}>
-        {(accountGroups || []).map((e) => (
+        {(accountGroups || [])
+            .filter(e=>["892f20e5-b8dc-42b6-10c9-08dabb20ff77"].includes(e.accountTypeId))
+            .map((e) => (
           <React.Fragment key={e.id}>
             <Divider textAlign="left" key={e.id}>
               {e.name}

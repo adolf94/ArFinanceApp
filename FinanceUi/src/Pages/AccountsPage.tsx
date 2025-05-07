@@ -2,18 +2,13 @@
 import React, { useState } from "react";
 import Accounts from "./Accounts";
 import { Typography } from "@mui/material";
-import IconButton from "@mui/material/IconButton";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faChevronLeft,
-  faChevronRight,
-  faEllipsisV,
-
-} from "@fortawesome/free-solid-svg-icons";
+import IconButton from "@mui/material/IconButton"; 
+import {Settings as SettingsIcon, AddCircleRounded} from '@mui/icons-material'
 import SettingsAccountType from "./Accounts/SettingAccountsType";
 import NewAccountGroup from "./Accounts/SettingAccountGroup";
 import NewAccount from "./Accounts/SettingsNewAccount";
-import { AddCircleRounded } from "@mui/icons-material";
+import UserPanel from "../components/UserPanel.js";
+import { useSearchParams } from "react-router-dom";
 
 const AccountsPage = (props) => {
   const [showType, setShowType] = useState(false);
@@ -37,17 +32,18 @@ const AccountsPage = (props) => {
           <Typography sx={{ flexGrow: 1 }} variant="h5" component="div">
             Accounts
           </Typography>
-          <IconButton size="large" color="inherit" onClick={handleMenu}>
-            <FontAwesomeIcon icon={faEllipsisV} />
+          <IconButton size="x-large" color="inherit" onClick={handleMenu}>
+            <SettingsIcon />
           </IconButton>
           <Menu
             anchorEl={ellRef}
             keepMounted
+            sx={{mr:2}}
             open={Boolean(ellRef)}
             onClose={() => handleMenuSelect(() => {})}
           >
             <MenuItem onClick={() => handleMenuSelect(setShowAccount)}>
-              Add Account
+                Add Account
             </MenuItem>
             <MenuItem onClick={() => handleMenuSelect(setShowGroup)}>
               Add Acct Group
@@ -58,6 +54,7 @@ const AccountsPage = (props) => {
             <MenuItem onClick={handleMenuSelect}>Sort</MenuItem>
             <MenuItem onClick={handleMenuSelect}>Show/Hide</MenuItem>
           </Menu>
+          <UserPanel />
         </Toolbar>
       </AppBar>
       <Grid container>

@@ -32,11 +32,12 @@ namespace FinanceApp.Controllers
 				public async Task<IActionResult> PostPayment([FromBody] PaymentRecord payment)
 				{
 						string appId = HttpContext.User.FindFirstValue("app")!;
+						string userId = HttpContext.User.FindFirstValue("userId")!;
 
 						User? user = await _user.GetById(payment.UserId);
 						if (user == null) return BadRequest();
 
-
+						payment.AddedBy =Guid.Parse(userId);
 
 						await _repo.ApplyPayment(payment);
 						decimal balance = await _loan.GetOutstandingBalance(payment.UserId, appId);

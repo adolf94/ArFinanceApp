@@ -1,7 +1,8 @@
 import api from "../components/api";
-import {LedgerAccount, LedgerEntry} from "FinanceApi";
+import {LedgerAccount, LedgerEntry, NewLedgerEntryDto} from "FinanceApi";
 import {queryClient} from "../App";
 import {LEDGER_ACCT} from "./ledgerAcct";
+import { useMutation } from "@tanstack/react-query";
 
 export const LEDGER_ENTRY = "ledgerEntry"
 
@@ -18,6 +19,24 @@ export const getLedgerEntriesBy = (by: string, month:string)=>{
     
     
     return api(`/ledgerentry/${month}/by${by}`).then(res=>res.data);
+}
+
+
+export const useMutateLedgerEntry = ()=>{
+    
+    const create = useMutation({
+        mutationFn :(data : NewLedgerEntryDto)=>{
+            return api.post("/ledgerentry", data)
+                .then(res=>res.data)
+        },
+        onSuccess: (data)=>{
+            updateLedgerCache(data)
+        }
+    })
+    
+    return {create}
+    
+    
 }
 
 

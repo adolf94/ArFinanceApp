@@ -1,4 +1,4 @@
-import { Dialog, DialogTitle, DialogContent, Autocomplete, Box, Grid2 as Grid, TextField, Chip, Button, useMediaQuery, useTheme, Paper} from "@mui/material"
+import { Dialog, DialogTitle, DialogContent, Autocomplete, Box, Grid2 as Grid, TextField, Chip, Button, useMediaQuery, useTheme, Paper, IconButton} from "@mui/material"
 import { useQuery } from "@tanstack/react-query"
 import React, { Suspense,  useState } from "react"
 import { getAll, USER } from "../../../repositories/users"
@@ -14,6 +14,7 @@ import CreateDisbursementAccount from "../CreateDisbursementAccount"
 import LoanProfileHelperText from "./LoanProfileHelperText";
 import NewAccount from "../Journal/NewAccount";
 import {getAllLedgerAccts, LEDGER_ACCT} from "../../../repositories/ledgerAcct";
+import { Close } from "@mui/icons-material"
 
 interface CreateLoanProps {
 
@@ -93,10 +94,19 @@ const CreateLoan = (props:CreateLoanProps) => {
             })
           }} onClose={()=>setShowNewDisbursement(false)}/>
         </Suspense>}
-				<Dialog fullScreen={fullScreen} open={true} maxWidth="lg" fullWidth onClose={()=>navigate(-1)}> 
-						<DialogTitle>Add a new Loan</DialogTitle>
-						<DialogContent>
-              <Grid container>
+				<Dialog fullScreen={fullScreen} open={true} maxWidth="lg" closeIcon fullWidth onClose={()=>navigate(-1)}>
+                    <DialogTitle>
+                        <Box sx={{display: "flex", justifyContent: "space-between"}}>
+                            <Box>Add New Loan</Box>
+                            <Box>
+                                <IconButton  onClick={()=>navigate(-1)}>
+                                    <Close />
+                                </IconButton>
+                            </Box>
+                        </Box>
+                    </DialogTitle>
+                    <DialogContent>
+                        <Grid container>
                 <Grid container size={{xs:12, md:4}} alignSelf="start" >
                     <Grid container size={12} >
                         <Paper variant="outlined" sx={{p:1,width:"100%", m:1}}>

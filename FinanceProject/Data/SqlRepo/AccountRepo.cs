@@ -19,21 +19,7 @@ namespace FinanceProject.Data.SqlRepo
 						{
 								_context.Accounts!.Add(group);
 								_context.SaveChanges();
-								_context.AccountBalances!.Add(new AccountBalance
-								{
-										AccountId = group.Id,
-										Balance = 0m,
-										Month = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1)
-								});
-								if (group.PeriodStartDay > 1)
-								{
-										_context.AccountBalances!.Add(new AccountBalance
-										{
-												AccountId = group.Id,
-												Balance = 0m,
-												Month = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1).AddMonths(-1)
-										});
-								}
+								_context.AccountBalances!.Add(new AccountBalance(DateTime.Now.Year, DateTime.Now.Month, group.id, group.PeriodStartDay))
 								if (group.Balance != 0)
 								{
 										_context.Transactions!.Add(new Transaction

@@ -1,11 +1,13 @@
-import { AppBar, Box, Grid2 as Grid, Toolbar, Typography, Avatar, Button, Menu, MenuItem } from '@mui/material';
+import { AppBar, Box, Grid2 as Grid, Toolbar, Typography, Avatar, Button, Menu, MenuItem, Divider } from '@mui/material';
 import { CurrencyExchange, ArrowDropDown } from '@mui/icons-material';
 import { ReactNode, useEffect, useState } from 'react';
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import {createSearchParams, useNavigate } from 'react-router-dom';
 import moment from 'moment';
 import useUserInfo, { UserContextValue, UserContext, useUpdateUserInfo } from './userContext';
 import { oauthSignIn } from './googlelogin';
+import NavigateSetter, {navigate} from "./NavigateSetter";
+import {getTokenProvider} from "./GetTokenProvider";
 
 
 interface AuthenticatedLayoutProps {
@@ -63,6 +65,51 @@ const PersonaMenu = ({ persona } :{ persona:string }) => {
 
 
 
+const PictureMenu = ()=>{
+    const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+    const open = Boolean(anchorEl);
+    const handleClick = (event: React.MouseEvent<HTMLElement>) => {
+        setAnchorEl(event.currentTarget);
+    };
+    const navigate = useNavigate()
+    const {isInRole, user} = useUserInfo()
+    const handleClose = () => {
+        setAnchorEl(null);
+    };
+
+    
+    return <Box>
+        <Avatar
+            sx={{cursor: 'pointer'}}
+            aria-haspopup="true"
+            aria-expanded={open ? 'true' : undefined}
+            src={user?.picture}
+            onClick={handleClick}
+        >A</Avatar>
+        <Menu
+            anchorEl={anchorEl}
+            open={open}
+            onClose={handleClose}
+            anchorOrigin={{
+                vertical: 'bottom',
+                horizontal: 'right',
+            }}
+            transformOrigin={{
+                vertical: 'top',
+                horizontal: 'right',
+            }}
+        >
+            <MenuItem sx={{fontWeight:'bold'}}>{user.name}</MenuItem>
+            <Divider />
+            <MenuItem onClick={()=>{
+                navigate({pathname:"/",
+                    search: "logout=true"})
+            }}>Logout</MenuItem>
+       </Menu>
+    </Box>
+}
+
+
 const AuthenticatedLayoutChild = ({ children, persona, roles, contextValue }: { contextValue: UserContextValue } & AuthenticatedLayoutProps) => {
 
     const navigate = useNavigate()
@@ -74,15 +121,36 @@ const AuthenticatedLayoutChild = ({ children, persona, roles, contextValue }: { 
         //check if token is valid
         if(loggedIn) return
         const token = window.sessionStorage.getItem("access_token");
-        if (!token) return oauthSignIn()
-        const tokenJson = JSON.parse(window.atob(token!.split(".")[1]));
+        const idToken = window.localStorage.getItem("id_token");
+        
+        const postTokenFn = (token : string)=>{
+            const tokenJson = JSON.parse(window.atob(token!.split(".")[1]));
+            const { protocal, host, pathname, search } = window.location;
 
-        if (moment().add(1, "minute").isAfter(tokenJson.exp * 1000)) oauthSignIn()
-        updateUser(tokenJson);
-        setLoggedIn(true)
-        return
+            if (moment().add(1, "minute").isAfter(tokenJson.exp * 1000)) {
+                if(window.webConfig.basePath !== `${pathname}${search}`) {
+                    navigate("/", { state: { nextUrl: `${pathname}${search}` } });
+                }
+                return
+            }
+            const idJson = JSON.parse(window.atob(idToken!.split(".")[1]));
+            
+            updateUser(idJson);
+            setLoggedIn(true)
+        }
+        
+        
+        if (!token) {
+            const { protocal, host, pathname, search } = window.location;
+            if(window.webConfig.basePath !== `${pathname}${search}`) {
+                navigate("/", { state: { nextUrl: `${pathname}${search}` } });
+            }
+            // getTokenProvider.getToken(postTokenFn)
+        }else{
+            postTokenFn(token)
+        }
 
-    }, [navigate, children])
+    }, [])
 
     useEffect(() => {
         if(!loggedIn || !roles ) return;
@@ -92,6 +160,7 @@ const AuthenticatedLayoutChild = ({ children, persona, roles, contextValue }: { 
     }, [roles,loggedIn]);
 
     return loggedIn && <>
+            <NavigateSetter />
             <Box flexGrow={1}>
                 <AppBar position="static" sx={{ bgColor: 'white' }}>
                     <Toolbar sx={{ justifyContent: 'space-between' }}>
@@ -110,7 +179,7 @@ const AuthenticatedLayoutChild = ({ children, persona, roles, contextValue }: { 
                         </Box>
                         <Box sx={{ display: 'flex' }}>
                             <PersonaMenu persona={persona} />
-                            <Avatar>A</Avatar>
+                            <PictureMenu />
                         </Box>
                     </Toolbar>
                 </AppBar>

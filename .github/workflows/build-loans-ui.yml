@@ -30,7 +30,7 @@ jobs:
       uses: restackio/update-json-file-action@2.1
       with:
         file: cooploanapp/dist/config.json
-        fields: '{"api":"${{ vars.API }}", "redirectUri":"${{ vars.REDIRECT_URI_LOANS }}"}'
+        fields: '{"api":"${{ vars.API }}", "redirectUri":"${{ vars.REDIRECT_URI_LOANS }}", "appName":"AR Hiram Tracker" }'
         
     - name: Move/Rename config.json to js
       run: |

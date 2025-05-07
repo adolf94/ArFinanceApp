@@ -1,8 +1,5 @@
 import React, { Component, useEffect, useState } from "react";
 import { Button } from "@mui/material";
-import { oauthSignIn } from "../common/GoogleLogin";
-import { v4 } from "uuid";
-import axios from "axios";
 import {
   GoogleOAuthProvider,
   useGoogleLogin,

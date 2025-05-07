@@ -40,12 +40,11 @@ namespace FinanceProject.Controllers
 				[HttpGet("account/{acctId}/accountbalance/{date}")]
 				public async Task<IActionResult> GetAccountByDate(DateTime date, Guid acctId)
 				{
-						_repo.CreateAccountBalances(date).Wait();
 						Account? acct = _acct.GetOne(acctId);
 
 						if (acct == null) return NotFound();
 
-						var result = await _repo.CreateAccountBalanceOne(date, acct, true);
+						var result = await _repo.GetOne( acct, date);
 						if (result == null) return NotFound();
 
 						return await Task.FromResult(Ok(result));

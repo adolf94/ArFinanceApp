@@ -6,7 +6,7 @@ namespace FinanceProject.Data
 {
 		public interface ITransactionRepo
 		{
-				public Transaction CreateTransaction(CreateTransactionDto item);
+				public Transaction CreateTransaction(Transaction item);
 
 				public Transaction UpdateTransaction(Transaction item);
 

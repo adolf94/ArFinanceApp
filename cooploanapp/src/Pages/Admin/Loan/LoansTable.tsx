@@ -1,4 +1,4 @@
-import { TableContainer, Table, TableHead, TableRow, TableCell, TableBody, Checkbox } from "@mui/material"
+import { TableContainer, Table, TableHead, TableRow, TableCell, TableBody, Checkbox, Skeleton } from "@mui/material"
 import { useQuery } from "@tanstack/react-query"
 import { USER, getAll } from "../../../repositories/users"
 import {Loan, LoanInterest, LoanPayment, User} from "FinanceApi"
@@ -38,7 +38,7 @@ const LoanClientRow = ( {client} : {client : User}  )=>{
 
       
       let computeInterest = generateCompute({principal: total.principal, date:moment(l.date), interestRecords: [...l.interestRecords], nextInterestDate:moment(l.nextInterestDate)}, l.loanProfile)
-      if(moment().isBefore(l.nextInterestDate)){
+      if(moment().isBefore(l.nextInterestDate) && l.loanProfile.computePerDay){
         let discount = computeInterest.computeDiscount(moment(), {
               balance: principal + interest - payments,
               date: moment(),
@@ -105,10 +105,20 @@ const LoanClientRow = ( {client} : {client : User}  )=>{
   <TableRow>
     <TableCell sx={{textAlign:'center'}} onClick={()=>setExpand(!expand)}>{expand? <ArrowDropDown /> : <ArrowRight /> } </TableCell>
     <TableCell  onClick={()=>setExpand(!expand)}>{client.name}</TableCell>
-    <TableCell>{FormattedAmount(total.principal)}</TableCell>
-    <TableCell>{FormattedAmount(total.interest)}</TableCell>
-    <TableCell>{FormattedAmount(total.payments)}</TableCell>
-    <TableCell>{FormattedAmount(total.balance)}</TableCell>
+    {
+      loading ? <>
+            <TableCell><Skeleton variant="text" /></TableCell>
+            <TableCell><Skeleton variant="text" /></TableCell>
+            <TableCell><Skeleton variant="text" /></TableCell>
+            <TableCell><Skeleton variant="text" /></TableCell>
+          </> 
+          : <>
+            <TableCell>{FormattedAmount(total.principal)}</TableCell>
+            <TableCell>{FormattedAmount(total.interest)}</TableCell>
+            <TableCell>{FormattedAmount(total.payments)}</TableCell>
+            <TableCell>{FormattedAmount(total.balance)}</TableCell>
+          </>
+    }
     <TableCell></TableCell>
   </TableRow>
   {expand && !loading && (loanCalculation || []).map((l:any)=><TableRow key={l.id} onClick={()=>navigate(`../loan/${l.orig.id}`)}>
@@ -143,7 +153,15 @@ const LoansTable = () => {
       </TableHead>
       <TableBody>
         {
-          !loading && clients.map((e:User)=> <LoanClientRow key={e.id} client={e} />)
+          !loading ? clients.map((e:User)=> <LoanClientRow key={e.id} client={e} />):
+            <TableRow>
+              <TableCell></TableCell>
+              <TableCell><Skeleton variant="text" /></TableCell>
+              <TableCell><Skeleton variant="text" /></TableCell>
+              <TableCell><Skeleton variant="text" /></TableCell>
+              <TableCell><Skeleton variant="text" /></TableCell>
+              <TableCell><Skeleton variant="text" /></TableCell>
+            </TableRow>
         }
       </TableBody>
     </Table>

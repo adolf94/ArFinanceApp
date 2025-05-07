@@ -240,7 +240,7 @@ const applyBackup = async (dbConfigToApply)=>{
         proc.on('exit', async (code) => {
             res(code)
 
-            let text = fs.readFileSync(`${__dirname}\\data\\__EfMigrations.json`, "utf-8");
+            let text = fs.readFileSync(`${output}\\__EfMigrations.json`, "utf-8");
             if(text === "[") {
                 const migrationsData = await readMigrationsConfig();
                 let keys= Object.keys(migrationsData).map(e=>({id:e, Id:e}))
@@ -273,7 +273,6 @@ const Migration = async ()=>{
     //start process
     //NOTE : if may data na, fetchData muna
         if(!fs.existsSync(output)) fs.mkdirSync(output)
-    console.log(output)
         let migrationIndex = -1;
     if(migrationNow === null){
         // create empty data for first migration array
@@ -322,10 +321,12 @@ const Migration = async ()=>{
             tableData[table.Container] = jsonArr
         })
         if(!!transformMigration.default.dataMigration){
-            
+            console.log("run data migrations")
            tableData =   transformMigration.default.dataMigration(tableData)
             
         }
+        
+        console.log("Write data to json");
         tables.forEach((table)=>{
             fs.writeFileSync(`${__dirname}\\data\\${table.Container}.json`, JSON.stringify(tableData[table.Container]));
         })
@@ -336,7 +337,7 @@ const Migration = async ()=>{
         console.log("item Count : " + jsonArr.length)
 
         jsonArr.push({id:migrationKeys[i]})
-
+        
         fs.writeFileSync(`${__dirname}\\data\\__EfMigrations.json`, JSON.stringify(jsonArr));
     }
 

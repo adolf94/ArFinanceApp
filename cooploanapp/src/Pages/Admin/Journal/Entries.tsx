@@ -1,4 +1,4 @@
-import {Box, CardContent, FormControl, Grid2 as Grid, InputLabel,  Paper, Typography, Select, MenuItem, Button, IconButton } from "@mui/material"
+import {Box, CardContent, FormControl, Grid2 as Grid, InputLabel,  Paper, Typography, Select, MenuItem, Button, IconButton, CircularProgress } from "@mui/material"
 import { useQuery } from "@tanstack/react-query"
 import moment from "moment";
 import {getLedgerEntries, getLedgerEntriesBy, LEDGER_ENTRY} from "../../../repositories/ledgerEntries";
@@ -6,6 +6,7 @@ import AccountName from "./AccountName";
 import {FormattedAmount} from "../../../components/NumberInput";
 import { useState } from "react";
 import {AddTask, FilterList, Event } from "@mui/icons-material";
+import NewEntry from "./NewEntry";
 
 
 const dates = Array.from(Array(12).keys()).map(key=>{
@@ -25,25 +26,31 @@ const JournalEntries = ()=>{
         <Grid size={12} sx={{px:{sm:0,md:1}}}>
             <Paper>
                 <CardContent>
-                    <Grid container padding={2} justifyContent="end">
-                        <Grid  sx={{px:2}}>
-                            <Button size="small" variant={filterBy=="dateAdded"?"outlined":"contained"} onClick={()=>setFilterBy("eventDate")}><Event /></Button>
-                            <Button size="small" variant={filterBy=="dateAdded"?"contained":"outlined"} onClick={()=>setFilterBy("dateAdded")}><AddTask /></Button>
-                            {/*<Button size="sm">Date</Button>*/}
-                            {/*<Button size="sm">Date Post</Button>*/}
+                    <Grid container sx={{py:2}} justifyContent="space-between">
+                        <Grid>
+                            <NewEntry>
+                                <Button variant="outlined">Add Ledger Entry</Button>
+                            </NewEntry>
                         </Grid>
-                        <Grid >
-                            <FormControl >
-                                <InputLabel id="demo-simple-select-label">Year</InputLabel>
-                                <Select
-                                    value={month}
-                                    label="Month"
-                                    size="small"
-                                    onChange={(evt) => setMonth(evt.target.value)}
-                                >
-                                    {dates.map(e => <MenuItem value={e.value}>{e.label}</MenuItem>)}
-                                </Select>
-                            </FormControl>
+                        <Grid container sx={{px:2}}>
+                            <Grid >
+                                <Button size="small" variant={filterBy=="dateAdded"?"outlined":"contained"} onClick={()=>setFilterBy("eventDate")}><Event /></Button>
+                                <Button size="small" variant={filterBy=="dateAdded"?"contained":"outlined"} onClick={()=>setFilterBy("dateAdded")}><AddTask /></Button>
+    
+                            </Grid>
+                            <Grid >
+                                <FormControl >
+                                    <InputLabel id="demo-simple-select-label">Year</InputLabel>
+                                    <Select
+                                        value={month}
+                                        label="Month"
+                                        size="small"
+                                        onChange={(evt) => setMonth(evt.target.value)}
+                                    >
+                                        {dates.map(e => <MenuItem value={e.value}>{e.label}</MenuItem>)}
+                                    </Select>
+                                </FormControl>
+                            </Grid>
                         </Grid>
                     </Grid>
                     <Grid container sx={{display:{md:'flex',xs:"none"}}}>
@@ -52,6 +59,12 @@ const JournalEntries = ()=>{
                         <Grid size={4}>To(Debit)</Grid>
                         <Grid size={2}>Amount</Grid>
                     </Grid>
+                    {isLoading && <Grid sx={{pt:3}} container justifyContent="center">
+                        <Grid size={2}>
+                            <CircularProgress />
+                        </Grid>
+                        
+                    </Grid>}
                     {(entries||[]).map(e=><><Grid container sx={{pt:1}}>
                         <Grid size={{xs:12, md:2}}>
                             <Typography variant="body1">{moment(e.date).format("YYYY-MM-DD")}</Typography>

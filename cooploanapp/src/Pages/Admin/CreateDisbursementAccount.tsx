@@ -60,7 +60,7 @@ const CreateDisbursementAccount = (props : CreateDisbursementAccount)=>{
             </Box>
         </DialogContent>
         <DialogActions>
-          <Button variant="contained" onClick={create}>Create</Button>
+          <Button variant="contained" disabled={addDisbursement.isPending} onClick={create}>Create</Button>
           <Button variant="outlined" onClick={()=>props.onClose()}>Cancel</Button>
         </DialogActions>
     </Dialog>

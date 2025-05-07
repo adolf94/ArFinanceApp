@@ -8,6 +8,7 @@ namespace FinanceApp.Dto
 
 				public string? UserName { get; set; }
 				public string Name { get; set; } = string.Empty;
+				public string? GoogleName { get; set; } = string.Empty;
 
 				public string MobileNumber { get; set; } = string.Empty;
 

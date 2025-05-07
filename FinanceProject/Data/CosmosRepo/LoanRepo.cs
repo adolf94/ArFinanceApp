@@ -68,9 +68,9 @@ namespace FinanceApp.Data.CosmosRepo
 			{
 				Principal = loan.Principal - loan.Payment.Where(e => e.AgainstPrincipal == true).Sum(e => e.Amount),
 				Interests = loan.InterestRecords.Sum(e => e.Amount),
-				Payments = loan.Payment.Where(e => e.AgainstPrincipal == true).Sum(e => e.Amount),
-				Balance = loan.Principal + loan.Interests -
-				          loan.Payment.Where(e => e.AgainstPrincipal == true).Sum(e => e.Amount)
+				Payments = loan.Payment.Sum(e => e.Amount),
+				Balance = loan.Principal + loan.InterestRecords.Sum(e => e.Amount) 
+							-loan.Payment.Sum(e => e.Amount)
 			};
 			DateTime StartDate = loan.Date;
 			double days = (loan.NextInterestDate - StartDate).TotalDays;
@@ -141,78 +141,7 @@ namespace FinanceApp.Data.CosmosRepo
 						// nextComputeDate = nextDate.AddMonths(1);
 					}
 					nextDate = nextCompute;
-				//
-				// }
-				// else
-				// {
-				// 	totalInterest = 0; // let's just add the previous months' interest
-				// 	while (nextCompute <= loan.NextComputeDate)
-				// 	{
-				// 		nextCompute = nextCompute.AddMonths(1);
-				// 		totalInterest = totalInterest + loanProfile.InterestPerMonth;
-				// 	}
-				// 	nextDate = nextCompute.AddMonths(-1);
-				// }
-				
-
-				//
-				// nextDate = createDate.clone().add(1, 'month');
-				// totalInterest = loanProfile.interestPerMonth!;
-				//
-				// while (nextDate.isSameOrBefore(nextInterest)) {
-				// 	nextDate.add(1, 'month')
-				// 	totalInterest = totalInterest + loanProfile.interestPerMonth!;
-				// }
-				//
-				// if (loanProfile.computePerDay && balance.date.isBefore(nextDate)) {
-				// 	//const curDaysInMonth = nextDate.daysInMonth()
-				// 	const noOfDaysInMonth = nextDate.clone().add(-1,'month').daysInMonth();
-				// 	const rebateDays = nextDate.clone().diff(balance.date.clone(), 'day');
-				// 	const percent = (rebateDays / noOfDaysInMonth) * loanProfile.interestPerMonth!
-				// 	totalInterest = totalInterest - percent
-				// 	nextDate = balance.date.clone()
-				// }
-
-
-				// 		nextDate = loan.Date.AddMonths(1);
-				//
-				// 		nextComputeDate = nextDate;
-				// 		if (createPayment || !loanProfile.ComputePerDay)
-				// 		{
-				// 				totalInterest = loanProfile.InterestPerMonth;
-				// 				while (nextDate <= loan.NextInterestDate && loan.LastInterestDate < dateRef)
-				// 				{
-				// 						nextDate = nextDate.AddMonths(1);
-				// 						totalInterest = totalInterest + loanProfile.InterestPerMonth;
-				//
-				// 				}
-				// 				nextComputeDate = nextDate;
-				//
-				// 				if (loanProfile.ComputePerDay && dateRef < nextDate)
-				// 				{
-				//
-				// 						int noOfDaysInMonth = nextDate.AddMonths(1).AddDays(-1).Day;
-				// 						int rebateDays = (nextDate - dateRef).Days;
-				// 						decimal percent = (rebateDays / noOfDaysInMonth) * loanProfile.InterestPerMonth;
-				// 						totalInterest = totalInterest - percent;
-				// 						nextDate = dateRef;
-				// 						nextComputeDate = nextDate.AddMonths(1);
-				// 				}
-				// 		}
-				// 		else
-				// 		{
-				// 				totalInterest = 0;
-				// 				while (nextComputeDate <= loan.NextInterestDate)
-				// 				{
-				// 						nextComputeDate = nextComputeDate.AddMonths(1);
-				// 						totalInterest = totalInterest + loanProfile.InterestPerMonth;
-				// 				}
-				// 				nextDate = nextComputeDate.AddMonths(-1);
-				// 		}
-				//
-				//
-				//
-				// }
+			
 
 			}
 

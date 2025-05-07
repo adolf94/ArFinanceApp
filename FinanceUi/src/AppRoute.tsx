@@ -3,8 +3,6 @@ import {
   LayoutRouteProps,
   PathRouteProps,
 } from "react-router";
-import { Counter } from "./components/Counter";
-import { FetchData } from "./components/FetchData";
 import { Home } from "./components/Home";
 import React from "react";
 import AccountsPage from "./Pages/AccountsPage";
@@ -12,11 +10,13 @@ import NewRecordPage from "./Pages/NewRecord";
 import Records from "./Pages/Records";
 import ViewAccount from "./Pages/Accounts/ViewAccount";
 import Settings from "./Pages/Settings";
+import { Navigate } from "react-router-dom";
+import Notifications from "./Pages/Notifications.js";
 
 const AppRoutes: (PathRouteProps | IndexRouteProps | LayoutRouteProps)[] = [
   {
     index: true,
-    element: <Home />,
+    element: <Navigate to="/records" />,
   },
   {
     path: "/records/:monthStr/:view",
@@ -28,6 +28,7 @@ const AppRoutes: (PathRouteProps | IndexRouteProps | LayoutRouteProps)[] = [
   },
   {
     path: "/transactions/:transId",
+    
     element: <NewRecordPage />,
   },
   {
@@ -41,6 +42,10 @@ const AppRoutes: (PathRouteProps | IndexRouteProps | LayoutRouteProps)[] = [
   {
     path: "/settings",
       element: <Settings />,
+  },
+  {
+    path: "/notifications",
+    element: <Notifications />,
   },
 ];
 

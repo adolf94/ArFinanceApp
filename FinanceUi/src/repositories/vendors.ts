@@ -22,7 +22,7 @@ export const fetchVendorById = async (id: string, force?:boolean) => {
 
     let vendors = queryClient.getQueryData<Vendor[]>([VENDOR]);
     if (!force) {
-        if (!vendors) queryClient.ensureQueryData({ queryKey: [VENDOR], queryFn: () => fetchVendors() })
+        if (!vendors) vendors = await queryClient.ensureQueryData({ queryKey: [VENDOR], queryFn: () => fetchVendors() })
         vendor = vendors.find(e=>e.id === id)
     }
     if(!!vendor) return vendor

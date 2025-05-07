@@ -155,7 +155,51 @@ namespace FinanceProject.Controllers
 				}
 
 
+				[HttpPut("user/{guid}")]
+				[Authorize(Roles = "ENROLL_USER")]
+				public async Task<IActionResult> UpdateUser(Guid guid, [FromBody] CreateUserDto data)
+				{
+					
+					string? userId = HttpContext.User.FindFirstValue("userId");
+					
+					if(data.Id != guid) return BadRequest();
+					
+					User? user = await _users.GetById(guid);
+					
+					user!.EmailAddress = data.UserName;
+					user!.MobileNumber = data.MobileNumber;
+					user!.UserName = data.UserName;
 
+
+					if (user.AcctReceivableId.HasValue)
+					{
+						LedgerAccount? rcv = await _ledgerAcct.GetOne(user.AcctReceivableId.Value);
+						rcv!.Name = $"Rcvb - ${user.Name}";
+					}
+
+
+					if (user.AcctEquityId.HasValue)
+					{
+						LedgerAccount? equit = await _ledgerAcct.GetOne(user.AcctEquityId.Value);
+						equit!.Name = $"Contrib - {user.Name}";
+					}
+					if (user.LiabilitiesId.HasValue)
+					{
+						LedgerAccount? liab = await _ledgerAcct.GetOne(user.LiabilitiesId.Value);
+						liab!.Name = $"Liability - {user.Name}";
+					}
+
+
+					_users.UpdateUser(user);
+					
+					
+					return NoContent();
+					
+					
+					
+					
+				}
+				
 
 				[HttpGet("user/login")]
 				[Authorize]

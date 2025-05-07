@@ -4,6 +4,9 @@ import { oauthSignIn } from "./googlelogin";
 import { memoize as mm } from "underscore";
 import { jwtDecode, JwtPayload } from "jwt-decode";
 import { enqueueSnackbar } from "notistack";
+import {getTokenProvider} from "./GetTokenProvider";
+import { v4 } from "uuid";
+import {navigate} from "./NavigateSetter";
 
 
 interface IdToken extends JwtPayload {
@@ -12,29 +15,63 @@ interface IdToken extends JwtPayload {
 }
 
 
+
+const redirectToLogin = ()=>{
+
+
+    const { protocal, host, pathname, search } = window.location;
+    const state = {
+        currentPath: `${pathname}${search}`,
+        uid: v4(),
+    }
+    
+    window.localStorage.setItem("googleLoginState", JSON.stringify(state));
+    navigate.push("/", { state: { nextUrl: state.currentPath } });
+}
+
+
 const getTokenFromApi = mm(
     () => {
         const token = window.localStorage.getItem("refresh_token");
 
-        if (!token) return oauthSignIn();
-        return axios
-            .post(`${window.webConfig.api}/google/auth/refresh`, {
-                refresh_token: token,
+        
+        return new Promise((res,rej)=>{
+
+            if (!token) return getTokenProvider.getToken((codeResponse)=>{
+                return api.post("/google/auth", { code: codeResponse.code, app: window.webConfig.app}, { preventAuth: true })
+                    .then((e) => {
+                        window.localStorage.setItem("refresh_token", e.data.refresh_token);
+                        window.sessionStorage.setItem("access_token", e.data.access_token);
+
+                        return res(e.data);
+                    })
             })
-            .then((e) => {
-                window.sessionStorage.setItem("access_token", e.data.access_token);
-                if(e.data.refresh_token) {
-                    window.localStorage.setItem("refresh_token", e.data.refresh_token);
-                }
-                return e.data.access_token;
-            })
-            .catch((e) => {
-                console.log(e);
-                oauthSignIn();
-            });
+
+            return axios
+                .post(`${window.webConfig.api}/google/auth/refresh`, {
+                    refresh_token: token,
+                })
+                .then((e) => {
+                    window.sessionStorage.setItem("access_token", e.data.access_token);
+                    if(e.data.refresh_token) {
+                        window.localStorage.setItem("refresh_token", e.data.refresh_token);
+                    }
+                    return e.data.access_token;
+                })
+                .catch((e) => {
+                    window.localStorage.removeItem("refresh_token");
+                    redirectToLogin()
+                    rej({msg:"redirected to login"})
+                });
+            
+        })
+        
+        
+       
     },
     (e) => moment().format("yyyyMMddHHmm"),
 );
+
 
 export const getToken = async (force: boolean) => {
     let token = window.sessionStorage.getItem("access_token");
@@ -64,24 +101,6 @@ api.interceptors.request.use(async (config: AxiosRequestConfig) => {
 
 api.interceptors.response.use(
     async (data) => {
-        //const headerTransId = data.headers["x-last-trans"];
-        //if (!data.config?.noLastTrans && !!headerTransId) {
-        //    const lastTransId = localStorage.getItem("last_transaction");
-        //    const stgTransId = localStorage.getItem("stg_transaction");
-        //    if (!!lastTransId && headerTransId !== lastTransId && stgTransId !== headerTransId) {
-        //        //Do fetch new data
-        //        queryClient.prefetchQuery({ queryKey: [TRANSACTION, { after: lastTransId }], queryFn: () => getAfterTransaction(lastTransId) })
-        //    }
-        //}
-        //if (!headerTransId) {
-        //    console.debug("no last-trans found " + data.config.url);
-        //}
-
-
-        //queryClient
-
-
-
         return data;
     },
     (err) => {

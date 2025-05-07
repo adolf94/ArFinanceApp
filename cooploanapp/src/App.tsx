@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { createBrowserRouter, RouterProvider } from 'react-router-dom'
+import { createBrowserRouter,   RouterProvider } from 'react-router-dom'
 import  Index  from "./Pages/Index"
 import  Admin from './Pages/Admin/Index'
 import { UserContext } from './components/userContext'
@@ -14,6 +14,8 @@ import { IdToken } from './Pages/Register'
 import { ConfirmProvider } from 'material-ui-confirm'
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import MemberPage from './Pages/Member/Index'
+import { GoogleOAuthProvider } from '@react-oauth/google'
+import GetTokenProvider from "./components/GetTokenProvider";
 
 
 export const queryClient = new QueryClient({defaultOptions: {
@@ -42,15 +44,18 @@ function App() {
             <LocalizationProvider dateAdapter={AdapterMoment}>
                 <QueryClientProvider client={queryClient}>
                     {/* //@ts-ignore */}
-                    <UserContext.Provider value={userContextValue}>
-                        <SnackbarProvider />
+                    <GoogleOAuthProvider clientId={window.webConfig.clientId}>
 
+                        <UserContext.Provider value={userContextValue}>
+                            <SnackbarProvider />
+                            <GetTokenProvider />
                         <RouterProvider router={ router } />
                     </UserContext.Provider>
                     <ReactQueryDevtools
                     initialIsOpen={false}
                     buttonPosition="bottom-left"
                     />
+                    </GoogleOAuthProvider>
                 </QueryClientProvider>
             </LocalizationProvider>
         </ConfirmProvider>

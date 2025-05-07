@@ -7,13 +7,21 @@ import { Account } from "FinanceApi";
 import api from "../components/api";
 import { queryClient } from "../App";
 import replaceById from "../common/replaceById";
+import db from "../components/LocalDb";
+import moment from "moment";
 
 export const ACCOUNT = "account";
+
+
+
+
+
 
 export const fetchAccounts = () => {
   return api.get("accounts").then((res) => {
     res.data.forEach((acct) => {
       queryClient.setQueryData([ACCOUNT, { id: acct.id }], acct);
+      db.accounts.put({...acct, dateUpdated: moment().toDate()})
     });
       let last = localStorage.getItem("last_transaction");
       if(!last) localStorage.setItem("last_transaction", res.headers["x-last-trans"])

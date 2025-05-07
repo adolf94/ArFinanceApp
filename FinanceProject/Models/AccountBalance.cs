@@ -5,18 +5,35 @@ namespace FinanceProject.Models
 {
 		public class AccountBalance
 		{
-				[Key]
-				public string Id
-				{
-						get
-						{
-								return $"{Year}/{Month}/{AccountId}";
-						}
-						set
-						{
-								return;
-						}
-				}
+			public AccountBalance()
+			{
+				
+			}
+
+			public AccountBalance(int year, int month, Guid acctId)
+			{
+				Year = year;
+				Month = month;
+				AccountId = acctId;
+				Id = $"{Year}|{Month:D2}|{AccountId}";
+				DateStart = new DateTime(year, month, 1);
+				DateEnd = new DateTime(year, month, 1).AddMonths(1);
+				PartitionKey = "default";
+			}
+			
+			public AccountBalance(int year, int month, Guid acctId, int startDate)
+			{
+				Year = year;
+				Month = month;
+				AccountId = acctId;
+				Id = $"{Year}|{Month:D2}|{AccountId}";
+				DateStart = new DateTime(year, month, startDate);
+				DateEnd = new DateTime(year, month, startDate).AddMonths(1);
+				PartitionKey = "default";
+			}
+
+			[Key] public string Id { get; set; } = "";
+
 				public Guid AccountId { get; set; }
 				[JsonIgnore]
 				public Account? Account { get; set; }
@@ -27,8 +44,24 @@ namespace FinanceProject.Models
 				// Technically DateStart is DateEnd of last period
 				// Note for credit card balance : adjust the view to NEXT month (checked na? NO)
 				public DateTime DateStart { get; set; }
-				public decimal Balance { get; set; }
+				public DateTime DateEnd { get; set; }
+
+
+				public decimal EndingBalance { get; set; } = 0;
+				public decimal Balance { get; set; } = 0;
 				
 				public string PartitionKey { get; init; } = "default";
+				
+				
+				public List<BalanceTransaction> Transactions { get; set; } = new ();
+				
+				public class BalanceTransaction
+				{
+					public Guid TransactionId { get; set; }
+					public long EpochUpdated { get; set; } 
+					public decimal Amount { get; set; }
+				}
+				
 		}
+
 }

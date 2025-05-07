@@ -1,6 +1,6 @@
 ﻿import { useContext, createContext, useEffect, useState } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
-import db from "./LocalDb";
+import db from "./LocalDb/index";
 export const defaultData = {
   accountTypes: [],
   accountGroups: [],

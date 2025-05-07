@@ -16,6 +16,7 @@ import {
   List,
   ListItem,
   Paper,
+  Skeleton,
   Toolbar,
   Typography,
 } from "@mui/material";
@@ -26,6 +27,7 @@ import {
   TRANSACTION,
   fetchTransactionsByMonth,
   fetchByAcctMonth,
+  fetchByAccountMonthKey,
 } from "../../repositories/transactions";
 import { useNavigate, useParams } from "react-router";
 import { Link } from 'react-router-dom'
@@ -36,6 +38,8 @@ import {
   getBalancesByDate,
 } from "../../repositories/accountBalance";
 import numeral from "numeral";
+import TransactionListItem from "../RecordsComponents/TransactionListItem.js";
+import { useOfflineData } from "../../components/LocalDb/useOfflineData";
 
 
 const fabGreenStyle = {
@@ -65,13 +69,11 @@ interface TransactionWithRunningBal extends Transaction {
 const ViewAccount = () => {
   const { acctId } = useParams();
   const [month, setMonth] = useState(moment());
-  const { data: records } = useQuery({
-    queryKey: [
-      TRANSACTION,
-      { accountId: acctId, month: month.month() + 1, year: month.year() },
-    ],
-    queryFn: () => fetchByAcctMonth(acctId, month.year(), month.month() + 1),
-  });
+  const { data: records, isFetching:recordsLoading } = useOfflineData({
+    defaultData:[],
+    getOnlineData: () => fetchByAccountMonthKey(acctId, month.year(), month.month() + 1, false),
+    initialData: ()=> fetchByAccountMonthKey(acctId, month.year(), month.month() + 1, true)
+  },[month.year(), month.month() + 1]);   
   const { data: account } = useQuery({
     queryKey: [ACCOUNT, { id: acctId }],
     queryFn: () => fetchByAccountId(acctId),
@@ -208,7 +210,8 @@ const ViewAccount = () => {
                   sx={{ px: 1, alignSelf: "center" }}
                   variant="transactionHeaderDate"
                 >
-                  {numeral(data.totals.deposit).format("0,0.00")}
+                  
+                  {isLoading? <Skeleton variant="text" width="5rem"  /> :numeral(data.totals.deposit).format("0,0.00")}
                 </Typography>
               </Grid>
               <Grid item>
@@ -219,7 +222,7 @@ const ViewAccount = () => {
                   sx={{ px: 1, alignSelf: "center" }}
                   variant="transactionHeaderDate"
                 >
-                  {numeral(data.totals.withdrawal).format("0,0.00")}
+                  {isLoading? <Skeleton variant="text" width="5rem"  /> :numeral(data.totals.withdrawal).format("0,0.00")}
                 </Typography>
               </Grid>
               <Grid item>
@@ -229,7 +232,7 @@ const ViewAccount = () => {
                   sx={{ px: 1, alignSelf: "center" }}
                   variant="transactionHeaderDate"
                 >
-                  {numeral(data.totals.total).format("0,0.00")}
+                  {isLoading? <Skeleton variant="text" width="5rem"  /> :numeral(data.totals.total).format("0,0.00")}
                 </Typography>
               </Grid>
               <Grid item>
@@ -239,14 +242,66 @@ const ViewAccount = () => {
                   sx={{ px: 1, alignSelf: "center" }}
                   variant="transactionHeaderDate"
                 >
-                  {numeral(data.totals.total + acctBalance?.balance).format(
+                  {isLoading? <Skeleton variant="text" width="5rem"  /> :numeral(acctBalance?.endingBalance).format(
                     "0,0.00",
                   )}
                 </Typography>
               </Grid>
             </Grid>
           </Paper>
-          {data.dates.map((data) => (
+          {
+              recordsLoading && <Paper sx={{ my: 1 }}>
+                <List>
+                  <ListItem dense>
+                    <Grid item xs={6}>
+                      <Typography sx={{ px: 1 }} variant="transactionHeaderDate">
+                        <Skeleton variant="text" />
+                      </Typography>{" "}
+                    </Grid>
+                    <Grid
+                        item
+                        xs={3}
+                        sx={{
+                          display: "flex",
+                          textAlign: "center",
+                          justifyContent: "center",
+                        }}
+                    >
+                      <Typography
+                          color="green"
+                          sx={{ px: 1, alignSelf: "center", fontColor: "success" }}
+                          variant="transactionHeaderDate"
+                      >
+                        <Skeleton variant="text" width="5rem" />
+
+                      </Typography>
+                    </Grid>
+                    <Grid
+                        item
+                        xs={3}
+                        sx={{
+                          display: "flex",
+                          textAlign: "center",
+                          justifyContent: "center",
+                        }}
+                    >
+                      <Typography
+                          color="red"
+                          sx={{ px: 1, alignSelf: "center", fontColor: "danger" }}
+                          variant="transactionHeaderDate"
+                      >
+                        <Skeleton variant="text" width="5rem" />
+                      </Typography>
+                    </Grid>
+                  </ListItem>
+                  <Divider />
+                  <TransactionListItem item={{}} loading={true} />
+                  <TransactionListItem item={{}} loading={true} />
+                  <TransactionListItem item={{}} loading={true} />
+                </List>
+              </Paper>
+          }
+          {data.dates.sort((a,b)=>a.dateGroup<b.dateGroup?1:-1).map((data) => (
               <Paper key={data.dateGroup} sx={{ my: 1 }}>
               <List>
                 <ListItem

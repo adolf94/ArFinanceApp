@@ -33,17 +33,24 @@ namespace FinanceApp.Utilities
 				{
 
 						//TODO: add validation that number is a PH number;
-						if (!number.StartsWith("9") || number.Length != 10)
+						if (!number.StartsWith("9") ||  number.Length != 10)
 						{
 								throw new Exception("number is not a valid number");
 						}
 
 						if (!_enabled)
 						{
-
 								_logger.LogWarning($"SMS disabled!");
 								_logger.LogDebug($"SMS \"sent\" to {number}: {message}");
 								return Guid.NewGuid().ToString();
+						}
+
+						if (number.StartsWith("900"))
+						{
+							_logger.LogWarning($"SMS was not send to a dummy number");
+							_logger.LogDebug($"SMS \"sent\" to {number}: {message}");
+							return Guid.NewGuid().ToString();
+
 						}
 
 

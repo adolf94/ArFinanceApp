@@ -13,9 +13,10 @@ import {
     Tab,
     Tabs,
     Toolbar,
-    colors
+    colors,
+    Button
 } from "@mui/material";
-import { createContext, useState } from "react";
+import { createContext, useState, useMemo } from "react";
 import AccountsPage from "./Accounts";
 
 import { Add } from "@mui/icons-material";
@@ -25,11 +26,12 @@ import moment from "moment";
 import { useEffect } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import {
-    TRANSACTION,
-    fetchTransactionsByMonth,
+    fetchTransactionsByMonthKey,
 } from "../repositories/transactions";
 import Calendar from "./RecordsComponents/Calendar";
 import Daily from "./RecordsComponents/Daily";
+import UserPanel from "../components/UserPanel.js";
+import { useOfflineData } from "../components/LocalDb/useOfflineData";
 
 interface RecordViewTransaction {
   dateGroup: string;
@@ -68,14 +70,25 @@ const Records = () => {
   const { view, monthStr } = useParams();
   const month = moment(monthStr);
     const navigate = useNavigate();
-    const { data: records, isLoading: loadingRecords  } = useQuery({
-    queryKey: [
-      TRANSACTION,
-      { month: month.get("month") + 1, year: month.get("year") },
-    ],
-    queryFn: () =>
-      fetchTransactionsByMonth(month.get("year"), month.get("month") + 1),
-  });
+  //   const { data: records, isLoading: loadingRecords  } = useQuery({
+  //   queryKey: [
+  //     TRANSACTION,
+  //     { month: month.get("month") , year: month.get("year") },
+  //   ],
+  //   queryFn: () =>
+  //     fetchTransactionsByMonthKey(month.get("year"), month.get("month"), false),
+  //   placeholderData:[]
+  // });
+    //const records = useMemo(()=>[],[])
+
+    const { data: records, isLoading:loadingRecords } = useOfflineData({
+        defaultData: [],
+        offlineOnly : false,
+        initialData: ()=>fetchTransactionsByMonthKey(month.get("year"), month.get("month"), true),
+        getOnlineData: ()=>fetchTransactionsByMonthKey(month.get("year"), month.get("month"), false)
+    }, [monthStr])
+
+
 
   const [dailies, setDailies] = useState([]);
 
@@ -84,6 +97,43 @@ const Records = () => {
     expense: 0,
     total: 0,
   });
+
+    //useEffect(() => {
+    //    console.debug("called useOfflineData useEffect " )
+    //    let mode = "offline"
+    //    //if (!isLoading) return;
+    //    //setLoading(true)
+    //    //const fetch = () => {
+    //    //fetching = true
+    //    ////setFetching(true)
+    //    //inputs.getOnlineData().then((data) => {
+    //    //    setData(data)
+    //    //    mode = "online"
+    //    //    setFetching(false)
+    //    //    setLoading(false)
+    //    //}).catch(() => {
+    //    //    //setFetching(false)
+    //    //    //setLoading(false)
+    //    //})
+    //    if (mode === "online") return;
+    //    fetchTransactionsByMonthKey(month.get("year"), month.get("month"), false).then((data) => {
+    //        setRecords(data)
+    //        mode = "online"
+    //        setLoading(false)
+    //    })
+
+    //    fetchTransactionsByMonthKey(month.get("year"), month.get("month"), true).then((data) => {
+    //        setLoading(false)
+    //        if (mode === "offline") setRecords(data)
+    //        //if (!fetching && !fetched && !inputs.offlineOnly ) fetch()
+    //    })
+
+
+
+    //}, [monthStr])
+
+
+
 
     const setMonth = (newDate) => {
         navigate(`../records/${moment(newDate).format("YYYY-MM")}/${view}`)
@@ -103,36 +153,37 @@ const Records = () => {
     };
     let rec = (records || [])
       .sort((a, b) => (a.date > b.date ? -1 : 1))
-      .reduce<RecordViewTransaction[]>((prev, current, index) => {
-        let date = prev.find(
-          (e) => e.dateGroup == moment(current.date).format("yyyy-MM-DD"),
-        );
-        if (!date) {
-          date = {
-            dateGroup: moment(current.date).format("yyyy-MM-DD"),
-            day: moment(current.date).date(),
-            dayOfWeek: moment(current.date).format("ddd"),
-            items: [],
-            income: 0,
-            expenses: 0,
-          };
-          prev.push(date);
-        }
-        date.items.push(current);
-        switch (current.type) {
-          case "expense":
-            date.expenses += current.amount;
-            totals.expense += current.amount;
-            totals.total -= current.amount;
-            break;
-          case "income":
-            date.income += current.amount;
-            totals.income += current.amount;
-            totals.total += current.amount;
-            break;
-        }
-        return prev;
-      }, []);
+      .reduce((prev : RecordViewTransaction[], current :Transaction ) => {
+              let date = prev.find(
+                  (e) => e.dateGroup == moment(current.date).format("yyyy-MM-DD"),
+              );
+              if (!date) {
+                  date = {
+                      dateGroup: moment(current.date).format("yyyy-MM-DD"),
+                      day: moment(current.date).date(),
+                      dayOfWeek: moment(current.date).format("ddd"),
+                      items: [],
+                      income: 0,
+                      expenses: 0,
+                  };
+                  prev.push(date);
+              }
+              date.items.push(current);
+              switch (current.type) {
+                  case "expense":
+                      date.expenses += current.amount;
+                      totals.expense += current.amount;
+                      totals.total -= current.amount;
+                      break;
+                  case "income":
+                      date.income += current.amount;
+                      totals.income += current.amount;
+                      totals.total += current.amount;
+                      break;
+              }
+              return prev;
+          },
+          []);
     setTotals(totals);
     setDailies(rec);
   }, [records]);
@@ -145,27 +196,42 @@ const Records = () => {
 
   return (
     <>
-      <AppBar position="static">
+      <AppBar position="static"  color="primary">
         <Toolbar>
-          <IconButton onClick={() => setMonth(month.clone().add(-1, "month"))}>
-            <FontAwesomeIcon
-              icon={faChevronLeft}
-              
-            />
-          </IconButton>
-          <span className="my-1">{month.format("MMM yyyy")}</span>
-          <IconButton onClick={() => setMonth(month.clone().add(1, "month"))}>
-            <FontAwesomeIcon
-              icon={faChevronRight}
-              
-            />
-          </IconButton>
+            <Grid container sx={{justifyContent: "space-between"}}>
+                <Grid>
+                    <IconButton onClick={() => setMonth(month.clone().add(-1, "month"))}>
+                        <FontAwesomeIcon
+                            icon={faChevronLeft}
+                        />
+                    </IconButton>
+                    <span className="my-1">{month.format("MMM yyyy")}</span>
+                    <IconButton onClick={() => setMonth(month.clone().add(1, "month"))}>
+                        <FontAwesomeIcon
+                            icon={faChevronRight}
+                        />
+                    </IconButton>
+                </Grid>
+                <Grid>
+                    <UserPanel />
+                </Grid>
+            </Grid>
+         
         </Toolbar>
       </AppBar>
       <Grid container spacing={1}>
         <Grid item md={4} sx={{ display: { xs: "none", md: "block" } }}>
           <Paper sx={{ mt: 3 }}>
-            <AccountsPage />
+              <Link to="/transactions/new">
+                  <Box sx={{px:2}}>
+                      <Button variant="contained" fullWidth color="primary">
+                          <Add/> Add Record
+                      </Button>
+                  </Box>
+              </Link>
+              <Box sx={{ my: 1, maxHeight: "75vh", overflow: "overlay" }}>
+                <AccountsPage />
+              </Box>
           </Paper>
         </Grid>
         <Grid item xs={12} md={8}>
@@ -196,7 +262,7 @@ const Records = () => {
         </Grid>
       </Grid>
       <Link to="/transactions/new">
-        <Fab color="primary" sx={fabGreenStyle}>
+        <Fab color="primary" sx={{...fabGreenStyle,display:{md:'none'}}} >
             <Add fontSize="large"/> 
         </Fab>
       </Link>

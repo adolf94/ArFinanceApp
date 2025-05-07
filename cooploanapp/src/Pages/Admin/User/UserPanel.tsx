@@ -34,6 +34,8 @@ import {
   getMemberProfiles,
 } from "../../../repositories/memberProfile";
 import * as React from "react";
+import {navigate} from "../../../components/NavigateSetter";
+import { useNavigate } from "react-router-dom";
 
 interface UserPanelProps {}
 
@@ -54,6 +56,7 @@ const UserPanel = (_: UserPanelProps) => {
     queryKey: [USER],
     queryFn: () => getAll(),
   });
+  const navigate = useNavigate()
   const { data: option } = useQuery({
     queryKey: [COOP_OPTION, { year }],
     queryFn: () => getOptionByYear(year),
@@ -143,7 +146,7 @@ const UserPanel = (_: UserPanelProps) => {
                             </IconButton>
                           </Tooltip>
                           <Tooltip title="Edit information">
-                            <IconButton>
+                            <IconButton onClick={()=>navigate(`./${client.id}`)}>
                               <ManageAccounts />
                             </IconButton>
                           </Tooltip>

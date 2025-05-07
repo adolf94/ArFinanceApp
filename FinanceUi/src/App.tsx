@@ -21,6 +21,7 @@ import { createTheme, ThemeProvider } from "@mui/material/styles";
 import history, { NavigateSetter } from "./components/History";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { oauthSignIn } from "./common/GoogleLogin";
+import { lightGreen, purple, indigo} from '@mui/material/colors';
 
 export const queryClient = new QueryClient({
   defaultOptions: {
@@ -41,6 +42,11 @@ const theme = createTheme({
       fontWeight: "600",
     },
   },
+    palette: {
+        primary: indigo,
+        secondary: lightGreen,
+    },
+    
 });
 
 const localStoragePersister = createSyncStoragePersister({
@@ -69,7 +75,6 @@ const TheApp = (props) => {
   const handleGoogleRedirect = () => {
     return new Promise((res, rej) => {
       let str = window.location.search;
-        console.log(location);
         if (str === "") {
 
             setInitialized(true)
@@ -82,7 +87,12 @@ const TheApp = (props) => {
         .map((v) => v.split(`=`, 1).concat(v.split(`=`).slice(1).join(`=`)))
         .reduce((pre, [key, value]) => ({ ...pre, [key]: value }), {});
 
-      if (!hash2Obj.state) return res("no_state");
+      if (!hash2Obj.state) {
+        
+        setInitialized(true)
+        res("no_state")
+        return
+      };
       let stateFromStorage = sessionStorage.getItem("googleLoginState");
       if (decodeURIComponent(hash2Obj.state) !== stateFromStorage) {
         console.debug("state did not match");
@@ -118,7 +128,9 @@ const TheApp = (props) => {
 
   useEffect(() => {
       handleGoogleRedirect().then((e) => {
+          
           if (e === "") return e;
+          if  (e === "no_state") return;
         let stateFromStorage = sessionStorage.getItem("googleLoginState");
           let state = JSON.parse(window.atob(stateFromStorage!))
           navigate(state.currentPath.replace("/finance",""))

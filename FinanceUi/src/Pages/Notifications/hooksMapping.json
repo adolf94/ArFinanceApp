@@ -1,0 +1,60 @@
+[{
+    "config": "notif_gcash_receive",
+    "subConfig": "gcashInwardTransfer",
+    "displayName":"GCash Received",
+    "type":"transfer",
+    "vendor":"senderAcct",
+    "credit":"fixed|gcash",
+    "debit":"senderAcct",
+    "fixedLists": {
+        "gcash": [ "01950582-caff-7823-9eb3-d52bcd602d67"]
+    },
+    "comments":""
+},{
+    "config": "notif_vybe_transfer_bank",
+    "subConfig": "vybeOutwardTransfer",
+    "displayName":"Vybe Transfer",
+    "type":"transfer",
+    "vendor":"recipientAcct",
+    "credit":"fixed|vybe",
+    "debit":"recipientAcct",
+    "fixedLists": {
+        "vybe": [ "01950582-caff-7823-9eb3-d52bcd602d67"]
+    },
+    "comments":""
+},{
+    "config": "notif_vybe_transfer_bank",
+    "subConfig": "vybeOutwardBankPayment",
+    "displayName":"Vybe Instapayment",
+    "type":"expense",
+    "vendor":"recipientAcct",
+    "credit":"fixed|vybe",
+    "debit":"recipientAcct",
+    "fixedLists": {
+        "vybe": [ "01950582-caff-7823-9eb3-d52bcd602d67"]
+    },
+    "comments":""
+},{
+    "config": "notif_vybe_pay",
+    "subConfig": "vybeMerchantPayment",
+    "displayName":"Vybe Merchant Payment",
+    "type":"expense",
+    "vendor":"recipientAcct",
+    "credit":"fixed|vybe",
+    "debit":"recipientAcct",
+    "fixedLists": {
+        "vybe": [ "01950582-caff-7823-9eb3-d52bcd602d67"]
+    },
+    "comments":""
+},{
+    "config": "notif_vybe_cashin",
+    "subConfig": "vyveCashIn",
+    "displayName":"Vybe Cash In",
+    "type":"transfer",
+    "vendor":"fixed|bpi",
+    "credit":"fixed|bpi",
+    "debit":"fixed|vybe",
+    "comments":""
+}
+
+]

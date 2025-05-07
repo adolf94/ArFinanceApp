@@ -6,6 +6,7 @@ namespace FinanceApp.Data
 		{
 				public Task ApplyPayment(PaymentRecord record);
 				public List<LoanPayment> GetByLoanId(Guid loanId);
+				public Task<IEnumerable<LoanPayment>> GetLoanPaymentsAsync(Guid loanId);
 
 		}
 }
