@@ -1,5 +1,5 @@
-﻿using Newtonsoft.Json;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
+using Newtonsoft.Json;
 
 namespace FinanceProject.Models
 {
@@ -18,6 +18,7 @@ namespace FinanceProject.Models
 				Id = $"{Year}|{Month:D2}|{AccountId}";
 				DateStart = new DateTime(year, month, 1);
 				DateEnd = new DateTime(year, month, 1).AddMonths(1);
+				Transactions = new();
 				PartitionKey = "default";
 			}
 			
@@ -29,10 +30,12 @@ namespace FinanceProject.Models
 				Id = $"{Year}|{Month:D2}|{AccountId}";
 				DateStart = new DateTime(year, month, startDate);
 				DateEnd = new DateTime(year, month, startDate).AddMonths(1);
+				Transactions = new();
 				PartitionKey = "default";
 			}
 
-			[Key] public string Id { get; set; } = "";
+			[Key]
+				public string Id { get; set; } = "";
 
 				public Guid AccountId { get; set; }
 				[JsonIgnore]

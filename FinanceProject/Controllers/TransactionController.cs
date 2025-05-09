@@ -22,9 +22,10 @@ namespace FinanceProject.Controllers
         private PersistentConfig _pConf;
         private readonly ILogger<TransactionController> _logger;
         private readonly IMonthlyTransactionRepo _monthly;
+        private readonly IHookMessagesRepo _hooks;
 
         public TransactionController(ITransactionRepo repo, IAccountRepo account, IAccountBalanceRepo bal, IMonthlyTransactionRepo monthly,
-            PersistentConfig pConfig, IMapper mapper, ILogger<TransactionController> logger)
+            PersistentConfig pConfig, IMapper mapper, ILogger<TransactionController> logger, IHookMessagesRepo hooks)
         {
             _repo = repo;
             _account = account;
@@ -33,6 +34,7 @@ namespace FinanceProject.Controllers
             _pConf = pConfig;
             _logger = logger;
             _monthly = monthly;
+            _hooks = hooks; 
         }
 
 
@@ -90,6 +92,16 @@ namespace FinanceProject.Controllers
                         balances[bal.Id] = bal);
             var bal = await _monthly.AddToMonthlyTransaction(item, false,false);
 
+            item.Notifications.ForEach(async notif =>
+            {
+                HookMessage? hook = await _hooks.GetOneHook(Guid.Parse(notif));
+                if (hook != null)
+                {
+                    hook.TransactionId = item.Id;
+                    await _hooks.SaveHook(hook, false);
+                }
+            });
+            
 
                         response.Accounts = accounts.Values.ToList();
             response.Balances = balances.Values.ToList();
@@ -131,13 +143,6 @@ namespace FinanceProject.Controllers
 
 
 
-
-            //using (var trans = await _repo.CreateTransactionAsync())
-            //{
-
-            //try
-            //{
-            //Reverse the transactions
             accounts[transaction.CreditId] = _account.UpdateCreditAcct(transaction.CreditId, -transaction.Amount);
             accounts[transaction.DebitId] = _account.UpdateDebitAcct(transaction.DebitId, -transaction.Amount);
 

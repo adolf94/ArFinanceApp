@@ -48,6 +48,8 @@ import hookMappings from  "../Notifications/hooksMapping.json"
 import selectionByHook, { getReferenceName } from "../Notifications/selectionByHook";
 import { logReferenceInstance } from "../../repositories/hookReference";
 import useSubmitTransaction from "./useSubmitTransaction";
+import numeral, { Numeral } from "numeral";
+import PillPopover from "./PillPopover";
 
 const cronOptions = [
   { name: "Monthly", cron: "0 0 DD * *" },
@@ -143,10 +145,10 @@ const NewRecordForm = (props: NewRecordFormProps) => {
     setQuery({})
   }
 
-  const submitTransaction = useSubmitTransaction({
+  const doSubmit = useSubmitTransaction({
     transaction:formData, 
     schedule, 
-    onConfirm: resetFormData, 
+    transactionId:transId,
     notification:hooks.hook,  
     hookConfig:hooks.selectedConfig
   })
@@ -163,7 +165,23 @@ const NewRecordForm = (props: NewRecordFormProps) => {
     return true;
   }),[formData]);
 
-  
+    const submitTransaction = (redirectToHome)=>{
+      const whilewaiting = ()=>{
+          const monthKey = moment(formData.date).format("YYYY-MM")
+          if(transId == "new"){
+          if(redirectToHome) {
+            if(!!hooks.hook?.hookId) navigate(-1)
+            if(!hooks.hook?.Id) navigate(`../records/${monthKey}/daily`)
+          };
+          if(!redirectToHome) {
+            resetFormData()
+          }
+        }else{
+          navigate(`../records/${monthKey}/daily`);
+        }
+      }
+      return doSubmit(whilewaiting)
+    }
   useEffect(() => {
       //when state is included on routing / navigate
       if (!!state?.credit) {
@@ -223,7 +241,10 @@ const NewRecordForm = (props: NewRecordFormProps) => {
               if(!!hook) {
                 configs = hookMappings.filter(e=>e.config==hook.extractedData?.matchedConfig)
               }
-
+              if(!!hook.transactionId){
+                navigate(`../transactions/${hook.transactionId}`)
+                return  
+              }
               setHooks({configs,hook, selectedConfig: null})
           }
           
@@ -318,7 +339,7 @@ const NewRecordForm = (props: NewRecordFormProps) => {
           ...formData,
           type:selectedConfig.type,
           date: datetime,
-          amount,
+          amount: numeral(amount).value(),
           debit,
           debitId: debit?.id,
           credit,
@@ -473,7 +494,9 @@ const NewRecordForm = (props: NewRecordFormProps) => {
         </ListItem>
         <ListItem>
           <Grid container sx={{textAlign:'right'}}>
-            <Grid item xs={4}sx={{textAlign:'left'}}><Chip label="Source data" size="small" clickable={true} color="primary"/></Grid>
+            <Grid item xs={4}sx={{textAlign:'left'}}>
+              {hooks.hook&&<PillPopover text={hooks.hook?.rawMsg}><Chip label="Notification Text" size="small" variant="filled" color="primary" ></Chip></PillPopover>}
+            </Grid>
             <Grid item xs={8}>
               {hooks.configs.map(e=>
                 <Chip  color="primary" size="small" label={e.displayName}

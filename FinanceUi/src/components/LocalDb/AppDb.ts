@@ -1,5 +1,5 @@
 import Dexie, {  EntityTable } from 'dexie';
-import { Account, AccountBalance as AccountBalanceApi, MonthlyTransaction as MTransactionFromApi, Transaction } from 'FinanceApi';
+import { Account, AccountBalance as AccountBalanceApi, HookMessage, MonthlyTransaction as MTransactionFromApi, Transaction } from 'FinanceApi';
 
 
 
@@ -23,7 +23,8 @@ const db = new Dexie('FinanceApp') as Dexie & {
     transactions: EntityTable<Transaction, 'id'>,
     monthTransactions: EntityTable<MonthlyTransaction & {dateUpdated : Date}, 'monthKey'>,
     accountBalances: EntityTable<  AccountBalance & { dateUpdated: Date }, 'id'>,
-    accounts: EntityTable<Account & { dateUpdated: Date }, 'id'>
+    accounts: EntityTable<Account & { dateUpdated: Date }, 'id'>,
+    hookMessages: EntityTable<HookMessage, 'id'>
   };
   
   // Schema declaration:
@@ -31,7 +32,8 @@ const db = new Dexie('FinanceApp') as Dexie & {
     transactions: '&id, monthKey',
     monthTransactions: '&monthKey',
       accountBalances: '&id, accountId',
-    accounts: '&id, type'
+    accounts: '&id, type',
+    hookMessages: '&id, transactionId'
   });
 
 

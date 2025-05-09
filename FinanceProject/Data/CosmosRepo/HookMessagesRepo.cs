@@ -24,5 +24,10 @@ public class HookMessagesRepo : IHookMessagesRepo
     {
         return await _context.HookMessages!.Where(e=>e.Id == HookId).FirstOrDefaultAsync();
     }
-
+    
+    public async Task SaveHook(HookMessage hook, bool save = true)
+    {
+        _context.Entry(hook).State = EntityState.Modified;
+        if (save)  await _context.SaveChangesAsync();
+    }
 }

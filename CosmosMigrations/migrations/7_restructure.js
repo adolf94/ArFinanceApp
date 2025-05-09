@@ -20,6 +20,7 @@ const data = {
 	  },
 	  {
 		"Container": "AccountBalance",
+		mapper: e=> ({...e,Transactions:[]}),
 		"PartitionKeyPath": "/PartitionKey"
 	  },
 	  {

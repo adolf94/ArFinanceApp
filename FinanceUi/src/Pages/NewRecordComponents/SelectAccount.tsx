@@ -9,6 +9,8 @@ import {
   List,
   ListItem,
   ListItemButton,
+  ListItemText,
+  Skeleton,
   TextField,
   Typography,
   useMediaQuery,
@@ -554,9 +556,16 @@ function SelectAccount(props: SelectAccountProps<any>) {
           </Grid>
         </Grid>
       </Grid>
-      {props.selectType === "account" && !groupLoading && (
+      {props.selectType === "account" && (
         <>
-          <Grid item xs={6}>
+          <Grid item xs={6}> 
+            {groupLoading ? <List sx={{p:2}}>
+              <ListItemText sx={{my:1}} primary={<Skeleton variant="text" width="100%"/>} />
+              <ListItemText sx={{my:1}} primary={<Skeleton variant="text" width="100%"/>} />
+              <ListItemText sx={{my:1}} primary={<Skeleton variant="text" width="100%"/>} />
+              <ListItemText sx={{my:1}} primary={<Skeleton variant="text" width="100%"/>} />
+              <ListItemText sx={{my:1}} primary={<Skeleton variant="text" width="100%"/>} />
+            </List>:
             <List>
               {(accountGroups || [])
                   .map((e, i) => {
@@ -570,18 +579,10 @@ function SelectAccount(props: SelectAccountProps<any>) {
                         <Box component="span" sx={{fontWeight:'bold'}}>{ e.hotkeyName.slice(e.hotkeyStart, e.hotkeyStart+e.hotkey.length)}</Box>
                         <Box component="span">{e.hotkeyName.slice(e.hotkeyStart + e.hotkey.length)}</Box>
                         
-                        
-                        
-                        {/*<Box component="span" sx={{fontWeight:'bold'}}>{e.name.slice(0, e.hotkey.length)}</Box>*/}
-                        
-                        {/*<Box component="span" sx={{fontWeight:'bold'}}>{e.name.slice(0, e.hotkey.length)}</Box>*/}
-                        {/*{e.hotkey.length > e.name? */}
-                        {/*    <Box component="span" sx={{fontWeight:"bold"}}>{e.hotkey.slice(e.name.length)}</Box>:*/}
-                        {/*    e.name.slice(e.hotkey.length)}*/}
                     </ListItemButton>   
                   );
                 })}
-            </List>
+            </List>}
           </Grid>
           <Grid item xs={6}>
             <List>
@@ -602,6 +603,13 @@ function SelectAccount(props: SelectAccountProps<any>) {
       )}
       {props.selectType === "vendor" && (
         <Grid item xs={8}>
+        {vendorLoading ? <List sx={{p:2}}>
+            <ListItemText sx={{my:1}} primary={<Skeleton variant="text" width="100%"/>} />
+            <ListItemText sx={{my:1}} primary={<Skeleton variant="text" width="100%"/>} />
+            <ListItemText sx={{my:1}} primary={<Skeleton variant="text" width="100%"/>} />
+            <ListItemText sx={{my:1}} primary={<Skeleton variant="text" width="100%"/>} />
+            <ListItemText sx={{my:1}} primary={<Skeleton variant="text" width="100%"/>} />
+          </List>:
           <List>
             {(filteredVendors || []).map((e, i) => (
               <ListItemButton
@@ -619,6 +627,7 @@ function SelectAccount(props: SelectAccountProps<any>) {
                 </ListItem>
               )}
           </List>
+        }
         </Grid>
       )}
     </Grid>

@@ -7,6 +7,8 @@ import selectionByHook, { getReferenceName } from "./selectionByHook";
 import moment from "moment";
 import { useNavigate } from "react-router-dom";
 import useSubmitTransaction from "../NewRecordComponents/useSubmitTransaction";
+import { faPersonMilitaryPointing } from "@fortawesome/free-solid-svg-icons";
+import { CreateTransactionDto } from "FinanceApi";
 
 const camelToSpace = (str:string)=>{
     return str.replace(/([A-Z])/g, ' $1')
@@ -84,9 +86,12 @@ const HooksAccordion = ({notif }) => {
 
     const navigate = useNavigate()
     const submitTransaction = useSubmitTransaction({transaction:formData, schedule:null, notification: notif, hookConfig: selected, onConfirm:()=>{
-        
-    }} )
 
+    }} )
+    const doSubmit =()=>{
+        if(!submittable())return
+
+    }    
 
     useEffect(()=>{
         setConfs(()=>{
@@ -123,7 +128,7 @@ const HooksAccordion = ({notif }) => {
             [ "account", ...(isDebitRefSameAsVendor?["vendor"]:[]) ])
             
   
-          setReference(reference)
+          setReference(references)
   
         await creditVendor.then(d=>{
           if(isCreditRefSameAsVendor) {
@@ -152,14 +157,17 @@ const HooksAccordion = ({notif }) => {
   
 
     }
-  useEffect(()=>{
-    (async()=>{
-    })()
-  }, [selected])
 
-  
+    const submittable = ()=>{
+        if(!! formData.type &&
+            !!formData.date &&
+            !!formData.debit &&
+            !!formData.credit &&
+            !!formData.vendor            
+        ) return true
 
-
+        return false
+    }
 
     return <>
         <Accordion  slotProps={{ transition: { unmountOnExit: true } }}>
@@ -258,7 +266,7 @@ const HooksAccordion = ({notif }) => {
                                     <ListItemText primary={
                                         <Grid container>
                                             <Grid sm={4}> </Grid>
-                                            <Grid sm={8} sx={{alignItems:'right'}}><Button>Submit</Button><Button onClick={()=>navigate(`/transactions/new?hookId=${notif.id}`)}>More</Button></Grid>
+                                            <Grid sm={8} sx={{alignItems:'right'}}><Button disabled={!submittable()} >Submit</Button><Button onClick={()=>navigate(`/transactions/new?hookId=${notif.id}`)}>More</Button></Grid>
                                         </Grid>} />
                                 </ListItem>
                             </List>

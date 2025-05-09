@@ -19,6 +19,7 @@ import {ACCOUNT_BALANCE, getBalancesByDate} from "./accountBalance.js";
 import numeral from "numeral";
 import { useState } from "react";
 import { CircularProgress } from "@mui/material";
+import { HOOK_MESSAGES } from "./hookMessages";
 
 
 export const TRANSACTION = "transaction";
@@ -146,6 +147,9 @@ export const addToTransactions = (item: Transaction, replace: boolean) => {
             return replaceById(item, cData);
         });
     }
+
+    
+
 
 };
 
@@ -422,6 +426,17 @@ export const ensureTransactionAcctData = async (item) => {
     
     db.transactions.put(item)
     
+    item.notifications.forEach((hookId)=>{
+        db.hookMessages.where("id").equals(hookId).first()
+        .then(toUpdate=>{
+          if(!!toUpdate){
+            toUpdate.transactionId = item.transactionId
+            db.hookMessages.put(toUpdate)
+            queryClient.setQueryData([HOOK_MESSAGES, { id: toUpdate.id }], toUpdate)
+          }
+        })
+    })
+    
 
     return item;
 
@@ -577,6 +592,9 @@ export const useMutateTransaction = () => {
       onSuccess: async (item: Transaction, vars, ctx) => {
           enqueueSnackbar("Saved!", { variant: 'info' })
           addToTransactions(item, true);
+          item.notifications.forEach((id)=>{
+
+          })
       },
       onError: (err, newTodo, context) => {
           context.doRollback()
