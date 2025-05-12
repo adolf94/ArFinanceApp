@@ -71,8 +71,9 @@ const ViewAccount = () => {
   const [month, setMonth] = useState(moment());
   const { data: records, isFetching:recordsLoading } = useOfflineData({
     defaultData:[],
-    getOnlineData: () => fetchByAccountMonthKey(acctId, month.year(), month.month() + 1, false),
-    initialData: ()=> fetchByAccountMonthKey(acctId, month.year(), month.month() + 1, true)
+    getOnlineData: () => fetchByAccountMonthKey(acctId, month.year(), month.month(), false),
+    initialData: ()=> fetchByAccountMonthKey(acctId, month.year(), month.month(), true),
+    offlineOnly:false
   },[month.year(), month.month() + 1]);   
   const { data: account } = useQuery({
     queryKey: [ACCOUNT, { id: acctId }],

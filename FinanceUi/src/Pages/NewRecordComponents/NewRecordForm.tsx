@@ -166,6 +166,7 @@ const NewRecordForm = (props: NewRecordFormProps) => {
   }),[formData]);
 
     const submitTransaction = (redirectToHome)=>{
+      if(!isSubmittable) return
       const whilewaiting = ()=>{
           const monthKey = moment(formData.date).format("YYYY-MM")
           if(transId == "new"){
@@ -765,6 +766,7 @@ const NewRecordForm = (props: NewRecordFormProps) => {
                   setSelectProps((prev) => ({ ...prev, dest: "amount" }))
                 }
                 onKeyUp={(evt)=>{
+                  console.log(`${evt.key} ${evt.altKey}`)
                   switch (evt.key) {
                     case "/":
                     case "*":
@@ -781,6 +783,16 @@ const NewRecordForm = (props: NewRecordFormProps) => {
                       evt.target.blur();
                       evt.preventDefault();
                       return true
+                    case  "KeyS":
+                      if(evt.altKey){
+                        setFormData({
+                          ...formData,
+                          amount: e.target.value || 0
+                        })
+                        setTimeout(()=>{
+                          submitTransaction(false)
+                        }, 200)
+                      }
                     default:
                       return false
                   }

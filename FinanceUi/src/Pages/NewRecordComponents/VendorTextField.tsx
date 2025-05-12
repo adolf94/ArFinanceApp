@@ -1,6 +1,6 @@
 import { Autocomplete, Box, createFilterOptions, TextField } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
-import { useContext, useState } from "react";
+import { useContext, useRef, useState } from "react";
 import {v4 as uuid } from 'uuid'
 import { fetchVendors, useMutateVendor, VENDOR } from "../../repositories/vendors";
 import { useParams } from "react-router-dom";
@@ -19,7 +19,7 @@ const VendorTextField = (props) => {
     const mutateVendor = useMutateVendor();
     const view = useContext<any>(SelectAccountContext);
     const { transId } = useParams();
-
+    const creating = useRef(false)
     const onTyped = (e) => {
         setInternalValue(e);
         props.onSearchChange(e);
@@ -34,6 +34,7 @@ const VendorTextField = (props) => {
     };
 
     const createNewVendor = (newVendor) => {
+        creating.current = true
         mutateVendor
             .create({
                 id: uuid(),
@@ -41,8 +42,10 @@ const VendorTextField = (props) => {
                 enabled: true,
             })
             .then((e) => {
+                
+
                 props.onChange(e);
-            });
+            }).finally(()=>creating.current = false);
     };
 
     return (
@@ -90,8 +93,17 @@ const VendorTextField = (props) => {
                             props.onChange(newValue);
                         }
                     }}
-                    renderInput={(params) => <TextField {...props}
+                    renderInput={(params) => <TextField helperText={props.helperText}
                     {...params}
+                    onBlur={(evt)=>{
+                        let filtered = filter(vendors, {inputValue:evt.target.value, getOptionLabel:(e: any) => e.name} )
+                                        .filter(e=>!e.new)
+                        let count = filtered.filter(e=>!e.new).length
+                        if(evt.target.value != "" && !creating.current && filtered.length == 1){
+                            props.onChange(filtered[0]);
+                        }
+                        return params.onBlur && params.onBlur(evt)
+                    }}
 
                     variant="standard" />}
                 />

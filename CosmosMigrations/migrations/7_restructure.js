@@ -32,6 +32,8 @@ const data = {
 		"PartitionKeyPath": "/PartitionKey"
 	  },
 	{
+
+		
 		"Container": "AuditLogs",
 		"PartitionKeyPath": "/Path",
 		mapper: e=>e

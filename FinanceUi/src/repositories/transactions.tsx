@@ -451,7 +451,7 @@ export const useMutateTransaction = () => {
       mutationFn: (data: Partial<Transaction>) => {
         
           let id = enqueueSnackbar(<><CircularProgress /> Saving... </>, {persist:true, variant:'info'})
-          setSnackbarId(id)
+          // setSnackbarId(id)
           return api
               .post<NewTransactionResponseDto>("transactions", data, { noLastTrans:true})
             .then(async (e: AxiosResponse<NewTransactionResponseDto>) => {
@@ -481,7 +481,7 @@ export const useMutateTransaction = () => {
                     }
                 })
                 e.data.monthly.forEach(e => {
-                    let item = db.accountBalances.where("monthKey").equals(e.monthKey)
+                    let item = db.accountBalances.where("id").equals(e.monthKey)
                         .first()
                     //dont insert if not existing,
                     if (!!item) {
@@ -498,9 +498,14 @@ export const useMutateTransaction = () => {
                 if (!prev || !Array.isArray(prev)) return undefined;
                 return replaceById(e.data.accounts, prev);
               });
+                closeSnackbar(id);
                 return item;
 
-            });
+            }).catch((ex=>{
+              
+              closeSnackbar(id);
+              return Promise.reject(ex)
+            }));
 
       },
       onMutate: (item) => {
@@ -510,12 +515,10 @@ export const useMutateTransaction = () => {
         onSuccess: async (item: Transaction, vars, ctx) => {
          enqueueSnackbar("Saved!", {variant : 'info'})  
           addToTransactions(item, true);
-             closeSnackbar(snackbarId);
       },
       onError: (err, newTodo, context) => {
          context.doRollback()
-          closeSnackbar(snackbarId);
-      },
+       },
   });
 
   const update = useMutation({

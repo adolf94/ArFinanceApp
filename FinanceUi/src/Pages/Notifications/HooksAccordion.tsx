@@ -90,7 +90,7 @@ const HooksAccordion = ({notif }) => {
     }} )
     const doSubmit =()=>{
         if(!submittable())return
-
+        
     }    
 
     useEffect(()=>{

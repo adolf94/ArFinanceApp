@@ -7,7 +7,7 @@ interface UseOfflineDataParams<T> {
     defaultData : T,
     getOnlineData : ()=>Promise<T>,
     initialData: () => Promise<T>,
-    offlineOnly: boolean
+    offlineOnly?: boolean
 }
 
 
