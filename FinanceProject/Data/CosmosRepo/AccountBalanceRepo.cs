@@ -132,7 +132,7 @@ namespace FinanceApp.Data.CosmosRepo
             balance.Add(bal);
             if (!acct.ResetEndOfPeriod)
             {
-                var balances = await _context.AccountBalances!.Where(e => e.AccountId == transaction.Id && e.DateStart > transaction.Date)
+                var balances = await _context.AccountBalances!.Where(e => e.AccountId == transaction.CreditId && e.DateStart > transaction.Date)
                     .ToListAsync();
 
                 balance.AddRange(balances.Select(b =>
@@ -210,7 +210,7 @@ namespace FinanceApp.Data.CosmosRepo
                     EpochUpdated = transaction.EpochUpdated
                 });
             }
-            balance.Add(bal);
+            balance.Add(bal); 
             if (!acct.ResetEndOfPeriod)
             {
                 var balances = await _context.AccountBalances!.Where(e => e.AccountId == transaction.DebitId && e.DateStart > transaction.Date)

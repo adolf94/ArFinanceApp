@@ -10,5 +10,5 @@ namespace FinanceProject.Data
 				public bool Create(Account group);
 				public Account? GetOne(Guid id);
 
-		}
+		} 
 }

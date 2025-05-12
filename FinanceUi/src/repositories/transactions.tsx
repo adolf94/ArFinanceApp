@@ -570,7 +570,7 @@ export const useMutateTransaction = () => {
               if(!!item) {
                 queryClient.setQueryData([
                       ACCOUNT_BALANCE,
-                      { accountId: e.accountId, date: moment(e.dateStart).format("YYYY-MM-dd") }]
+                      { accountId: e.accountId, date: moment(e.dateStart).format("YYYY-MM-01") }]
                       , e)
                 db.accountBalances.put(e)
               }
