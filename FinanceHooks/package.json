@@ -1,0 +1,14 @@
+{
+  "name": "financehooks",
+  "version": "1.0.0",
+  "description": "---\r page_type: sample\r languages: \r - python\r products: \r - azure\r - azure-functions\r description: \"This is a sample Azure Function app created with the Flask framework.\"\r title: Using Flask Framework with Azure Functions\r author: vrdmr, shreyabatra4\r urlFragment: azure-functions-python-create-flask-app\r ---",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "azurite": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC"
+}
