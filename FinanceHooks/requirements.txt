@@ -8,4 +8,5 @@ flask
 uuid_v7
 uuid7
 azure.cosmos
-
+azure.storage.blob 
+azure.identity

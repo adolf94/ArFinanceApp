@@ -6,6 +6,7 @@ from flask import Flask, request, Response, redirect, url_for,app
 from azure.cosmos  import CosmosClient, DatabaseProxy
 from uuid_extensions import uuid7
 from FlaskApp.notif_handler import handle_notif
+from FlaskApp.upload_handler import handle_upload
 
 # Always use relative import for custom module
 from .package.module import MODULE_VALUE
@@ -29,6 +30,9 @@ def index():
 @app.route("/hello/<name>", methods=['GET'])
 def hello(name: str):
     return f"hello {name}"
+
+
+
 
 
 @app.post("/phone_hook") 
@@ -62,6 +66,15 @@ def phone_hook():
 
 
     return Response( json.dumps( newItem ), 201, content_type="application/json")
+
+
+@app.post("/file_hook")
+def file_hook_handler():
+    # id=uuid7( as_type='str')
+    # headeApiKey = request.headers.get("x-api-key", type=str)
+    # if(headeApiKey == None or headeApiKey != apiKey ): return Response(status=401)
+    resp = handle_upload(request)
+    return resp
 
 
 def open_db() -> DatabaseProxy:

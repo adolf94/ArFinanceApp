@@ -11,6 +11,16 @@
               "port": 9091
             },
             "preLaunchTask": "func: host start"
+        },
+        
+        {
+            "name": "Attach withouyt Prelaunch",
+            "type": "debugpy",
+            "request": "attach",
+            "connect": {
+              "host": "localhost",
+              "port": 9091
+            }
         }
     ]
 }
