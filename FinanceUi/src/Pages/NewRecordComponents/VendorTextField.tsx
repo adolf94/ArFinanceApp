@@ -56,6 +56,7 @@ const VendorTextField = (props) => {
                     id="combo-box-demo"
                     options={vendors || []}
                     fullWidth
+                    autoSelect
                     getOptionLabel={(e) => e.name}
                     getOptionKey={(e) => e.id}
                     isOptionEqualToValue={(opt,v)=>opt.id === v.id}
@@ -95,16 +96,15 @@ const VendorTextField = (props) => {
                     }}
                     renderInput={(params) => <TextField helperText={props.helperText}
                     {...params}
-                    onBlur={(evt)=>{
-                        let filtered = filter(vendors, {inputValue:evt.target.value, getOptionLabel:(e: any) => e.name} )
-                                        .filter(e=>!e.new)
-                        let count = filtered.filter(e=>!e.new).length
-                        if(evt.target.value != "" && !creating.current && filtered.length == 1){
-                            props.onChange(filtered[0]);
-                        }
-                        return params.onBlur && params.onBlur(evt)
-                    }}
-
+                    // onBlur={(evt)=>{
+                    //     let filtered = filter(vendors, {inputValue:evt.target.value, getOptionLabel:(e: any) => e.name} )
+                    //                     .filter(e=>!e.new)
+                    //     let count = filtered.filter(e=>!e.new).length
+                    //     if(evt.target.value != "" && !creating.current && filtered.length == 1){
+                    //         props.onChange(filtered[0]);
+                    //     }
+                    //     return params.onBlur && params.onBlur(evt)
+                    // }}
                     variant="standard" />}
                 />
             </Box>
