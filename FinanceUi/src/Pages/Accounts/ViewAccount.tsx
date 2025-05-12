@@ -103,25 +103,27 @@ const ViewAccount = () => {
       withdrawal: 0,
       total: 0,
     };
-    const acctBalanceInternal = { ...acctBalance };
     if (!acctBalance)
       return {
         dates: [],
         totals,
       };
-
+      const acctBalanceInternal = { ...acctBalance };
+       let balance = acctBalance.balance
     let rec = (records || [])
       .filter((e) => [e.creditId, e.debitId].includes(acctId))
-      .sort((a, b) => (a.date < b.date ? -1 : a.id < b.id ? -1 : 1))
+      .sort((a, b) => (a.date < b.date ? -1  : 1))
       .map((tr: TransactionWithRunningBal) => {
-        acctBalanceInternal.balance += tr.creditId === acctId ? -tr.amount : 0;
-        acctBalanceInternal.balance += tr.debitId === acctId ? tr.amount : 0;
+        let prevBal = balance;
+        let curAmount = tr.creditId === acctId ? -tr.amount :tr.amount;
+        balance += tr.creditId === acctId ? -tr.amount : 0;
+        balance += tr.debitId === acctId ? tr.amount : 0;
 
-        tr.runningBalance = acctBalanceInternal.balance;
-
+        tr.runningBalance = balance;
+        console.debug(`${prevBal} + ${curAmount} = ${balance}`)
         return tr;
       })
-      .sort((a, b) => (a.date > b.date ? -1 : a.id > b.id ? -1 : 1))
+      .sort((a, b) => (a.date > b.date ? -1 : 1))
       .reduce<RecordViewTransaction[]>((prev, current, index) => {
         let date = prev.find(
           (e) => e.dateGroup == moment(current.date).format("yyyy-MM-DD"),
@@ -358,7 +360,7 @@ const ViewAccount = () => {
                   </Grid>
                 </ListItem>
                 <Divider />
-                      {data.items.map((item) => (
+                      {data.items.sort((a,b)=>a.date<b.date?1:-1).map((item) => (
                 <ListItem
                     key={ item.id }
                     onClick={() => navigate("../../transactions/" + item.id)}
