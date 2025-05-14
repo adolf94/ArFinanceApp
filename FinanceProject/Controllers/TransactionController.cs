@@ -92,16 +92,18 @@ namespace FinanceProject.Controllers
                         balances[bal.Id] = bal);
             var bal = await _monthly.AddToMonthlyTransaction(item, false,false);
 
-            item.Notifications.ForEach(async notif =>
+
+            for (int i = 0; i<item.Notifications.Count(); i++)
             {
-                HookMessage? hook = await _hooks.GetOneHook(Guid.Parse(notif));
-                if (hook != null)
-                {
-                    hook.TransactionId = item.Id;
-                    await _hooks.SaveHook(hook, false);
-                }
-            });
-            
+                var notif = item.Notifications[i];
+								HookMessage? hook = await _hooks.GetOneHook(Guid.Parse(notif));
+								if (hook != null)
+								{
+										hook.TransactionId = item.Id;
+										await _hooks.SaveHook(hook, false);
+								}
+						}
+
 
                         response.Accounts = accounts.Values.ToList();
             response.Balances = balances.Values.ToList();

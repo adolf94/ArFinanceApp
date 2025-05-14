@@ -29,5 +29,6 @@ public class HookMessagesRepo : IHookMessagesRepo
     {
         _context.Entry(hook).State = EntityState.Modified;
         if (save)  await _context.SaveChangesAsync();
-    }
+				await Task.CompletedTask;
+		}
 }

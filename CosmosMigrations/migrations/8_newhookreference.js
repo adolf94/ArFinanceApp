@@ -137,10 +137,6 @@ const data = {
     },
     {
       "Container": "LoanPayments",
-      "PartitionKeyPaths": ["/AppId", "/UserId", "/LoanId"],
-    },
-    {
-      "Container": "LoanPayments",
       "PartitionKeyPaths": ["/AppId", "/ProfileId"],
     },
     {
