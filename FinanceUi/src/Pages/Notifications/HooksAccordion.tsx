@@ -1,5 +1,5 @@
-import { ArrowDownward,  Attachment, Event, CheckCircle,  AccountBalanceWalletRounded, QrCode2, AccountBalance, Check, CheckCircleOutlined, AssignmentTurnedInOutlined, ArrowCircleLeft, Paid, RequestQuote, AccountCircle, AccountBox } from "@mui/icons-material"
-import { Accordion, AccordionDetails, AccordionSummary,  Grid,  Typography,List,  ListItem, ListItemText, ListItemIcon, Tooltip, Divider, Chip,  Button } from "@mui/material"
+import { ArrowDownward,  Attachment, Event, CheckCircle,  AccountBalanceWalletRounded, QrCode2, AccountBalance, Check, CheckCircleOutlined, AssignmentTurnedInOutlined, ArrowCircleLeft, Paid, RequestQuote, AccountCircle, AccountBox, Clear, ExpandMore, ExpandLess } from "@mui/icons-material"
+import { Accordion, AccordionDetails, AccordionSummary,  Grid,  Typography,List,  ListItem, ListItemText, ListItemIcon, Tooltip, Divider, Chip,  Button, Stack, IconButton } from "@mui/material"
 import LayerIcon from "../../common/LayerIcon";
 import { useEffect, useState } from "react";
 import configs from './hooksMapping.json';
@@ -92,6 +92,8 @@ const HooksAccordion = ({notif }) => {
         if(!submittable())return
         
     }    
+    const [expanded, setExpanded] = useState<boolean>(false);
+
 
     useEffect(()=>{
         setConfs(()=>{
@@ -170,14 +172,30 @@ const HooksAccordion = ({notif }) => {
     }
 
     return <>
-        <Accordion  slotProps={{ transition: { unmountOnExit: true } }}>
-            <AccordionSummary
-                expandIcon={<ArrowDownward />}
-                aria-controls="panel1-content"
-                id="panel1-header"
-            >
-                    <Typography component="span">{ notif.rawMsg}</Typography>
-            </AccordionSummary>
+        <Accordion  slotProps={{ transition: { unmountOnExit: true } }} expanded={expanded} onChange={()=>setExpanded(!expanded)}>
+            <Grid container sx={{justifyContent:'space-between'}}>
+                <Grid  sm={11} sx={{width:'auto'}}>
+                    <AccordionSummary
+                        aria-controls="panel1-content"
+                        id="panel1-header"
+                    >
+
+                            <Stack>
+                                <Typography component="span">{ notif.rawMsg}</Typography>
+                                <Typography component="span" sx={{fontSize:'0.75rem', color:'grey'}} >{moment(notif.date).fromNow()}</Typography>
+
+                            </Stack>
+                    </AccordionSummary>
+                </Grid>
+                <Grid sm={1} sx={{shrink:1, textAlign:'right'}}>
+                    <IconButton>
+                        <Clear />
+                    </IconButton>
+                    <IconButton onClick={()=>setExpanded(!expanded)}>
+                        {expanded?<ExpandLess />:<ExpandMore/>}
+                    </IconButton>
+                </Grid>
+            </Grid>
             <AccordionDetails>
                 <Grid container sx={{alignItems:'start'}}>
                     <Grid md={6}>

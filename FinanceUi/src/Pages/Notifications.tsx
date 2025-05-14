@@ -3,6 +3,8 @@ import { useQuery } from "@tanstack/react-query";
 import UserPanel from "../components/UserPanel.js";
 import {getHooksMessages, HOOK_MESSAGES} from "../repositories/hookMessages.js";
 import HooksAccordion from "./Notifications/HooksAccordion.jsx";
+import { useMemo } from "react";
+import moment from "moment";
 
 
 const Notifications = ()=>{
@@ -12,6 +14,12 @@ const Notifications = ()=>{
         placeholderData:[]
     })
     
+
+    const sortedHookMessages = useMemo(()=>{
+        return (hookMessages || []).sort((a,b)=>b.date>a.date?1:-1)
+    },[hookMessages])
+
+
     
     return   <>
         
@@ -37,7 +45,7 @@ const Notifications = ()=>{
             <Grid md={9}>
                 <Paper>
                     <List>
-                        {!hookLoading && hookMessages.map(e => <HooksAccordion notif={ e} />)}
+                        {!hookLoading && sortedHookMessages.map(e => <HooksAccordion notif={ e} />)}
                         
                     </List>
                 </Paper>

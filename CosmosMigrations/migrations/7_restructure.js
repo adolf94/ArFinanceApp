@@ -250,7 +250,8 @@ const data = {
 	  
 	  
 	}
-
+	
+	db.HookMessages = db.HookMessages.map(e => ({ ...e, MonthKey:moment("YYYY-MM-01")}))
 	console.log("update acct and balance data");
 	db.AccountBalance = acctBals
 	db.Transaction.forEach((tran, i)=> {
