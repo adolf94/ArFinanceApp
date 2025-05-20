@@ -130,6 +130,7 @@ const getCurrentMigrationData = async ()=>{
 const readMigrationsConfig =()=>{
     return new Promise( async res=>{
         let files = fs.readdirSync(__dirname + "/migrations")
+
         let configs = {};
         for (let i in files)
         {
@@ -139,7 +140,6 @@ const readMigrationsConfig =()=>{
             configs[files[i].split(".")[0]] = config;
 
         }
-
         res(configs)
     })
 
@@ -278,7 +278,7 @@ const Migration = async ()=>{
         // create empty data for first migration array
         let theIndexFinal = migrationKeys.length - 1
         migrationIndex = migrationKeys.length - 1
-
+        console.log(migrationKeys[theIndexFinal]);
         let firstMigration = migrationsData[migrationKeys[theIndexFinal]].default;
         for( var i in firstMigration.migrate.database) {
             let table =  firstMigration.migrate.database[i]
@@ -438,6 +438,7 @@ const OnDemandRestore = async (type)=>{
         let migration = migrationsData[migrationNow.id].default;
         migrationIndex = migrationKeys.indexOf(migrationNow.id);
         console.log(migration)
+        console.log(migrationNow.id)
         applyRestore(migration);
     }
 

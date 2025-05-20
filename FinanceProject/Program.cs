@@ -107,6 +107,7 @@ PersistentConfig pConfig = new PersistentConfig();
 UrlReminderConfig uConfig = new UrlReminderConfig();
 builder.Services.AddSingleton(pConfig);
 builder.Services.AddSingleton(uConfig);
+builder.Services.AddSingleton(config);
 builder.Services.AddSingleton<Sms>();
 
 

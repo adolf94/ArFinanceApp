@@ -100,6 +100,7 @@ namespace FinanceProject.Controllers
 								if (hook != null)
 								{
 										hook.TransactionId = item.Id;
+                    hook.TimeToLive = -1;
 										await _hooks.SaveHook(hook, false);
 								}
 						}

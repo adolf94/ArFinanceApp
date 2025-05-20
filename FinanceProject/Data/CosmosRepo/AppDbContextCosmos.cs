@@ -152,7 +152,7 @@ namespace FinanceApp.Data.CosmosRepo
 
             builder.Entity<HookMessage>()
                 .ToContainer("HookMessages")
-                .HasPartitionKey(e => e.PartitionKey)
+                .HasPartitionKey(e => e.MonthKey)
                 .HasKey(c => c.Id);
 
             builder.Entity<HookMessage>()

@@ -1,6 +1,9 @@
 using FinanceApp.Models;
+using FinanceProject.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Azure.Cosmos;
 using Microsoft.EntityFrameworkCore;
+using System.Data.Common;
 using System.Net;
 
 namespace FinanceApp.Data.CosmosRepo;
@@ -8,10 +11,12 @@ namespace FinanceApp.Data.CosmosRepo;
 public class HookMessagesRepo : IHookMessagesRepo
 {
 	private readonly AppDbContext _context;
+		private readonly AppConfig _config;
 
-	public HookMessagesRepo(AppDbContext context)
+		public HookMessagesRepo(AppDbContext context, AppConfig config)
 	{
 		_context = context;
+				_config = config;
     }
 
     public async Task<IEnumerable<HookMessage>> GetHookMessagesAsync()
@@ -44,6 +49,16 @@ public class HookMessagesRepo : IHookMessagesRepo
 		{
 				_context.Entry(hook).State = EntityState.Deleted;
 				await _context.SaveChangesAsync();
+
+				string constr = _context.Database.GetDbConnection().ConnectionString;
+				CosmosClient client = new CosmosClient(constr);
+
+				Database db = client.GetDatabase(_config.PersistDb);
+
+				Container container =  db.GetContainer("HookMessages");
+
+				await container.DeleteItemAsync<HookMessage>(hook.Id.ToString(), new PartitionKey("default"), null);
+
 				return true;
 		}
 

@@ -52,8 +52,8 @@ const data = {
       },
       {
         "Container": "HookMessages",
-        "PartitionKeyPaths": ["/PartitionKey"],
-          mapper: e => ({ ...e, Status: "New", TransactionId:null})
+        "PartitionKeyPath": "/MonthKey",
+          mapper: e => ({ ...e, Status: "New", TransactionId:null, MonthKey:moment("YYYY-MM-01")})
       },
       {
         "Container": "LedgerEntries",

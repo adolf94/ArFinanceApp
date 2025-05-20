@@ -16,7 +16,7 @@ public class HookMessage
     public string? Status { get; set; } = "New";
     public Guid? TransactionId { get; set; }
 		public string MonthKey { get; set; } = "";
-		public int? TimeToLive { get; set; } = null;
+		public int? TimeToLive { get; set; } = 60*24*60*60;
 
 
 		public class ExtractedDataModel
