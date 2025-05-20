@@ -155,6 +155,10 @@ namespace FinanceApp.Data.CosmosRepo
                 .HasPartitionKey(e => e.PartitionKey)
                 .HasKey(c => c.Id);
 
+            builder.Entity<HookMessage>()
+                .Property(e => e.TimeToLive)
+                .ToJsonProperty("ttl");
+
             builder.Entity<Transaction>()
                 .ToContainer("Transaction")
                 .HasOne(e => e.Credit).WithMany(e => e.TransactionsAsCredit);
@@ -220,6 +224,7 @@ namespace FinanceApp.Data.CosmosRepo
 
             builder.Entity<InputLogs>().HasPartitionKey(e => e.Path).ToContainer("AuditLogs");
 
+            
 
 
             base.OnModelCreating(builder);

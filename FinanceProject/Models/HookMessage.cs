@@ -15,9 +15,11 @@ public class HookMessage
 	public bool IsHtml { get; set; } =false;
     public string? Status { get; set; } = "New";
     public Guid? TransactionId { get; set; }
+		public string MonthKey { get; set; } = "";
+		public int? TimeToLive { get; set; } = null;
 
 
-    public class ExtractedDataModel
+		public class ExtractedDataModel
     {
 		public string matchedConfig { get; set; } = "";
 		public string senderName { get; set; } = "";

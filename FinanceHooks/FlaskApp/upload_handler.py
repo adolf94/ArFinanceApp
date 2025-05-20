@@ -10,9 +10,8 @@ from flask import Request, Response
 from uuid_extensions import uuid7
 
 
-account_url = "http://127.0.0.1:10000"  # e.g., "https://mydatalake.blob.core.windows.net"
+account_url = os.environ["BLOB_SCREENSHOT_UPLOAD"]  # e.g., "https://mydatalake.blob.core.windows.net"
 container_name = "transact-screenshots" # Replace with your container name
-connection_string =  "DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://127.0.0.1:10000/devstoreaccount1;"
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}  # Allowed file types
             # if connection_string:
         #     blob_service_client = BlobServiceClient.from_connection_string(connection_string)
@@ -79,15 +78,15 @@ def upload_to_azure(file_path, blob_name):
     """
     try:
 
-        blob_service_client = None
-        if connection_string:
-            blob_service_client = BlobServiceClient.from_connection_string(connection_string)
+        # blob_service_client = None
+        # if connection_string:
+        #     blob_service_client = BlobServiceClient.from_connection_string(connection_string)
 
-        # Use DefaultAzureCredential - this will use whatever identity you've configured
-        # (e.g., environment variables, managed identity, etc.)
-        else:
-            credential = DefaultAzureCredential()
-            blob_service_client = BlobServiceClient(account_url=account_url, credential=credential)
+        # # Use DefaultAzureCredential - this will use whatever identity you've configured
+        # # (e.g., environment variables, managed identity, etc.)
+        # else:
+        credential = DefaultAzureCredential()
+        blob_service_client = BlobServiceClient(account_url=account_url, credential=credential)
             
         blob_client = blob_service_client.get_blob_client(container=container_name, blob=blob_name)
         with open(file_path, "rb") as data:

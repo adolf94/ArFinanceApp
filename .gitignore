@@ -7,3 +7,5 @@
 /package.json
 FinanceProject/configs
 /FinanceHooks2
+.venv
+CosmosMigrations/backuppersist.json

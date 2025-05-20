@@ -1,5 +1,5 @@
 import { ArrowDownward,  Attachment, Event, CheckCircle,  AccountBalanceWalletRounded, QrCode2, AccountBalance, Check, CheckCircleOutlined, AssignmentTurnedInOutlined, ArrowCircleLeft, Paid, RequestQuote, AccountCircle, AccountBox, Clear, ExpandMore, ExpandLess } from "@mui/icons-material"
-import { Accordion, AccordionDetails, AccordionSummary,  Grid,  Typography,List,  ListItem, ListItemText, ListItemIcon, Tooltip, Divider, Chip,  Button, Stack, IconButton } from "@mui/material"
+import { Accordion, AccordionDetails, AccordionSummary,  Grid,  Typography,List,  ListItem, ListItemText, ListItemIcon, Tooltip, Divider, Chip,  Button, Stack, IconButton, CircularProgress } from "@mui/material"
 import LayerIcon from "../../common/LayerIcon";
 import { useEffect, useState } from "react";
 import configs from './hooksMapping.json';
@@ -9,6 +9,7 @@ import { useNavigate } from "react-router-dom";
 import useSubmitTransaction from "../NewRecordComponents/useSubmitTransaction";
 import { faPersonMilitaryPointing } from "@fortawesome/free-solid-svg-icons";
 import { CreateTransactionDto } from "FinanceApi";
+import { mutateHookMessages } from "../../repositories/hookMessages";
 
 const camelToSpace = (str:string)=>{
     return str.replace(/([A-Z])/g, ' $1')
@@ -63,10 +64,49 @@ const Icons = {
         </LayerIcon>
     }
 }
+
+
+const DeleteLoading = ({onCommit, seconds})=>{
+    const [enabled, setEnabled] = useState(false)
+    const [value, setValue] = useState(0)
+    const [endTime, setEndTime] = useState(null)
+    const [timer, setTimer] = useState(null)
+
+
+    const onInitialize = ()=>{
+        const end = moment().add(seconds, "seconds")
+        setEndTime(end)
+        setEnabled(true)
+        const timer = setInterval(()=>{
+            const remaining = end.diff(moment(), "milliseconds")
+            const curValue =  100 - ( remaining * 100 / (seconds * 1000))
+            setValue(curValue)
+            //ts-ignore
+            if(curValue >= 100) {
+                clearInterval(timer!)
+                onCommit()
+            }
+        },450)
+        setTimer(timer)
+    }
+
+    const onCancel = ()=>{
+        clearInterval(timer)
+        setEnabled(false)
+        setValue(0)
+    }
+
     
+    return <IconButton onClick={()=>enabled?onCancel(): onInitialize()}>{enabled ? <Tooltip title={value}>
+            <CircularProgress variant={value >= 100? "indeterminate" : "determinate"} value={value} sx={{width:"20px!important", height:"20px!important"}}/>
+        </Tooltip>
+        : <Clear />}
+        </IconButton>
+
+}
 
 
-const HooksAccordion = ({notif }) => {
+const HooksAccordion = ({notif, onDelete }) => {
 
     const [confs, setConfs] = useState([])
     const [selected, setSelected] = useState(null)
@@ -85,6 +125,7 @@ const HooksAccordion = ({notif }) => {
     })
 
     const navigate = useNavigate()
+    const {deleteHook} = mutateHookMessages(notif.id, notif.monthKey)
     const submitTransaction = useSubmitTransaction({transaction:formData, schedule:null, notification: notif, hookConfig: selected, onConfirm:()=>{
 
     }} )
@@ -92,6 +133,9 @@ const HooksAccordion = ({notif }) => {
         if(!submittable())return
         
     }    
+
+
+
     const [expanded, setExpanded] = useState<boolean>(false);
 
 
@@ -188,9 +232,7 @@ const HooksAccordion = ({notif }) => {
                     </AccordionSummary>
                 </Grid>
                 <Grid sm={1} sx={{shrink:1, textAlign:'right'}}>
-                    <IconButton>
-                        <Clear />
-                    </IconButton>
+                    <DeleteLoading onCommit={()=>deleteHook.mutateAsync()} seconds={5}></DeleteLoading>
                     <IconButton onClick={()=>setExpanded(!expanded)}>
                         {expanded?<ExpandLess />:<ExpandMore/>}
                     </IconButton>

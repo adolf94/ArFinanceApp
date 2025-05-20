@@ -31,9 +31,9 @@ const db = new Dexie('FinanceApp') as Dexie & {
   db.version(1).stores({
     transactions: '&id, monthKey',
     monthTransactions: '&monthKey',
-      accountBalances: '&id, accountId',
+      accountBalances: '&id,accountId',
     accounts: '&id, type',
-    hookMessages: '&id, transactionId'
+    hookMessages: '&id,monthKey,transactionId'
   });
 
 

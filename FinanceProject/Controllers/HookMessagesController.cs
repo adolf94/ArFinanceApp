@@ -21,7 +21,7 @@ public class HookMessagesController : ControllerBase
 		_repo = repo;
 	}
 
-
+		
 	[HttpGet("hookmessages")]
 	public async Task<IActionResult> GetHookMessages()
 	{
@@ -30,7 +30,16 @@ public class HookMessagesController : ControllerBase
 		return Ok(items);
 	}
 
-	[HttpGet("hookmessages/{id}")]
+
+		[HttpGet("month/{monthkey}/hookmessages/")]
+		public async Task<IActionResult> GetByMonth(DateTime  monthkey)
+		{
+
+				var items = await _repo.GetHookMessagesMonthAsync(monthkey);
+				return Ok(items);
+		}
+
+		[HttpGet("hookmessages/{id}")]
 	public async Task<IActionResult> GetOneHookMessage(Guid id)
 	{
 
@@ -38,6 +47,17 @@ public class HookMessagesController : ControllerBase
 		if (item == null) return NotFound();
         return Ok(item);
     }
-	
+
+
+
+		[HttpDelete("hookmessages/{id}")]
+		public async Task<IActionResult> DeleteHook(Guid id)
+		{
+
+				var item = await _repo.GetOneHook(id);
+				if (item == null) return NotFound();
+				await _repo.DeleteHook(item);
+				return Ok(item);
+		}
 }
 

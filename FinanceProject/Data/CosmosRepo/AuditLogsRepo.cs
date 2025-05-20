@@ -47,11 +47,17 @@ public class AuditLogsRepo : IAuditLogsRepo
 
 		// Rewind, so the core is not lost when it looks at the body for the request
 		req.Body.Position = 0;
-			
-			
-		JObject jsonObj = JObject.Parse(bodyStr);
+				JObject jsonObj;
+				try
+				{
+						jsonObj = JObject.Parse(bodyStr);
 
-		Guid auditLogId = Uuid.NewSequential();
+				}catch
+				{
+						jsonObj = new JObject();
+				}
+
+				Guid auditLogId = Uuid.NewSequential();
 		var newItem = new
 		{
 			Path = req.Path.Value!,
@@ -63,23 +69,13 @@ public class AuditLogsRepo : IAuditLogsRepo
 			Body = jsonObj,
 			Response = new {},
 			id = auditLogId,
+			_ttl = (30*24*60*60),
 			StatusCode = "0"
 		};
 		_currentItem = JObject.FromObject(newItem);
 
 		await _table.CreateItemAsync(_currentItem);
 		
-		//
-		// _context.AuditLogs!.Add(item);
-		// var logEntry = _context.Entry(item);
-		//
-		//
-		// var jsonProperty = logEntry.Property<JObject>("__jObject");
-		// jsonProperty.CurrentValue.Add("Body", jsonObj); 
-		//
-		// logEntry.State = Microsoft.EntityFrameworkCore.EntityState.Modified;
-		// await _context.SaveChangesAsync();
-
 		return auditLogId;
 	}
 

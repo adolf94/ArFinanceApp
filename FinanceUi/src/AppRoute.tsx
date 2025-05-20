@@ -42,11 +42,11 @@ const AppRoutes: (PathRouteProps | IndexRouteProps | LayoutRouteProps)[] = [
   {
     path: "/settings",
       element: <Settings />,
-  },
-  {
-    path: "/notifications",
-    element: <Notifications />,
-  },
+    },
+    {
+        path: "/notifications",
+        element: <Notifications />,
+    },
 ];
 
 export default AppRoutes;

@@ -251,7 +251,7 @@ const data = {
 	  
 	}
 	
-	db.HookMessages = db.HookMessages.map(e => ({ ...e, MonthKey:moment("YYYY-MM-01")}))
+	db.HookMessages = db.HookMessages.map(e => ({ ...e, MonthKey:moment(e.Date).format("YYYY-MM-01")}))
 	console.log("update acct and balance data");
 	db.AccountBalance = acctBals
 	db.Transaction.forEach((tran, i)=> {
@@ -288,7 +288,11 @@ const data = {
 	})
 	
 	
-	
+	db.AuditLogs = db.AuditLogs.filter(e=>moment().isBefore(moment(e.DateLogged).add(1,'M')))
+		.map(e=>({
+			...e,
+			_ttl : moment(e.DateLogged).add(1,"M").diff(moment(),'seconds') 
+		}))
 	
 	
 	
