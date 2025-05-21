@@ -1,5 +1,6 @@
 using FinanceApp.Models;
 using FinanceProject.Models;
+using FinanceProject.Utilities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Cosmos;
 using Microsoft.EntityFrameworkCore;
@@ -12,11 +13,15 @@ public class HookMessagesRepo : IHookMessagesRepo
 {
 	private readonly AppDbContext _context;
 		private readonly AppConfig _config;
+		private readonly IConfiguration _iconfig;
+		private readonly ILogger<HookMessagesRepo> _logger;
 
-		public HookMessagesRepo(AppDbContext context, AppConfig config)
+		public HookMessagesRepo(AppDbContext context, AppConfig config, IConfiguration iconfig, ILogger<HookMessagesRepo> logger)
 	{
 		_context = context;
 				_config = config;
+				_iconfig = iconfig;
+				_logger = logger;
     }
 
     public async Task<IEnumerable<HookMessage>> GetHookMessagesAsync()
@@ -50,14 +55,24 @@ public class HookMessagesRepo : IHookMessagesRepo
 				_context.Entry(hook).State = EntityState.Deleted;
 				await _context.SaveChangesAsync();
 
-				string constr = _context.Database.GetDbConnection().ConnectionString;
+				string constr = AesOperation.DecryptString(Environment.GetEnvironmentVariable("ENV_PASSKEY")!, 
+						_iconfig.GetConnectionString("CosmosDb")!);
 				CosmosClient client = new CosmosClient(constr);
 
 				Database db = client.GetDatabase(_config.PersistDb);
 
 				Container container =  db.GetContainer("HookMessages");
-
-				await container.DeleteItemAsync<HookMessage>(hook.Id.ToString(), new PartitionKey("default"), null);
+				try
+				{
+						await container.DeleteItemAsync<HookMessage>(hook.Id.ToString(), new PartitionKey("default"), null);
+				}catch (Exception ex)
+				{
+						if (!ex.Message.Contains("NotFound"))
+						{
+								_logger.LogError(ex, "Error deleting the hookmsg in the persistent notification db");
+						}
+						
+				}
 
 				return true;
 		}

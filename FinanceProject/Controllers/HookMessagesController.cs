@@ -51,10 +51,12 @@ public class HookMessagesController : ControllerBase
 
 
 		[HttpDelete("hookmessages/{id}")]
-		public async Task<IActionResult> DeleteHook(Guid id)
+		public async Task<IActionResult> DeleteHook(string id)
 		{
 
-				var item = await _repo.GetOneHook(id);
+				var guid = Guid.Parse(id);
+
+				var item = await _repo.GetOneHook(guid);
 				if (item == null) return NotFound();
 				await _repo.DeleteHook(item);
 				return Ok(item);
