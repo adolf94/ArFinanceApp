@@ -55,6 +55,8 @@ declare module 'FinanceApi' {
     export interface AppConfig {
         cosmosEndpoint: string;
         cosmosKey: string;
+        databaseName: string;
+        persistDb: string;
         dataImplementation: string;
         authConfig: GoogleConfig;
         jwtConfig: AppJwtConfig;
@@ -102,6 +104,8 @@ declare module 'FinanceApi' {
         isHtml: boolean;
         status?: string;
         transactionId?: string;
+        monthKey: string;
+        timeToLive?: number;
     }
 
     // ..\FinanceProject\Models\HookReference.cs
@@ -439,6 +443,7 @@ declare module 'FinanceApi' {
         accounts: Account[];
         balances: AccountBalance[];
         monthly: MonthlyTransaction[];
+        notifications: HookMessage[];
     }
 
     // ..\FinanceProject\Dto\UserWithClaims.cs

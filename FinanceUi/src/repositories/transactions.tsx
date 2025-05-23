@@ -430,7 +430,7 @@ export const ensureTransactionAcctData = async (item) => {
         db.hookMessages.where("id").equals(hookId).first()
         .then(toUpdate=>{
           if(!!toUpdate){
-            toUpdate.transactionId = item.transactionId
+            toUpdate.transactionId = item.id
             db.hookMessages.put(toUpdate)
             queryClient.setQueryData([HOOK_MESSAGES, { id: toUpdate.id }], toUpdate)
           }

@@ -215,7 +215,6 @@ const data = {
 			Id: transactionId,
 			EpochUpdated:epoch 
 		})
-		console.log(`${transactionId} - ${epoch}`)
 	}
 
 	const updateBalances = (transactionId, acctId,date,epoch, amount)=>{

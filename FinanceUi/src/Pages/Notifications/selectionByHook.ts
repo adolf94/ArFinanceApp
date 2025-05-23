@@ -52,4 +52,35 @@ const selectionByHook  = async (key : string, hook : HookMessage, tranType, fiel
 
 }
 
+
+export const subtituteText = (template : string, hook:HookMessage) =>{
+    let vars = template.match(/\$\{([$\.a-zA-Z]+)\}/g)
+    let current = template
+    var getDataFromHook = (data)=>{
+        let v = data.substring(2,data.length-1)
+        let props = v.split(".")
+        let hookItem = {...hook} as any
+        for(let i=0; i < props.length; i++){
+            if(i==0 && props[i] == "$"){
+                hookItem = hookItem.extractedData
+            } else if (i==0 && props[i] == "#") {
+                hookItem = hookItem.jsonData
+            }else{
+                if(!hookItem.hasOwnProperty(props[i])){
+                    return props[i]
+                }
+                hookItem = hookItem[props[i]]
+                if(i == props.length - 1) return hookItem.toString();
+            }
+        }
+    }
+
+    let output = vars.reduce((p,c,i)=>{
+        return p.replace(c,getDataFromHook(c))
+    },template)
+    return output
+
+}
+
+
 export default selectionByHook

@@ -9,6 +9,7 @@
     "fixedLists": {
         "gcash": [ "01950582-caff-7823-9eb3-d52bcd602d67"]
     },
+    "remarks": "Received GCash from ${$.senderName}($.senderAcct).",
     "comments":""
 },{
     "config": "notif_vybe_transfer_bank",
@@ -21,6 +22,7 @@
     "fixedLists": {
         "vybe": [ "01950582-caff-7823-9eb3-d52bcd602d67"]
     },
+    "remarks": "Sent to ${$.recipientAcct}($.recipientBank) with reference ${$.reference} ",
     "comments":""
 },{
     "config": "notif_vybe_transfer_bank",
@@ -33,18 +35,20 @@
     "fixedLists": {
         "vybe": [ "01950582-caff-7823-9eb3-d52bcd602d67"]
     },
+    "remarks": "Payment to ${$.recipientAcct}($.recipientBank) with reference ${$.reference} ",
     "comments":""
 },{
     "config": "notif_vybe_pay",
     "subConfig": "vybeMerchantPayment",
     "displayName":"Vybe Merchant Payment",
     "type":"expense",
-    "vendor":"recipientAcct",
+    "vendor":"recipientName",
     "credit":"fixed|vybe",
-    "debit":"recipientAcct",
+    "debit":"recipientName",
     "fixedLists": {
         "vybe": [ "01950582-caff-7823-9eb3-d52bcd602d67"]
     },
+    "remarks": "Merchant Payment to ${$.recipientName} with reference ${$.reference} ",
     "comments":""
 },{
     "config": "notif_vybe_cashin",
@@ -54,6 +58,7 @@
     "vendor":"fixed|bpi",
     "credit":"fixed|bpi",
     "debit":"fixed|vybe",
+    "remarks": "Vybe cash in from BPI reference ${$.reference} ",
     "comments":""
 },
 {
@@ -64,10 +69,8 @@
     "vendor":"fixed|bpi-others",
     "credit":"fixed|bpi-others",
     "debit":"ownAcct",
+    "remarks": "Received BPI Funds to ${$.ownAcct}",
     "comments":"When receiving from others"
-
-
-
 }
 
 ]

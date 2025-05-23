@@ -21,6 +21,16 @@ export const getHooksMessagesByMonth = (month:string) => {
     return api.get(`/month/${month}/hookMessages`)
         .then((response: any) => {
             db.hookMessages.bulkPut(response.data)
+            let existingkeys = response.data.map(e=>e.id)
+
+            return db.hookMessages.where("monthKey").equals(month).toArray()
+                .then(async e=>{
+                    for(let i=0;i<e.length;i++){
+                        if(existingkeys.indexOf(e[i].id) == -1){
+                            await db.hookMessages.delete(e[i].id)
+                        }
+                    }
+                })
             return response.data;
         })
 
@@ -47,7 +57,11 @@ export const mutateHookMessages = (id, month)=>{
         onSuccess:(data)=>{
             db.hookMessages.delete(id)
             queryClient.setQueryData([HOOK_MESSAGES, { monthKey: month}], (prevData : HookMessage[])=>prevData.filter(e=>e.id!=id))
+        },
+        onError:(err)=>{
+            console.log(err)
         }
+
     })
 
     return {deleteHook}

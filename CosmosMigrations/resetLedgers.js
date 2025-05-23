@@ -1,5 +1,5 @@
 const migrationinfo = require('./migrations/7_restructure');
-const lastMigrate = require('./migrations/7_restructure');
+const lastMigrate = require('./migrations/8_newhookreference');
 const fs = require("node:fs");
 const os = require("node:os");
 const {spawn} = require("node:child_process");

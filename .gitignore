@@ -8,4 +8,6 @@
 FinanceProject/configs
 /FinanceHooks2
 .venv
+.env
 CosmosMigrations/backuppersist.json
+MigrationPython/data

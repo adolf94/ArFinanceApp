@@ -45,7 +45,7 @@ import { getOneHookMsg, HOOK_MESSAGES } from "../../repositories/hookMessages";
 import { ACCOUNT, fetchByAccountId } from "../../repositories/accounts";
 import db from "../../components/LocalDb/AppDb";
 import hookMappings from  "../Notifications/hooksMapping.json"
-import selectionByHook, { getReferenceName } from "../Notifications/selectionByHook";
+import selectionByHook, { getReferenceName, subtituteText } from "../Notifications/selectionByHook";
 import { logReferenceInstance } from "../../repositories/hookReference";
 import useSubmitTransaction from "./useSubmitTransaction";
 import numeral, { Numeral } from "numeral";
@@ -258,12 +258,6 @@ const NewRecordForm = (props: NewRecordFormProps) => {
             : null;
             setFormData({ ...defaultValue, id: v7(), date, credit, creditId: credit?.id });
         } else {
-          // queryClient
-          //   .fetchQuery({
-          //     queryKey: [TRANSACTION, { id: transId }],
-          //     queryFn: () => fetchTransactionById(transId),
-          //   })
-          //   .then((e) => setFormData(e));
           let type = "offline"
           db.transactions.filter(e=>e.id == transId)
             .first().then(tr=>{
@@ -347,7 +341,7 @@ const NewRecordForm = (props: NewRecordFormProps) => {
           creditId: credit?.id,
           vendor,
           vendorId:vendor?.id,
-          description: hook.rawMsg
+          description: subtituteText(data.remarks, hook) 
         })
 
   }

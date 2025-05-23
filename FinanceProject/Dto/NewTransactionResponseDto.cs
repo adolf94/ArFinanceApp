@@ -9,9 +9,11 @@ namespace FinanceProject.Dto
 
         public List<Account> Accounts { get; set; } = new List<Account>();
         public List<AccountBalance> Balances { get; set; } = new List<AccountBalance>();
-        public List<MonthlyTransaction> Monthly { get; set; } = new List<MonthlyTransaction>();
+				public List<MonthlyTransaction> Monthly { get; set; } = new List<MonthlyTransaction>();
 
-        public class AccountBalanceKey
+				public List<HookMessage> Notifications { get; set; } = new List<HookMessage>();
+
+				public class AccountBalanceKey
         {
             public AccountBalanceKey(Guid accountId, int year, int month)
             {
