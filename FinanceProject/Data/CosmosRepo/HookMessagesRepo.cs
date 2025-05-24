@@ -48,6 +48,14 @@ public class HookMessagesRepo : IHookMessagesRepo
 		{
 				_context.Entry(hook).State = EntityState.Modified;
 				if (save) await _context.SaveChangesAsync();
+				string constr = AesOperation.DecryptString(Environment.GetEnvironmentVariable("ENV_PASSKEY")!,
+						_iconfig.GetConnectionString("CosmosDb")!);
+				CosmosClient client = new CosmosClient(constr);
+
+				Database db = client.GetDatabase(_config.PersistDb);
+
+				Container container = db.GetContainer("HookMessages");
+				await container.UpsertItemAsync(hook);
 				await Task.CompletedTask;
 		}
 		public async Task<bool> DeleteHook(HookMessage hook)

@@ -1,0 +1,6 @@
+
+azure-cosmos
+azure-identity
+InquirerPy
+dotenv
+python-dateutil

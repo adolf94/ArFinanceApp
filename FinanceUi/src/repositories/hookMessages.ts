@@ -19,11 +19,11 @@ export const getHooksMessages = () => {
 export const getHooksMessagesByMonth = (month:string) => {
 
     return api.get(`/month/${month}/hookMessages`)
-        .then((response: any) => {
+        .then(async (response: any) => {
             db.hookMessages.bulkPut(response.data)
             let existingkeys = response.data.map(e=>e.id)
 
-            return db.hookMessages.where("monthKey").equals(month).toArray()
+            await db.hookMessages.where("monthKey").equals(month).toArray()
                 .then(async e=>{
                     for(let i=0;i<e.length;i++){
                         if(existingkeys.indexOf(e[i].id) == -1){

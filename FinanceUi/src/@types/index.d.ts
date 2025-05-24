@@ -61,6 +61,7 @@ declare module 'FinanceApi' {
         authConfig: GoogleConfig;
         jwtConfig: AppJwtConfig;
         smsConfig: SmsConfiguration;
+        financeHook: AppHookConfig;
         apps: Application[];
     }
 

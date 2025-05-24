@@ -10,7 +10,8 @@
 				public GoogleConfig authConfig { get; set; } = new();
 					public AppJwtConfig jwtConfig { get; set; } = new();
 		        public SmsConfiguration SmsConfig { get; set; }
-		        public IEnumerable<Application> Apps { get; set; } = Array.Empty<Application>();
+				public AppHookConfig FinanceHook { get; set; } = new();
+				public IEnumerable<Application> Apps { get; set; } = Array.Empty<Application>();
 
 				public class GoogleConfig
 				{
@@ -33,6 +34,13 @@
 						public bool Enabled { get; set; } = false;
 						public bool Encrypt { get; set; } = false;
         }
+				
+				public class AppHookConfig
+				{
+						public string HookUrl { get; set; } = "";
+						public string Key { get; set; } = "";
+				}
+
         public class AppJwtConfig
 				{
 						public string issuer { get; set; } = "";

@@ -1,4 +1,4 @@
-import { ArrowDownward,  Attachment, Event, CheckCircle,  AccountBalanceWalletRounded, QrCode2, AccountBalance, Check, CheckCircleOutlined, AssignmentTurnedInOutlined, ArrowCircleLeft, Paid, RequestQuote, AccountCircle, AccountBox, Clear, ExpandMore, ExpandLess, Task } from "@mui/icons-material"
+import { ArrowDownward,  Attachment, Event, CheckCircle,  AccountBalanceWalletRounded, QrCode2, AccountBalance, Check, CheckCircleOutlined, AssignmentTurnedInOutlined, ArrowCircleLeft, Paid, RequestQuote, AccountCircle, AccountBox, Clear, ExpandMore, ExpandLess, Task, Refresh } from "@mui/icons-material"
 import { Accordion, AccordionDetails, AccordionSummary,  Grid,  Typography,List,  ListItem, ListItemText, ListItemIcon, Tooltip, Divider, Chip,  Button, Stack, IconButton, CircularProgress, Box, Skeleton } from "@mui/material"
 import LayerIcon from "../../common/LayerIcon";
 import { lazy, Suspense, useEffect, useState } from "react";
@@ -6,6 +6,9 @@ import selectionByHook, { getReferenceName } from "./selectionByHook";
 import moment from "moment";
 import { useNavigate } from "react-router-dom";
 import { mutateHookMessages } from "../../repositories/hookMessages";
+import api from "../../components/api";
+import { confirm } from "material-ui-confirm";
+import db from "../../components/LocalDb";
 const HooksTransaction = lazy(()=>import('./HooksTransaction'))
 
 const camelToSpace = (str:string)=>{
@@ -117,6 +120,18 @@ const HooksAccordion = ({notif, onDelete }) => {
 
     const [expanded, setExpanded] = useState<boolean>(false);
 
+    const reprocess = ()=>{
+        confirm({
+            description:"Are you sure to reprocess this notification?"
+        }).then(e=>{
+            api.delete(`/hookmessages/${notif.id}/reprocess`)
+                .then(e=>{
+                    db.hookMessages.put(e.data)
+                    db.hookMessages.delete(notif.id)
+                })
+        })
+
+    }
 
 
     return <>
@@ -129,7 +144,7 @@ const HooksAccordion = ({notif, onDelete }) => {
                     >
 
                             <Stack>
-                                <Typography component="span"> {notif.transactionId && <Task color="success"/>} { notif.rawMsg}</Typography>
+                                <Typography component="span"> {notif.transactionId && <Task color="success"/>} { notif.rawMsg} </Typography>
                                 <Typography component="span" sx={{fontSize:'0.75rem', color:'grey'}} >{moment(notif.date).fromNow()}</Typography>
 
                             </Stack>
@@ -146,7 +161,7 @@ const HooksAccordion = ({notif, onDelete }) => {
                 <Grid container sx={{alignItems:'start'}}>
                     <Grid md={6}>
                         <List>
-                            
+                                
                                 {
                                 notif.extractedData && Object.keys(notif.extractedData).map((key:string)=>{
                                         if(!notif.extractedData[key]) return "";
@@ -158,7 +173,9 @@ const HooksAccordion = ({notif, onDelete }) => {
                                                         {Icons[key].icon}
                                                     </Tooltip>
                                                 </ListItemIcon>
-                                                <ListItemText primary={notif.extractedData[key]} />
+                                                {key != "success" ? <ListItemText primary={notif.extractedData[key]} /> 
+                                                    :<ListItemText primary={<>{notif.extractedData[key]} <IconButton size="small" onClick={reprocess}><Refresh /></IconButton></>} />
+                                                }
                                             </ListItem>
                                                 <Divider />
                                             </>    

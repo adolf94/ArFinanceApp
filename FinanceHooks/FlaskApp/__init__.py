@@ -43,7 +43,6 @@ def phone_hook():
     if(headeApiKey == None or headeApiKey != apiKey ): return Response(status=401)
 
     data = request.get_json()
-    print(data)
 
     db = open_db(dbName)
     container = db.get_container_client("HookMessages")
@@ -66,6 +65,7 @@ def phone_hook():
         "Location": extracted["location"],
         "RawMsg":raw,
         "Type":"notif",
+        "MonthKey": datetime.datetime.now().strftime("%Y-%m-01"),
         "PartitionKey":"default",
         "Discriminator": "HookMessage",
         "IsHtml":False

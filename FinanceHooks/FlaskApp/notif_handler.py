@@ -74,7 +74,6 @@ def handle_bpi_notif(data:dict):
 
 def handle_vybe_notif(data:dict):
 
-    print(data["notif_title"])
 
     match(data["notif_title"]):
         case "Bank Transfer Successful":
