@@ -1,6 +1,7 @@
-
+from progress.bar import Bar
 from datetime import datetime
 from dateutil.parser import parse
+from dateutil.relativedelta import relativedelta
 from functools import reduce
 import json
 from dotenv import load_dotenv, dotenv_values
@@ -12,17 +13,17 @@ import importlib.util
 
 import os
 
-load_dotenv()  
+load_dotenv()
 dotenv_vars = dotenv_values()
 
 env_s = []
 for key, value in dotenv_vars.items():
     if(key.startswith("ENDPOINT_")):
-        
+
         env_s.append(key[9:])
 to_do = inquirer.select(
     message="What do you want to do?",
-    choices=["Backup","Restore", "Migrate","Reset"],
+    choices=["Backup","Restore", "Migrate","Reset","Merge with Pesistent"],
 ).execute()
 
 
@@ -61,16 +62,16 @@ def export_data():
     for cont in containers:
         items = []
 
-        container = db.get_container_client(cont["id"],) 
+        container = db.get_container_client(cont["id"],)
         for item in container.read_all_items():
             items.append(item)
-        
-        Path(exportPath).mkdir(parents=True,exist_ok=True)
-            
-        with open(exportPath + cont["id"] + ".json", 'w') as f:
-            json.dump(items, f, indent=4) 
 
-    
+        Path(exportPath).mkdir(parents=True,exist_ok=True)
+
+        with open(exportPath + cont["id"] + ".json", 'w') as f:
+            json.dump(items, f, indent=4)
+
+
 def import_data(container_data, migration):
     table_data = migration.table_metadata()
 
@@ -89,12 +90,16 @@ def import_data(container_data, migration):
             partition_key = PartitionKey(path = conDict["PartitionKeyPath"]),
             default_ttl= conDict.get("DefaultTtl", None)
         )
-        
-        
+
+
         if conDict["Container"] in container_data:
             rows = container_data[conDict["Container"]]
-            for row in rows:
+            count = len(rows)
+            bar = Bar(conDict["Container"], max=count)
+            for row in rows:                        
                 container.upsert_item(row)
+                bar.next()
+            bar.finish()
         print(f"Completed insert in {conDict["Container"]}")
 
 
@@ -124,8 +129,8 @@ def select_data_dir():
         choices=dir,
     ).execute()
 
-def loadFiles(): 
-    backupfolder = "./data/" + backupname 
+def loadFiles():
+    backupfolder = "./data/" + backupname
     dir = os.listdir(backupfolder)
     containers = {}
     for file in dir:
@@ -141,14 +146,14 @@ def loadFiles():
 
 
 if to_do == "Restore":
-    
-    which_db = get_db_list(True) 
+
+    which_db = get_db_list(True)
     dir = os.listdir("./data")
     backupname = inquirer.select(
         message="Select a folder to restore",
         choices=dir,
     ).execute()
-    
+
     db = loadFiles()
     migration_name = current_version_file()["id"]
     migration = load_config_from_file(migration_name)
@@ -163,14 +168,14 @@ elif to_do == "Backup":
 
 elif to_do == "Merge with Pesistent":
 
-    
+
     which_db = get_db_list(text="Select Source Db (Persistent)")
 
     destination = inquirer.select(
-        message="Data Source?",
+        message="Data Destination?",
         choices=["Database", "Folder"],
     ).execute()
-    
+
     if destination == "Folder":
         backupname = select_data_dir()
     else:
@@ -180,38 +185,110 @@ elif to_do == "Merge with Pesistent":
         ).execute()
 
         dest_client = CosmosClient(os.environ["ENDPOINT_" + dest_env], credential=os.environ["KEY_" +dest_env])
-        dest_db = get_db_list(text="Select destination database", client= dest_client)
-
+        dest_db_name = get_db_list(text="Select destination database", client= dest_client)
+        dest_db = dest_client.get_database_client(dest_db_name)
+        dest_hooks = dest_db.get_container_client("HookMessages")
+        dest_transactions = dest_db.get_container_client("Transaction")
+        lastMonth = (datetime.now() + relativedelta(months=-1)).strftime("%Y-%m-01")
+        trx_dest_items = list(dest_transactions.query_items("SELECT * from c where c.Date>@monthKey",
+                                 [{"name":"@monthKey", "value": lastMonth }],
+                                  enable_cross_partition_query=True ))
 
         shouldUpload = inquirer.select(
             message="Update the source data?",
             choices=["Yes", "No"],
         ).execute()
-        
-        source_db = dest_client.get_database_client(which_db)
+
+        source_db = client.get_database_client(which_db)
         source_hooks = source_db.get_container_client("HookMessages")
+        # source_transactions = source_db.get_container_client("HookMessages")
+
+        thisMonth = datetime.now().strftime("%Y-%m-01")
+
+
+        source_hooks_data = []
+        items = source_hooks.query_items("SELECT * from c where c.MonthKey=@monthKey",
+                                 [{"name":"@monthKey", "value": lastMonth }],
+                                 partition_key= thisMonth,
+                                  enable_cross_partition_query=False )
+        source_hooks_data.extend(list(items))
+
+        items = source_hooks.query_items("SELECT * from c where c.MonthKey=@monthKey",
+                                 [{"name":"@monthKey", "value": thisMonth }],
+                                 partition_key= thisMonth,
+                                  enable_cross_partition_query=False )
+        source_hooks_data.extend(list(items))
 
 
 
+        dest_hooks_data = []
+        items = source_hooks.query_items("SELECT * from c where c.MonthKey=@monthKey",
+                                 [{"name":"@monthKey", "value": lastMonth }],
+                                 partition_key= lastMonth,
+                                  enable_cross_partition_query=False )
+        dest_hooks_data.extend(list(items))
 
-        source_hooks = source_db.get_container_client("HookMessages")
+        items = source_hooks.query_items("SELECT * from c where c.MonthKey=@monthKey",
+                                 [{"name":"@monthKey", "value": thisMonth }],
+                                 partition_key= thisMonth,
+                                  enable_cross_partition_query=False )
+        dest_hooks_data.extend(list(items))
+
+
+        #Safe to assume dest is synced with Transactions
+        set_of_dest = {item["Id"]: item for item in dest_hooks_data} 
+
+        upload_to_dest = []
+        put_to_source = []
+
+        for item in  source_hooks_data:
+            if item["Id"] not in set_of_dest:
+                upload_to_dest.append(item)
+            elif set_of_dest["Id"].get("TransactionId", None) != item.get("TransactionId", None):
+                put_to_source.append(item)
+
+    
+        dest_dict = {item["Id"]: item for item in upload_to_dest}
+
+        for tr in trx_dest_items:
+            if "Notifications" in tr and len(tr["Notifications"]) > 0:
+                for notifId in list(tr["Notifications"]):
+                    if notifId in dest_dict:
+                        dest_dict[notifId]["TransactionId"] = notifId
+                        put_to_source.append(dest_dict[notifId])
         
+
+        print("To Upload to DEST")
+        for item in upload_to_dest:
+            print(item.Id)
+
+
+        print("To PUT to SOURCe")
+        for item in put_to_source:
+            print(item.Id)
+
+
+
+
+
+
+
 
     # source_env = inquirer.select(
     #     message="SOURCE: Select env",
     #     choices=env_s,
     # ).execute()
-    
+
     # s_client = CosmosClient(os.environ["ENDPOINT_" + source_env], credential=os.environ["KEY_" + source_env])
 
     # source_db = get_db_list(False, "Select Source Db (Persistent)", s_client)
 
-    
-    
-        
 
 
-else:   
+
+
+
+else:
     source = inquirer.select(
         message="Data Source?",
         choices=["Database", "Folder"],
@@ -219,14 +296,14 @@ else:
 
     if source == "Folder":
         backupname = select_data_dir()
-        which_db = get_db_list(True) 
+        which_db = get_db_list(True)
         db = loadFiles()
         migration_name = current_version_file()["id"]
         migration = load_config_from_file(migration_name)
         db = migration.reset_ledgers(db)
         import_data(db, migration)
     else:
-        which_db = get_db_list(False) 
+        which_db = get_db_list(False)
         backupname = "temp"
         dir = os.listdir("./data")
         if(dir != None):
@@ -239,4 +316,4 @@ else:
         db = migration.reset_ledgers(db)
         import_data(db, migration)
 
-        
+

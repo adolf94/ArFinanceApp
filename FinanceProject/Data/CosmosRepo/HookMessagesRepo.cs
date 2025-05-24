@@ -52,10 +52,15 @@ public class HookMessagesRepo : IHookMessagesRepo
 						_iconfig.GetConnectionString("CosmosDb")!);
 				CosmosClient client = new CosmosClient(constr);
 
-				Database db = client.GetDatabase(_config.PersistDb);
+				Database db = await client.CreateDatabaseIfNotExistsAsync(_config.PersistDb);
 
-				Container container = db.GetContainer("HookMessages");
-				await container.UpsertItemAsync(hook);
+				Container container = await db.CreateContainerIfNotExistsAsync("HookMessages", "/MonthKey");
+				try
+				{
+						await container.UpsertItemAsync(hook);
+				}catch(Exception ex)
+				{
+				}
 				await Task.CompletedTask;
 		}
 		public async Task<bool> DeleteHook(HookMessage hook)

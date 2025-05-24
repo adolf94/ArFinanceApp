@@ -1,5 +1,5 @@
 import { ArrowDownward,  Attachment, Event, CheckCircle,  AccountBalanceWalletRounded, QrCode2, AccountBalance, Check, CheckCircleOutlined, AssignmentTurnedInOutlined, ArrowCircleLeft, Paid, RequestQuote, AccountCircle, AccountBox, Clear, ExpandMore, ExpandLess, Task, Refresh } from "@mui/icons-material"
-import { Accordion, AccordionDetails, AccordionSummary,  Grid,  Typography,List,  ListItem, ListItemText, ListItemIcon, Tooltip, Divider, Chip,  Button, Stack, IconButton, CircularProgress, Box, Skeleton } from "@mui/material"
+import { Accordion, AccordionDetails, AccordionSummary,  Grid,  Typography,List,  ListItem, ListItemText, ListItemIcon, Tooltip, Divider, Chip,  Button, Stack, IconButton, CircularProgress, Box, Skeleton, Menu, MenuItem, ClickAwayListener } from "@mui/material"
 import LayerIcon from "../../common/LayerIcon";
 import { lazy, Suspense, useEffect, useState } from "react";
 import selectionByHook, { getReferenceName } from "./selectionByHook";
@@ -116,11 +116,14 @@ const HooksAccordion = ({notif, onDelete }) => {
 
     const navigate = useNavigate()
     const {deleteHook} = mutateHookMessages(notif.id, notif.monthKey)
+    const [anchor,setAnchor] = useState<any>(null)
+    const showMenu = !!anchor
 
 
     const [expanded, setExpanded] = useState<boolean>(false);
 
     const reprocess = ()=>{
+        hide()
         confirm({
             description:"Are you sure to reprocess this notification?"
         }).then(e=>{
@@ -131,6 +134,10 @@ const HooksAccordion = ({notif, onDelete }) => {
                 })
         })
 
+    }
+
+    const hide = ()=>{
+        setAnchor(null)
     }
 
 
@@ -152,9 +159,17 @@ const HooksAccordion = ({notif, onDelete }) => {
                 </Grid>
                 <Grid sm={1} sx={{shrink:1, textAlign:'right'}}>
                     {notif.transactionId ? <Box  sx={{display:'inline-flex', position:'relative', padding:1, top:"8px"}}><Task color="success"/></Box> : <DeleteLoading onCommit={()=>deleteHook.mutateAsync()} seconds={5}></DeleteLoading>}
-                    <IconButton onClick={()=>setExpanded(!expanded)}>
+                    {/* <IconButton onClick={()=>setExpanded(!expanded)}>
                         {expanded?<ExpandLess />:<ExpandMore/>}
+                    </IconButton> */}
+                    <IconButton onClick={(evt)=>setAnchor(evt.target)}>
+                        <ExpandMore />
                     </IconButton>
+                    <Menu anchorEl={anchor} open={showMenu}>
+                        <ClickAwayListener onClickAway={hide}>
+                            <MenuItem disabled={!!notif.transactionId} onClick={reprocess}>Reprocess</MenuItem>
+                        </ClickAwayListener>
+                    </Menu>
                 </Grid>
             </Grid>
             <AccordionDetails>
@@ -173,8 +188,8 @@ const HooksAccordion = ({notif, onDelete }) => {
                                                         {Icons[key].icon}
                                                     </Tooltip>
                                                 </ListItemIcon>
-                                                {key != "success" ? <ListItemText primary={notif.extractedData[key]} /> 
-                                                    :<ListItemText primary={<>{notif.extractedData[key]} <IconButton size="small" onClick={reprocess}><Refresh /></IconButton></>} />
+                                                {key != "success" || !!notif.transactionId ? <ListItemText primary={notif.extractedData[key]} /> 
+                                                    :<ListItemText primary={<>{notif.extractedData[key]} </>} />
                                                 }
                                             </ListItem>
                                                 <Divider />
@@ -193,8 +208,8 @@ const HooksAccordion = ({notif, onDelete }) => {
                                     })
                                 }
 
-                        </List>                  
-                        </Grid>
+                        </List>
+                    </Grid>
                     <Grid container md={6} sx={{justifyContent:"flex-start"}}>
                         <Suspense fallback={<Skeleton fullWidth height="4rem"/>}>
                             <HooksTransaction hook={notif} />

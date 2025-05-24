@@ -171,8 +171,8 @@ const NewRecordForm = (props: NewRecordFormProps) => {
           const monthKey = moment(formData.date).format("YYYY-MM")
           if(transId == "new"){
           if(redirectToHome) {
-            if(!!hooks.hook?.hookId) navigate(-1)
-            if(!hooks.hook?.Id) navigate(`../records/${monthKey}/daily`)
+            if(!!hooks.hook?.id) navigate(-1)
+            if(!hooks.hook?.id) navigate(`../records/${monthKey}/daily`)
           };
           if(!redirectToHome) {
             resetFormData()

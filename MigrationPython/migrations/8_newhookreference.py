@@ -157,7 +157,9 @@ def reset_ledgers(db):
             e["_ttl"] = time_diff.total_seconds()
             AuditLogs.append(e)
     db["AuditLogs"] = AuditLogs
-        
+    
+    db["HookMessages"] = list(map(lambda e: {**e,"Status": "New", "TransactionId":None, "MonthKey":parse(e["Date"]).strftime("%Y-%m-01")}, db["HookMessages"]))
+
     return db
 
 

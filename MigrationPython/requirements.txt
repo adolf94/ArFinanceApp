@@ -1,4 +1,4 @@
-
+progress
 azure-cosmos
 azure-identity
 InquirerPy

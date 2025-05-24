@@ -6,6 +6,7 @@ from flask import Flask, request, Response, redirect, url_for,app
 from azure.cosmos  import CosmosClient, DatabaseProxy
 from uuid_extensions import uuid7
 from FlaskApp.notif_handler import handle_notif
+from FlaskApp.sms_handler import handle_sms
 from FlaskApp.upload_handler import handle_upload
 
 # Always use relative import for custom module
@@ -51,10 +52,7 @@ def phone_hook():
         extracted = handle_notif(data)
         raw = data["notif_msg"]
     elif data["action"] == "sms_receive":
-        extracted = {
-            "data" : {},
-            "location": {}
-        }
+        extracted = handle_sms(data) 
         raw = data["sms_rcv_sender"] + ": " + data["sms_rcv_msg"]
     newItem = {
         "Id" : id,
