@@ -9,7 +9,7 @@
     "fixedLists": {
         "gcash": [ "01950582-caff-7823-9eb3-d52bcd602d67"]
     },
-    "remarks": "Received GCash from ${$.senderName}($.senderAcct).",
+    "remarks": "Received GCash from ${$.senderName}$($.senderAcct).",
     "comments":""
 },{
     "config": "notif_vybe_transfer_bank",
@@ -22,7 +22,7 @@
     "fixedLists": {
         "vybe": [ "01950582-caff-7823-9eb3-d52bcd602d67"]
     },
-    "remarks": "Sent to ${$.recipientAcct}($.recipientBank) with reference ${$.reference} ",
+    "remarks": "Sent to ${$.recipientAcct}$($.recipientBank) with reference ${$.reference} ",
     "comments":""
 },{
     "config": "notif_vybe_transfer_bank",
@@ -71,6 +71,16 @@
     "debit":"ownAcct",
     "remarks": "Received BPI Funds to ${$.ownAcct}",
     "comments":"When receiving from others"
+},{
+    "config": "sms_maybank_withdrawal",
+    "subConfig": "maybankWithdrawal",
+    "displayName":"Maybank Withdraw",
+    "type":"transfer",
+    "vendor":"fixed|maybank",
+    "credit":"fixed|maybank",
+    "debit":"fixed|cash",
+    "remarks": "Maybank Widthdrawal from ${$.ownAcct}",
+    "comments":""
 }
 
 ]

@@ -75,6 +75,7 @@ export const subtituteText = (template : string, hook:HookMessage) =>{
         }
     }
 
+    if(vars == null) return template;
     let output = vars.reduce((p,c,i)=>{
         return p.replace(c,getDataFromHook(c))
     },template)
