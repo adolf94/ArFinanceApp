@@ -5,6 +5,12 @@
       "methods": [
         "get"
       ]
+    },
+    {
+      "route": "/config.js",
+      "methods": [
+        "get"
+      ]
     }
   ]
 }
