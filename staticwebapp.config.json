@@ -1,18 +1,6 @@
 {
   "routes": [
     {
-      "route": "/assets/*",
-      "methods": [
-        "get"
-      ]
-    },
-    {
-      "route": "/config.js",
-      "methods": [
-        "get"
-      ]
-    },
-    {
       "route": "/*",
       "rewrite": "/index.html"
     },
