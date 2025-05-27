@@ -11,6 +11,10 @@
       "methods": [
         "get"
       ]
+    },
+    {
+      "route": "/*",
+      "rewrite": "/index.html"
     }
   ]
 }
