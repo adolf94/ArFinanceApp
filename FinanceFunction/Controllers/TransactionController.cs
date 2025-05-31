@@ -233,15 +233,16 @@ namespace FinanceFunction
 						if (!_user.IsAuthenticated) return new UnauthorizedResult();
 						if (!_user.IsAuthorized("finance_user")) return new ForbidResult();
 						IEnumerable<Transaction> transactions = Array.Empty<Transaction>();
-						if(req.Query.Any(e=>e.Key=="Year") && req.Query.Any(e => e.Key=="Month"))
+						if(req.Query.Any(e=>e.Key=="year") && req.Query.Any(e => e.Key== "month"))
 						{
-								var year = int.Parse(req.Query["Year"]!);
-								var month = int.Parse(req.Query["Month"]!);  req.Query.Any(e => e.Key == "Month");
+								var year = int.Parse(req.Query["year"]!);
+								var month = int.Parse(req.Query["month"]!); 
+								
 								transactions = _repo.GetByMonth(year, month);
 						}
 						else
 						{
-								var year = int.Parse(req.Query["After"]!);
+								var year = int.Parse(req.Query["after"]!);
 						}
             return await Task.FromResult(new OkObjectResult(transactions));
 				}

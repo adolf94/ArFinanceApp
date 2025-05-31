@@ -34,7 +34,7 @@ namespace FinanceFunction.Controllers
 
 						if (!_user.IsAuthenticated) return new UnauthorizedResult();
 						if (!_user.IsAuthorized("finance_user")) return new ForbidResult();
-						var creditParam = req.Query.Where(e=>e.Key== "credit").FirstOrDefault();
+						var creditParam = req.Query.Where(e=>e.Key=="credit").FirstOrDefault();
 						var credit = creditParam.Value == true;
 
 						IEnumerable<AccountBalance> result;

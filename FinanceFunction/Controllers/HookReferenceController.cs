@@ -27,10 +27,11 @@ public class HookReferenceController
 				if (!_user.IsAuthenticated) return new UnauthorizedResult();
 				if (!_user.IsAuthorized("finance_user")) return new ForbidResult();
 
+				if (!req.Query.Any(e => e.Key == "referenceName")) return new BadRequestResult();
 
-				var ReferenceName = req.Query.FirstOrDefault(e => e.Key == "ReferenceName").Value;
+				var ReferenceName = req.Query["referenceName"]!;
 
-				var items = await _repo.GetByName(ReferenceName.ToString());
+				var items = await _repo.GetByName(ReferenceName);
 
 
 				return new OkObjectResult(items);
