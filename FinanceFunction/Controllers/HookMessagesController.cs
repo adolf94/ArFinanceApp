@@ -62,7 +62,7 @@ public class HookMessagesController
 
 
 		[Function("DeleteHook")]
-		public async Task<IActionResult> DeleteHook([HttpTrigger(AuthorizationLevel.Anonymous, "delete", Route = "hookmessages/{monthkey}")]
+		public async Task<IActionResult> DeleteHook([HttpTrigger(AuthorizationLevel.Anonymous, "delete", Route = "hookmessages/{id}")]
 				HttpRequest req, Guid id)
 		{
 				if (!_user.IsAuthenticated) return new UnauthorizedResult();
@@ -75,7 +75,7 @@ public class HookMessagesController
 
 
 		[Function("ReprocessHookMessage")]
-		public async Task<IActionResult> ReprocessHookMessage([HttpTrigger(AuthorizationLevel.Anonymous, "delete", Route = "hookmessages/{monthkey}/reprocess")]
+		public async Task<IActionResult> ReprocessHookMessage([HttpTrigger(AuthorizationLevel.Anonymous, "delete", Route = "hookmessages/{id}/reprocess")]
 				HttpRequest req, Guid id)
 		{
 				if (!_user.IsAuthenticated) return new UnauthorizedResult();
