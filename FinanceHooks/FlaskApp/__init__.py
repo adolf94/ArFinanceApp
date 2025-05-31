@@ -60,7 +60,7 @@ def phone_hook():
         "Date": datetime.datetime.now(datetime.UTC).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "JsonData": data,
         "ExtractedData": extracted["data"],
-        "Location": extracted["location"],
+        "Location": extracted["location"] if "location" in extracted else {},
         "RawMsg":raw,
         "Type":"notif",
         "MonthKey": datetime.datetime.now().strftime("%Y-%m-01"),

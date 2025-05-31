@@ -20,7 +20,8 @@ namespace FinanceApp.Utilities
 						_enabled = config.SmsConfig.Enabled;
 						string passkey = Environment.GetEnvironmentVariable("ENV_PASSKEY")!;
 						// string user = AesOperation.DecryptString(passkey, config.SmsConfig.Username);
-							string pass = AesOperation.DecryptString(passkey, config.SmsConfig.Password);
+						
+							string pass = _enabled?AesOperation.DecryptString(passkey, config.SmsConfig.Password):"";
 
 						_cache = cache;
 						_logger = logger;

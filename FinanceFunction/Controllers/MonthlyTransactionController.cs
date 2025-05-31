@@ -22,7 +22,7 @@ public class MonthlyTransactionController
     }
 
     [Function("GetMonthlyTransactionByKey")]
-    public async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "monthlytransaction/{id}")] 
+    public async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "monthlytransaction/{key}")] 
         HttpRequest req, string key)
 		{
 				if (!_user.IsAuthenticated) return new UnauthorizedResult();

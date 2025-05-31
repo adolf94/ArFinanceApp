@@ -22,7 +22,7 @@ namespace FinanceApp.BgServices
 				public async Task StartAsync(CancellationToken cancellationToken)
 				{
 #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
-						ComputeInterest(cancellationToken);
+						//ComputeInterest(cancellationToken);
 #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
 						await Task.CompletedTask;
 				}

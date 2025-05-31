@@ -19,12 +19,19 @@ dotenv_vars = dotenv_values()
 env_s = []
 for key, value in dotenv_vars.items():
     if(key.startswith("ENDPOINT_")):
-
         env_s.append(key[9:])
 to_do = inquirer.select(
     message="What do you want to do?",
-    choices=["Backup","Restore", "Migrate","Reset","Merge with Pesistent"],
+    choices=["Backup","Restore", "Migrate","Others"],
 ).execute()
+
+if to_do == "Others":
+    to_do = inquirer.select(
+        message="Others?",
+        choices=["Merge with Pesistent","Restore Persist","Reset Persist","Reset"],
+    ).execute()
+
+
 
 
 which_env = inquirer.select(
@@ -48,8 +55,10 @@ def get_db_list(allowNew = False, text = "Which database?", client = client):
 
     if(which_db == "new_db"):
         which_db = inquirer.text(
-            message="Name the new db"
-        )
+            message="Name the new db",
+            default="FinanceApp"
+        ).execute()
+        client.create_database(which_db)
 
     return which_db
 
@@ -96,7 +105,11 @@ def import_data(container_data, migration):
             rows = container_data[conDict["Container"]]
             count = len(rows)
             bar = Bar(conDict["Container"], max=count)
-            for row in rows:                        
+            for row in rows:                
+                if "$type" not in row and "Discriminator" in row: 
+                    row["$type"] = row["Discriminator"]       
+                if "Id" in row and "id" in row: 
+                    row["id"] = row["Id"]       
                 container.upsert_item(row)
                 bar.next()
             bar.finish()
@@ -121,11 +134,11 @@ def current_version_file():
     migration = reduce(lambda x,y: x if x["id"] > y["id"] else y, history)
     return migration
 
-def select_data_dir():
+def select_data_dir(msg = "Select a folder to restore"):
 
     dir = os.listdir("./data")
     return inquirer.select(
-        message="Select a folder to restore",
+        message=msg,
         choices=dir,
     ).execute()
 
@@ -244,7 +257,7 @@ elif to_do == "Merge with Pesistent":
         for item in  source_hooks_data:
             if item["Id"] not in set_of_dest:
                 upload_to_dest.append(item)
-            elif set_of_dest["Id"].get("TransactionId", None) != item.get("TransactionId", None):
+            elif set_of_dest[item["Id"]].get("TransactionId", None) != item.get("TransactionId", None):
                 put_to_source.append(item)
 
     
@@ -268,25 +281,60 @@ elif to_do == "Merge with Pesistent":
             print(item.Id)
 
 
+elif to_do == "Reset Persist":
 
+    which_db = get_db_list(text="Select Db")
+    db = client.get_database_client(which_db)
+    container = db.get_container_client("HookMessages")
 
+    rows = container.query_items("select * from c", enable_cross_partition_query=True)
+    items = []
+    for row in rows:
+        item = {**row,"Status": "New", "MonthKey":parse(row["Date"]).strftime("%Y-%m-01")}
+        items.append(item)
 
+    try:
+        db.delete_container("HookMessages")
+        print("Recreating")
+    except:
+        print("Created Container")
 
+    container = db.create_container("HookMessages", partition_key=PartitionKey(path="/MonthKey") )
 
+    count = len(items)
+    bar = Bar("Inserting to HookMessages", max=count)
+    for item in items:
+        container.upsert_item(item)
+        bar.next()
+    bar.finish()
 
-    # source_env = inquirer.select(
-    #     message="SOURCE: Select env",
-    #     choices=env_s,
-    # ).execute()
+elif "Restore Persist":
+    
+    backupname = select_data_dir()
+    which_db = get_db_list(True,text="Select Db")
+    db = client.get_database_client(which_db)
 
-    # s_client = CosmosClient(os.environ["ENDPOINT_" + source_env], credential=os.environ["KEY_" + source_env])
+    try:
+        db.delete_container("HookMessages")
+        print(f"Recreating HookMessages")
+    except Exception as e:
+        print(f"Creating HookMessages")
 
-    # source_db = get_db_list(False, "Select Source Db (Persistent)", s_client)
+    container = db.create_container(
+        id = "HookMessages",
+        partition_key = PartitionKey(path = "/MonthKey")
+    )
 
-
-
-
-
+    with open(f"./data/{backupname}/HookMessages.json", "r", encoding="utf-8") as f:
+        hooksData = json.load(f)
+        rows = hooksData
+        count = len(rows)
+        bar = Bar("HookMessages", max=count)
+        for row in rows:                        
+            container.upsert_item(row)
+            bar.next()
+        bar.finish()
+    print(f"Completed insert in HookMessages")
 
 else:
     source = inquirer.select(
