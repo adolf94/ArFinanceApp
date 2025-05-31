@@ -1,18 +1,19 @@
 ﻿import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "../components/api";
+import fnApi from "../components/fnApi";
 import { AccountGroup } from "FinanceApi";
 import { queryClient } from "../App";
 
 export const ACCOUNT_GROUP = "accountGroup";
 
 export const fetchGroups = () => {
-  return api.get("/accountgroups").then((e) => e.data);
+  return fnApi.get("/accountgroups").then((e) => e.data);
 };
 
 export const fetchGroupById = (id: string) => {
   let state = queryClient.getQueryState([ACCOUNT_GROUP]);
   console.log(state);
-  return api.get("/accountgroups").then((e) => e.data);
+  return fnApi.get(`/accountgroups/${id}`).then((e) => e.data);
 };
 
 export const useMutateGroups = () => {
@@ -20,7 +21,7 @@ export const useMutateGroups = () => {
 
   const create = useMutation({
     mutationFn: (data: Partial<AccountGroup>): Promise<AccountGroup> => {
-      return api.post("accountgroups", data).then((e) => e.data);
+      return fnApi.post("accountgroups", data).then((e) => e.data);
     },
     onSuccess: (data: AccountGroup) => {
       queryClient.setQueryData([ACCOUNT_GROUP, { id: data.id }], data);

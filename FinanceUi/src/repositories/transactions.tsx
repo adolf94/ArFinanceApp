@@ -20,6 +20,7 @@ import numeral from "numeral";
 import { useState } from "react";
 import { CircularProgress } from "@mui/material";
 import { HOOK_MESSAGES } from "./hookMessages";
+import fnApi from "../components/fnApi";
 
 
 export const TRANSACTION = "transaction";
@@ -172,7 +173,7 @@ export const fetchTransactionsByMonthKey = async (year: number, month: number, o
         let data = origData.find(e=>e.id === d.id)
         if(data && data.epochUpdated === d.epochUpdated) return data
 
-        return api(`transactions/${d.id}`)
+        return fnApi(`transactions/${d.id}`)
           .then(res=>res.data)
     }))
 
@@ -180,7 +181,7 @@ export const fetchTransactionsByMonthKey = async (year: number, month: number, o
   
   let monthlytransaction = await queryClient.ensureQueryData({
     queryKey: [MONTHLY_TRANSACTION, {monthKey: key}],
-    queryFn: ()=>api.get(`monthlytransaction/${key}`).then((e:MonthlyTransaction)=>e.data)
+    queryFn: ()=>fnApi.get(`monthlytransaction/${key}`).then((e:MonthlyTransaction)=>e.data)
   }) 
   let transactions = [] as Transaction[]
   if(!hasData){
@@ -230,7 +231,7 @@ export const fetchByAccountMonthKey = async (
           let data = origData.find(e=>e.id === d.transactionId)
           if(data && data.epochUpdated === d.epochUpdated) return data
   
-          return api(`transactions/${d.transactionId}`)
+          return fnApi(`transactions/${d.transactionId}`)
             .then(res=>res.data)
       }))
   
@@ -254,7 +255,7 @@ export const fetchByAccountMonthKey = async (
 
             await queryClient.ensureQueryData({
               queryKey: [MONTHLY_TRANSACTION, {monthKey: KEY1}],
-              queryFn: ()=>api.get(`monthlytransaction/${KEY1}`).then(e=>e.data)
+              queryFn: ()=>fnApi.get(`monthlytransaction/${KEY1}`).then(e=>e.data)
             }) 
             .then((m)=>db.monthTransactions.put(m))
         }
@@ -271,7 +272,7 @@ export const fetchByAccountMonthKey = async (
             
             await queryClient.ensureQueryData({
               queryKey: [MONTHLY_TRANSACTION, {monthKey: key0}],
-              queryFn: ()=>api.get(`monthlytransaction/${key0}`).then(e=>e.data)
+              queryFn: ()=>fnApi.get(`monthlytransaction/${key0}`).then(e=>e.data)
             }) 
             .then((m)=>db.monthTransactions.put(m))
         }
@@ -298,7 +299,7 @@ export const fetchByAccountMonthKey = async (
 export const fetchTransactionsByMonth = (year: number, month: number, persistLast? : string ) => {
  
 
-    return api<Transaction[]>("transactions", { params: { year, month }, noLastTrans: persistLast }).then(
+    return fnApi<Transaction[]>("transactions", { params: { year, month }, noLastTrans: persistLast }).then(
       (e : AxiosResponse<Transaction[]>) => {
 
         const lastTransId = localStorage.getItem("last_transaction");
@@ -395,7 +396,7 @@ export const fetchByAcctMonth = async (
 
 
 export const fetchTransactionById = (transId: string) => {
-  return api<Transaction>("transactions/" + transId).then(async (e) => {
+  return fnApi<Transaction>("transactions/" + transId).then(async (e) => {
     let item = e.data;
 
       return ensureTransactionAcctData(item);
@@ -452,7 +453,7 @@ export const useMutateTransaction = () => {
         
           let id = enqueueSnackbar(<><CircularProgress /> Saving... </>, {persist:true, variant:'info'})
           // setSnackbarId(id)
-          return api
+          return fnApi
               .post<NewTransactionResponseDto>("transactions", data, { noLastTrans:true})
             .then(async (e: AxiosResponse<NewTransactionResponseDto>) => {
               let item  = e.data.transaction;
@@ -523,7 +524,7 @@ export const useMutateTransaction = () => {
 
   const update = useMutation({
     mutationFn: (data: Partial<Transaction>) => {
-          return api
+          return fnApi
         .put<NewTransactionResponseDto>("transactions/" + data.id, data)
         .then(async (e: AxiosResponse<NewTransactionResponseDto>) => {
           let item = e.data.transaction;
@@ -609,7 +610,7 @@ export const useMutateTransaction = () => {
 
 
 export const getAfterTransaction = (id : string ) => {
-    return api.get("transactions", {
+    return fnApi.get("transactions", {
         params: {
             after:id
         }

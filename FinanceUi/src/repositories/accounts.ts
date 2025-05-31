@@ -9,6 +9,7 @@ import { queryClient } from "../App";
 import replaceById from "../common/replaceById";
 import db from "../components/LocalDb";
 import moment from "moment";
+import fnApi from "../components/fnApi";
 
 export const ACCOUNT = "account";
 
@@ -18,7 +19,7 @@ export const ACCOUNT = "account";
 
 
 export const fetchAccounts = () => {
-  return api.get("accounts").then((res) => {
+  return fnApi.get("accounts").then((res) => {
     res.data.forEach((acct) => {
       queryClient.setQueryData([ACCOUNT, { id: acct.id }], acct);
       db.accounts.put({...acct, dateUpdated: moment().toDate()})
@@ -43,7 +44,7 @@ export const fetchByAccountId = async (id: string, force: boolean = false) => {
 
     if(!!account) return account
 
-    return api.get("accounts/" + id).then((e) => {
+    return fnApi.get("accounts/" + id).then((e) => {
         queryClient.setQueryData([ACCOUNT] , replaceById(account,accountCache))
         return e.data;
       });
@@ -54,7 +55,7 @@ export const useMutateAccount = () => {
 
   const create = useMutation({
     mutationFn: (data: Partial<Account>) => {
-      return api
+      return fnApi
         .post("accounts", {
           accountGroupId: data.accountGroupId,
           resetEndOfPeriod: data.resetEndOfPeriod,

@@ -4,10 +4,11 @@ import { Vendor } from "FinanceApi";
 import { queryClient } from "../App";
 import { sortBy } from 'lodash'
 import replaceById from "../common/replaceById";
+import fnApi from "../components/fnApi";
 
 export const VENDOR = "vendor";
 export const fetchVendors = () => {
-  return api("vendors").then((e) => {
+  return fnApi("vendors").then((e) => {
     e.data.forEach((vendor) => {
       queryClient.setQueryData([VENDOR, { id: vendor.id }], vendor);
     });
@@ -27,7 +28,7 @@ export const fetchVendorById = async (id: string, force?:boolean) => {
     }
     if(!!vendor) return vendor
 
-    return api("vendors/" + id).then((e) => {
+    return fnApi("vendors/" + id).then((e) => {
         return e.data;
         
     });
@@ -38,7 +39,7 @@ export const useMutateVendor = () => {
 
   const create = useMutation({
     mutationFn: (data: Partial<Vendor>) => {
-      return api.post("vendors", data).then((e) => e.data);
+      return fnApi.post("vendors", data).then((e) => e.data);
     },
     onSuccess: (data: Vendor) => {
         queryClient.setQueryData<Vendor[]>([VENDOR], (prev) => {

@@ -1,14 +1,14 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import api from "../components/api.js";
 import db from "../components/LocalDb/AppDb.js";
 import { HookMessage } from "FinanceApi";
+import fnApi from "../components/fnApi.js";
 
 
 export const HOOK_MESSAGES = "hookMessages";
 
 export const getHooksMessages = () => {
 
-    return api.get("/hookMessages")
+    return fnApi.get("/hookMessages")
         .then((response: any) => {
             db.hookMessages.bulkPut(response.data)
             return response.data;
@@ -18,7 +18,7 @@ export const getHooksMessages = () => {
 
 export const getHooksMessagesByMonth = (month:string) => {
 
-    return api.get(`/month/${month}/hookMessages`)
+    return fnApi.get(`/month/${month}/hookMessages`)
         .then(async (response: any) => {
             db.hookMessages.bulkPut(response.data)
             let existingkeys = response.data.map(e=>e.id)
@@ -39,7 +39,7 @@ export const getHooksMessagesByMonth = (month:string) => {
 
 export const getOneHookMsg = (id:string)=>{
 
-    return api.get(`/hookMessages/${id}`)
+    return fnApi.get(`/hookMessages/${id}`)
         .then((response:any) => {
             db.hookMessages.put(response.data)
             return response.data;
@@ -51,7 +51,7 @@ export const mutateHookMessages = (id, month)=>{
     const queryClient = useQueryClient()
     const deleteHook = useMutation({
         mutationFn:()=>{
-            return api.delete(`/hookMessages/${id}`)
+            return fnApi.delete(`/hookMessages/${id}`)
                 .then(res=>res.data)
         },
         onSuccess:(data)=>{

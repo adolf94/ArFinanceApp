@@ -1,4 +1,5 @@
 import api from "../components/api"
+import fnApi from "../components/fnApi"
 
 
 export const HOOK_REFERENCE = "hookReference"
@@ -6,7 +7,7 @@ export const HOOK_REFERENCE = "hookReference"
 
 
 export const getReferencesByName = (name)=>{
-   return api(`hookReference`, {
+   return fnApi(`hookReference`, {
         params : {
             referenceName: name
         }
@@ -17,7 +18,7 @@ export const getReferencesByName = (name)=>{
 
 
 export const logReferenceInstance = (data : any)=>{
-    return api.put("hookReference", data)
+    return fnApi.put("hookReference", data)
         .then((res)=>{
             return res.data
         })

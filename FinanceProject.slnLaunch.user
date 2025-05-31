@@ -1,0 +1,17 @@
+[
+  {
+    "Name": "New Profile",
+    "Projects": [
+      {
+        "Path": "FinanceProject\\FinanceApp.csproj",
+        "Action": "Start",
+        "DebugTarget": "FinanceProject"
+      },
+      {
+        "Path": "FinanceFunction\\FinanceFunction.csproj",
+        "Action": "Start",
+        "DebugTarget": "FinanceFunction"
+      }
+    ]
+  }
+]

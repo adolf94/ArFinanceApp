@@ -14,7 +14,7 @@ const getTokenFromApi = mm(
 
     if (!token) return oauthSignIn();
     return axios
-      .post(`${window.webConfig.api}/google/auth/refresh`, {
+      .post(`${window.webConfig.oldApi}/google/auth/refresh`, {
         refresh_token: token,
           app: 'finance'
       })
@@ -44,7 +44,7 @@ export const getToken = async (force : boolean) => {
 
 const api = axios.create({
   //@ts-ignore
-  baseURL: window.webConfig.api,
+  baseURL: window.webConfig.oldApi,
 });
 
 api.interceptors.request.use(async (config: AxiosRequestConfig) => {
@@ -56,18 +56,18 @@ api.interceptors.request.use(async (config: AxiosRequestConfig) => {
 
 api.interceptors.response.use(
     async (data) => {
-            const headerTransId = data.headers["x-last-trans"];
-        if (!data.config?.noLastTrans && !!headerTransId) {
-            const lastTransId = localStorage.getItem("last_transaction");
-            const stgTransId = localStorage.getItem("stg_transaction");
-            if (!!lastTransId && headerTransId !== lastTransId && stgTransId !== headerTransId) {
-                //Do fetch new data
-                    queryClient.prefetchQuery({ queryKey: [TRANSACTION, { after: lastTransId }], queryFn: () => getAfterTransaction(lastTransId) })
-            }
-        }
-        if (!headerTransId) {
-            console.debug("no last-trans found " + data.config.url);
-        }
+        //     const headerTransId = data.headers["x-last-trans"];
+        // if (!data.config?.noLastTrans && !!headerTransId) {
+        //     const lastTransId = localStorage.getItem("last_transaction");
+        //     const stgTransId = localStorage.getItem("stg_transaction");
+        //     if (!!lastTransId && headerTransId !== lastTransId && stgTransId !== headerTransId) {
+        //         //Do fetch new data
+        //             queryClient.prefetchQuery({ queryKey: [TRANSACTION, { after: lastTransId }], queryFn: () => getAfterTransaction(lastTransId) })
+        //     }
+        // }
+        // if (!headerTransId) {
+        //     console.debug("no last-trans found " + data.config.url);
+        // }
             
 
         //queryClient

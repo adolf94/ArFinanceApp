@@ -21,7 +21,9 @@ import { createTheme, ThemeProvider } from "@mui/material/styles";
 import history, { NavigateSetter } from "./components/History";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { oauthSignIn } from "./common/GoogleLogin";
+import { CircularProgress, Grid } from '@mui/material'
 import { lightGreen, purple, indigo} from '@mui/material/colors';
+import fnApi from "./components/fnApi";
 
 export const queryClient = new QueryClient({
   defaultOptions: {
@@ -106,7 +108,7 @@ const TheApp = (props) => {
         }
 
 
-      api.post("/google/auth", { code: decodeURIComponent(hash2Obj.code), app: 'finance' }, { preventAuth: true })
+      fnApi.post("/google/auth", { code: decodeURIComponent(hash2Obj.code), app: 'finance' }, { preventAuth: true })
         .then((e) => {
             window.localStorage.setItem("refresh_token", e.data.refresh_token);
             window.sessionStorage.setItem("access_token", e.data.access_token);
@@ -133,7 +135,7 @@ const TheApp = (props) => {
           if  (e === "no_state") return;
         let stateFromStorage = sessionStorage.getItem("googleLoginState");
           let state = JSON.parse(window.atob(stateFromStorage!))
-          navigate(state.currentPath.replace("/finance",""))
+          //navigate(state.currentPath.replace("/",""))
       });
   }, []);
 
@@ -152,7 +154,13 @@ const TheApp = (props) => {
   return (
     <DropdownContext.Provider value={{ ...dropdown, set: setDropdownValue }}>
           <SnackbarProvider autoHideDuration={1000} >
-              {msalInitialized && <Routes>{RouteMapper(AppRoutes)}</Routes>}
+              {msalInitialized ? <Routes>{RouteMapper(AppRoutes)}</Routes>
+                  : <Grid container sx={{ justifyContent: 'center' } }>
+                      <Grid>
+                        <CircularProgress />
+                      </Grid>
+                  </Grid>
+                }
           </SnackbarProvider>
           <NavigateSetter />
       </DropdownContext.Provider>

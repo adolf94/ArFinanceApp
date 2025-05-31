@@ -32,6 +32,7 @@ import Calendar from "./RecordsComponents/Calendar";
 import Daily from "./RecordsComponents/Daily";
 import UserPanel from "../components/UserPanel.js";
 import { useOfflineData } from "../components/LocalDb/useOfflineData";
+import React from "react";
 
 interface RecordViewTransaction {
   dateGroup: string;

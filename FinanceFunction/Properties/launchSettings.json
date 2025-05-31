@@ -1,0 +1,15 @@
+{
+  "profiles": {
+    "FinanceFunction": {
+      "commandName": "Project",
+      "commandLineArgs": "--port 7188"
+    },
+    "Container (Dockerfile)": {
+      "commandName": "Docker",
+      "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}",
+      "containerRunArguments": "--init",
+      "httpPort": 33357,
+      "useSSL": false
+    }
+  }
+}
