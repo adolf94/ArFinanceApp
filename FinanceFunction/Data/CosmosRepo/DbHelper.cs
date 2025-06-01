@@ -6,12 +6,12 @@ using System.Threading.Tasks;
 
 namespace FinanceFunction.Data.CosmosRepo
 {
-		public class IDbHelper
+		public class DbHelper : IDbHelper
 		{
 				private readonly AppDbContext _context;
 				private readonly CancellationToken _cancelToken;
 
-				public IDbHelper(AppDbContext context, CancellationToken token)
+				public DbHelper(AppDbContext context, CancellationToken token)
 				{
 						_context = context;
 						_cancelToken = token;

@@ -39,7 +39,7 @@ namespace FinanceFunction.Data.CosmosRepo
         public AppDbContext(DbContextOptions<AppDbContext> options, IConfiguration config) : base(options)
         {
             _configuration = config;
-            base.Database.EnsureCreatedAsync().Wait();
+            // base.Database.EnsureCreatedAsync().Wait();
         }
 
 
@@ -258,6 +258,7 @@ namespace FinanceFunction.Data.CosmosRepo
             services.AddScoped<ITransactionRepo, TransactionRepo>();
             services.AddScoped<IAccountBalanceRepo, AccountBalanceRepo>();
             services.AddScoped<IVendorRepo, VendorRepo>();
+            services.AddScoped<IDbHelper, DbHelper>();
             //services.AddScoped<IScheduledTransactionRepo, ScheduledTransactionRepo>();
             services.AddScoped<IUserRepo, UserRepo>();
             //services.AddScoped<ILoanProfileRepo, LoanProfileRepo>();
