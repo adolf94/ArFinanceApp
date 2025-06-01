@@ -352,7 +352,7 @@ else:
     else:
         which_db = get_db_list(False)
         backupname = "temp"
-        dir = os.listdir("./data")
+        dir = os.listdir("./data/")
         if(dir != None):
             for file in dir:
                 os.remove(file)

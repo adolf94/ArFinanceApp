@@ -44,8 +44,8 @@ def reset_ledgers(db):
                 "$type": "AccountBalance",
                 "Year": month.year,
                 "Month": month.month,
-                "DateStart": month.replace(day=c["PeriodStartDay"]).strftime("%Y-%m-&d"),
-                "DateEnd": (month.replace(day=c["PeriodStartDay"]) + relativedelta(months=1)).strftime("%Y-%m-&d"),
+                "DateStart": month.replace(day=c["PeriodStartDay"]).strftime("%Y-%m-%d"),
+                "DateEnd": (month.replace(day=c["PeriodStartDay"]) + relativedelta(months=1)).strftime("%Y-%m-%d"),
                 "Balance": 0,
                 "EndingBalance": 0,
                 "PartitionKey": "default",
@@ -181,7 +181,7 @@ def reset_ledgers(db):
     db["AccountBalance"] = final_acctBals
     
 
-    db["HookMessages"] = list(map(lambda e: {**e,"Status": "New", "TransactionId":None, "MonthKey":parse(e["Date"]).strftime("%Y-%m-01")}, db["HookMessages"]))
+    db["HookMessages"] = list(map(lambda e: {**e,"Status": "New", "$type":"HookMessage","TransactionId":None, "MonthKey":parse(e["Date"]).strftime("%Y-%m-01")}, db["HookMessages"]))
 
     return db
 

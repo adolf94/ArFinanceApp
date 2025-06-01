@@ -65,7 +65,7 @@ def phone_hook():
         "Type":"notif",
         "MonthKey": datetime.datetime.now().strftime("%Y-%m-01"),
         "PartitionKey":"default",
-        "Discriminator": "HookMessage",
+        "$type": "HookMessage",
         "_ttl": 60*24*60*60,
         "IsHtml":False
     }

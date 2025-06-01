@@ -1,4 +1,5 @@
 using FinanceFunction.Data;
+using FinanceFunction.Dtos;
 using FinanceFunction.Utilities;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -36,6 +37,22 @@ public class HookReferenceController
 
 				return new OkObjectResult(items);
     }
+
+
+		[Function("LogHookReference")]
+    public async Task<IActionResult> LogHookReference([HttpTrigger(AuthorizationLevel.Anonymous, "put", Route = "hookReference")] HttpRequest req)
+		{
+				if (!_user.IsAuthenticated) return new UnauthorizedResult();
+				if (!_user.IsAuthorized("finance_user")) return new ForbidResult();
+				var dto = await req.ReadFromJsonAsync<HookRefLogDto>();
+
+				var items = await _repo.RecordReference(dto!);
+
+
+				return new OkObjectResult(items);
+
+		}
+
 }
 public class GetHookReferenceQueryParams
 {
