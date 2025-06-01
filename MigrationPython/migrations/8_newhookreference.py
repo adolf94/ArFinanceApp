@@ -76,9 +76,10 @@ def reset_ledgers(db):
                        db["MonthTransactions"] ,
                        {})
     
-    AccountDictionary = reduce(lambda p,c: ({**p, c["id"]:c}), 
+    AccountDictionary = reduce(lambda p,c: ({**p, c["Id"]:c}), 
                                db["Account"],
-                               {})
+                                {})
+
     BalanceDictionary = reduce(lambda p,c: {**p, c["id"]:c}, 
                                acctBals,
                                {})

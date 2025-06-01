@@ -154,8 +154,7 @@ def loadFiles():
 
     return containers
 
-
-
+print(to_do)
 
 
 if to_do == "Restore":
@@ -308,7 +307,7 @@ elif to_do == "Reset Persist":
         bar.next()
     bar.finish()
 
-elif "Restore Persist":
+elif to_do == "Restore Persist":
     
     backupname = select_data_dir()
     which_db = get_db_list(True,text="Select Db")

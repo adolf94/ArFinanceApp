@@ -37,9 +37,9 @@ export const getHooksMessagesByMonth = (month:string) => {
 }
 
 
-export const getOneHookMsg = (id:string)=>{
+export const getOneHookMsg = (id:string, month : string)=>{
 
-    return fnApi.get(`/hookMessages/${id}`)
+    return fnApi.get(`/month/${month}/hookMessages/${id}`)
         .then((response:any) => {
             db.hookMessages.put(response.data)
             return response.data;
@@ -47,11 +47,11 @@ export const getOneHookMsg = (id:string)=>{
 
 }
 
-export const mutateHookMessages = (id, month)=>{
+export const mutateHookMessages = (id = "", month)=>{
     const queryClient = useQueryClient()
     const deleteHook = useMutation({
         mutationFn:()=>{
-            return fnApi.delete(`/hookMessages/${id}`)
+            return fnApi.delete(`/month/${month}/hookMessages/${id}`)
                 .then(res=>res.data)
         },
         onSuccess:(data)=>{
@@ -63,6 +63,22 @@ export const mutateHookMessages = (id, month)=>{
         }
 
     })
+    const deleteMany = useMutation({
+        mutationFn:(many : string[])=>{
+            return fnApi.delete(`/month/${month}/hookMessages`, {
+                data: many
+            }).then(res=>res.data)
+        },
+        onSuccess:(data : string[])=>{
+            db.hookMessages.bulkDelete(data)
+            queryClient.setQueryData([HOOK_MESSAGES, { monthKey: month}], (prevData : HookMessage[])=>prevData.filter(e=>data.includes(e.id)))
+            return data
+        },
+        onError:(err)=>{
+            console.log(err)
+        }
 
-    return {deleteHook}
+    })
+
+    return {deleteHook, deleteMany}
 }

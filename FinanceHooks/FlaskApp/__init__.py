@@ -56,7 +56,7 @@ def phone_hook():
         raw = data["sms_rcv_sender"] + ": " + data["sms_rcv_msg"]
     newItem = {
         "Id" : id,
-        "id": "HookMessage|" + id,  
+        "id": id,  
         "Date": datetime.datetime.now(datetime.UTC).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "JsonData": data,
         "ExtractedData": extracted["data"],
@@ -66,6 +66,7 @@ def phone_hook():
         "MonthKey": datetime.datetime.now().strftime("%Y-%m-01"),
         "PartitionKey":"default",
         "Discriminator": "HookMessage",
+        "_ttl": 60*24*60*60,
         "IsHtml":False
     }
 
