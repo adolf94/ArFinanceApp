@@ -117,12 +117,12 @@ const Accounts = (props) => {
                         {a.name}
                       </Grid>
                     </Grid>
-                   {a.periodStartDay !== 1 && (
+                   {/* {a.periodStartDay !== 1 && (
                       <CreditStatementBalance
                         account={a}
                         date={moment().toDate()}
                       />
-                    )}
+                    )} */}
                     <Grid
                       item
                       xs={3}
