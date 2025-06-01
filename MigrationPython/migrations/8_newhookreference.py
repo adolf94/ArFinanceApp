@@ -157,6 +157,29 @@ def reset_ledgers(db):
             e["_ttl"] = time_diff.total_seconds()
             AuditLogs.append(e)
     db["AuditLogs"] = AuditLogs
+
+    grouped_balace = {}
+    final_acctBals = []
+    for b in acctBals:
+        if b["AccountId"] not in grouped_balace:
+            grouped_balace[b["AccountId"]] = []
+        
+        grouped_balace[b["AccountId"]] = grouped_balace[b["AccountId"]] + [b]
+    
+    for acctId in grouped_balace:
+        grouped_balace[acctId].sort(key = lambda d: d["id"])
+        keep_index = -1
+        for i, value in enumerate(grouped_balace[acctId]):
+            if value["EndingBalance"] != 0:
+                keep_index = i - 1
+                break
+        if keep_index == -1:
+            final_acctBals = final_acctBals + grouped_balace[acctId]
+            continue 
+        final_acctBals = final_acctBals + grouped_balace[acctId][keep_index:]
+        
+
+    db["AccountBalance"] = final_acctBals
     
     db["HookMessages"] = list(map(lambda e: {**e,"Status": "New", "TransactionId":None, "MonthKey":parse(e["Date"]).strftime("%Y-%m-01")}, db["HookMessages"]))
 
