@@ -12,7 +12,7 @@ import { fetchTransactionById } from '../../repositories/transactions';
 import { useNavigate } from 'react-router-dom';
 
 
-const HooksTransaction = ({hook}: {hook:HookMessage})=>{
+const HooksTransaction = ({hook, shown}: {hook:HookMessage, shown:boolean})=>{
     const [selected, setSelected] = useState<any>(null)
     const [confs, setConfs] = useState<any[]>([])
     const navigate = useNavigate()
@@ -22,6 +22,7 @@ const HooksTransaction = ({hook}: {hook:HookMessage})=>{
         credit:"",
         debit:""
     })
+    const [initialized, setInitialized] = useState(false)
     const [formData,setFormData] = useState<CreateTransactionDto>({
         date: null,
         credit: null,
@@ -43,23 +44,25 @@ const HooksTransaction = ({hook}: {hook:HookMessage})=>{
 
     useEffect(()=>{
         if(!hook.transactionId) return
-        
+        if(!shown || initialized) return
         let type = "offline"
         db.transactions.filter(e=>e.id == hook.transactionId)
           .first().then(tr=>{
             if(!!tr){
                 setFormData(tr)
+                setInitialized(true)
                 return
             } else {
     
                 fetchTransactionById(hook.transactionId)
                 .then(e=>{
                     setFormData(e)
+                    setInitialized(true)
                 })
             }
           })
 
-    },[])
+    },[shown])
 
 
 
@@ -197,7 +200,7 @@ const HooksTransaction = ({hook}: {hook:HookMessage})=>{
                                                     hook.transactionId ? <Button onClick={()=>navigate(`/transactions/${hook.transactionId}`)}>View</Button>
                                                         : <>
                                                         <Button disabled={!submittable()} >Submit</Button>
-                                                        <Button onClick={()=>navigate(`/transactions/new?hookId=${hook.id}`)}>More</Button>
+                                                        <Button onClick={()=>navigate(`/transactions/new?hookId=${hook.id}&date=${moment(hook.jsonData.timestamp).format("YYYY-MM-DD")}`)}>More</Button>
                                                     </>
                                                 }
                                                 

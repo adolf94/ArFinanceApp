@@ -237,7 +237,7 @@ const NewRecordForm = (props: NewRecordFormProps) => {
               let configs = []
               let hook = await queryClient.ensureQueryData({
                 queryKey: [HOOK_MESSAGES, { id: hookId }],
-                queryFn: () => getOneHookMsg(hookId),
+                queryFn: () => getOneHookMsg(hookId, moment(date).format("YYYY-MM-01") ),
               })
               if(!!hook) {
                 configs = hookMappings.filter(e=>e.config==hook.extractedData?.matchedConfig)
