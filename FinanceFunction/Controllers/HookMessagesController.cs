@@ -9,6 +9,8 @@ using System.Text.Json;
 using System.Text;
 using FinanceFunction.Models;
 using System.Net.Http.Json;
+using Microsoft.EntityFrameworkCore;
+using FinanceFunction.Data.CosmosRepo;
 
 namespace FinanceFunction.Controllers;
 
@@ -17,13 +19,16 @@ public class HookMessagesController
     private readonly ILogger<HookMessagesController> _logger;
 		private readonly IHookMessagesRepo _repo;
 		private readonly CurrentUser _user;
+		private readonly IDbHelper _db;
 		private readonly AppConfig _config;
 
-		public HookMessagesController(ILogger<HookMessagesController> logger, IHookMessagesRepo repo, CurrentUser user, AppConfig config)
+		public HookMessagesController(ILogger<HookMessagesController> logger, IHookMessagesRepo repo, CurrentUser user, 
+				AppConfig config, IDbHelper db)
     {
         _logger = logger;
         _repo = repo;
 				_user = user;
+				_db = db;
 				_config = config;
 
 		}
@@ -48,7 +53,7 @@ public class HookMessagesController
 		}
 
 		[Function("GetOneHook")]
-		public async Task<IActionResult> GetOneHookMessage([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "hookmessages/{id}")]  
+		public async Task<IActionResult> GetOneHookMessage([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "hookmessages/{id}")]
 		HttpRequest req, Guid id)
 		{
 				if (!_user.IsAuthenticated) return new UnauthorizedResult();
@@ -60,22 +65,60 @@ public class HookMessagesController
 		}
 
 
-
-		[Function("DeleteHook")]
-		public async Task<IActionResult> DeleteHook([HttpTrigger(AuthorizationLevel.Anonymous, "delete", Route = "hookmessages/{monthkey}")]
-				HttpRequest req, Guid id)
+		[Function("GetOneHookWithKey")]
+		public async Task<IActionResult> GetOneHookWithKey([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "month/{month}/hookmessages/{id}")]
+		HttpRequest req, Guid id, string month)
 		{
 				if (!_user.IsAuthenticated) return new UnauthorizedResult();
 				if (!_user.IsAuthorized("finance_user")) return new ForbidResult();
-				var item = await _repo.GetOneHook(id);
+
+				var item = await _repo.GetOneHookWithMonth(id,month );
+				if (item == null) return new NotFoundResult();
+				return new OkObjectResult(item);
+		}
+
+
+
+		[Function("DeleteHook")]
+		public async Task<IActionResult> DeleteHook([HttpTrigger(AuthorizationLevel.Anonymous, "delete", Route = "month/{month}/hookmessages/{id}")]
+				HttpRequest req, Guid id, string month)
+		{
+				if (!_user.IsAuthenticated) return new UnauthorizedResult();
+				if (!_user.IsAuthorized("finance_user")) return new ForbidResult();
+				var item = await _repo.GetOneHookWithMonth(id, month);
 				if (item == null) return new NotFoundResult();
 				await _repo.DeleteHook(item);
 				return new OkObjectResult(item);
 		}
 
 
+		[Function("DeleteManyHook")]
+		public async Task<IActionResult> DeleteHookMany([HttpTrigger(AuthorizationLevel.Anonymous, "delete", Route = "month/{month}/hookmessages")]
+				HttpRequest req, DateTime month)
+		{
+				if (!_user.IsAuthenticated) return new UnauthorizedResult();
+				if (!_user.IsAuthorized("finance_user")) return new ForbidResult();
+
+				var body = await req.ReadFromJsonAsync<IEnumerable<string>>();
+
+
+				var items = await _repo.GetHookMessagesMonthAsync(month);
+				var toDelete = items.Where(e => body!.Contains(e.Id.ToString()))
+						.ToList();
+
+				for (var i = 0; i < toDelete.Count(); i++)
+				{
+						var item = toDelete[i];
+						await _repo.DeleteHook(item);
+				}
+				await _db.SaveChangesAsync();
+
+				return new OkObjectResult(toDelete.Select(e=>e.Id).ToArray());
+		}
+
+
 		[Function("ReprocessHookMessage")]
-		public async Task<IActionResult> ReprocessHookMessage([HttpTrigger(AuthorizationLevel.Anonymous, "delete", Route = "hookmessages/{monthkey}/reprocess")]
+		public async Task<IActionResult> ReprocessHookMessage([HttpTrigger(AuthorizationLevel.Anonymous, "delete", Route = "hookmessages/{id}/reprocess")]
 				HttpRequest req, Guid id)
 		{
 				if (!_user.IsAuthenticated) return new UnauthorizedResult();

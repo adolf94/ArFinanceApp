@@ -1,4 +1,4 @@
-name: Build and Deploy Finance App
+name: z DEPRECATED - Build and Deploy Finance App
 
 on:
   workflow_dispatch:

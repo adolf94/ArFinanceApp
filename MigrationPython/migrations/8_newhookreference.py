@@ -37,12 +37,11 @@ def reset_ledgers(db):
     def create_acct_balances(p,c):
         month = parse(c["MinMonth"]).replace(tzinfo=None)
         while month <= parse(c["MaxMonth"]).replace(tzinfo=None):
-            currentKey = f"{month.strftime("%Y|%m")}|{c["Id"]}"
+            currentKey = f"{month.strftime("%Y|%m")}|{c["id"]}"
             item = {
-                "AccountId": c["Id"],
-                "id": f"AccountBalance|{currentKey}",
-                "Id": currentKey,
-                "Discriminator": "AccountBalance",
+                "AccountId": c["id"],
+                "id": currentKey,
+                "$type": "AccountBalance",
                 "Year": month.year,
                 "Month": month.month,
                 "DateStart": month.replace(day=c["PeriodStartDay"]).strftime("%Y-%m-&d"),
@@ -66,7 +65,7 @@ def reset_ledgers(db):
             "id": f"MonthlyTransaction|{month.strftime("%Y-%m-01")}",
             "MonthKey": month.strftime("%Y-%m-01"),
             "PartitionKey": "default",
-            "Discriminator": "MonthlyTransaction",
+            "$type": "MonthlyTransaction",
             "Transactions":[]
         }
         balance.append(newitem)
@@ -79,8 +78,9 @@ def reset_ledgers(db):
     
     AccountDictionary = reduce(lambda p,c: ({**p, c["Id"]:c}), 
                                db["Account"],
-                               {})
-    BalanceDictionary = reduce(lambda p,c: {**p, c["Id"]:c}, 
+                                {})
+
+    BalanceDictionary = reduce(lambda p,c: {**p, c["id"]:c}, 
                                acctBals,
                                {})
     
@@ -117,24 +117,23 @@ def reset_ledgers(db):
             raise ex
         
         for b in acctBals:
-            if b["AccountId"] == acctId and b["Id"] > key:
+            if b["AccountId"] == acctId and b["id"] > key:
                 b["Balance"] += amount
                 b["EndingBalance"] += amount
         return key
     
-    db["AccountBalnce"] = acctBals
     for tran in db["Transaction"]:
         tran["EpochUpdated"] = parse(tran["DateAdded"]).timestamp()
         tran["MonthKey"] = parse(tran["Date"]).strftime("%Y-%m-01")
 
-        updateMonthBal(tran["Id"], tran["Date"], tran["EpochUpdated"])
+        updateMonthBal(tran["id"], tran["Date"], tran["EpochUpdated"])
 
         updateAcct(tran["DebitId"], tran["Amount"])
-        debitKey = updateBalances(tran["Id"], tran["DebitId"], tran["Date"], tran["EpochUpdated"]
+        debitKey = updateBalances(tran["id"], tran["DebitId"], tran["Date"], tran["EpochUpdated"]
                                   , tran["Amount"])
 
         updateAcct(tran["CreditId"], -tran["Amount"])
-        creditKey = updateBalances(tran["Id"], tran["CreditId"], tran["Date"], tran["EpochUpdated"]
+        creditKey = updateBalances(tran["id"], tran["CreditId"], tran["Date"], tran["EpochUpdated"]
                                   , tran["Amount"])
         
         tran["BalanceRefs"] = [
@@ -181,6 +180,7 @@ def reset_ledgers(db):
 
     db["AccountBalance"] = final_acctBals
     
+
     db["HookMessages"] = list(map(lambda e: {**e,"Status": "New", "TransactionId":None, "MonthKey":parse(e["Date"]).strftime("%Y-%m-01")}, db["HookMessages"]))
 
     return db
@@ -196,7 +196,7 @@ def table_metadata():
         {
             "Container": "Account",
             "PartitionKeyPath": "/PartitionKey",
-            "mapper": lambda e : ({**e,id:"Account|"+e["Id"]})
+            "mapper": lambda e : ({**e})
         },
         {
             "Container": "AccountBalance",
@@ -205,7 +205,7 @@ def table_metadata():
         {
             "Container": "AccountGroup",
             "PartitionKeyPath": "/PartitionKey",
-            "mapper": lambda e : {**e, id: "AccountGroup|%s" % (e["Id"]) }
+            "mapper": lambda e : {**e }
         },
         {
             "Container": "AccountType",

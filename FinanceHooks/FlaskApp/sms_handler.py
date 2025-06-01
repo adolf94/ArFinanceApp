@@ -17,8 +17,15 @@ def handle_sms(jsonBody : dict):
         
         case "HSBC":
            return handle_unionbank_sms(jsonBody)
+        
+        case "MaybankPH":
+           return handle_maybank_sms(jsonBody)
 
-
+        case _:
+            return {"data":{
+                "matchedConfig":"sms",
+                "success":False
+            }}
 
 def handle_bpi_sms(data):
     #[BPI] DO NOT SHARE: Use your SECRET one-time PIN 930765 to complete your Cardless Withdrawal of PHP 5,000. For the Order ID, go to your BPI app's inbox.
@@ -49,7 +56,7 @@ def handle_unionbank_sms(data):
     searc = get_regex_match(reg, data["sms_rcv_msg"])
     if searc != None:
         output = regex_matches_tolist(searc)
-        return  {"data":{
+        return {"data":{
             "matchedConfig":"sms_unionbank_paydirect",
             "success" : True,
             "amount": output[1]['group'],
@@ -83,12 +90,33 @@ def handle_unionbank_sms(data):
             "reference":output[4]['span'],
         }}
 
-    return {data:{
+    return {"data":{
         "matchedConfig" : "sms_unionbank",
         "success" : False,
     }}
 
+def handle_maybank_sms(data):
+    #PHP 10,018.00 was withdrawn from XXXXXXX0518 on 26-MAY-2025/11:39:14 at TERMINAL 9888. For inquiries, please call (02)85883888. Maybank is regulated by the BSP
+    reg = r'PHP ([0-9,\.]+) was withdrawn from ([0-9X]+) on ([0-9A-Z\-\/:]+) at TERMINAL [0-9]+. For inquiries, please call [\()0-9]+. Maybank is regulated by the BSP'
+    
+    searc = get_regex_match(reg, data["sms_rcv_msg"])
+    if searc != None:
+        output = regex_matches_tolist(searc)
+        return  {"data":{
+            "matchedConfig":"sms_maybank_withdrawal",
+            "success" : True,
+            "amount": output[0]['group'],
+            "ownAcct":output[1]['group'],
+        }, "location": {
+            "amount": output[0]['span'],
+            "ownAcct":output[1]['span'],
+        }}
+    
 
+    return {data:{
+        "matchedConfig":"sms_maybank",
+        "success":False
+    }}
 
 def handle_hsbc_sms(data):
     #YOUR HSBC CARD ENDING IN *** 7187 WAS USED AT SHINSEN SUSHI BAR ON 10/05/2025 AT 20:31 IN THE AMOUNT OF PHP3174.08. PLS CALL 0279768000 FOR ANY CONCERNS.

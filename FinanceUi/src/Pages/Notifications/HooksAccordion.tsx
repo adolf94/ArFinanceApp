@@ -9,6 +9,7 @@ import { mutateHookMessages } from "../../repositories/hookMessages";
 import api from "../../components/api";
 import { confirm } from "material-ui-confirm";
 import db from "../../components/LocalDb";
+import React from "react";
 const HooksTransaction = lazy(()=>import('./HooksTransaction'))
 
 const camelToSpace = (str:string)=>{
@@ -71,7 +72,7 @@ const Icons = {
 }
 
 
-const DeleteLoading = ({onCommit, seconds})=>{
+const DeleteLoading = ({onCommit,onClick, onCancel : propsCancel, seconds})=>{
     const [enabled, setEnabled] = useState(false)
     const [value, setValue] = useState(0)
     const [endTime, setEndTime] = useState(null)
@@ -82,6 +83,7 @@ const DeleteLoading = ({onCommit, seconds})=>{
         const end = moment().add(seconds, "seconds")
         setEndTime(end)
         setEnabled(true)
+        onClick()
         const timer = setInterval(()=>{
             const remaining = end.diff(moment(), "milliseconds")
             const curValue =  100 - ( remaining * 100 / (seconds * 1000))
@@ -96,6 +98,7 @@ const DeleteLoading = ({onCommit, seconds})=>{
     }
 
     const onCancel = ()=>{
+        propsCancel()
         clearInterval(timer)
         setEnabled(false)
         setValue(0)
@@ -111,7 +114,7 @@ const DeleteLoading = ({onCommit, seconds})=>{
 }
 
 
-const HooksAccordion = ({notif, onDelete }) => {
+const HooksAccordion = ({notif, onDelete, onCancel }) => {
 
 
     const navigate = useNavigate()
@@ -158,7 +161,8 @@ const HooksAccordion = ({notif, onDelete }) => {
                     </AccordionSummary>
                 </Grid>
                 <Grid sm={1} sx={{shrink:1, textAlign:'right'}}>
-                    {notif.transactionId ? <Box  sx={{display:'inline-flex', position:'relative', padding:1, top:"8px"}}><Task color="success"/></Box> : <DeleteLoading onCommit={()=>deleteHook.mutateAsync()} seconds={5}></DeleteLoading>}
+                    {notif.transactionId ? <Box  sx={{display:'inline-flex', position:'relative', padding:1, top:"8px"}}>
+                        <Task color="success"/></Box> : <DeleteLoading onClick={()=>onDelete(notif.id)} onCancel={()=>onCancel(notif.id)} onCommit={()=>{}} seconds={5}></DeleteLoading>}
                     {/* <IconButton onClick={()=>setExpanded(!expanded)}>
                         {expanded?<ExpandLess />:<ExpandMore/>}
                     </IconButton> */}
@@ -182,7 +186,7 @@ const HooksAccordion = ({notif, onDelete }) => {
                                         if(!notif.extractedData[key]) return "";
                                         if(Icons.hasOwnProperty(key)){
                                                         
-                                            return <><ListItem>
+                                            return <React.Fragment key={key}><ListItem>
                                                 <ListItemIcon>
                                                     <Tooltip title={camelToSpace(key)}>
                                                         {Icons[key].icon}
@@ -193,9 +197,9 @@ const HooksAccordion = ({notif, onDelete }) => {
                                                 }
                                             </ListItem>
                                                 <Divider />
-                                            </>    
+                                            </React.Fragment>    
                                         }else{            
-                                            return <ListItem>
+                                            return <ListItem key={key}>
                                                 <ListItemIcon>
                                                     <Tooltip title={camelToSpace(key)}>
                                                         <Attachment />
@@ -211,8 +215,8 @@ const HooksAccordion = ({notif, onDelete }) => {
                         </List>
                     </Grid>
                     <Grid container md={6} sx={{justifyContent:"flex-start"}}>
-                        <Suspense fallback={<Skeleton fullWidth height="4rem"/>}>
-                            <HooksTransaction hook={notif} />
+                        <Suspense fallback={<Skeleton variant="text" height="4rem"/>}>
+                            <HooksTransaction hook={notif} shown={expanded} />
                         </Suspense>
                     </Grid>
                 </Grid>

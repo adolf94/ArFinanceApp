@@ -13,6 +13,7 @@ using FinanceFunction.Data.CosmosRepo;
 using FinanceFunction.Middlewares;
 using FinanceFunction.Utilities;
 using FinanceFunction.Dtos;
+using Microsoft.AspNetCore.Http;
 
 var builder = FunctionsApplication.CreateBuilder(args);
 
@@ -30,6 +31,12 @@ builder.Services.Configure<ForwardedHeadersOptions>(options =>
 var config = FnConfigToAppConfig.PrepareConfig();
 builder.Services.AddSingleton(config);
 builder.Services.AddScoped<CurrentUser>();
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped(typeof(CancellationToken), serviceProvider =>
+{
+		IHttpContextAccessor httpContext = serviceProvider.GetRequiredService<IHttpContextAccessor>();
+		return httpContext.HttpContext?.RequestAborted ?? CancellationToken.None;
+});
 //builder.Services.AddOpen Telemetry().UseAzureMonitor(e =>
 //{
 //		e.ConnectionString = builder.Configuration.GetSection("InsightsLogging").GetValue<string>("ConnectionString");
