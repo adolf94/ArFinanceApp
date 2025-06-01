@@ -48,7 +48,7 @@ public class VendorsController
 				var vendor = await req.ReadFromJsonAsync<Vendor>()!;
         if (vendor == null) return new BadRequestResult();
 				bool result = _repo.CreateVendor(vendor!);
-				return await Task.FromResult(new CreatedAtRouteResult("vendors/{id}", new { id = vendor.Id }, vendor));
+				return await Task.FromResult(new CreatedResult("api/vendors/" + vendor.Id , vendor));
 		}
 
 }

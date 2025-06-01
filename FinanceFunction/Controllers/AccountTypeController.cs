@@ -52,7 +52,7 @@ public class AccountTypeController
 				var type = await req.ReadFromJsonAsync<AccountType>();
 
 				await _repo.Create(type!);
-				return await Task.FromResult(new CreatedAtRouteResult("accounttypes/{id}", new { id = type!.Id }, type));
+				return await Task.FromResult(new CreatedResult("api/accounttypes/" + type!.Id , type));
 
 		}
 }

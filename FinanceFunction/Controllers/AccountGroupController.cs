@@ -58,7 +58,7 @@ public class AccountGroupController
 				if (!_user.IsAuthorized(RequiredRole)) return new ForbidResult();
 				var type = await req.ReadFromJsonAsync<AccountGroup>();
 				_repo.Create(type!);
-				return await Task.FromResult(new CreatedAtRouteResult("accountgroups/{id}", new { id = type!.Id }, type));
+				return await Task.FromResult(new CreatedResult("api/accountgroups/" + type!.Id , type));
 
 		}
 

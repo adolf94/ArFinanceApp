@@ -65,7 +65,11 @@ namespace FinanceFunction.Data.CosmosRepo
 						}
 				}
 
-
+				public async Task<Account?> GetAccountFromName(Guid groupId, string name)
+				{
+						var acct = await _context.Accounts!.Where(e => e.Name == name && e.AccountGroupId == groupId).FirstOrDefaultAsync();
+						return acct;
+				}
 
 				public Account UpdateDebitAcct(Guid debitId, decimal amount)
 				{

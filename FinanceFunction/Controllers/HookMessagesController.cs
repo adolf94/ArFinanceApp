@@ -150,7 +150,7 @@ public class HookMessagesController
 
 				await _repo.DeleteHook(item);
 				var newItem = await _repo.GetOneHook(Guid.Parse(body!.Id));
-				return new CreatedAtRouteResult("hookmessages/{id}/", new { id = body.Id! }, newItem);
+				return new CreatedResult("api/hookmessages/" + body.Id!, newItem);
 
 		}
 		public class HookHookReprocess
