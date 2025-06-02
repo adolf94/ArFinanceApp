@@ -14,7 +14,6 @@
   CircularProgress,
 } from "@mui/material";
 import react, { useEffect, useState } from "react";
-import api from "../../components/api";
 import React from "react";
 import db from "../../components/LocalDb";
 import { ACCOUNT_TYPE, fetchTypes } from "../../repositories/accountTypes";

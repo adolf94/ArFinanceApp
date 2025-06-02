@@ -6,7 +6,6 @@ import selectionByHook, { getReferenceName } from "./selectionByHook";
 import moment from "moment";
 import { useNavigate } from "react-router-dom";
 import { mutateHookMessages } from "../../repositories/hookMessages";
-import api from "../../components/api";
 import { confirm } from "material-ui-confirm";
 import db from "../../components/LocalDb";
 import React from "react";
@@ -130,7 +129,7 @@ const HooksAccordion = ({notif, onDelete, onCancel }) => {
         confirm({
             description:"Are you sure to reprocess this notification?"
         }).then(e=>{
-            api.delete(`/hookmessages/${notif.id}/reprocess`)
+            fnApi.delete(`/hookmessages/${notif.id}/reprocess`)
                 .then(e=>{
                     db.hookMessages.put(e.data)
                     db.hookMessages.delete(notif.id)

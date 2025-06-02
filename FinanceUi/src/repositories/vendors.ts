@@ -1,5 +1,4 @@
 ﻿import { useMutation, useQueryClient } from "@tanstack/react-query";
-import api from "../components/api";
 import { Vendor } from "FinanceApi";
 import { queryClient } from "../App";
 import { sortBy } from 'lodash'

@@ -1,5 +1,4 @@
 ﻿import { useMutation, useQueryClient } from "@tanstack/react-query";
-import api from "../components/api";
 import { AccountType } from "FinanceApi";
 import fnApi from "../components/fnApi";
 

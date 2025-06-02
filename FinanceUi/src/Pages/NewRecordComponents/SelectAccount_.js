@@ -4,7 +4,6 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faChevronRight } from '@fortawesome/free-solid-svg-icons'
 import useDropdown from '../../components/useDropdown'
 import { v4 as uid} from 'uuid'
-import api from '../../components/api'
 import db from '../../components/LocalDb/index.js'
 import { useQuery } from '@tanstack/react-query'
 import { ACCOUNT, fetchAccounts } from '../../repositories/accounts'
@@ -32,7 +31,7 @@ const SelectAccount = (props) => {
   const newVendor = () => {
     const item = { name: view.searchValue, accountTypeId: "892f20e5-b8dc-42b6-10c9-08dabb20ff77", id: uid() }
     view.setViewContext({ searchValue: "" })
-    api.post("vendors", item)
+    fnApi.post("vendors", item)
       .then(e => {
         db.vendors.put(e.data)
       }).catch(() => {

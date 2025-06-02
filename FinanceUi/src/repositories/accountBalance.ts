@@ -1,5 +1,4 @@
-﻿import api from "../components/api";
-import { AxiosResponse } from "axios";
+﻿import { AxiosResponse } from "axios";
 import fnApi from "../components/fnApi";
 export const ACCOUNT_BALANCE = "accountBalance";
 

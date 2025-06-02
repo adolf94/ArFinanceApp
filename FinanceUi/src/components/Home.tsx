@@ -5,8 +5,6 @@ import {
   useGoogleLogin,
   GoogleLogin,
 } from "@react-oauth/google";
-import qs from "qs";
-import api from "./api";
 
 const LoginButton = () => {
   const [code, setCode] = useState("");
@@ -50,17 +48,6 @@ export const Home = () => {
   const [refresh, setRefresh] = useState("");
   const [loginState, setLoginState] = useState("");
 
-  const getToken = () => {
-    api
-      .post(
-        "/google/auth/refresh",
-        { Refresh_Token: refresh },
-        { preventAuth: true },
-      )
-      .then((e) => console.log(e.data));
-  };
-
-  useEffect(() => {}, []);
 
   const redirectLogin = () => {
   };

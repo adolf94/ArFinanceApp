@@ -40,7 +40,7 @@ import DropdownSelect from "../../common/Select";
 import cron from "cron-parser";
 import { useMutateSchedule } from "../../repositories/scheduledTasks";
 import VendorTextField from "./VendorTextField";
-import { getToken } from "../../components/api";
+import { getToken } from "../../components/fnApi";
 import { getOneHookMsg, HOOK_MESSAGES } from "../../repositories/hookMessages";
 import { ACCOUNT, fetchByAccountId } from "../../repositories/accounts";
 import db from "../../components/LocalDb/AppDb";

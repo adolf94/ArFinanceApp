@@ -4,7 +4,6 @@
   useQueryClient,
 } from "@tanstack/react-query";
 import { Account } from "FinanceApi";
-import api from "../components/api";
 import { queryClient } from "../App";
 import replaceById from "../common/replaceById";
 import db from "../components/LocalDb";

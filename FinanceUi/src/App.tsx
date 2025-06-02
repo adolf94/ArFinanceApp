@@ -6,7 +6,6 @@ import { Layout } from "./components/Layout";
 import db from "./components/LocalDb";
 import { ConfirmProvider } from "material-ui-confirm";
 import { SnackbarProvider } from 'notistack'
-import api from "./components/api";
 import "./custom.css";
 import "@fontsource/roboto/300.css";
 import "@fontsource/roboto/400.css";

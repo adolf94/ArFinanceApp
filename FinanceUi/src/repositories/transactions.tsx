@@ -1,5 +1,4 @@
 import { useMutation } from "@tanstack/react-query";
-import api from "../components/api";
 import {
     Account, 
     CreateTransactionDto,
@@ -185,7 +184,7 @@ export const fetchTransactionsByMonthKey = async (year: number, month: number, o
   }) 
   let transactions = [] as Transaction[]
   if(!hasData){
-     transactions = await api<Transaction[]>("transactions", { params: { year, month : month + 1 }, noLastTrans: false })
+     transactions = await fnApi<Transaction[]>("transactions", { params: { year, month : month + 1 }, noLastTrans: false })
         .then(res=>res.data) as Transaction[]
   }else{
     transactions = await Promise.all(monthlytransaction.transactions.map(
@@ -246,7 +245,7 @@ export const fetchByAccountMonthKey = async (
         let MT1 = await db.monthTransactions.where("monthKey").equals( KEY1 ).first();
         
         if(!MT1){
-           await api<Transaction[]>("transactions", { params: { year, month  }, noLastTrans: false })
+           await fnApi<Transaction[]>("transactions", { params: { year, month  }, noLastTrans: false })
             .then(res=>res.data as Transaction[])
             .then(items=>Promise.all(items.map(e=>ensureTransactionAcctData(e)))) 
 
@@ -263,7 +262,7 @@ export const fetchByAccountMonthKey = async (
         let mt0 = await db.monthTransactions.where("monthKey").equals( key0 ).first();
 
         if(!mt0){
-          let data = await api<Transaction[]>("transactions", { params: { year: date0.year(), month: date0.month() + 1  }, noLastTrans: false })
+          let data = await fnApi<Transaction[]>("transactions", { params: { year: date0.year(), month: date0.month() + 1  }, noLastTrans: false })
             .then(res=>res.data as Transaction[])
             .then(items=>Promise.all(items.map(e=>ensureTransactionAcctData(e)))) 
             

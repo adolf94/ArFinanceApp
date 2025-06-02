@@ -62,7 +62,7 @@ def reset_ledgers(db):
     month = parse(minMax["min"]).replace(tzinfo=None)
     while month <= parse(minMax["max"]).replace(tzinfo=None):
         newitem = {
-            "id": f"MonthlyTransaction|{month.strftime("%Y-%m-01")}",
+            "id": f"{month.strftime("%Y-%m-01")}",
             "MonthKey": month.strftime("%Y-%m-01"),
             "PartitionKey": "default",
             "$type": "MonthlyTransaction",
@@ -76,7 +76,7 @@ def reset_ledgers(db):
                        db["MonthTransactions"] ,
                        {})
     
-    AccountDictionary = reduce(lambda p,c: ({**p, c["Id"]:c}), 
+    AccountDictionary = reduce(lambda p,c: ({**p, c["id"]:c}), 
                                db["Account"],
                                 {})
 
@@ -188,95 +188,95 @@ def reset_ledgers(db):
 
 def table_metadata():
     return [
-        {
-            "Container": "__EfMigrations",
-            "PartitionKeyPath": "/Id",
-            "mapper" : lambda e : e
-        },
-        {
-            "Container": "Account",
-            "PartitionKeyPath": "/PartitionKey",
-            "mapper": lambda e : ({**e})
-        },
+        # {
+        #     "Container": "__EfMigrations",
+        #     "PartitionKeyPath": "/Id",
+        #     "mapper" : lambda e : e
+        # },
+        # {
+        #     "Container": "Account",
+        #     "PartitionKeyPath": "/PartitionKey",
+        #     "mapper": lambda e : ({**e})
+        # },
         {
             "Container": "AccountBalance",
             "PartitionKeyPath": "/PartitionKey"
         },
-        {
-            "Container": "AccountGroup",
-            "PartitionKeyPath": "/PartitionKey",
-            "mapper": lambda e : {**e }
-        },
-        {
-            "Container": "AccountType",
-            "PartitionKeyPath": "/PartitionKey"
-        },
-        {
-            "Container": "AuditLogs",
-            "PartitionKeyPath": "/Path",
-        },
-        {
-            "Container": "CoopOption",
-            "PartitionKeyPath":"/AppId",
-        },
-        {
-            "Container":"ScheduledTransactions",
-            "PartitionKeyPath":"/PartitionKey"
-        },
-        {
-            "Container": "LoanPayments",
-            "PartitionKeyPath": "/AppId",
-        },
-        {
-            "Container": "HookMessages",
-            "PartitionKeyPath": "/MonthKey",
-            "mapper": lambda e : { **e, "Status": "New", "TransactionId":None, "MonthKey":parse(e["Date"]).strftime("%Y-%m-01")}
-        },
-        {
-            "Container": "LedgerEntries",
-            "PartitionKeyPath": "/MonthGroup"
-        },
-        {
-            "Container": "LedgerAccounts",
-            "PartitionKeyPath": "/PartitionKey"
-        },
-        {
-            "Container": "LoanProfiles",
-            "PartitionKeyPath": "/AppId"
-        },
-        {
-            "Container": "Loans",
-            "PartitionKeyPath":"/AppId",
-        },
-        {
-            "Container": "MemberProfiles",
-            "PartitionKeyPath":"/AppId"
-        },
-        {
-            "Container": "Payments",
-            "PartitionKeyPath":"/AppId"
-        },
-        {
-            "Container":"Transaction",
-            "PartitionKeyPath":"/PartitionKey",
-            "mapper": lambda e : { **e, "MonthKey": parse(e.Date).strftime("%Y-%m-01"), "Notifications" :[]}
-        },
-        {
-            "Container":"User",
-            "PartitionKeyPath":"/PartitionKey"
-        },
-        {
-            "Container":"Vendor",
-            "PartitionKeyPath":"/PartitionKey"
-        },
+        # {
+        #     "Container": "AccountGroup",
+        #     "PartitionKeyPath": "/PartitionKey",
+        #     "mapper": lambda e : {**e }
+        # },
+        # {
+        #     "Container": "AccountType",
+        #     "PartitionKeyPath": "/PartitionKey"
+        # },
+        # {
+        #     "Container": "AuditLogs",
+        #     "PartitionKeyPath": "/Path",
+        # },
+        # {
+        #     "Container": "CoopOption",
+        #     "PartitionKeyPath":"/AppId",
+        # },
+        # {
+        #     "Container":"ScheduledTransactions",
+        #     "PartitionKeyPath":"/PartitionKey"
+        # },
+        # {
+        #     "Container": "LoanPayments",
+        #     "PartitionKeyPath": "/AppId",
+        # },
+        # {
+        #     "Container": "HookMessages",
+        #     "PartitionKeyPath": "/MonthKey",
+        #     "mapper": lambda e : { **e, "Status": "New", "TransactionId":None, "MonthKey":parse(e["Date"]).strftime("%Y-%m-01")}
+        # },
+        # {
+        #     "Container": "LedgerEntries",
+        #     "PartitionKeyPath": "/MonthGroup"
+        # },
+        # {
+        #     "Container": "LedgerAccounts",
+        #     "PartitionKeyPath": "/PartitionKey"
+        # },
+        # {
+        #     "Container": "LoanProfiles",
+        #     "PartitionKeyPath": "/AppId"
+        # },
+        # {
+        #     "Container": "Loans",
+        #     "PartitionKeyPath":"/AppId",
+        # },
+        # {
+        #     "Container": "MemberProfiles",
+        #     "PartitionKeyPath":"/AppId"
+        # },
+        # {
+        #     "Container": "Payments",
+        #     "PartitionKeyPath":"/AppId"
+        # },
+        # {
+        #     "Container":"Transaction",
+        #     "PartitionKeyPath":"/PartitionKey",
+        #     "mapper": lambda e : { **e, "MonthKey": parse(e.Date).strftime("%Y-%m-01"), "Notifications" :[]}
+        # },
+        # {
+        #     "Container":"User",
+        #     "PartitionKeyPath":"/PartitionKey"
+        # },
+        # {
+        #     "Container":"Vendor",
+        #     "PartitionKeyPath":"/PartitionKey"
+        # },
         {
             "Container":"MonthTransactions",
             "PartitionKeyPath":"/PartitionKey"
         },
-        {
-            "Container":"HookReferences",
-            "PartitionKeyPath":"/PartitionKey"
-        }
+        # {
+        #     "Container":"HookReferences",
+        #     "PartitionKeyPath":"/PartitionKey"
+        # }
     ]
      
       
