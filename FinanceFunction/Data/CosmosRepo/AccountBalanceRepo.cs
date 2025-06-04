@@ -75,6 +75,7 @@ namespace FinanceFunction.Data.CosmosRepo
                 DateTime period = acct.MaxMonth.AddMonths(1);
                 while (period <= currentPeriod)
                 {
+                    //check acctBalance before insert?
                     var newBalance = new AccountBalance(period.Year, period.Month, acct.Id, acct.PeriodStartDay)
                     {
                         Balance = acct.ResetEndOfPeriod ? 0 : acct.Balance,

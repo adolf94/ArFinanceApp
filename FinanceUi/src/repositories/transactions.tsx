@@ -459,33 +459,33 @@ export const useMutateTransaction = () => {
               localStorage.setItem("last_transaction", item.id)
 
                 let accounts = e.data.accounts;
-                accounts.forEach(e => {
-                    queryClient.setQueryData([ACCOUNT, { id: e.id }], e);
-                    db.accounts.put(e)
+                accounts.forEach(a => {
+                    queryClient.setQueryData([ACCOUNT, { id: a.id }], e);
+                    db.accounts.put(a)
                 })
 
 
-                e.data.balances.forEach(e =>{
-                    let item = db.accountBalances.where("id").equals(e.id)
+                e.data.balances.forEach(b =>{
+                    let item = db.accountBalances.where("id").equals(b.id)
                         .first()
                         //dont insert if not existing,
-                      queryClient.setQueryData([MONTHLY_TRANSACTION, {monthKey: e.monthKey}], e)
+                      // queryClient.setQueryData([ACCOUNT_BALANCE, {id: b.id}], e)
 
                     if(!!item) {
                       queryClient.setQueryData([
                             ACCOUNT_BALANCE,
-                            { accountId: e.accountId, date: moment(e.dateStart).format("YYYY-MM-dd") }]
-                            , e)
-                      db.accountBalances.put(e)
+                            { accountId: b.accountId, date: moment(b.dateStart).format("YYYY-MM-01") }]
+                            , b)
+                      db.accountBalances.put({...b, dateUpdated:moment().toISOString()})
                     }
                 })
-                e.data.monthly.forEach(e => {
-                    let item = db.accountBalances.where("id").equals(e.monthKey)
+                e.data.monthly.forEach(m => {
+                    let item = db.accountBalances.where("id").equals(m.monthKey)
                         .first()
                     //dont insert if not existing,
                     if (!!item) {
-                      queryClient.setQueryData([MONTHLY_TRANSACTION, {monthKey: e.monthKey}], e)
-                      db.monthTransactions.put(e)
+                      queryClient.setQueryData([MONTHLY_TRANSACTION, {monthKey: m.monthKey}], m)
+                      db.monthTransactions.put({...m, dateUpdated:moment().toISOString()})
                     }
                 })
 

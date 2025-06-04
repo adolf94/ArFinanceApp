@@ -32,6 +32,9 @@ def reset_ledgers(db):
                                        "MaxMonth":minMax["max"], 
                                        "Balance":0, "CurrBalance":0}, 
                                        db["Account"]))
+    
+
+
     print("generate balances")
 
     def create_acct_balances(p,c):
@@ -70,6 +73,7 @@ def reset_ledgers(db):
         }
         balance.append(newitem)
         month = month + relativedelta(months=1)
+
     db["MonthTransactions"] = balance
 
     monthKeys = reduce(lambda p,c: ({**p,c["MonthKey"]: c}),
@@ -134,7 +138,7 @@ def reset_ledgers(db):
 
         updateAcct(tran["CreditId"], -tran["Amount"])
         creditKey = updateBalances(tran["id"], tran["CreditId"], tran["Date"], tran["EpochUpdated"]
-                                  , tran["Amount"])
+                                  , -tran["Amount"])
         
         tran["BalanceRefs"] = [
             {
@@ -167,15 +171,27 @@ def reset_ledgers(db):
     
     for acctId in grouped_balace:
         grouped_balace[acctId].sort(key = lambda d: d["id"])
-        keep_index = -1
+        keep_index = 0
         for i, value in enumerate(grouped_balace[acctId]):
             if value["EndingBalance"] != 0:
                 keep_index = i - 1
                 break
         if keep_index == -1:
-            final_acctBals = final_acctBals + grouped_balace[acctId]
-            continue 
-        final_acctBals = final_acctBals + grouped_balace[acctId][keep_index:]
+            keep_index = 0
+        #if keep_index = -1 as is lang
+
+        
+        copied_grouped = sorted(grouped_balace[acctId], key = lambda d: d["id"], reverse=True)
+        last_index = len(copied_grouped)
+        for i, value in enumerate(copied_grouped):
+            if value["EndingBalance"] != value["Balance"]:
+                last_index = len(copied_grouped) - i 
+                break
+
+        AccountDictionary[acctId]["MinMonth"] = parse(grouped_balace[acctId][keep_index]["DateStart"]).strftime("%Y-%m-01")
+        AccountDictionary[acctId]["MaxMonth"] = parse(grouped_balace[acctId][last_index-1]["DateStart"]).strftime("%Y-%m-01")
+
+        final_acctBals = final_acctBals + grouped_balace[acctId][keep_index:last_index]
         
 
     db["AccountBalance"] = final_acctBals
@@ -188,95 +204,95 @@ def reset_ledgers(db):
 
 def table_metadata():
     return [
-        # {
-        #     "Container": "__EfMigrations",
-        #     "PartitionKeyPath": "/Id",
-        #     "mapper" : lambda e : e
-        # },
-        # {
-        #     "Container": "Account",
-        #     "PartitionKeyPath": "/PartitionKey",
-        #     "mapper": lambda e : ({**e})
-        # },
+        {
+            "Container": "__EfMigrations",
+            "PartitionKeyPath": "/Id",
+            "mapper" : lambda e : e
+        },
+        {
+            "Container": "Account",
+            "PartitionKeyPath": "/PartitionKey",
+            "mapper": lambda e : ({**e})
+        },
         {
             "Container": "AccountBalance",
             "PartitionKeyPath": "/PartitionKey"
         },
-        # {
-        #     "Container": "AccountGroup",
-        #     "PartitionKeyPath": "/PartitionKey",
-        #     "mapper": lambda e : {**e }
-        # },
-        # {
-        #     "Container": "AccountType",
-        #     "PartitionKeyPath": "/PartitionKey"
-        # },
-        # {
-        #     "Container": "AuditLogs",
-        #     "PartitionKeyPath": "/Path",
-        # },
-        # {
-        #     "Container": "CoopOption",
-        #     "PartitionKeyPath":"/AppId",
-        # },
-        # {
-        #     "Container":"ScheduledTransactions",
-        #     "PartitionKeyPath":"/PartitionKey"
-        # },
-        # {
-        #     "Container": "LoanPayments",
-        #     "PartitionKeyPath": "/AppId",
-        # },
-        # {
-        #     "Container": "HookMessages",
-        #     "PartitionKeyPath": "/MonthKey",
-        #     "mapper": lambda e : { **e, "Status": "New", "TransactionId":None, "MonthKey":parse(e["Date"]).strftime("%Y-%m-01")}
-        # },
-        # {
-        #     "Container": "LedgerEntries",
-        #     "PartitionKeyPath": "/MonthGroup"
-        # },
-        # {
-        #     "Container": "LedgerAccounts",
-        #     "PartitionKeyPath": "/PartitionKey"
-        # },
-        # {
-        #     "Container": "LoanProfiles",
-        #     "PartitionKeyPath": "/AppId"
-        # },
-        # {
-        #     "Container": "Loans",
-        #     "PartitionKeyPath":"/AppId",
-        # },
-        # {
-        #     "Container": "MemberProfiles",
-        #     "PartitionKeyPath":"/AppId"
-        # },
-        # {
-        #     "Container": "Payments",
-        #     "PartitionKeyPath":"/AppId"
-        # },
-        # {
-        #     "Container":"Transaction",
-        #     "PartitionKeyPath":"/PartitionKey",
-        #     "mapper": lambda e : { **e, "MonthKey": parse(e.Date).strftime("%Y-%m-01"), "Notifications" :[]}
-        # },
-        # {
-        #     "Container":"User",
-        #     "PartitionKeyPath":"/PartitionKey"
-        # },
-        # {
-        #     "Container":"Vendor",
-        #     "PartitionKeyPath":"/PartitionKey"
-        # },
+        {
+            "Container": "AccountGroup",
+            "PartitionKeyPath": "/PartitionKey",
+            "mapper": lambda e : {**e }
+        },
+        {
+            "Container": "AccountType",
+            "PartitionKeyPath": "/PartitionKey"
+        },
+        {
+            "Container": "AuditLogs",
+            "PartitionKeyPath": "/Path",
+        },
+        {
+            "Container": "CoopOption",
+            "PartitionKeyPath":"/AppId",
+        },
+        {
+            "Container":"ScheduledTransactions",
+            "PartitionKeyPath":"/PartitionKey"
+        },
+        {
+            "Container": "LoanPayments",
+            "PartitionKeyPath": "/AppId",
+        },
+        {
+            "Container": "HookMessages",
+            "PartitionKeyPath": "/MonthKey",
+            "mapper": lambda e : { **e, "Status": "New", "TransactionId":None, "MonthKey":parse(e["Date"]).strftime("%Y-%m-01")}
+        },
+        {
+            "Container": "LedgerEntries",
+            "PartitionKeyPath": "/MonthGroup"
+        },
+        {
+            "Container": "LedgerAccounts",
+            "PartitionKeyPath": "/PartitionKey"
+        },
+        {
+            "Container": "LoanProfiles",
+            "PartitionKeyPath": "/AppId"
+        },
+        {
+            "Container": "Loans",
+            "PartitionKeyPath":"/AppId",
+        },
+        {
+            "Container": "MemberProfiles",
+            "PartitionKeyPath":"/AppId"
+        },
+        {
+            "Container": "Payments",
+            "PartitionKeyPath":"/AppId"
+        },
+        {
+            "Container":"Transaction",
+            "PartitionKeyPath":"/PartitionKey",
+            "mapper": lambda e : { **e, "MonthKey": parse(e.Date).strftime("%Y-%m-01"), "Notifications" :[]}
+        },
+        {
+            "Container":"User",
+            "PartitionKeyPath":"/PartitionKey"
+        },
+        {
+            "Container":"Vendor",
+            "PartitionKeyPath":"/PartitionKey"
+        },
         {
             "Container":"MonthTransactions",
             "PartitionKeyPath":"/PartitionKey"
         },
-        # {
-        #     "Container":"HookReferences",
-        #     "PartitionKeyPath":"/PartitionKey"
-        # }
+        {
+            "Container":"HookReferences",
+            "PartitionKeyPath":"/PartitionKey"
+        }
     ]
      
       

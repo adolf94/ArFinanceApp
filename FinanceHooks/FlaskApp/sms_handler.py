@@ -43,7 +43,7 @@ def handle_bpi_sms(data):
         }}
     
     
-    return {data:{
+    return {"data":{
         "matchedConfig" : "sms_bpi",
         "success" : False,
     }}
@@ -113,7 +113,7 @@ def handle_maybank_sms(data):
         }}
     
 
-    return {data:{
+    return {"data":{
         "matchedConfig":"sms_maybank",
         "success":False
     }}
@@ -138,7 +138,7 @@ def handle_hsbc_sms(data):
         }}
     
 
-    return {data:{
+    return {"data":{
         "matchedConfig":"sms_hsbc",
         "success":False
     }}

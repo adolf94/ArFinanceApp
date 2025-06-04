@@ -49,7 +49,7 @@ namespace FinanceFunction.Data.CosmosRepo
         public Transaction UpdateTransaction(Transaction item)
         {
 
-
+            _context.Entry(item).State = EntityState.Modified;
 
             _context.SaveChangesAsync().Wait();
             return item;
