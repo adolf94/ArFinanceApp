@@ -60,7 +60,7 @@ public class AccountController
 
         var acct = _mapper.Map<Account>(type);
 
-        var exist = _repo.GetAccountFromName(type!.AccountGroupId!.Value, type!.Name!);
+        var exist = await _repo.GetAccountFromName(type!.AccountGroupId!.Value, type!.Name!);
         if (exist != null) return new ConflictObjectResult(exist);
         _repo.Create(acct);
 

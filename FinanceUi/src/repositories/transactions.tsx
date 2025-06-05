@@ -46,7 +46,7 @@ export const temporaryAddTransaction = async (item) => {
             month: moment(item.date).get("month") + 1,
         };
         queryClient.setQueryData([TRANSACTION, prevKey], (prev: Transaction[]) => {
-            return prev.filter(e => e.id === item.id)
+            return (prev || []).filter(e => e.id === item.id)
         });
     }
 
@@ -63,7 +63,7 @@ export const temporaryAddTransaction = async (item) => {
         //if it was not previously fetch, no need to remove. wala eh
         if (!prevItem) {
             queryClient.setQueryData([TRANSACTION, key], (prev: Transaction[]) => {
-                return prev.filter(e=>e.id===item.id)
+                return (prev || []).filter(e=>e.id===item.id)
             });
         }else{
             //if exist before;
@@ -72,7 +72,7 @@ export const temporaryAddTransaction = async (item) => {
             
             if (moment(prevItem.date).format("YYYY-MM") !== moment(item.date).format("YYYY-MM")) {
                 queryClient.setQueryData([TRANSACTION, key], (prev: Transaction[]) => {
-                    return prev.filter(e => e.id === item.id)
+                    return (prev || []).filter(e => e.id === item.id)
                 });
             } 
 
@@ -513,6 +513,7 @@ export const useMutateTransaction = () => {
       },
         onSuccess: async (item: Transaction, vars, ctx) => {
          enqueueSnackbar("Saved!", {variant : 'info'})  
+         
           addToTransactions(item, true);
       },
       onError: (err, newTodo, context) => {
