@@ -114,15 +114,16 @@ namespace FinanceFunction.Data.CosmosRepo
 
 
             AccountBalance bal = await CreateBalances(acct, transaction.Date);
-            bal.EndingBalance -= transaction.Amount;
 
             if (reverse)
-            {
-                bal.Transactions = bal.Transactions.Where(e => e.TransactionId != transaction.Id).ToList();
+						{
+								bal.EndingBalance += transaction.Amount;
+								bal.Transactions = bal.Transactions.Where(e => e.TransactionId != transaction.Id).ToList();
             }
             else
-            {
-                bal.Transactions.Add(new AccountBalance.BalanceTransaction()
+						{
+								bal.EndingBalance -= transaction.Amount;
+								bal.Transactions.Add(new AccountBalance.BalanceTransaction()
                 {
                     TransactionId = transaction.Id,
                     Amount = -transaction.Amount,
@@ -138,9 +139,9 @@ namespace FinanceFunction.Data.CosmosRepo
 
                 balance.AddRange(balances.Select(b =>
                 {
-                    b.Balance -= transaction.Amount;
-                    b.EndingBalance -= transaction.Amount;
-                    return b;
+                    b.Balance += transaction.Amount * (reverse?1:0);
+                    b.EndingBalance -= transaction.Amount * (reverse ? 1 : 0);
+										return b;
                 }).ToArray());
             }
 
@@ -196,15 +197,16 @@ namespace FinanceFunction.Data.CosmosRepo
             List<AccountBalance> balance = new List<AccountBalance>();
 
             AccountBalance bal = await CreateBalances(acct, transaction.Date);
-            bal.EndingBalance += transaction.Amount;
 
             if (reverse)
-            {
-                bal.Transactions = bal.Transactions.Where(e => e.TransactionId != transaction.Id).ToList();
+						{
+								bal.EndingBalance -= transaction.Amount;
+								bal.Transactions = bal.Transactions.Where(e => e.TransactionId != transaction.Id).ToList();
             }
             else
-            {
-                bal.Transactions.Add(new AccountBalance.BalanceTransaction()
+						{
+								bal.EndingBalance += transaction.Amount;
+								bal.Transactions.Add(new AccountBalance.BalanceTransaction()
                 {
                     TransactionId = transaction.Id,
                     Amount = +transaction.Amount,
@@ -219,9 +221,9 @@ namespace FinanceFunction.Data.CosmosRepo
 
                 balance.AddRange(balances.Select(b =>
                 {
-                    b.Balance += transaction.Amount;
-                    b.EndingBalance += transaction.Amount;
-                    return b;
+                    b.Balance += transaction.Amount * (reverse? -1:1);
+                    b.EndingBalance += transaction.Amount * (reverse ? -1 : 1);
+										return b;
                 }).ToArray());
             }
 

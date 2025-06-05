@@ -397,7 +397,7 @@ export const fetchTransactionById = (transId: string) => {
   return fnApi<Transaction>("transactions/" + transId).then(async (e) => {
     let item = e.data;
 
-      return ensureTransactionAcctData(item);
+      return await ensureTransactionAcctData(item);
   });
 };
 
@@ -460,7 +460,7 @@ export const useMutateTransaction = () => {
 
                 let accounts = e.data.accounts;
                 accounts.forEach(a => {
-                    queryClient.setQueryData([ACCOUNT, { id: a.id }], e);
+                    queryClient.setQueryData([ACCOUNT, { id: a.id }], a);
                     db.accounts.put(a)
                 })
 
@@ -513,7 +513,7 @@ export const useMutateTransaction = () => {
       },
         onSuccess: async (item: Transaction, vars, ctx) => {
          enqueueSnackbar("Saved!", {variant : 'info'})  
-         
+
           addToTransactions(item, true);
       },
       onError: (err, newTodo, context) => {
