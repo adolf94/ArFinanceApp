@@ -81,6 +81,47 @@
     "debit":"fixed|cash",
     "remarks": "Maybank Widthdrawal from ${$.ownAcct}",
     "comments":""
+},{
+    "config": "sms_unionbank_card2",
+    "subConfig": "smsUnionbankCardPayment2",
+    "displayName":"UB Card transaction",
+    "type":"expense",
+    "vendor":"recipientName",
+    "credit":"ownAcct",
+    "debit":"recipientName",
+    "remarks": "Card Transaction with ${$.recipientName}",
+    "comments":""
+},{
+    "config": "sms_unionbank_card",
+    "subConfig": "smsUnionbankCardPayment",
+    "displayName":"UB Card transaction",
+    "type":"expense",
+    "vendor":"recipientName",
+    "credit":"ownAcct",
+    "debit":"recipientName",
+    "remarks": "Card Transaction with ${$.recipientName}",
+    "comments":""
+},{
+    "config": "sms_unionbank_card_otp",
+    "subConfig": "smsUnionbankCardPaymentOtp",
+    "displayName":"UB Card transaction",
+    "type":"expense",
+    "vendor":"recipientName",
+    "credit":"ownAcct",
+    "debit":"recipientName",
+    "remarks": "Card Transaction with ${$.recipientName}",
+    "comments":""
+}
+,{
+    "config": "sms_bpi_card_otp",
+    "subConfig": "bpiCardOtp",
+    "displayName":"BPI Card transaction",
+    "type":"expense",
+    "vendor":"recipientName",
+    "credit":"ownAcct",
+    "debit":"recipientName",
+    "remarks": "Card Transaction with ${$.recipientName}",
+    "comments":""
 }
 
 ]

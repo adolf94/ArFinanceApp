@@ -14,6 +14,8 @@ def handle_sms(jsonBody : dict):
 
         case "Unionbank":
            return handle_unionbank_sms(jsonBody)
+        case "UnionBank":
+           return handle_unionbank_sms(jsonBody)
         
         case "HSBC":
            return handle_hsbc_sms(jsonBody)
@@ -42,8 +44,8 @@ def handle_bpi_sms(data):
             "amount": output[1]['group']
         }}
     
-
-    reg = r"(This OTP is to approve your purchase at SHOPEE amounting to PHP ([0-9\.,]+) using your Primary BPI credit card ending in ([0-9]+))"
+    
+    reg = r"(This OTP is to approve your purchase at ([A-Za-z0-9 ]+) amounting to PHP ([0-9\.,]+) using your Primary BPI credit card ending in ([0-9]+))"
     
     searc = get_regex_match(reg, data["sms_rcv_msg"])
     if searc != None:
@@ -51,11 +53,13 @@ def handle_bpi_sms(data):
         return {"data":{
             "matchedConfig":"sms_bpi_card_otp",
             "success" : True,
-            "amount": output[1]['group'],
-            "ownAcct":output[2]['group']
+            "recipientName": output[1]['group'],
+            "amount": output[2]['group'],
+            "ownAcct":output[3]['group']
         }, "location": {
-            "amount": output[1]['span'],
-            "ownAcct":output[2]['span']
+            "recipientName": output[1]['span'],
+            "amount": output[2]['span'],
+            "ownAcct":output[3]['span']
         }}
 
     return {"data":{
@@ -85,7 +89,6 @@ def handle_unionbank_sms(data):
             "reference":output[4]['span'],
         }}
     
-
 
     reg = r"(Thank you for using your UnionBank Credit card ending in ([0-9]+) for the amount PHP ([\.0-9,]+) at ([A-Za-z0-9 ]+). For inquiries call \+632-8841-8600. Ref# ([0-9]+))"
     searc = get_regex_match(reg, data["sms_rcv_msg"])
@@ -135,6 +138,7 @@ def handle_unionbank_sms(data):
             "ownAcct":output[3]['span'],
             "reference":output[4]['span'],
         }}
+
 
     return {"data":{
         "matchedConfig" : "sms_unionbank",
