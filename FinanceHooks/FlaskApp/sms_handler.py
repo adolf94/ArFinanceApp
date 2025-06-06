@@ -16,7 +16,7 @@ def handle_sms(jsonBody : dict):
            return handle_unionbank_sms(jsonBody)
         
         case "HSBC":
-           return handle_unionbank_sms(jsonBody)
+           return handle_hsbc_sms(jsonBody)
         
         case "MaybankPH":
            return handle_maybank_sms(jsonBody)
@@ -42,7 +42,22 @@ def handle_bpi_sms(data):
             "amount": output[1]['group']
         }}
     
+
+    reg = r"(This OTP is to approve your purchase at SHOPEE amounting to PHP ([0-9\.,]+) using your Primary BPI credit card ending in ([0-9]+))"
     
+    searc = get_regex_match(reg, data["sms_rcv_msg"])
+    if searc != None:
+        output = regex_matches_tolist(searc)
+        return {"data":{
+            "matchedConfig":"sms_bpi_card_otp",
+            "success" : True,
+            "amount": output[1]['group'],
+            "ownAcct":output[2]['group']
+        }, "location": {
+            "amount": output[1]['span'],
+            "ownAcct":output[2]['span']
+        }}
+
     return {"data":{
         "matchedConfig" : "sms_bpi",
         "success" : False,
@@ -77,16 +92,47 @@ def handle_unionbank_sms(data):
     if searc != None:
         output = regex_matches_tolist(searc)
         return  {"data":{
-            "matchedConfig":"sms_unionbank_paydirect",
+            "matchedConfig":"sms_unionbank_card",
             "success" : True,
             "amount": output[2]['group'],
             "recipientName": output[3]['group'],
             "ownAcct":output[1]['group'],
-            "reference":output[4]['group'],
         }, "location": {
             "amount": output[2]['span'],
             "recipientName": output[3]['span'],
             "ownAcct":output[1]['span'],
+        }}
+
+    reg = r"(Thank you for using your UnionBank Credit Card ending in ([0-9]+) for the amount of PHP ([\.0-9,]+) at ([A-Za-z0-9 ]+).)"
+    searc = get_regex_match(reg, data["sms_rcv_msg"])
+    if searc != None:
+        output = regex_matches_tolist(searc)
+        return  {"data":{
+            "matchedConfig":"sms_unionbank_card2",
+            "success" : True,
+            "amount": output[2]['group'],
+            "recipientName": output[3]['group'],
+            "ownAcct":output[1]['group'],
+        }, "location": {
+            "amount": output[2]['span'],
+            "recipientName": output[3]['span'],
+            "ownAcct":output[1]['span'],
+        }}
+
+    reg = r"([0-9]+ is your one-time pin to confirm payment of PHP ([0-9\.,]+) to ([A-Za-z0-9]+) on your card ending with ([0-9]+).)"
+    searc = get_regex_match(reg, data["sms_rcv_msg"])
+    if searc != None:
+        output = regex_matches_tolist(searc)
+        return  {"data":{
+            "matchedConfig":"sms_unionbank_card_otp",
+            "success" : True,
+            "amount": output[1]['group'],
+            "recipientName": output[2]['group'],
+            "ownAcct":output[3]['group'],
+        }, "location": {
+            "amount": output[1]['span'],
+            "recipientName": output[2]['span'],
+            "ownAcct":output[3]['span'],
             "reference":output[4]['span'],
         }}
 

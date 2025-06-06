@@ -9,6 +9,7 @@ import { mutateHookMessages } from "../../repositories/hookMessages";
 import { confirm } from "material-ui-confirm";
 import db from "../../components/LocalDb";
 import React from "react";
+import fnApi from "../../components/fnApi";
 const HooksTransaction = lazy(()=>import('./HooksTransaction'))
 
 const camelToSpace = (str:string)=>{
@@ -168,11 +169,17 @@ const HooksAccordion = ({notif, onDelete, onCancel }) => {
                     <IconButton onClick={(evt)=>setAnchor(evt.target)}>
                         <ExpandMore />
                     </IconButton>
-                    <Menu anchorEl={anchor} open={showMenu}>
-                        <ClickAwayListener onClickAway={hide}>
-                            <MenuItem disabled={!!notif.transactionId} onClick={reprocess}>Reprocess</MenuItem>
-                        </ClickAwayListener>
-                    </Menu>
+                        <Menu anchorEl={anchor} open={showMenu}>
+                            <ClickAwayListener onClickAway={hide}>
+                                <div>
+                                    <MenuItem onClick={()=> {
+                                        navigator.clipboard.writeText(notif.rawMsg)
+                                        setAnchor(null)
+                                    }}>Copy Message</MenuItem>
+                                    <MenuItem disabled={!!notif.transactionId} onClick={reprocess}>Reprocess</MenuItem>
+                                </div>
+                            </ClickAwayListener>
+                        </Menu>
                 </Grid>
             </Grid>
             <AccordionDetails>
