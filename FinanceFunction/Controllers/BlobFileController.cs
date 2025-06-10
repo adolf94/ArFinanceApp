@@ -35,7 +35,7 @@ namespace FinanceFunction.Controllers
 						_config = config.BlobClient;
 
 						bool isDevelopment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development";
-						if (!string.IsNullOrEmpty(_config.ConnectionString))
+						if (string.IsNullOrEmpty(_config.ConnectionString))
 						{
 								// Managed identity token credential discovered when running in Azure environments
 								credential = new ManagedIdentityCredential();
