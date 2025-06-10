@@ -1,5 +1,6 @@
 import datetime
 import json
+import logging
 import tempfile
 import os, uuid
 from azure.identity import DefaultAzureCredential
@@ -9,8 +10,18 @@ from flask import Request, Response
 
 from uuid_extensions import uuid7
 
+from FlaskApp.ai_modules import extract_from_ia
+from FlaskApp.ai_modules.extract_data import identify_from_filename
+from FlaskApp.cosmos_modules import add_to_app, add_to_persist
 
-account_url = os.environ["BLOB_SCREENSHOT_UPLOAD"]  # e.g., "https://mydatalake.blob.core.windows.net"
+
+endpoint = os.getenv("COSMOS_ENDPOINT")
+key = os.getenv("COSMOS_KEY")
+dbName = os.getenv("COSMOS_DB")
+dbName2 = os.getenv("COSMOS_DB2")
+apiKey =os.getenv("API_KEY")
+account_url = os.getenv("BLOB_SCREENSHOT_UPLOAD")  # e.g., "https://mydatalake.blob.core.windows.net"
+connection_string = os.getenv("BLOB_CONNECTION_STRING")  # e.g., "https://mydatalake.blob.core.windows.net"
 container_name = "transact-screenshots" # Replace with your container name
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}  # Allowed file types
             # if connection_string:
@@ -27,6 +38,7 @@ def allowed_file(filename):
 
 def handle_upload(request : Request):
     id=uuid7( as_type='str')
+    logging.info("handle_upload starting")
     temp_file = tempfile.NamedTemporaryFile(delete=False)
     local_file_path = temp_file.name
     if request.content_type == "application/octet-stream":
@@ -44,9 +56,15 @@ def handle_upload(request : Request):
             f.write(request.data)
 
     else:
+
         if 'file' not in request.files:
             return Response(json.dumps({"error":"no file found"}) , 400, content_type="application/json")
+        
+        logging.info("found file in files")
+
         file = request.files['file']
+        logging.info("found " + file.filename)
+
         # If the user does not select a file, the browser submits an
         # empty file without a filename.
         if file.filename == '':
@@ -57,11 +75,58 @@ def handle_upload(request : Request):
         
         file.save(local_file_path)  
 
-    fileId = uuid7( as_type='str').replace("-","")
+        logging.info("file saved ")
+    fileId = id.replace("-","")
     fileType = originalFileName.split(".",1)[-1]
     blob_name = fileId + "." + fileType
         
-    return upload_to_azure(local_file_path,blob_name)
+    upload_to_azure(local_file_path,blob_name)
+    record = {
+        "id":id,
+        "Container": container_name,
+        "PartitionKey":"default",
+        "Service": "blob",
+        "OriginalFileName":originalFileName,
+        "MimeType": file.mimetype ,
+        "FileKey": blob_name,
+        "$type": "BlobFile",
+        "DateCreated": datetime.datetime.now(datetime.UTC).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "Status":"Active"
+    }
+    add_to_app("Files", record)
+
+
+    image_extract = extract_from_ia(local_file_path)
+
+    output = identify_from_filename(originalFileName, image_extract["lines"])
+
+    newItem = { 
+        "Id" : id,
+        "id": id,  
+        "Date": datetime.datetime.now(datetime.UTC).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "JsonData": {
+            "lines":image_extract["lines"],
+            "action":"image_upload",
+            "imageId": id,
+            "fileName":originalFileName,
+            "timestamp": datetime.datetime.now(datetime.UTC).strftime("%Y-%m-%dT%H:%M:%SZ") 
+        },
+        "ExtractedData": output,
+        "Location": image_extract["data"],
+        "RawMsg":originalFileName + " image upload",
+        "Type":"notif",
+        "MonthKey": datetime.datetime.now().strftime("%Y-%m-01"),
+        "PartitionKey":"default",
+        "$type": "HookMessage",
+        "_ttl": 60*24*60*60,
+        "IsHtml":False
+    }
+
+    add_to_app("HookMessages", newItem)
+    add_to_persist("HookMessages", newItem)
+
+
+    return  newItem
 
 
 def upload_to_azure(file_path, blob_name):
@@ -78,19 +143,22 @@ def upload_to_azure(file_path, blob_name):
     """
     try:
 
-        # blob_service_client = None
-        # if connection_string:
-        #     blob_service_client = BlobServiceClient.from_connection_string(connection_string)
+        blob_service_client = None
+        if connection_string != "":
+            blob_service_client = BlobServiceClient.from_connection_string(connection_string)
+            logging.debug("found the connection string")
 
         # # Use DefaultAzureCredential - this will use whatever identity you've configured
         # # (e.g., environment variables, managed identity, etc.)
-        # else:
-        credential = DefaultAzureCredential()
-        blob_service_client = BlobServiceClient(account_url=account_url, credential=credential)
+        else:
+            credential = DefaultAzureCredential()
+            blob_service_client = BlobServiceClient(account_url=account_url, credential=credential)
+            logging.debug("using default Credential")
             
         blob_client = blob_service_client.get_blob_client(container=container_name, blob=blob_name)
         with open(file_path, "rb") as data:
             blob_client.upload_blob(data, overwrite=True)  # Overwrite if it exists
+        logging.debug("uploading blob")
 
         sas_token = generate_blob_sas(
             account_name=blob_client.account_name,
@@ -101,8 +169,11 @@ def upload_to_azure(file_path, blob_name):
             expiry=datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=1),  # SAS expires in 1 hour
         )
         blob_url_with_sas = f"{blob_client.url}?{sas_token}"
+        logging.debug("upload complete")
+
         return {
             "url":blob_client.url,
+            "fileId": blob_name,
             "sas":sas_token
         }
 

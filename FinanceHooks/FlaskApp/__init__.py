@@ -5,6 +5,7 @@ import logging
 from flask import Flask, request, Response, redirect, url_for,app
 from azure.cosmos  import CosmosClient, DatabaseProxy
 from uuid_extensions import uuid7
+from FlaskApp.cosmos_modules import add_to_app, add_to_persist
 from FlaskApp.notif_handler import handle_notif
 from FlaskApp.sms_handler import handle_sms
 from FlaskApp.upload_handler import handle_upload
@@ -18,7 +19,6 @@ app = Flask(__name__)
 endpoint = os.environ["COSMOS_ENDPOINT"]
 key = os.environ["COSMOS_KEY"]
 dbName = os.environ["COSMOS_DB"]
-dbName2 = os.environ["COSMOS_DB2"]
 apiKey = os.environ["API_KEY"]
 
 
@@ -45,9 +45,6 @@ def phone_hook():
 
     data = request.get_json()
 
-    db = open_db(dbName)
-    container = db.get_container_client("HookMessages")
-
     if data["action"] == "notif_post":
         extracted = handle_notif(data)
         raw = data["notif_msg"]
@@ -70,13 +67,10 @@ def phone_hook():
         "IsHtml":False
     }
 
-    container.upsert_item(newItem)
-
+    add_to_app("HookMessages", newItem)
     
-    db2 = open_db(dbName2)
-    container2 = db2.get_container_client("HookMessages")
-    container2.upsert_item(newItem)
-
+    add_to_persist("HookMessages", newItem)
+    
 
     return Response( json.dumps( newItem ), 201, content_type="application/json")
 
@@ -87,15 +81,9 @@ def file_hook_handler():
     headeApiKey = request.headers.get("x-api-key", type=str)
     if(headeApiKey == None or headeApiKey != apiKey ): return Response(status=401)
     resp = handle_upload(request)
-    return resp
 
+    return Response( json.dumps(resp) , 201, content_type="application/json")
 
-def open_db(dbName) -> DatabaseProxy:
-
-    client = CosmosClient(endpoint, credential=key)
-    db = client.get_database_client(database=dbName)
-    
-    return db
 
 if __name__ == "__main__":
     app.run()
