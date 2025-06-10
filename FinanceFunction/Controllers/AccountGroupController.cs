@@ -55,6 +55,7 @@ public class AccountGroupController
 		public async Task<IActionResult> CreateOne([HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "accountgroups")]
 				HttpRequest req)
 		{
+				if (!_user.IsAuthenticated) return new UnauthorizedResult();
 				if (!_user.IsAuthorized(RequiredRole)) return new ForbidResult();
 				var type = await req.ReadFromJsonAsync<AccountGroup>();
 				_repo.Create(type!);

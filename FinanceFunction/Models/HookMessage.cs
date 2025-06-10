@@ -10,7 +10,7 @@ public class HookMessage
 	public string Type { get; set; } = "";
 	public string RawMsg { get; set; } = "";
 	public string PartitionKey { get; set; } = "default";
-    public Dictionary<string, string>? JsonData { get; set; }
+    public JsonDataModel? JsonData { get; set; }
 	public Dictionary<string, string>? ExtractedData { get; set; }
 	public bool IsHtml { get; set; } =false;
     public string? Status { get; set; } = "New";
@@ -35,5 +35,20 @@ public class HookMessage
 
 
     }
+
+		public class JsonDataModel
+		{
+				public string action { get; set; }
+				public List<string>? lines { get; set; }
+				public string? fileName { get; set; }
+				public string? imageId { get; set; }
+				public string? timestamp { get; set; }
+				public string? sms_rcv_sender { get; set; }
+				public string? sms_rcv_sms_rcv_msg { get; set; }
+				public string? notif_pkg { get; set; }
+				public string? notif_title { get; set; }
+				public string? notif_msg { get; set; }
+				public string? notif_id { get; set; }
+		}
 
 }					

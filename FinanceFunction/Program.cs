@@ -27,7 +27,6 @@ builder.Services.Configure<ForwardedHeadersOptions>(options =>
 				ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
 });
 
-
 var config = FnConfigToAppConfig.PrepareConfig();
 builder.Services.AddSingleton(config);
 builder.Services.AddScoped<CurrentUser>();

@@ -26,6 +26,7 @@ public class AccountTypeController
 		public async Task<IActionResult> GetAllType([HttpTrigger(AuthorizationLevel.Anonymous, "get",Route = "accounttypes")]
 				HttpRequest req)
 		{
+				if (!_user.IsAuthenticated) return new UnauthorizedResult();
 				if (!_user.IsAuthorized(RequiredRole)) return new ForbidResult();
 				var data = await _repo.GetAllType();
 
@@ -36,6 +37,7 @@ public class AccountTypeController
 		public async Task<IActionResult> GetOneType([HttpTrigger(AuthorizationLevel.Anonymous, "get",Route = "accounttypes/{guid}")]
 				HttpRequest req, Guid id)
 		{
+				if (!_user.IsAuthenticated) return new UnauthorizedResult();
 				if (!_user.IsAuthorized(RequiredRole)) return new ForbidResult();
 				AccountType? accounts = _repo.GetOne(id);
 
@@ -48,6 +50,7 @@ public class AccountTypeController
 		public async Task<IActionResult> CreateType([HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "accounttypes")]
 				HttpRequest req)
 		{
+				if (!_user.IsAuthenticated) return new UnauthorizedResult();
 				if (!_user.IsAuthorized(RequiredRole)) return new ForbidResult();
 				var type = await req.ReadFromJsonAsync<AccountType>();
 

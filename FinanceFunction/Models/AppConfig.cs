@@ -13,7 +13,7 @@
 				public AppHookConfig FinanceHook { get; set; } = new();
 				public IEnumerable<Application> Apps { get; set; } = Array.Empty<Application>();
 
-
+				public BlobClientConfig BlobClient { get; set; } = new BlobClientConfig();
 
 
 				public class GoogleConfig
@@ -38,7 +38,12 @@
 						public bool Enabled { get; set; } = false;
 						public bool Encrypt { get; set; } = false;
         }
-				
+				public class BlobClientConfig
+				{
+						public string Endpoint { get; set; } = string.Empty;
+						public string Container { get; set; } = string.Empty;
+						public string ConnectionString { get; set; } = string.Empty;
+				}
 				public class AppHookConfig
 				{
 						public string HookUrl { get; set; } = "";

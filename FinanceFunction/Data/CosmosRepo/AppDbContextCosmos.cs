@@ -31,15 +31,16 @@ namespace FinanceFunction.Data.CosmosRepo
         public DbSet<HookMessage>? HookMessages { get; set; }
         public DbSet<MonthlyTransaction> MonthTransactions { get; set; }
         public DbSet<HookReference> HookReferences { get; set; }
+        public DbSet<BlobFile> Files { get; set; }
 
-        public Guid InterestIncomeId { get; set; } = Guid.Parse("742070bd-e68b-45c9-a1f7-021916127731");
+				public Guid InterestIncomeId { get; set; } = Guid.Parse("742070bd-e68b-45c9-a1f7-021916127731");
 
 
         private readonly IConfiguration _configuration;
         public AppDbContext(DbContextOptions<AppDbContext> options, IConfiguration config) : base(options)
         {
             _configuration = config;
-            // base.Database.EnsureCreatedAsync().Wait();
+            //base.Database.EnsureCreatedAsync().Wait();
         }
 
 
@@ -186,9 +187,14 @@ namespace FinanceFunction.Data.CosmosRepo
                 .HasKey(c => c.Id)
                 ;
 
+            builder.Entity<BlobFile>()
+								.HasPartitionKey(e => e.PartitionKey)
+								.ToContainer("Files")
+								.HasKey(c => c.Id);
 
 
-            builder.Entity<LoanPayment>().HasPartitionKey(e => new { e.AppId })
+
+						builder.Entity<LoanPayment>().HasPartitionKey(e => new { e.AppId })
                 .ToContainer("LoanPayments")
                 .HasKey(e => new { e.LoanId, e.PaymentId, e.AgainstPrincipal });
             //builder.Entity<LoanPayment>().HasIndex(e => new { e.AppId, e.UserId, e.Date });
@@ -271,8 +277,9 @@ namespace FinanceFunction.Data.CosmosRepo
             services.AddScoped<IHookMessagesRepo, HookMessagesRepo>();
             services.AddScoped<IMonthlyTransactionRepo, MonthlyTransactionRepo>();
             services.AddScoped<IHookReferenceRepo, HookReferenceRepo>();
+            services.AddScoped<IBlobFileRepo, BlobFileRepo>();
 
-            return services;
+						return services;
         }
     }
 }

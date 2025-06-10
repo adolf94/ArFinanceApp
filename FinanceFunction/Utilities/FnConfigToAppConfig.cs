@@ -1,6 +1,7 @@
 ﻿using FinanceFunction.Models;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -30,7 +31,13 @@ namespace FinanceFunction.Utilities
 										Key =  GetEnv("FinanceHook_Key"),
 										HookUrl =  GetEnv("FinanceHook_HookUrl"),
 								},
-								PersistDb = GetEnv("FinanceHook_PersistDb")
+								PersistDb = GetEnv("FinanceHook_PersistDb"),
+								BlobClient =
+								{
+										Endpoint = GetEnv("BlobClient_Endpoint"),
+										Container = GetEnv("BlobClient_Container"),
+										ConnectionString = GetEnv("BlobClient_ConnectionString")
+								}
 						};
 				}
 				private static string GetEnv(string env)
