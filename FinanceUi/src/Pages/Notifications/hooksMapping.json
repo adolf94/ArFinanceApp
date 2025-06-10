@@ -122,6 +122,26 @@
     "debit":"recipientName",
     "remarks": "Card Transaction with ${$.recipientName}",
     "comments":""
+},{
+    "config": "img_gcash_express",
+    "subConfig": "gcashExpressPayment",
+    "displayName":"GCash InstaPayment",
+    "type":"expense",
+    "vendor":"recipientAcct",
+    "credit":"fixed|gcash",
+    "debit":"recipientAcct",
+    "remarks": "GCash payment to ${$.recipientName}",
+    "comments":""
+},{
+    "config": "img_gcash_express",
+    "subConfig": "gcashExpressSend",
+    "displayName":"GCash Transfer",
+    "type":"transfer",
+    "vendor":"recipientAcct",
+    "credit":"fixed|gcash",
+    "debit":"recipientAcct",
+    "remarks": "GCash transfer to ${$.recipientName}",
+    "comments":""
 }
 
 ]

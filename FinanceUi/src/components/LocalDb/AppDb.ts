@@ -17,6 +17,10 @@ export interface AccountBalance extends AccountBalanceApi {
     }[]
 }
 
+export interface Image {
+  id:string,
+  data: string
+}
 
 
 const db = new Dexie('FinanceApp') as Dexie & {
@@ -24,7 +28,8 @@ const db = new Dexie('FinanceApp') as Dexie & {
     monthTransactions: EntityTable<MonthlyTransaction & {dateUpdated : Date}, 'monthKey'>,
     accountBalances: EntityTable<  AccountBalance & { dateUpdated: Date }, 'id'>,
     accounts: EntityTable<Account & { dateUpdated: Date }, 'id'>,
-    hookMessages: EntityTable<HookMessage, 'id'>
+    hookMessages: EntityTable<HookMessage, 'id'>,
+    images: EntityTable<Image, 'id'>,
   };
   
   // Schema declaration:
@@ -33,7 +38,8 @@ const db = new Dexie('FinanceApp') as Dexie & {
     monthTransactions: '&monthKey',
       accountBalances: '&id,accountId',
     accounts: '&id, type',
-    hookMessages: '&id,monthKey,transactionId'
+    hookMessages: '&id,monthKey,transactionId',
+    images:"&id"
   });
 
 

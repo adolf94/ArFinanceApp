@@ -10,6 +10,7 @@ import { confirm } from "material-ui-confirm";
 import db from "../../components/LocalDb";
 import React from "react";
 import fnApi from "../../components/fnApi";
+import ImageModal from "./ImageModal";
 const HooksTransaction = lazy(()=>import('./HooksTransaction'))
 
 const camelToSpace = (str:string)=>{
@@ -187,6 +188,9 @@ const HooksAccordion = ({notif, onDelete, onCancel }) => {
                     <Grid md={6}>
                         <List>
                                 
+                        {
+                                    !!notif.jsonData.imageId &&  <ImageModal id={notif.jsonData.imageId} />
+                                }
                                 {
                                 notif.extractedData && Object.keys(notif.extractedData).map((key:string)=>{
                                         if(!notif.extractedData[key]) return "";
@@ -217,7 +221,6 @@ const HooksAccordion = ({notif, onDelete, onCancel }) => {
                                         }
                                     })
                                 }
-
                         </List>
                     </Grid>
                     <Grid container md={6} sx={{justifyContent:"flex-start"}}>
