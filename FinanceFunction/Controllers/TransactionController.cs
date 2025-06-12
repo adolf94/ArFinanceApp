@@ -178,6 +178,12 @@ namespace FinanceFunction
 						_mapper.Map(dto, transaction);
 						accounts[dto.CreditId] = _account.UpdateCreditAcct(dto.CreditId, dto.Amount);
 						var creditBal = await _bal.CreateBalances(accounts[dto.CreditId], dto.Date, false);
+
+						if(creditBal == null)
+						{
+								throw new Exception($"creditbal was null for some reason: creditId:{dto.CreditId}, date:{dto.Date.ToString("yyyy-MM")}, transactionId: {dto.Id}");
+						}
+
 						transaction.BalanceRefs.Clear();
 						transaction.BalanceRefs.Add(new BalanceAccount
 						{
@@ -189,6 +195,10 @@ namespace FinanceFunction
 						accounts[dto.DebitId] = _account.UpdateDebitAcct(dto.DebitId, dto.Amount);
 						var debitBal = await _bal.CreateBalances(accounts[dto.DebitId], dto.Date, false);
 
+						if (debitBal == null)
+						{
+								throw new Exception($"debitBal was null for some reason: DebitId:{dto.DebitId}, date:{dto.Date.ToString("yyyy-MM")}, transactionId: {dto.Id}");
+						}
 						transaction.BalanceRefs.Add(new BalanceAccount
 						{
 								AccountId = dto.DebitId,

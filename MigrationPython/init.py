@@ -10,12 +10,14 @@ from azure.cosmos import CosmosClient, PartitionKey
 from azure.identity import ClientSecretCredential, DefaultAzureCredential
 from pathlib import Path
 import importlib.util
+import urllib3
 
 import os
 
 load_dotenv()
 dotenv_vars = dotenv_values()
 
+urllib3.disable_warnings()
 env_s = []
 for key, value in dotenv_vars.items():
     if(key.startswith("ENDPOINT_")):

@@ -46,7 +46,7 @@ namespace FinanceFunction.Data.CosmosRepo
 
 
 
-        public async Task<AccountBalance> CreateBalances(Account acct, DateTime month, bool save = true)
+        public async Task<AccountBalance?> CreateBalances(Account acct, DateTime month, bool save = true)
 
         {
             DateTime currentPeriod = new DateTime(month.Year, month.Month, 1);
