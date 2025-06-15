@@ -67,7 +67,7 @@ namespace FinanceFunction.Controllers
 								.GetBlobContainerClient(_config.Container)
 								.GetBlobClient(file.FileKey);
 
-						if (!blobClient.Exists()) return new NotFoundResult();
+						if (!blobClient.Exists().Value) return new NotFoundResult();
 						var item = await blobClient.DownloadContentAsync();
 
 

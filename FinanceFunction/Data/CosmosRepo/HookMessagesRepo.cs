@@ -79,6 +79,9 @@ public class HookMessagesRepo : IHookMessagesRepo
 						_iconfig.GetConnectionString("CosmosDb")!);
 				CosmosClient client = new CosmosClient(constr);
 
+				///Add Delete in the Storage Container 
+
+
 				Database db = client.GetDatabase(_config.PersistDb);
 
 				Container container =  db.GetContainer("HookMessages");

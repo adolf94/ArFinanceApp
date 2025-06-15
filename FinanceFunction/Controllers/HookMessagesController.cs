@@ -11,6 +11,9 @@ using FinanceFunction.Models;
 using System.Net.Http.Json;
 using Microsoft.EntityFrameworkCore;
 using FinanceFunction.Data.CosmosRepo;
+using Azure.Identity;
+using Azure.Storage.Blobs;
+using Microsoft.Identity.Client.Platforms.Features.DesktopOs.Kerberos;
 
 namespace FinanceFunction.Controllers;
 
@@ -21,15 +24,17 @@ public class HookMessagesController
 		private readonly CurrentUser _user;
 		private readonly IDbHelper _db;
 		private readonly AppConfig _config;
+		private readonly IBlobFileRepo _files;
 
 		public HookMessagesController(ILogger<HookMessagesController> logger, IHookMessagesRepo repo, CurrentUser user, 
-				AppConfig config, IDbHelper db)
+				AppConfig config, IDbHelper db, IBlobFileRepo blob)
     {
         _logger = logger;
         _repo = repo;
 				_user = user;
 				_db = db;
 				_config = config;
+				_files = blob;
 
 		}
 
@@ -106,10 +111,34 @@ public class HookMessagesController
 				var toDelete = items.Where(e => body!.Contains(e.Id.ToString()))
 						.ToList();
 
+
+				BlobContainerClient? blobSvc = null;
+
 				for (var i = 0; i < toDelete.Count(); i++)
 				{
 						var item = toDelete[i];
 						await _repo.DeleteHook(item);
+						if (!string.IsNullOrEmpty(item.JsonData?.imageId))
+						{
+								BlobFile? file = await _files.GetOneFileinfo(Guid.Parse(item.JsonData!.imageId));
+								if (blobSvc is null)
+								{
+										if (string.IsNullOrEmpty(_config.BlobClient.ConnectionString))
+										{
+												// Managed identity token credential discovered when running in Azure environments
+												var creds = new ManagedIdentityCredential();
+												var client = new BlobServiceClient(new Uri(_config.BlobClient.Endpoint), creds);
+												blobSvc = client.GetBlobContainerClient(_config.BlobClient.Container);
+										}
+										else
+										{
+												// Running locally on dev machine - DO NOT use in production or outside of local dev
+												var client = new BlobServiceClient(_config.BlobClient.ConnectionString);
+												blobSvc = client.GetBlobContainerClient(_config.BlobClient.Container);
+										}
+								}
+								if (file != null) await blobSvc.DeleteBlobIfExistsAsync(file.FileKey);
+						}
 				}
 				await _db.SaveChangesAsync();
 
