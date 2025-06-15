@@ -19,7 +19,10 @@ namespace FinanceFunction.Data.CosmosRepo
 
 				public async Task<int> SaveChangesAsync()
 				{
-						return await _context.SaveChangesAsync(_cancelToken);
+						
+						var i = await _context.SaveChangesAsync(_cancelToken);
+						_context.ChangeTracker.Clear();
+						return i;
 				}
 
 		}

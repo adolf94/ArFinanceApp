@@ -66,10 +66,18 @@ namespace FinanceFunction.Data.CosmosRepo
                     balancesToAdd.Add(newBalance);
                     acct.MinMonth = period;
                     period = period.AddMonths(-1);
-                }
-            }
+										await _context.AccountBalances!.AddAsync(newBalance);
+										if (save) await _context.SaveChangesAsync();
 
-            if (currentPeriod > acct.MaxMonth)
+								}
+						}
+
+						string balanceKey = isPrevPeriod ? $"{prevPeriod.Year}|{prevPeriod.Month:D2}|{acct.Id}"
+														: $"{currentPeriod.Year}|{currentPeriod.Month:D2}|{acct.Id}";
+
+
+
+						if (currentPeriod > acct.MaxMonth)
             {
 
                 DateTime period = acct.MaxMonth.AddMonths(1);
@@ -83,26 +91,19 @@ namespace FinanceFunction.Data.CosmosRepo
                     };
                     balancesToAdd.Add(newBalance);
                     acct.MaxMonth = period;
-                    period = period.AddMonths(1);
+										await _context.AccountBalances!.AddAsync(newBalance);
+										if (save) await _context.SaveChangesAsync();
+										period = period.AddMonths(1);
+
                 }
             }
 
-            if (balancesToAdd.Any())
-            {
-                await _context.AccountBalances!.AddRangeAsync(balancesToAdd);
-                if (save) await _context.SaveChangesAsync();
-            }
 
-            string balanceKey = isPrevPeriod ? $"{prevPeriod.Year}|{prevPeriod.Month:D2}|{acct.Id}"
-                            : $"{currentPeriod.Year}|{currentPeriod.Month:D2}|{acct.Id}";
+						var item = await _context.AccountBalances!.FindAsync(balanceKey);
 
 
-            var item = await _context.AccountBalances!.FirstOrDefaultAsync(e =>
-                e.Id == balanceKey);
-
-            return item!;
-
-        }
+            return item;
+				}
 
 
 
