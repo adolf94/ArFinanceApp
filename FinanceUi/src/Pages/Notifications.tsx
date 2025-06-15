@@ -28,7 +28,7 @@ const Notifications = () => {
             gcTime:24*60*60
         })
 
-        const [type,setType] = useState(["sms", "notif"]) 
+        const [type,setType] = useState(["sms", "notif", "image"]) 
         const [success,setSuccess] = useState(["yes"]) 
     // const {data:hookMessages, isLoading: hookLoading} = useQuery({
     //     queryKey: [HOOK_MESSAGES, { monthKey: params.get("month")}],
@@ -44,6 +44,7 @@ const Notifications = () => {
                 //type
                 if(e.jsonData.action == "sms_receive" && !type.includes("sms")) return false
                 if(e.jsonData.action == "notif_post" && !type.includes("notif")) return false
+                if(e.jsonData.action == "image_upload" && !type.includes("image")) return false
 
                 //success
                 if((!e.extractedData?.success || e.extractedData.success.toLowerCase() == "false") && !success.includes("no")) return false
@@ -63,7 +64,7 @@ const Notifications = () => {
             if(value.length == 0) return
             deleteMany.mutateAsync(value)
             .then(e=>{
-                forDelete.current = forDelete.current.filter(e=>value.contains(e)) 
+                forDelete.current = forDelete.current.filter(e=>!value.includes(e)) 
             });
         },
         // delay in ms
@@ -165,6 +166,7 @@ const Notifications = () => {
                         <Chip label="Failed Extract" color="primary" onClick={()=>onFilter("success", "no")}  variant={success.includes("no")?"filled":"outlined" }></Chip>
                         <Chip label="Notifications" color="primary" onClick={()=>onFilter("type", "notif")}  variant={type.includes("notif")?"filled":"outlined" }></Chip>
                         <Chip label="SMS" color="primary"  onClick={()=>onFilter("type", "sms")}  variant={type.includes("sms")?"filled":"outlined" }></Chip>
+                        <Chip label="Image" color="primary"  onClick={()=>onFilter("type", "image")}  variant={type.includes("image")?"filled":"outlined" }></Chip>
                     </Box>
                 </Box>
                 <Paper sx={{ width:'100%'}}>

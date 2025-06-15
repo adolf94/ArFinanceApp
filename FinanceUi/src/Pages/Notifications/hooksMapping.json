@@ -122,6 +122,17 @@
     "debit":"recipientName",
     "remarks": "Card Transaction with ${$.recipientName}",
     "comments":""
+}
+,{
+    "config": "notif_gcash_instapay",
+    "subConfig": "gcashReceiveInstapay",
+    "displayName":"GCash Received(Instapay)",
+    "type":"transfer",
+    "vendor":"senderAcct",
+    "credit":"senderAcct",
+    "debit":"fixed|gcash",
+    "remarks": "Received from ${$.senderBank} acct ${$.senderAcct}. Reference ${$.reference}",
+    "comments":""
 },{
     "config": "img_gcash_express",
     "subConfig": "gcashExpressPayment",

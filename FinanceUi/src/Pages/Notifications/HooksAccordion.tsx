@@ -163,10 +163,9 @@ const HooksAccordion = ({notif, onDelete, onCancel }) => {
                 </Grid>
                 <Grid sm={1} sx={{shrink:1, textAlign:'right'}}>
                     {notif.transactionId ? <Box  sx={{display:'inline-flex', position:'relative', padding:1, top:"8px"}}>
-                        <Task color="success"/></Box> : <DeleteLoading onClick={()=>onDelete(notif.id)} onCancel={()=>onCancel(notif.id)} onCommit={()=>{}} seconds={5}></DeleteLoading>}
-                    {/* <IconButton onClick={()=>setExpanded(!expanded)}>
-                        {expanded?<ExpandLess />:<ExpandMore/>}
-                    </IconButton> */}
+                        <Task color="success"/></Box> : 
+                            (notif.extractedData.success == false || notif.extractedData.success.toLowerCase() == "false") && <DeleteLoading onClick={()=>onDelete(notif.id)} onCancel={()=>onCancel(notif.id)} onCommit={()=>{}} seconds={5}></DeleteLoading>}
+
                     <IconButton onClick={(evt)=>setAnchor(evt.target)}>
                         <ExpandMore />
                     </IconButton>
@@ -178,6 +177,9 @@ const HooksAccordion = ({notif, onDelete, onCancel }) => {
                                         setAnchor(null)
                                     }}>Copy Message</MenuItem>
                                     <MenuItem disabled={!!notif.transactionId} onClick={reprocess}>Reprocess</MenuItem>
+                                    {(notif.extractedData.success == true || notif.extractedData.success.toLowerCase() == "true") && !notif.transactionId &&
+                                        <MenuItem disabled={!!notif.transactionId} onClick={()=>onDelete(notif.id)}>Delete</MenuItem>
+                                    }
                                 </div>
                             </ClickAwayListener>
                         </Menu>
