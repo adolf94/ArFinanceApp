@@ -171,16 +171,19 @@ const HooksAccordion = ({notif, onDelete, onCancel }) => {
                     </IconButton>
                         <Menu anchorEl={anchor} open={showMenu}>
                             <ClickAwayListener onClickAway={hide}>
-                                <div>
+                                <Box>
                                     <MenuItem onClick={()=> {
                                         navigator.clipboard.writeText(notif.rawMsg)
                                         setAnchor(null)
                                     }}>Copy Message</MenuItem>
                                     <MenuItem disabled={!!notif.transactionId} onClick={reprocess}>Reprocess</MenuItem>
                                     {(notif.extractedData.success == true || notif.extractedData.success.toLowerCase() == "true") && !notif.transactionId &&
-                                        <MenuItem disabled={!!notif.transactionId} onClick={()=>onDelete(notif.id)}>Delete</MenuItem>
+                                        <MenuItem disabled={!!notif.transactionId} onClick={() => {
+                                            onDelete(notif.id)
+                                            hide();
+                                        }}>Delete</MenuItem>
                                     }
-                                </div>
+                                </Box>
                             </ClickAwayListener>
                         </Menu>
                 </Grid>

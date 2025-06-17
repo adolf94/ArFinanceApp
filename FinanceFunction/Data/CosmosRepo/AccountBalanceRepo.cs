@@ -136,61 +136,24 @@ namespace FinanceFunction.Data.CosmosRepo
             if (!acct.ResetEndOfPeriod)
             {
                 var balances = await _context.AccountBalances!.Where(e => e.AccountId == transaction.CreditId && e.DateStart > transaction.Date)
+                    .Select(e=>e.Id)
                     .ToListAsync();
 
-                balance.AddRange(balances.Select(b =>
-                {
-                    b.Balance += transaction.Amount * (reverse?1:0);
-                    b.EndingBalance -= transaction.Amount * (reverse ? 1 : 0);
-										return b;
-                }).ToArray());
-            }
+                for(var i = 0; i<balances.Count(); i++)
+								{
+										var b = await _context.AccountBalances!.FindAsync(balances[i]);
+										b.Balance += transaction.Amount * (reverse ? 1 : -1);
+										b.EndingBalance += transaction.Amount * (reverse ? 1 : -1);
 
+										balance.Add(b);
+								}
+
+            }
+             
             if (save) await _context.SaveChangesAsync();
             return balance;
         }
 
-        public async Task<IEnumerable<AccountBalance>> UpdateCrAccount(Guid creditId, decimal amount,
-            Guid transaction, DateTime date, bool reverse = false, bool save = true)
-        {
-            Account? acct = await _context.Accounts!.Where(e => e.Id == creditId).FirstOrDefaultAsync();
-            if (acct == null) throw new Exception("Account not found");
-            List<AccountBalance> balance = new List<AccountBalance>();
-
-            AccountBalance bal = await CreateBalances(acct, date);
-            bal.EndingBalance -= amount;
-
-            if (reverse)
-            {
-                bal.Transactions = bal.Transactions.Where(e => e.TransactionId != transaction).ToList();
-            }
-            else
-            {
-                bal.Transactions.Add(new AccountBalance.BalanceTransaction()
-                {
-                    TransactionId = transaction,
-                    Amount = -amount
-                });
-            }
-
-            balance.Add(bal);
-            if (!acct.ResetEndOfPeriod)
-            {
-                var balances = await _context.AccountBalances!.Where(e => e.AccountId == creditId && e.DateStart > date)
-                    .ToListAsync();
-
-                balance.AddRange(balances.Select(b =>
-                {
-                    b.Balance -= amount;
-                    b.EndingBalance -= amount;
-                    return b;
-                }).ToArray());
-            }
-
-            if (save) await _context.SaveChangesAsync();
-            return balance;
-
-        }
         public async Task<IEnumerable<AccountBalance>> UpdateDrAccount(Transaction transaction, bool reverse = false, bool save = true)
         {
             Account? acct = await _context.Accounts!.Where(e => e.Id == transaction.DebitId).FirstOrDefaultAsync();
@@ -220,61 +183,21 @@ namespace FinanceFunction.Data.CosmosRepo
                 var balances = await _context.AccountBalances!.Where(e => e.AccountId == transaction.DebitId && e.DateStart > transaction.Date)
                     .ToListAsync();
 
-                balance.AddRange(balances.Select(b =>
-                {
-                    b.Balance += transaction.Amount * (reverse? -1:1);
-                    b.EndingBalance += transaction.Amount * (reverse ? -1 : 1);
-										return b;
-                }).ToArray());
+
+								for (int i = 0; i < balances.Count; i++)
+								{
+										var b = await _context.AccountBalances!.FindAsync(balances[i].Id)!;
+										b.Balance += transaction.Amount * (reverse ? -1 : 1);
+										b.EndingBalance += transaction.Amount * (reverse ? -1 : 1);
+										balance.Add(b);
+								}
+
             }
 
             if (save) await _context.SaveChangesAsync();
 
             return balance;
         }
-        public async Task<IEnumerable<AccountBalance>> UpdateDrAccount(Guid debitId, decimal amount,
-            Guid transaction, DateTime date, bool reverse = false, bool save = true)
-        {
-            Account? acct = await _context.Accounts!.Where(e => e.Id == debitId).FirstOrDefaultAsync();
-            if (acct == null) throw new Exception("Account not found");
-            List<AccountBalance> balance = new List<AccountBalance>();
-
-            AccountBalance bal = await CreateBalances(acct, date);
-            bal.EndingBalance += amount;
-
-            if (reverse)
-            {
-                bal.Transactions = bal.Transactions.Where(e => e.TransactionId != transaction).ToList();
-            }
-            else
-            {
-                bal.Transactions.Add(new AccountBalance.BalanceTransaction()
-                {
-                    TransactionId = transaction,
-                    Amount = -amount
-                });
-            }
-            balance.Add(bal);
-            if (!acct.ResetEndOfPeriod)
-            {
-                var balances = await _context.AccountBalances!.Where(e => e.AccountId == debitId && e.DateStart > date)
-                    .ToListAsync();
-
-                balance.AddRange(balances.Select(b =>
-                {
-                    b.Balance += amount;
-                    b.EndingBalance += amount;
-                    return b;
-                }).ToArray());
-            }
-
-            if (save) await _context.SaveChangesAsync();
-
-            return balance;
-
-        }
-
-
 
         public AccountBalance? GetByAccountWithDate(Guid account, DateTime date)
         {
@@ -294,7 +217,7 @@ namespace FinanceFunction.Data.CosmosRepo
         }
 
         public IQueryable<AccountBalance> GetByDateCredit(DateTime date)
-        {
+        { 
             throw new NotImplementedException();
         }
     }

@@ -73,7 +73,7 @@ namespace FinanceFunction.Data.CosmosRepo
 
 				public Account UpdateDebitAcct(Guid debitId, decimal amount)
 				{
-						var debitTask = _context.Accounts!.Where(e => e.Id == debitId).FirstOrDefaultAsync();
+						var debitTask = _context.Accounts!.FindAsync(debitId).AsTask();
 						debitTask.Wait();
 						var debit = debitTask.Result;
 						if (debit == null)
@@ -91,7 +91,7 @@ namespace FinanceFunction.Data.CosmosRepo
 
 				public Account UpdateCreditAcct(Guid creditId, decimal amount)
 				{
-						var creditTask = _context.Accounts!.Where(e => e.Id == creditId).FirstOrDefaultAsync();
+						var creditTask = _context.Accounts!.FindAsync(creditId).AsTask();
 						creditTask.Wait();
 						var credit = creditTask.Result;
 						
