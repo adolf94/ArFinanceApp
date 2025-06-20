@@ -2,13 +2,12 @@ import { Box, CircularProgress, Dialog, DialogContent, Divider, ListItem, ListIt
 import { useEffect, useState } from "react"
 import db from "../../components/LocalDb"
 import api from "../../components/fnApi"
-import { Image } from "@mui/icons-material"
-
+import {Image} from '@mui/icons-material'
 
 
 const ImageModal = ({id} : {id:string})=>{
     const [open,setOpen] = useState(false)
-    const [data,setData] = useState("")
+    const [data,setData] = useState<string | ArrayBuffer>("")
     
     useEffect(()=>{
         if(!open) return
@@ -16,17 +15,26 @@ const ImageModal = ({id} : {id:string})=>{
             var output = await db.images.where("id").equals(id).first();
             if(!output) {
                 output = await api(`/file/${id}`, {
-                    responseType: 'blob'
-                }).then(async (res)=>{
-                    const imageBlob = res.data;
-                    const imageUrl = URL.createObjectURL(imageBlob); // Create a Blob URL
-                    var item = {
-                        id:id,
-                        data: imageUrl
-                    }
-                    await db.images.put(item)
-                    setData(imageUrl);
-                    return item
+                    responseType: 'arraybuffer'
+                  }).then(async (resp)=>{
+
+                    return new Promise((result)=>{
+                        const reader = new FileReader();
+                        reader.onloadend = async () => {
+                        // reader.result will contain the data URL (e.g., "data:image/jpeg;base64,...")
+                            var item = {
+                                id:id,
+                                data: reader.result as string
+                            }
+                            await db.images.put(item)
+                            setData(reader.result);
+                            result(item)
+                        };
+                                        
+                        reader.readAsDataURL(resp.data);
+                    })
+                                
+            
                 })
             }
 
