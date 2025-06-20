@@ -197,7 +197,7 @@ def reset_ledgers(db):
     db["AccountBalance"] = final_acctBals
     
 
-    db["HookMessages"] = list(map(lambda e: {**e,"Status": "New", "$type":"HookMessage","TransactionId":None, "MonthKey":parse(e["Date"]).strftime("%Y-%m-01")}, db["HookMessages"]))
+    db["HookMessages"] = list(map(lambda e: {**e,"Status": "New", "$type":"HookMessage","MonthKey":parse(e["Date"]).strftime("%Y-%m-01")}, db["HookMessages"]))
 
     return db
 
@@ -250,7 +250,7 @@ def table_metadata():
         {
             "Container": "HookMessages",
             "PartitionKeyPath": "/MonthKey",
-            "mapper": lambda e : { **e, "Status": "New", "TransactionId":None, "MonthKey":parse(e["Date"]).strftime("%Y-%m-01")}
+            "mapper": lambda e : { **e, "Status": "New", "MonthKey":parse(e["Date"]).strftime("%Y-%m-01")}
         },
         {
             "Container": "LedgerEntries",
@@ -279,7 +279,7 @@ def table_metadata():
         {
             "Container":"Transaction",
             "PartitionKeyPath":"/PartitionKey",
-            "mapper": lambda e : { **e, "MonthKey": parse(e.Date).strftime("%Y-%m-01"), "Notifications" :[]}
+            "mapper": lambda e : { **e, "MonthKey": parse(e.Date).strftime("%Y-%m-01")}
         },
         {
             "Container":"User",

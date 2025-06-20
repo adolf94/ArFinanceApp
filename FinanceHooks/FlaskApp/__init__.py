@@ -77,13 +77,12 @@ def phone_hook():
 
 @app.post("/file_hook")
 def file_hook_handler():
-    id=uuid7( as_type='str')
     headeApiKey = request.headers.get("x-api-key", type=str)
     if(headeApiKey == None or headeApiKey != apiKey ): return Response(status=401)
     resp = handle_upload(request)
 
     return Response( json.dumps(resp) , 201, content_type="application/json")
-
+ 
 
 if __name__ == "__main__":
     app.run()

@@ -21,7 +21,7 @@ dbName = os.getenv("COSMOS_DB")
 dbName2 = os.getenv("COSMOS_DB2")
 apiKey =os.getenv("API_KEY")
 account_url = os.getenv("BLOB_SCREENSHOT_UPLOAD")  # e.g., "https://mydatalake.blob.core.windows.net"
-connection_string = os.getenv("BLOB_CONNECTION_STRING")  # e.g., "https://mydatalake.blob.core.windows.net"
+connection_string = os.getenv("BLOB_CONNECTION_STRING", "")  # e.g., "https://mydatalake.blob.core.windows.net"
 container_name = "transact-screenshots" # Replace with your container name
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}  # Allowed file types
             # if connection_string:
@@ -80,7 +80,9 @@ def handle_upload(request : Request):
     fileType = originalFileName.split(".",1)[-1]
     blob_name = fileId + "." + fileType
         
-    upload_to_azure(local_file_path,blob_name)
+    logging.info("start upload to azure ")
+    upload_result = upload_to_azure(local_file_path,blob_name)
+    logging.info(upload_result)
     record = {
         "id":id,
         "Container": container_name,
@@ -146,39 +148,48 @@ def upload_to_azure(file_path, blob_name):
         blob_service_client = None
         if connection_string != "":
             blob_service_client = BlobServiceClient.from_connection_string(connection_string)
-            logging.debug("found the connection string")
+            logging.info("found the connection string")
 
         # # Use DefaultAzureCredential - this will use whatever identity you've configured
         # # (e.g., environment variables, managed identity, etc.)
         else:
             credential = DefaultAzureCredential()
             blob_service_client = BlobServiceClient(account_url=account_url, credential=credential)
-            logging.debug("using default Credential")
+            logging.info("using default Credential")
             
         blob_client = blob_service_client.get_blob_client(container=container_name, blob=blob_name)
         with open(file_path, "rb") as data:
             blob_client.upload_blob(data, overwrite=True)  # Overwrite if it exists
-        logging.debug("uploading blob")
+        logging.info("uploading blob")
+
+
+                        
+            # Get a user delegation key
+        if connection_string == "":
+            user_delegation_key = blob_service_client.get_user_delegation_key(
+                key_start_time=datetime.datetime.now(datetime.timezone.utc) ,
+                key_expiry_time=datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=1)  # Key valid for 1 hour
+            )
+
 
         sas_token = generate_blob_sas(
             account_name=blob_client.account_name,
             container_name=container_name,
             blob_name=blob_name,
-            account_key=blob_client.credential.account_key if hasattr(blob_client.credential, 'account_key') else None, #important
+            account_key=blob_client.credential.account_key if connection_string != "" else user_delegation_key, #important
             permission="r",  # Read permission
             expiry=datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=1),  # SAS expires in 1 hour
         )
         blob_url_with_sas = f"{blob_client.url}?{sas_token}"
-        logging.debug("upload complete")
 
         return {
             "url":blob_client.url,
             "fileId": blob_name,
-            "sas":sas_token
+            "sas":sas_token if sas_token != None else "" 
         }
 
 
     except Exception as ex:
-        print(ex)
+        logging.error(ex)
         return Response(ex, 500)
         

@@ -33,6 +33,8 @@ import Daily from "./RecordsComponents/Daily";
 import UserPanel from "../components/UserPanel.js";
 import { useOfflineData } from "../components/LocalDb/useOfflineData";
 import React from "react";
+import { useLiveQuery } from "dexie-react-hooks";
+import db from "../components/LocalDb";
 
 interface RecordViewTransaction {
   dateGroup: string;
@@ -82,14 +84,21 @@ const Records = () => {
   // });
     //const records = useMemo(()=>[],[])
 
-    const { data: records, isLoading:loadingRecords } = useOfflineData({
+    const { isLoading:loadingRecords } = useOfflineData({
         defaultData: [],
         offlineOnly : false,
         initialData: ()=>fetchTransactionsByMonthKey(month.get("year"), month.get("month"), true),
         getOnlineData: ()=>fetchTransactionsByMonthKey(month.get("year"), month.get("month"), false)
     }, [monthStr])
 
-
+  const records = useLiveQuery(async ()=>{
+    let key = moment([month.get("year"),  month.get("month"),1]).format("YYYY-MM-01")
+    let monthData = await db.monthTransactions.where("monthKey").equals( key ).first();
+    if(!monthData) return null;
+    return Promise.all( monthData.transactions.map((tr)=>{
+      return db.transactions.where("id").equals(tr.id).first()
+    }))
+  }, [month.get("year"),  month.get("month")])
 
   const [dailies, setDailies] = useState([]);
 

@@ -1,158 +1,224 @@
-[{
-    "config": "notif_gcash_receive",
-    "subConfig": "gcashInwardTransfer",
-    "displayName":"GCash Received",
-    "type":"transfer",
-    "vendor":"senderAcct",
-    "credit":"senderAcct",
-    "debit":"fixed|gcash",
-    "fixedLists": {
-        "gcash": [ "01950582-caff-7823-9eb3-d52bcd602d67"]
+[
+    {
+        "config": "notif_gcash_receive",
+        "subConfig": "gcashInwardTransfer",
+        "displayName": "GCash Received",
+        "type": "transfer",
+        "vendor": "senderAcct",
+        "credit": "senderAcct",
+        "debit": "fixed|gcash",
+        "fixedLists": {
+            "gcash": [ "01950582-caff-7823-9eb3-d52bcd602d67" ]
+        },
+        "remarks": "Received GCash from ${$.senderName}(${$.senderAcct}).",
+        "comments": ""
     },
-    "remarks": "Received GCash from ${$.senderName}(${$.senderAcct}).",
-    "comments":""
-},{
-    "config": "notif_vybe_transfer_bank",
-    "subConfig": "vybeOutwardTransfer",
-    "displayName":"Vybe Transfer",
-    "type":"transfer",
-    "vendor":"recipientAcct",
-    "credit":"fixed|vybe",
-    "debit":"recipientAcct",
-    "fixedLists": {
-        "vybe": [ "01950582-caff-7823-9eb3-d52bcd602d67"]
+    {
+        "config": "notif_vybe_transfer_bank",
+        "subConfig": "vybeOutwardTransfer",
+        "displayName": "Vybe Transfer",
+        "type": "transfer",
+        "vendor": "recipientAcct",
+        "credit": "fixed|vybe",
+        "debit": "recipientAcct",
+        "fixedLists": {
+            "vybe": [ "01950582-caff-7823-9eb3-d52bcd602d67" ]
+        },
+        "remarks": "Sent to ${$.recipientAcct}(${$.recipientBank}) with reference ${$.reference} ",
+        "comments": ""
     },
-    "remarks": "Sent to ${$.recipientAcct}(${$.recipientBank}) with reference ${$.reference} ",
-    "comments":""
-},{
-    "config": "notif_vybe_transfer_bank",
-    "subConfig": "vybeOutwardBankPayment",
-    "displayName":"Vybe Instapayment",
-    "type":"expense",
-    "vendor":"recipientAcct",
-    "credit":"fixed|vybe",
-    "debit":"recipientAcct",
-    "fixedLists": {
-        "vybe": [ "01950582-caff-7823-9eb3-d52bcd602d67"]
+    {
+        "config": "notif_vybe_transfer_bank",
+        "subConfig": "vybeOutwardBankPayment",
+        "displayName": "Vybe Instapayment",
+        "type": "expense",
+        "vendor": "recipientAcct",
+        "credit": "fixed|vybe",
+        "debit": "recipientAcct",
+        "fixedLists": {
+            "vybe": [ "01950582-caff-7823-9eb3-d52bcd602d67" ]
+        },
+        "remarks": "Payment to ${$.recipientAcct}(${$.recipientBank}) with reference ${$.reference} ",
+        "comments": ""
     },
-    "remarks": "Payment to ${$.recipientAcct}(${$.recipientBank}) with reference ${$.reference} ",
-    "comments":""
-},{
-    "config": "notif_vybe_pay",
-    "subConfig": "vybeMerchantPayment",
-    "displayName":"Vybe Merchant Payment",
-    "type":"expense",
-    "vendor":"recipientName",
-    "credit":"fixed|vybe",
-    "debit":"recipientName",
-    "fixedLists": {
-        "vybe": [ "01950582-caff-7823-9eb3-d52bcd602d67"]
+    {
+        "config": "notif_vybe_pay",
+        "subConfig": "vybeMerchantPayment",
+        "displayName": "Vybe Merchant Payment",
+        "type": "expense",
+        "vendor": "recipientName",
+        "credit": "fixed|vybe",
+        "debit": "recipientName",
+        "fixedLists": {
+            "vybe": [ "01950582-caff-7823-9eb3-d52bcd602d67" ]
+        },
+        "remarks": "Merchant Payment to ${$.recipientName} with reference ${$.reference} ",
+        "comments": ""
     },
-    "remarks": "Merchant Payment to ${$.recipientName} with reference ${$.reference} ",
-    "comments":""
-},{
-    "config": "notif_vybe_cashin",
-    "subConfig": "vyveCashIn",
-    "displayName":"Vybe Cash In",
-    "type":"transfer",
-    "vendor":"fixed|bpi",
-    "credit":"fixed|bpi",
-    "debit":"fixed|vybe",
-    "remarks": "Vybe cash in from BPI reference ${$.reference} ",
-    "comments":""
-},
-{
-    "config":"notif_bpi_receive_from_bpi",
-    "subConfig": "bpiTransferFromOthers",
-    "displayName":"BPI Received",
-    "type":"transfer",
-    "vendor":"fixed|bpi-others",
-    "credit":"fixed|bpi-others",
-    "debit":"ownAcct",
-    "remarks": "Received BPI Funds to ${$.ownAcct}",
-    "comments":"When receiving from others"
-},{
-    "config": "sms_maybank_withdrawal",
-    "subConfig": "maybankWithdrawal",
-    "displayName":"Maybank Withdraw",
-    "type":"transfer",
-    "vendor":"fixed|maybank",
-    "credit":"fixed|maybank",
-    "debit":"fixed|cash",
-    "remarks": "Maybank Widthdrawal from ${$.ownAcct}",
-    "comments":""
-},{
-    "config": "sms_unionbank_card2",
-    "subConfig": "smsUnionbankCardPayment2",
-    "displayName":"UB Card transaction",
-    "type":"expense",
-    "vendor":"recipientName",
-    "credit":"ownAcct",
-    "debit":"recipientName",
-    "remarks": "Card Transaction with ${$.recipientName}",
-    "comments":""
-},{
-    "config": "sms_unionbank_card",
-    "subConfig": "smsUnionbankCardPayment",
-    "displayName":"UB Card transaction",
-    "type":"expense",
-    "vendor":"recipientName",
-    "credit":"ownAcct",
-    "debit":"recipientName",
-    "remarks": "Card Transaction with ${$.recipientName}",
-    "comments":""
-},{
-    "config": "sms_unionbank_card_otp",
-    "subConfig": "smsUnionbankCardPaymentOtp",
-    "displayName":"UB Card transaction",
-    "type":"expense",
-    "vendor":"recipientName",
-    "credit":"ownAcct",
-    "debit":"recipientName",
-    "remarks": "Card Transaction with ${$.recipientName}",
-    "comments":""
-}
-,{
-    "config": "sms_bpi_card_otp",
-    "subConfig": "bpiCardOtp",
-    "displayName":"BPI Card transaction",
-    "type":"expense",
-    "vendor":"recipientName",
-    "credit":"ownAcct",
-    "debit":"recipientName",
-    "remarks": "Card Transaction with ${$.recipientName}",
-    "comments":""
-}
-,{
-    "config": "notif_gcash_instapay",
-    "subConfig": "gcashReceiveInstapay",
-    "displayName":"GCash Received(Instapay)",
-    "type":"transfer",
-    "vendor":"senderAcct",
-    "credit":"senderAcct",
-    "debit":"fixed|gcash",
-    "remarks": "Received from ${$.senderBank} acct ${$.senderAcct}. Reference ${$.reference}",
-    "comments":""
-},{
-    "config": "img_gcash_express",
-    "subConfig": "gcashExpressPayment",
-    "displayName":"GCash InstaPayment",
-    "type":"expense",
-    "vendor":"recipientAcct",
-    "credit":"fixed|gcash",
-    "debit":"recipientAcct",
-    "remarks": "GCash payment to ${$.recipientName}",
-    "comments":""
-},{
-    "config": "img_gcash_express",
-    "subConfig": "gcashExpressSend",
-    "displayName":"GCash Transfer",
-    "type":"transfer",
-    "vendor":"recipientAcct",
-    "credit":"fixed|gcash",
-    "debit":"recipientAcct",
-    "remarks": "GCash transfer to ${$.recipientName}",
-    "comments":""
-}
+    {
+        "config": "notif_vybe_cashin",
+        "subConfig": "vyveCashIn",
+        "displayName": "Vybe Cash In",
+        "type": "transfer",
+        "vendor": "fixed|bpi",
+        "credit": "fixed|bpi",
+        "debit": "fixed|vybe",
+        "remarks": "Vybe cash in from BPI reference ${$.reference} ",
+        "comments": ""
+    },
+    {
+        "config": "notif_bpi_receive_from_bpi",
+        "subConfig": "bpiTransferFromOthers",
+        "displayName": "BPI Received",
+        "type": "transfer",
+        "vendor": "fixed|bpi-others",
+        "credit": "fixed|bpi-others",
+        "debit": "ownAcct",
+        "remarks": "Received BPI Funds to ${$.ownAcct}",
+        "comments": "When receiving from others"
+    },
+    {
+        "config": "sms_maybank_withdrawal",
+        "subConfig": "maybankWithdrawal",
+        "displayName": "Maybank Withdraw",
+        "type": "transfer",
+        "vendor": "fixed|maybank",
+        "credit": "fixed|maybank",
+        "debit": "fixed|cash",
+        "remarks": "Maybank Widthdrawal from ${$.ownAcct}",
+        "comments": ""
+    },
+    {
+        "config": "sms_unionbank_card2",
+        "subConfig": "smsUnionbankCardPayment2",
+        "displayName": "UB Card transaction",
+        "type": "expense",
+        "vendor": "recipientName",
+        "credit": "ownAcct",
+        "debit": "recipientName",
+        "remarks": "Card Transaction with ${$.recipientName}",
+        "comments": ""
+    },
+    {
+        "config": "sms_unionbank_card",
+        "subConfig": "smsUnionbankCardPayment",
+        "displayName": "UB Card transaction",
+        "type": "expense",
+        "vendor": "recipientName",
+        "credit": "ownAcct",
+        "debit": "recipientName",
+        "remarks": "Card Transaction with ${$.recipientName}",
+        "comments": ""
+    },
+    {
+        "config": "sms_unionbank_card_otp",
+        "subConfig": "smsUnionbankCardPaymentOtp",
+        "displayName": "UB Card transaction",
+        "type": "expense",
+        "vendor": "recipientName",
+        "credit": "ownAcct",
+        "debit": "recipientName",
+        "remarks": "Card Transaction with ${$.recipientName}",
+        "comments": ""
+    },
+    {
+        "config": "sms_bpi_card_otp",
+        "subConfig": "bpiCardOtp",
+        "displayName": "BPI Card transaction",
+        "type": "expense",
+        "vendor": "recipientName",
+        "credit": "ownAcct",
+        "debit": "recipientName",
+        "remarks": "Card Transaction with ${$.recipientName}",
+        "comments": ""
+    },
+    {
+        "config": "notif_gcash_instapay",
+        "subConfig": "gcashReceiveInstapay",
+        "displayName": "GCash Received(Instapay)",
+        "type": "transfer",
+        "vendor": "senderAcct",
+        "credit": "senderAcct",
+        "debit": "fixed|gcash",
+        "remarks": "Received from ${$.senderBank} acct ${$.senderAcct}. Reference ${$.reference}",
+        "comments": ""
+    },
+    {
+        "config": "img_gcash_express",
+        "subConfig": "gcashExpressPayment",
+        "displayName": "GCash InstaPayment",
+        "type": "expense",
+        "vendor": "recipientAcct",
+        "credit": "fixed|gcash",
+        "debit": "recipientAcct",
+        "remarks": "GCash payment to ${$.recipientName}",
+        "comments": ""
+    },
+    {
+        "config": "img_gcash_express",
+        "subConfig": "gcashExpressSend",
+        "displayName": "GCash Transfer",
+        "type": "transfer",
+        "vendor": "recipientAcct",
+        "credit": "fixed|gcash",
+        "debit": "recipientAcct",
+        "remarks": "GCash transfer to ${$.recipientName}",
+        "comments": ""
+    },
+    {
+        "config": "img_vybe_payment",
+        "subConfig": "vybeMerchantPaymentImg",
+        "displayName": "Vybe Payment",
+        "type": "expense",
+        "vendor": "recipientAcct",
+        "credit": "fixed|vybe",
+        "debit": "recipientAcct",
+        "remarks": "Vybe merchant payment to ${$.recipientName}. Ref: ${$.reference}",
+        "comments": ""
+    },
+    {
+        "config": "img_vybe_instapay",
+        "subConfig": "vybeInstaPaymentImg",
+        "displayName": "Vybe Instapayment",
+        "type": "expense",
+        "vendor": "recipientAcct",
+        "credit": "fixed|vybe",
+        "debit": "recipientAcct",
+        "remarks": "Vybe Instapay payment to ${$.recipientAcct}. Ref: ${$.reference}",
+        "comments": ""
+    },
+    {
+        "config": "img_vybe_instapay",
+        "subConfig": "vybeTransferImg",
+        "displayName": "Vybe Instapay",
+        "type": "transfer",
+        "vendor": "recipientAcct",
+        "credit": "fixed|vybe",
+        "debit": "recipientAcct",
+        "remarks": "Vybe Instapay transfer to ${$.recipientAcct}(${$.recipientBank}). Ref: ${$.reference}",
+        "comments": ""
+    },
+    {
+        "config": "img_bdo_transfer",
+        "subConfig": "bdoTransferImg",
+        "displayName": "BDO Transfer",
+        "type": "transfer",
+        "vendor": "recipientAcct",
+        "credit": "senderAcct",
+        "debit": "recipientAcct",
+        "remarks": "BDO transfer to ${$.recipientName}. Ref: ${$.reference}",
+        "comments": ""
+    },
+    {
+        "config": "img_bdo_transfer",
+        "subConfig": "bdoInstapaymentImg",
+        "displayName": "BDO Transfer",
+        "type": "expense",
+        "vendor": "recipientAcct",
+        "credit": "senderAcct",
+        "debit": "recipientAcct",
+        "remarks": "BDO payment to ${$.recipientName}. Ref: ${$.reference}",
+        "comments": ""
+    }
 
 ]

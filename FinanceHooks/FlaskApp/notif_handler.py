@@ -178,24 +178,46 @@ def handle_gcash_notif(data : dict):
     if(data["notif_title"] == "You have received money in GCash!"):
         reg = r"(You have received PHP ([0-9\.]+) of GCash from ([A-Z\*\ \.]+) ([0-9]*)\.)"
         match = get_regex_match(reg, data["notif_msg"])
-        if(match == None):
+        if(match != None):
+            output = regex_matches_tolist(match)
             return {"data":{
                 "matchedConfig" : "notif_gcash_receive",
-                    "success" : False
-                }, "location": None}
+                "success" : True,
+                "senderName": output[2]['group'],
+                "senderAcct": output[3]['group'],
+                "amount": output[1]['group']
+            }, "location": {
+                "senderName": output[2]['span'],
+                "senderAcct": output[3]['span'],
+                "amount": output[1]['span']
+            }}
         
-        output = regex_matches_tolist(match)
+        reg = r"(You have received ([0-9\.]+) of GCash from ([A-Za-z\ ,.]+) with account ending in ([A-Za-z0-9]+). Your new balance is ([0-9\.]+) [0-9\-\ :AMP]+. Ref. No. ([A-Z0-9]+).)"
+        match = get_regex_match(reg, data["notif_msg"])
+        if(match != None):
+            output = regex_matches_tolist(match)
+            return {"data":{
+                "matchedConfig" : "notif_gcash_instapay",
+                "success" : True,
+                "senderBank": output[2]['group'],
+                "newBalance": output[4]['group'],
+                "senderAcct": output[3]['group'],
+                "reference": output[5]['group'],
+                "amount": output[1]['group']
+            }, "location": {
+                "senderBank": output[2]['span'],
+                "senderAcct": output[3]['span'],
+                "newBalance": output[4]['span'],
+                "amount": output[1]['span'],
+                "reference": output[5]['span'],
+            }}
+
+
         return {"data":{
-            "matchedConfig" : "notif_gcash_receive",
-            "success" : True,
-            "senderName": output[2]['group'],
-            "senderAcct": output[3]['group'],
-            "amount": output[1]['group']
-        }, "location": {
-            "senderName": output[2]['span'],
-            "senderAcct": output[3]['span'],
-            "amount": output[1]['span']
-        }}
+            "matchedConfig" : "notif_gcash_receive_unknown",
+                "success" : False
+            }, "location": None}
+        
     else:   
         return {"data":{
             "matchedConfig":"notif_gcash",
