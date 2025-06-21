@@ -12,6 +12,7 @@ from uuid_extensions import uuid7
 
 from FlaskApp.ai_modules import extract_from_ia
 from FlaskApp.ai_modules.extract_data import identify_from_filename
+from FlaskApp.ai_modules.image_functions import read_screenshot
 from FlaskApp.cosmos_modules import add_to_app, add_to_persist
 
 
@@ -100,7 +101,7 @@ def handle_upload(request : Request):
 
     image_extract = extract_from_ia(local_file_path)
 
-    output = identify_from_filename(originalFileName, image_extract["lines"])
+    output = read_screenshot(originalFileName, image_extract["lines"])
 
     newItem = { 
         "Id" : id,

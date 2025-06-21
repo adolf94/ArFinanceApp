@@ -17,14 +17,13 @@ CREDENTIAL = DefaultAzureCredential() if  os.environ.get("AZ_IMAGE_KEY") == None
 client = ImageAnalysisClient(SERVICE_ENDPOINT, CREDENTIAL)
 
 
-
 def extract_from_ia(image_path):
-    
-    with open(image_path, "rb") as image_stream:
-        image_bytes = image_stream.read()
-        image_data = io.BytesIO(image_bytes)
 
-    # Call the OCR API using image data
+    with open(image_path, "rb") as image_stream:
+            image_bytes = image_stream.read()
+            image_data = io.BytesIO(image_bytes)
+
+        # Call the OCR API using image data
     result = client.analyze(
         image_data=image_data,
         visual_features=[VisualFeatures.READ]
