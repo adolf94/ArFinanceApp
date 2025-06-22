@@ -71,8 +71,12 @@ namespace FinanceFunction
 						Transaction item = _mapper.Map<Transaction>(dto);
 
 						//to do -- add try catch with rollback transactions
-						var AcctCredit = _account.UpdateCreditAcct(dto!.CreditId, dto.Amount);
+
+						//get was separated vs update, as create balances was using the updated balance when creating new Account Balance
+						var AcctCredit = _account.GetOne(dto!.CreditId)!;
+
 						var creditBal = await _bal.CreateBalances(AcctCredit, dto.Date);
+						AcctCredit = _account.UpdateCreditAcct(dto!.CreditId, dto.Amount);
 						accounts[dto.CreditId] = AcctCredit;
 						item.BalanceRefs.Add(new BalanceAccount
 						{
@@ -81,14 +85,16 @@ namespace FinanceFunction
 								IsDebit = false
 						});
 
+						//get was separated vs update, as create balances was using the updated balance when creating new Account Balance
+						var accDebit = _account.GetOne(dto.DebitId)!;
 
-						var accDebit = _account.UpdateDebitAcct(dto.DebitId, dto.Amount);
+						var debitBal = await _bal.CreateBalances(accDebit, dto.Date);  
+						accDebit = _account.UpdateDebitAcct(dto!.DebitId, dto.Amount);
 						accounts[dto.DebitId] = accDebit;
-						var debitBal = await _bal.CreateBalances(accDebit, dto.Date);
 						item.BalanceRefs.Add(new BalanceAccount
 						{
 								AccountId = dto.DebitId,
-								AccountBalanceKey = debitBal.Id,
+								AccountBalanceKey = debitBal!.Id,
 								IsDebit = true
 						});
 
@@ -176,10 +182,10 @@ namespace FinanceFunction
 						monthly[bal.MonthKey] = bal;
 
 						_mapper.Map(dto, transaction);
-						accounts[dto.CreditId] = _account.UpdateCreditAcct(dto.CreditId, dto.Amount);
 						var creditBal = await _bal.CreateBalances(accounts[dto.CreditId], dto.Date, false);
+						accounts[dto.CreditId] = _account.UpdateCreditAcct(dto.CreditId, dto.Amount);
 
-						if(creditBal == null)
+						if (creditBal == null)
 						{
 								throw new Exception($"creditbal was null for some reason: creditId:{dto.CreditId}, date:{dto.Date.ToString("yyyy-MM")}, transactionId: {dto.Id}");
 						}
@@ -192,8 +198,8 @@ namespace FinanceFunction
 								IsDebit = false
 						});
 
+						var debitBal = await _bal.CreateBalances(accounts[dto.DebitId], dto.Date, false);  
 						accounts[dto.DebitId] = _account.UpdateDebitAcct(dto.DebitId, dto.Amount);
-						var debitBal = await _bal.CreateBalances(accounts[dto.DebitId], dto.Date, false);
 
 						if (debitBal == null)
 						{

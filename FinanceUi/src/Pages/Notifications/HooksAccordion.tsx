@@ -171,7 +171,7 @@ const HooksAccordion = ({notif, onDelete, onCancel }) => {
                     </IconButton>
                         <Menu anchorEl={anchor} open={showMenu}>
                             <ClickAwayListener onClickAway={hide}>
-                                <Box>
+                                <Box>  
                                     <MenuItem onClick={()=> {
                                         navigator.clipboard.writeText(notif.rawMsg)
                                         setAnchor(null)

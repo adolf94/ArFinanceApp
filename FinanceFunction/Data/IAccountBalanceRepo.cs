@@ -8,7 +8,7 @@ namespace FinanceFunction.Data
 
         public Task<IEnumerable<AccountBalance>> UpdateCrAccount(Transaction transaction, bool reverse = false, bool save = true);
         public  Task<IEnumerable<AccountBalance>> UpdateDrAccount(Transaction transaction, bool reverse = false, bool save = true);
-				public Task<AccountBalance?> CreateBalances(Account acct, DateTime month, bool save = true);
+				public Task<AccountBalance> CreateBalances(Account acct, DateTime month, bool save = true);
 
 				public Task<AccountBalance?> GetOne(Account acct, DateTime date);
 

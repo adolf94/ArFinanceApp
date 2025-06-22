@@ -100,6 +100,7 @@ def read_screenshot(image_location, lines):
 
 
     conf_to_use = next(x for x in confs_to_test if run_conditions(x["conditions"], lines))
+    name = conf_to_use['name']
 
     extracted_data = {}
 
@@ -122,7 +123,8 @@ def read_screenshot(image_location, lines):
                 match = re.search(prop["extractRegex"], value)
                 value = match.group(int(prop["getMatch"]))
             else:
-                print(f"getMatch is required when using extractRegex. conf:{conf_to_use["name"]}, prop:{prop["property"]} ")
+                property = prop['property']
+                print(f"getMatch is required when using extractRegex. conf:{name}, prop:{property} ")
                 
         
         if "removeRegex" in prop:
@@ -136,7 +138,7 @@ def read_screenshot(image_location, lines):
 
         extracted_data[prop["property"]] = value
 
-    extracted_data["matchedConfig"] = f"img_{conf_to_use["name"]}"
+    extracted_data["matchedConfig"] = f"img_{name}"
     extracted_data["success"] = True
 
     return extracted_data

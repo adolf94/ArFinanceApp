@@ -1,4 +1,10 @@
+import asyncio
+import queue
+import random
+import threading
 from progress.bar import Bar
+from progress.spinner import Spinner
+
 from datetime import datetime
 from dateutil.parser import parse
 from dateutil.relativedelta import relativedelta
@@ -83,7 +89,8 @@ def export_data():
             json.dump(items, f, indent=4)
 
 
-def import_data(container_data, migration):
+
+async def import_data(container_data, migration):
     table_data = migration.table_metadata()
 
     for con in table_data:
@@ -102,20 +109,59 @@ def import_data(container_data, migration):
             default_ttl= conDict.get("DefaultTtl", None)
         )
 
+        svc = queue.Queue(4)
+        bar = None
+
+        def upsert_worker():
+
+            # spinner = Spinner(f'Loading {i}')
+            
+
+            while True:
+                current_container = db.get_container_client(conDict["Container"])
+                current_item = svc.get()
+                ii = current_item["i"]
+                
+                current_container.upsert_item(current_item["item"])
+                # print(f"complete {queue_num}: item {ii}")
+                bar.next()
+                svc.task_done()
+                
+                
+        
+        threading.Thread(target=upsert_worker, daemon=True).start()
 
         if conDict["Container"] in container_data:
             rows = container_data[conDict["Container"]]
             count = len(rows)
-            bar = Bar(conDict["Container"], max=count)
-            for row in rows:                
+            bar = Bar(conDict["Container"], max=count, suffix='%(index)d/%(max)d %(avg)d/s %(elapsed)d')
+            for i,row in enumerate(rows):                
                 if "$type" not in row and "Discriminator" in row: 
                     row["$type"] = row["Discriminator"]       
                 if "Id" in row and "id" in row: 
                     row["id"] = row["Id"]       
-                container.upsert_item(row)
-                bar.next()
+                svc.put({"item":row, "i":i})
+                
+            svc.join()
+                
+                # container.upsert_item(row)
+                # bar.next()
+        #     tasks = []
+        #     for i in range(4):
+        #         task = asyncio.create_task(upsert_worker(queue, conDict["Container"], bar, i))
+        #         tasks.append(task)
+
+        #     await queue.join()
+
+            
+        # # Cancel our worker tasks.
+        #     for task in tasks:
+        #         task.cancel()
+        #     # Wait until all worker tasks are cancelled.
+        #     await asyncio.gather(*tasks, return_exceptions=True)
+
             bar.finish()
-        print(f"Completed insert in {conDict["Container"]}")
+            print(f"Completed insert in {conDict["Container"]}")
 
 
 
@@ -171,7 +217,7 @@ if to_do == "Restore":
     db = loadFiles()
     migration_name = current_version_file()["id"]
     migration = load_config_from_file(migration_name)
-    import_data(db, migration)
+    asyncio.run(import_data(db, migration))
 
 
 
@@ -350,7 +396,7 @@ else:
         migration_name = current_version_file()["id"]
         migration = load_config_from_file(migration_name)
         db = migration.reset_ledgers(db)
-        import_data(db, migration)
+        asyncio.run(import_data(db, migration))
     else:
         which_db = get_db_list(False)
         backupname = "temp"
@@ -363,6 +409,6 @@ else:
         migration_name = current_version_file()["id"]
         migration = load_config_from_file(migration_name)
         db = migration.reset_ledgers(db)
-        import_data(db, migration)
+        asyncio.run(import_data(db, migration))
 
 
