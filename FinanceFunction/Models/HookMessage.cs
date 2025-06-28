@@ -44,7 +44,7 @@ public class HookMessage
 				public string? imageId { get; set; }
 				public string? timestamp { get; set; }
 				public string? sms_rcv_sender { get; set; }
-				public string? sms_rcv_sms_rcv_msg { get; set; }
+				public string? sms_rcv_msg { get; set; }
 				public string? notif_pkg { get; set; }
 				public string? notif_title { get; set; }
 				public string? notif_msg { get; set; }

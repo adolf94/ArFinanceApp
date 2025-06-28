@@ -45,7 +45,7 @@ def handle_bpi_sms(data):
         }}
     
     
-    reg = r"(This OTP is to approve your purchase at ([A-Za-z0-9 ]+) amounting to PHP ([0-9\.,]+) using your Primary BPI credit card ending in ([0-9]+))"
+    reg = r"(This OTP is to approve your purchase at ([A-Z\-a-z0-9 ]+) amounting to PHP ([0-9\.,]+) using your Primary BPI credit card ending in ([0-9]+))"
     
     searc = get_regex_match(reg, data["sms_rcv_msg"])
     if searc != None:

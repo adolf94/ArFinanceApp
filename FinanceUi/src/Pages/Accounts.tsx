@@ -20,61 +20,7 @@ import { Account } from "FinanceApi";
 import numeral from "numeral";
 import { useNavigate } from "react-router-dom";
 import moment from "moment";
-import {
-  fetchByAcctMonth,
-  fetchTransactionsByMonth,
-  TRANSACTION,
-} from "../repositories/transactions";
-
-interface CreditStatementBalanceProps {
-  account: Account;
-  date: Date;
-}
-
-const CreditStatementBalance = (props: CreditStatementBalanceProps) => {
-  const [date, setDate] = useState(props.date);
-
-  const { data: transactions, isLoading :loading } = useQuery({
-    queryKey: [
-      TRANSACTION,
-      {
-        accountId: props.account.id,
-        year: moment(date).year(),
-        month: moment(date).month() + 1,
-      },
-    ],
-    queryFn: () =>
-      fetchByAcctMonth(
-        props.account.id,
-        moment(date).add().year(),
-        moment(date).month() + 1,
-      ),
-  });
-  const [total, setTotal] = useState(0);
-
-  useEffect(() => {
-    let maxDate =
-      moment(props.date).endOf("month").date() > props.account.periodStartDay
-        ? props.account.periodStartDay - 1
-        : moment(props.date).endOf("month").date() - 1;
-    let date = moment(props.date).add(-maxDate, "day");
-    setDate(date);
-  }, [props.date, props.account]);
-
-  useEffect(() => {
-    let internalTotal = [...(transactions || [])].reduce((prev, cur, i) => {
-        if (cur.debitId === cur.creditId) return prev;
-      return prev + (props.account.id === cur.debitId ? -1 : 1) * cur.amount;
-    }, props.account.balance);
-    setTotal(internalTotal);
-  }, [transactions, props.account]);
-
-  return (
-      <Grid item xs={3} sx={{ alignContent: "center", textAlign: "end" }}>
-          {loading ? <Skeleton variant="text" /> : numeral(total).format("0,0.00")}
-    </Grid>
-  );
-};
+import CreditStatementBalance from "./Accounts/CreditCardBalance";
 
 const Accounts = (props) => {
   const theme = useTheme();
@@ -123,13 +69,21 @@ const Accounts = (props) => {
                         date={moment().toDate()}
                       />
                     )} */}
-                    <Grid
-                      item
-                      xs={3}
-                      sx={{ alignContent: "center", textAlign: "end" }}
-                    >
-                      {numeral(a.balance).format("0,0.00")}
-                    </Grid>
+                     {
+                     a.periodStartDay !== 1 ? 
+                     <CreditStatementBalance
+                     account={a}
+                     date={moment().toDate()}
+                   /> :
+                     
+                      <Grid
+                        item
+                        xs={3}
+                        sx={{ alignContent: "center", textAlign: "end" }}
+                      >
+                        {numeral(a.balance).format("0,0.00")}
+                      </Grid>
+                    }
                   </Grid>
                 </ListItem>
               ))}
