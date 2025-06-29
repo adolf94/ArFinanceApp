@@ -20,7 +20,15 @@
 		},
 		{
 			"path": "FinanceHooks"
+		},
+		{
+			"path": "FinanceFunction"
+		},
+		{
+			"path": ".devcontainer"
 		}
 	],
-	"settings": {}
+	"settings": {
+		"debug.internalConsoleOptions": "neverOpen"
+	}
 }

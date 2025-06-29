@@ -4,14 +4,19 @@
         "dockerfile": "Dockerfile",
         "context": ".."
       },
+    "features": {
+      "ghcr.io/devcontainers/features/dotnet:2": {
+        "version": "9.0" // Specify the .NET 9.0 SDK version
+      }
+    },
     "customizations": {
       "vscode": {
         "extensions": [
           "ms-azuretools.vscode-azurefunctions",
-          "ms-python.python"
+          "ms-python.python" 
         ]
       }
     },
     "forwardPorts": [7071], // Default port for Azure Functions Core Tools
-    "postCreateCommand": "pip install -r ./FinanceFunction/requirements.txt"
+    "postCreateCommand": "pip install -r ./FinanceHooks/requirements.txt"
 }
