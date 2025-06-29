@@ -12,3 +12,4 @@ FinanceProject/configs
 CosmosMigrations/backuppersist.json
 MigrationPython/data
 /MigrationPython/migrations/__pycache__
+pythonhttp/local.settings.json

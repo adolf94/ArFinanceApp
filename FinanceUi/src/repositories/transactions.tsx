@@ -196,8 +196,9 @@ export const fetchTransactionsByMonthKey = async (year: number, month: number, o
 
   let revalidatedData = await revalidateData(transactions , monthlytransaction)
   
-  let output = await Promise.all(revalidatedData.map(e=>ensureTransactionAcctData(e))) as MonthlyTransaction[] & { dateUpdated: Date; }
-  db.monthTransactions.put(output)
+  let output = await Promise.all(revalidatedData.map(e=>ensureTransactionAcctData(e))) as Transaction[] & { dateUpdated: Date; }
+  db.transactions.bulkPut(output)
+  db.monthTransactions.put(monthlytransaction)
   return output;
 
 
