@@ -1,0 +1,17 @@
+{
+    "name": "Azure Functions Python Dev Container",
+    "build": {
+        "dockerfile": "Dockerfile",
+        "context": ".."
+      },
+    "customizations": {
+      "vscode": {
+        "extensions": [
+          "ms-azuretools.vscode-azurefunctions",
+          "ms-python.python"
+        ]
+      }
+    },
+    "forwardPorts": [7071], // Default port for Azure Functions Core Tools
+    "postCreateCommand": "pip install -r ./FinanceFunction/requirements.txt"
+}
