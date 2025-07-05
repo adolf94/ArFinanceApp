@@ -3,12 +3,11 @@
 
 
 import json
+import logging
 import os
-from pathlib import Path
 import re
 
 
-import io
 from pathlib import Path
 from azure.core.credentials import AzureKeyCredential
 from azure.ai.vision.imageanalysis import ImageAnalysisClient
@@ -82,9 +81,8 @@ def get_from_test_files(image_path):
 
 
 def read_screenshot(image_location, lines):
-    current_directory = os.path.dirname(os.path.abspath(__file__))
-    print(current_directory)
-    config_path = os.path.join(current_directory, 'config.json')
+    current_directory = Path(os.path.dirname(os.path.abspath(__file__)))
+    config_path = os.path.join(current_directory.parent, 'config.json')
     # Path to the JSON file in the same directory
     configFile = open(config_path, 'r')
 
@@ -96,13 +94,20 @@ def read_screenshot(image_location, lines):
     app = read_from_filename(image_location)
 
 
-    confs_to_test = filter(lambda c: c["app"] == app, imageConfigs)
+    extracted_data = {
+        "matchedConfig" : "img",
+        "success": False 
+    }
 
-
-    conf_to_use = next(x for x in confs_to_test if run_conditions(x["conditions"], lines))
-    name = conf_to_use['name']
-
-    extracted_data = {}
+    confs_to_test = list(confs_to_test)
+    if len(confs_to_test) == 0:
+        logging.error(f"No config associated with {app}")
+        return extracted_data
+    try:
+        conf_to_use = next(x for x in confs_to_test if run_conditions(x["conditions"], lines))
+    except StopIteration:
+        logging.error(f"No config that matches the image")
+        return extracted_data
 
     for pi, prop in enumerate(conf_to_use["properties"]):
 

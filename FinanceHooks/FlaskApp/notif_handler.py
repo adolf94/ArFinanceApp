@@ -87,7 +87,6 @@ def handle_vybe_notif(data:dict):
                     "success" : False
                 }, "location": None}
             
-            print(match)
 
 
             output = regex_matches_tolist(match)

@@ -1,0 +1,421 @@
+{
+    "image" : [
+        {
+            "name": "gcash_express",
+            "app":"gcash",
+            "conditions": [
+                {
+                    "hasLine": "Express Send"
+                }
+            ],
+            "properties": [
+                {
+                    "property": "recipientName",
+                    "lookFor": "Express Send",
+                    "getValueAfter" : 1
+                },
+                {
+                    "property": "recipientAcct",
+                    "lookForRegex": "\\+63( [0-9·]+){3,4}",
+                    "getValueAfter" : 0,
+                    "replaceRegex":[{"f":"·", "t":"*"}, {"f":" ", "t":""}]
+                },
+                {
+                    "property": "reference",
+                    "lookForRegex":"Ref No\\. ([0-9 ]+)",
+                    "getValueAfter" :0,
+                    "extractRegex":"Ref No\\. ([0-9 ]+)",
+                    "getMatch":1,
+                    "removeRegex":[" "]
+                },
+                {
+                    "property":"amount",
+                    "lookFor": "Amount",
+                    "getValueAfter":1,
+                    "removeRegex": [","]
+                }
+            ]
+        },
+        {
+            "name": "vybe_payment",
+            "app":"vybe",
+            "conditions":[
+                { "hasLine" : "Payment To"}
+            ],  
+            "properties":[
+                {
+                    "property":"recipientName",
+                    "lookFor":"Payment To",
+                    "getValueAfter":2
+                },
+                {
+                    "property":"amount",
+                    "lookFor":"Amount",
+                    "getValueAfter":1,
+                    "extractRegex":"[₱PHP]*\\s*([0-9.,]+)",
+                    "getMatch":1,
+                    "removeRegex": [","]
+                },
+                {
+                    "property":"reference",
+                    "lookFor":"Reference No.",
+                    "getValueAfter":1
+                }
+            ]
+        },
+        {
+            "name": "vybe_payment",
+            "app":"vybe",
+            "conditions":[
+                { "hasLine" : "Bank Transfer To"}
+            ],  
+            "properties":[
+                {
+                    "property":"recipientAcct",
+                    "lookFor":"Bank Transfer To",
+                    "getValueAfter":1
+                },
+                {
+                    "property":"recipientBank",
+                    "lookFor":"Bank Transfer To",
+                    "getValueAfter":2
+                },
+                {
+                    "property":"amount",
+                    "lookFor":"Total Amount Deducted",
+                    "lookForRegex":"[₱PHP]*\\s*([0-9.,]+)",
+                    "getValueAfter":0,
+                    "extractRegex":"[₱PHP]*\\s*([0-9.,]+)",
+                    "getMatch":1,
+                    "removeRegex": [","]
+                },
+                {
+                    "property":"reference",
+                    "lookFor":"Reference No.",
+                    "getValueAfter":1
+                }
+            ]
+        },
+        {
+            "name":"bdo_transfer",
+            "app":"bdo",
+            "conditions":[],
+            "properties":[
+                {
+                    "property":"amount",
+                    "lookFor":"Sent!",
+                    "getValueAfter":1,
+                    "extractRegex":"[₱PHP]*\\s*([0-9.,]+)",
+                    "getMatch":1,
+                    "removeRegex": [","]
+                },
+                {
+                    "property":"recipientName",
+                    "lookFor":"To",
+                    "getValueAfter":1
+                },
+                {
+                    "property":"recipientAcct",
+                    "lookFor":"To",
+                    "getValueAfter":2
+                },
+                {
+                    "property":"sourceAcct",
+                    "lookFor":"From",
+                    "getValueAfter":3
+                },
+                {
+                    "property":"reference",
+                    "lookFor":"Reference no.",
+                    "getValueAfter":1
+                }
+                
+            ]
+        },
+        {
+            "name":"bpi_transfer",
+            "app":"bpi",
+            "conditions":[
+                { "hasLine" : "Sent via BPI"}
+            ],
+            "properties":[
+                {
+                    "property": "recipientName",
+                    "lookFor":"Transfer to",
+                    "getValueAfter":1
+                },
+                {
+                    "property": "recipientAcct",
+                    "lookFor":"Transfer to",
+                    "getValueAfter":2
+                },
+                {
+                    "property": "amount",
+                    "lookFor":"Transfer amount",
+                    "getValueAfter":1,
+                    "extractRegex":"[₱PHP]*\\s*([0-9.,]+)",
+                    "getMatch":1,
+                    "removeRegex": [","]
+                },
+                {
+                    "property": "reference",
+                    "lookForRegex":"Confirmation No. ([0-9]+)",
+                    "getValueAfter":0,
+                    "extractRegex":"Confirmation No. ([0-9]+)",
+                    "getMatch":1
+                },
+                {
+                    "property": "sourceAcct",
+                    "lookFor":"Transfer from",
+                    "getValueAfter":2
+                }
+            ]
+        },
+        {
+            "name": "unionbank_paybills",
+            "app":"unionbank",
+            "conditions":[{
+                "hasLine":"Bills Payment Request Received"
+            }],
+            "properties":[
+                {
+                    "property":"reference",
+                    "lookFor":"Reference Number",
+                    "getValueAfter" : 1
+                },
+                {
+                    "property":"dateTime",
+                    "lookFor":"Date",
+                    "getValueAfter" : 1
+                },
+                {
+                    "property":"ownAcct",
+                    "lookFor":"From Account",
+                    "getValueAfter" : 2,
+                    "extractRegex":"[\\*\\ ]+([0-9 ]+)"
+                },
+                {
+                    "property":"recipientName",
+                    "lookFor":"To Biller",
+                    "getValueAfter" : 1
+                },
+                
+                {
+                    "property":"recipientAcct",
+                    "lookFor":"To Biller",
+                    "getValueAfter" : 2,
+                    "extractRegex":".+: *([0-9 ]+)",
+                    "getMatch":1
+                },
+                
+                {
+                    "property":"amount",
+                    "lookFor":"Amount",
+                    "getValueAfter" : 1,
+                    "extractRegex":"[₱PHP]*\\s*([0-9.,]+)",
+                    "getMatch":1,
+                    "removeRegex": [","]
+                }
+            ]
+        }
+    ],
+    "notification":[
+        {
+            "name":"notif_bpi_receive_from_bpi",
+            "app": "com.bpi.ng.app",
+            "regex": "(Your account (X+[0-9]*) has been credited Php ([0-9,\\.]*).)",
+            "conditions":[],
+            "properties":[
+                {
+                    "property": "ownAcct",
+                    "regexIndex": 1
+                },
+                {
+                    "property":"amount",
+                    "regexIndex": 2
+                }
+            ]
+
+        },
+        {
+            "name":"notif_bpi",
+            "success":false,
+            "app": "com.bpi.ng.app",
+            "conditions":[]
+        },
+        {
+            "name":"notif_gcash_receive",
+            "app": "com.globe.gcash.android",
+            "regex": "(You have received PHP ([0-9\\.]+) of GCash from ([A-Z\\*\\ \\.]+) ([0-9]*)\\.)",
+            "conditions":[{
+                "property": "notif_title",
+                "operation": "equals",
+                "value": "You have received money in GCash!"
+            }],
+            "properties":[
+                {
+                    "property": "senderName",
+                    "regexIndex": 2
+                },
+                {
+                    "property":"senderAcct",
+                    "regexIndex": 3
+                },
+                {
+                    "property":"amount",
+                    "regexIndex": 1
+                }
+            ]
+
+        },
+        {
+            "name":"notif_gcash_instapay",
+            "app": "com.globe.gcash.android",
+            "regex": "(You have received ([0-9\\.]+) of GCash from ([A-Za-z\\ ,.]+) with account ending in ([A-Za-z0-9]+). Your new balance is ([0-9\\.]+) [0-9\\-\\ :AMP]+. Ref. No. ([A-Z0-9]+).)",
+            "conditions":[{
+                "property": "notif_title",
+                "method": "equals",
+                "valueString": "You have received money in GCash!"
+            }],
+            "properties":[
+                {
+                    "property": "senderName",
+                    "regexIndex": 2
+                },
+                {
+                    "property":"senderAcct",
+                    "regexIndex": 3
+                },
+                {
+                    "property":"amount",
+                    "regexIndex": 1
+                },
+                {
+                    "property":"newBalance",
+                    "regexIndex": 4
+                },
+                {
+                    "property":"reference",
+                    "regexIndex": 5
+                }
+            ]
+
+        },
+        {
+            "name":"notif_gcash_receive",
+            "success":false,
+            "app": "com.globe.gcash.android",            
+            "conditions":[{
+                "property": "notif_title",
+                "method": "equals",
+                "valueString": "You have received money in GCash!"
+            }]
+        },
+        {
+            "name":"notif_gcash",
+            "success":false,
+            "app": "com.globe.gcash.android",
+            "conditions":[]
+        },
+        {
+            "name":"notif_vybe_transfer_bank",
+            "app": "com.indivara.bpi",
+            "regex": "(You have transferred Php ([0-9\\.,]*) to ([A-Za-z,\\. ]+) account ending in (X+[0-9a-zA-Z]+). Your new balance is Php ([0-9\\.,]+). Ref. No. ([a-zA-Z0-9]+))",
+            "conditions":[{
+                "property": "notif_title",
+                "method": "equals",
+                "valueString": "Bank Transfer Successful"
+            }],
+            "properties":[
+                {
+                    "property": "recipientBank",
+                    "regexIndex": 2
+                },
+                {
+                    "property":"recipientAcct",
+                    "regexIndex": 3
+                },
+                {
+                    "property":"amount",
+                    "regexIndex": 1
+                },
+                {
+                    "property":"newBalance",
+                    "regexIndex": 4
+                },
+                {
+                    "property":"reference",
+                    "regexIndex": 5
+                }
+            ]
+
+        },
+        {
+            "name":"notif_vybe_pay",
+            "app": "com.indivara.bpi",
+            "regex": "(Hi ([A-Z ]+), your payment to ([A-Za-z0-9 ]+) of PHP ([0-9,\\.]+) has been successfully posted Ref.no. ([0-9]+).)",
+            "conditions":[{
+                "property": "notif_title",
+                "method": "equals",
+                "valueString": "Pay Merchant"
+            }],
+            "properties":[
+                {
+                    "property": "recipientName",
+                    "regexIndex": 2
+                },
+                {
+                    "property":"amount",
+                    "regexIndex": 3
+                },
+                {
+                    "property":"reference",
+                    "regexIndex": 4
+                }
+            ]
+
+        },
+
+        {
+            "name":"notif_vybe_cashin",
+            "app": "com.indivara.bpi",
+            "regex": "(You have received Php ([0-9\\.,]+) from ([A-Za-z ]+) on *([0-9PMAMN\\/ :]+). Your new wallet balance is Php ([0-9,\\.]+). Ref. no. ([0-9]+).)",
+            "conditions":[{
+                "property": "notif_title",
+                "method": "equals",
+                "valueString": "Top Up"
+            }],
+            "properties":[
+                {
+                    "property": "senderBank",
+                    "regexIndex": 2
+                },
+                {
+                    "property":"dateTime",
+                    "regexIndex": 3
+                },
+                {
+                    "property":"amount",
+                    "regexIndex": 1
+                },
+                {
+                    "property":"newBalance",
+                    "regexIndex": 4
+                },
+                {
+                    "property":"reference",
+                    "regexIndex": 5
+                }
+            ]
+
+        },
+
+        {
+            "name":"notif_vybe",
+            "success":false,
+            "app": "com.indivara.bpi",
+            "conditions":[]
+        }
+    ]
+}
+     
