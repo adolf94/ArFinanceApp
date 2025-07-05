@@ -10,7 +10,7 @@
   FormControl,
   InputLabel,
   Box,
-  Grid,
+  Grid2 as Grid,
   CircularProgress,
 } from "@mui/material";
 import react, { useEffect, useState } from "react";
@@ -130,7 +130,7 @@ const NewAccount = (props) => {
             <Box>
               <Grid container>
                 {form.accountGroup?.isCredit && (
-                  <Grid item xs={6} sx={{ pr: 1 }}>
+                  <Grid size={6} sx={{ pr: 1 }}>
                     <FormControl fullWidth sx={{ m: 1 }}>
                       <TextField
                         label="Cutoff start date"
@@ -159,7 +159,7 @@ const NewAccount = (props) => {
                     </FormControl>
                   </Grid>
                 )}
-                <Grid item xs={form.accountGroup?.isCredit ? 6 : 12}>
+                <Grid xs={form.accountGroup?.isCredit ? 6 : 12}>
                   <FormControl fullWidth sx={{ m: 1 }}>
                     <TextField
                       label="Balance"

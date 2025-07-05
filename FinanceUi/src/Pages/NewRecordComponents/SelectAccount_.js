@@ -1,5 +1,5 @@
 ﻿import React, { useState, useEffect, useContext } from 'react'
-import { Grid, List, ListItem, Button, Dialog } from '@mui/material'
+import { Grid2 as Grid, List, ListItem, Button, Dialog } from '@mui/material'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faChevronRight } from '@fortawesome/free-solid-svg-icons'
 import useDropdown from '../../components/useDropdown'
@@ -43,7 +43,7 @@ const SelectAccount = (props) => {
 
   return <Grid container>
     {view && view.type == "account" ?<>
-    <Grid item xs={6}>
+    <Grid size={6}>
       <List>
           {
             accountGroups.filter(e => e.accountTypeId == view.groupId).map(e => <ListItem button
@@ -56,7 +56,7 @@ const SelectAccount = (props) => {
           }
       </List>
     </Grid>
-    <Grid item xs={6}>
+    <Grid size={6}>
       <List>
         {
             accounts.filter(e => accountGroup && e.accountGroupId == accountGroup?.id).map(f => <ListItem button
@@ -73,7 +73,7 @@ const SelectAccount = (props) => {
     {
       view && view.type == "vendor" ? 
 
-        <Grid item xs={6}>
+        <Grid size={6}>
           <List>
             {view.searchValue != "" ? <ListItem button onClick={newVendor}>
               Add "{view.searchValue}"

@@ -11,7 +11,7 @@ import { ACCOUNT_BALANCE, getBalancesByDate } from "../../repositories/accountBa
 import moment from "moment";
 import { AccountBalance } from "@mui/icons-material";
 import numeral from "numeral";
-import { Grid, LinearProgress, Skeleton } from "@mui/material";
+import { Grid2 as Grid, LinearProgress, Skeleton, Typography } from "@mui/material";
 
 interface CreditStatementBalanceProps {
   account: Account;
@@ -40,18 +40,20 @@ const CreditStatementBalance = (props: CreditStatementBalanceProps) => {
     return <> 
         
         <Grid
-            item
-            xs={3}
+            size={3}
             sx={{ alignContent: "center", textAlign: "end" }}
         >
-            {isLoading ? <Skeleton variant="text" /> : numeral(acctBalance.balance + payments).format("0,0.00")  }
+            <Typography variant="body1">
+              {isLoading ? <Skeleton variant="text" /> : numeral(acctBalance.balance + payments).format("0,0.00")  }
+            </Typography>
         </Grid>
         <Grid
-            item
-            xs={3}
+            size={3}
             sx={{ alignContent: "center", textAlign: "end" }}
         >
-            {numeral(props.account.balance).format("0,0.00")}
+            <Typography variant="body1">
+              {numeral(props.account.balance).format("0,0.00")}
+            </Typography>
         </Grid>
     </>
 };

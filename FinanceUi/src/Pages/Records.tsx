@@ -7,7 +7,7 @@ import {
     AppBar,
     Box,
     Fab,
-    Grid,
+    Grid2 as Grid,
     IconButton,
     Paper,
     Tab,
@@ -208,7 +208,7 @@ const Records = () => {
     <>
       <AppBar position="static"  color="primary">
         <Toolbar>
-            <Grid container sx={{justifyContent: "space-between"}}>
+            <Grid container sx={{width:"100%",justifyContent: "space-between"}}>
                 <Grid>
                     <IconButton onClick={() => setMonth(month.clone().add(-1, "month"))}>
                         <FontAwesomeIcon
@@ -229,8 +229,8 @@ const Records = () => {
          
         </Toolbar>
       </AppBar>
-      <Grid container spacing={1}>
-        <Grid item md={4} sx={{ display: { xs: "none", md: "block" } }}>
+      <Grid container width="100%" spacing={1}>
+        <Grid size={{md:4}} sx={{ display: { xs: "none", md: "block" } }}>
           <Paper sx={{ mt: 3 }}>
               <Link to="/transactions/new">
                   <Box sx={{px:2}}>
@@ -244,7 +244,7 @@ const Records = () => {
               </Box>
           </Paper>
         </Grid>
-        <Grid item xs={12} md={8}>
+        <Grid size={{xs:12,sm:8}}>
           <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
             <Tabs
               value={view}

@@ -11,7 +11,7 @@ import {
   colors,
   Divider,
   Fab,
-  Grid,
+  Grid2 as Grid,
   IconButton,
   List,
   ListItem,
@@ -171,15 +171,15 @@ const ViewAccount = () => {
         <Toolbar>
           <Grid
             container
-            sx={{ display: "flex", justifyContent: "space-between" }}
+            sx={{ width:"100%", display: "flex", justifyContent: "space-between" }}
           >
-            <Grid item onClick={() => navigate(-1)}>
+            <Grid onClick={() => navigate(-1)}>
               <IconButton sx={{ mr: 1 }}>
                 <ArrowLeft />
               </IconButton>
               {account?.name}
             </Grid>
-            <Grid item>
+            <Grid>
               <IconButton
                 onClick={() => setMonth(month.clone().add(-1, "month"))}
               >
@@ -195,17 +195,17 @@ const ViewAccount = () => {
           </Grid>
         </Toolbar>
       </AppBar>
-      <Grid container spacing={1} sx={{ mt: 2 }}>
-        <Grid item md={5} sx={{ display: { xs: "none", md: "block" } }}>
+      <Grid container spacing={1} sx={{ width:"100%" , mt: 2 }}>
+        <Grid size={{md:5}} sx={{ display: { xs: "none", md: "block" } }}>
           Charts Here
         </Grid>
-        <Grid item md={7} xs={12}>
+        <Grid size={{md:7,xs:12}}>
           <Paper sx={{ my: 1, p: 2 }}>
             <Grid
               container
               sx={{ textAlign: "center", justifyContent: "space-around" }}
             >
-              <Grid item>
+              <Grid>
                 Deposit
                 <br />
                 <Typography
@@ -217,7 +217,7 @@ const ViewAccount = () => {
                   {isLoading? <Skeleton variant="text" width="5rem"  /> :numeral(data.totals.deposit).format("0,0.00")}
                 </Typography>
               </Grid>
-              <Grid item>
+              <Grid>
                 Withdrawal
                 <br />
                 <Typography
@@ -228,7 +228,7 @@ const ViewAccount = () => {
                   {isLoading? <Skeleton variant="text" width="5rem"  /> :numeral(data.totals.withdrawal).format("0,0.00")}
                 </Typography>
               </Grid>
-              <Grid item>
+              <Grid>
                 Total
                 <br />
                 <Typography
@@ -238,7 +238,7 @@ const ViewAccount = () => {
                   {isLoading? <Skeleton variant="text" width="5rem"  /> :numeral(data.totals.total).format("0,0.00")}
                 </Typography>
               </Grid>
-              <Grid item>
+              <Grid>
                 Balance
                 <br />
                 <Typography
@@ -256,14 +256,13 @@ const ViewAccount = () => {
               recordsLoading && <Paper sx={{ my: 1 }}>
                 <List>
                   <ListItem dense>
-                    <Grid item xs={6}>
+                    <Grid size={6}>
                       <Typography sx={{ px: 1 }} variant="transactionHeaderDate">
                         <Skeleton variant="text" />
                       </Typography>{" "}
                     </Grid>
                     <Grid
-                        item
-                        xs={3}
+                        size={3}
                         sx={{
                           display: "flex",
                           textAlign: "center",
@@ -280,8 +279,7 @@ const ViewAccount = () => {
                       </Typography>
                     </Grid>
                     <Grid
-                        item
-                        xs={3}
+                        size={3}
                         sx={{
                           display: "flex",
                           textAlign: "center",
@@ -318,45 +316,46 @@ const ViewAccount = () => {
                     )
                   }
                 >
-                  <Grid item xs={6}>
-                    <Typography sx={{ px: 1 }} variant="transactionHeaderDate">
-                      {data.day}
-                    </Typography>{" "}
-                    <Chip label={data.dayOfWeek} sx={{ mr: 1 }}></Chip>
-                  </Grid>
-                  <Grid
-                    item
-                    xs={3}
-                    sx={{
-                      display: "flex",
-                      textAlign: "center",
-                      justifyContent: "center",
-                    }}
-                  >
-                    <Typography
-                      color="green"
-                      sx={{ px: 1, alignSelf: "center", fontColor: "success" }}
-                      variant="transactionHeaderDate"
+                  <Grid container width="100%">
+                    <Grid size={6}>
+                      <Typography sx={{ px: 1 }} variant="transactionHeaderDate">
+                        {data.day}
+                      </Typography>{" "}
+                      <Chip label={data.dayOfWeek} sx={{ mr: 1 }}></Chip>
+                    </Grid>
+                    <Grid
+                      size={3}
+                      sx={{
+                        display: "flex",
+                        textAlign: "center",
+                        justifyContent: "center",
+                      }}
                     >
-                      {numeral(data.income).format("0,0.00")}
-                    </Typography>
-                  </Grid>
-                  <Grid
-                    item
-                    xs={3}
-                    sx={{
-                      display: "flex",
-                      textAlign: "center",
-                      justifyContent: "center",
-                    }}
-                  >
-                    <Typography
-                      color="red"
-                      sx={{ px: 1, alignSelf: "center", fontColor: "danger" }}
-                      variant="transactionHeaderDate"
+                      <Typography
+                        color="green"
+                        sx={{ px: 1, alignSelf: "center", fontColor: "success" }}
+                        variant="transactionHeaderDate"
+                      >
+                        {numeral(data.income).format("0,0.00")}
+                      </Typography>
+                    </Grid>
+                    <Grid
+                      item
+                      size={3}
+                      sx={{
+                        display: "flex",
+                        textAlign: "center",
+                        justifyContent: "center",
+                      }}
                     >
-                      {numeral(data.expenses).format("0,0.00")}
-                    </Typography>
+                      <Typography
+                        color="red"
+                        sx={{ px: 1, alignSelf: "center", fontColor: "danger" }}
+                        variant="transactionHeaderDate"
+                      >
+                        {numeral(data.expenses).format("0,0.00")}
+                      </Typography>
+                    </Grid>
                   </Grid>
                 </ListItem>
                 <Divider />
@@ -365,8 +364,8 @@ const ViewAccount = () => {
                     key={ item.id }
                     onClick={() => navigate("../../transactions/" + item.id)}
                   >
-                    <Grid container>
-                      <Grid item xs={3}>
+                    <Grid container width="100%">
+                      <Grid size={3}>
                         <Typography sx={{ px: 1 }} variant="body1">
                           {item.type === "transfer"
                             ? "Transfer"
@@ -378,24 +377,28 @@ const ViewAccount = () => {
                           {item.vendor?.name}
                         </Typography>
                       </Grid>
-                      <Grid item xs={5}>
+                      <Grid size={5}>
                         <Typography sx={{ fontWeight: 600 }} variant="body1">
                           {item.description || ""}
                         </Typography>
+                        <Typography variant="body1">
                         {item.type == "transfer"
                           ? item.credit.name + " => " + item.debit.name
                           : item.type == "expense"
                             ? item.credit.name
                             : item.debit.name}
+                          </Typography>
                       </Grid>
-                      <Grid item xs={4} sx={{ textAlign: "right", px: 1 }}>
+                      <Grid size={4} sx={{ textAlign: "right", px: 1 }}>
                         <Typography
                           color={fontColorOnType(item.debitId, item.creditId)}
                           sx={{ fontWeight: 600 }}
-                        >
+                          variant="body1">
                           P {numeral(item.amount).format("0,0.00")}
                         </Typography>
-                        {numeral(item.runningBalance).format("0,0.00")}
+                        <Typography variant="body1">
+                          {numeral(item.runningBalance).format("0,0.00")}
+                        </Typography>
                       </Grid>
                     </Grid>
                   </ListItem>

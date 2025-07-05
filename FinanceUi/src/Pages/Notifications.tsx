@@ -1,4 +1,4 @@
-import { AppBar, Box, Button, Chip, Divider, Grid, IconButton, List, ListItem, ListItemText, Paper, Skeleton, Toolbar, Typography } from "@mui/material";
+import { AppBar, Box, Button, Chip, Divider, Grid2 as Grid, IconButton, List, ListItem, ListItemText, Paper, Skeleton, Toolbar, Typography } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
 import UserPanel from "../components/UserPanel.js";
 import {getHooksMessages, getHooksMessagesByMonth, HOOK_MESSAGES} from "../repositories/hookMessages.js";
@@ -12,6 +12,7 @@ import db from "../components/LocalDb/AppDb.js";
 import { queryClient } from "../App.jsx";
 import {useDebouncedCallback} from 'use-debounce'
 import { mutateHookMessages } from "../repositories/hookMessages";
+import {Grid2} from "@mui/material";
 
 
 
@@ -138,8 +139,8 @@ const Notifications = () => {
             </Toolbar>
         </AppBar>
         <Grid container sx={{width:"100%", p:2}}>
-            <Grid md={3}></Grid>
-            <Grid container md={9}>
+            <Grid size={{md:3}}></Grid>
+            <Grid container size={{md:9}}>
                 <Paper sx={{my:1,p:2, width:'100%'}}>
                     <Grid container sx={{justifyContent:"space-between", alignItems:'center'}}>
                         <Grid>
@@ -161,13 +162,17 @@ const Notifications = () => {
                     </Grid>
                 </Paper>
                 <Box sx={{py:1}}>
-                    <Box sx={{display:'flex',gap:'0.25rem'}}>
-                        <Chip label="Confirmed" color="primary" onClick={()=>onFilter("success", "yes")} variant={success.includes("yes")?"filled":"outlined" }></Chip>
-                        <Chip label="Failed Extract" color="primary" onClick={()=>onFilter("success", "no")}  variant={success.includes("no")?"filled":"outlined" }></Chip>
-                        <Chip label="Notifications" color="primary" onClick={()=>onFilter("type", "notif")}  variant={type.includes("notif")?"filled":"outlined" }></Chip>
-                        <Chip label="SMS" color="primary"  onClick={()=>onFilter("type", "sms")}  variant={type.includes("sms")?"filled":"outlined" }></Chip>
-                        <Chip label="Image" color="primary"  onClick={()=>onFilter("type", "image")}  variant={type.includes("image")?"filled":"outlined" }></Chip>
-                    </Box>
+                    <Grid2 container >
+                        <Grid2>
+                            <Chip label="Confirmed" color="primary" onClick={()=>onFilter("success", "yes")} variant={success.includes("yes")?"filled":"outlined" }></Chip>
+                            <Chip label="Failed Extract" color="primary" onClick={()=>onFilter("success", "no")}  variant={success.includes("no")?"filled":"outlined" }></Chip>
+                        </Grid2>
+                        <Grid2>
+                            <Chip label="Notifications" color="primary" onClick={()=>onFilter("type", "notif")}  variant={type.includes("notif")?"filled":"outlined" }></Chip>
+                            <Chip label="SMS" color="primary"  onClick={()=>onFilter("type", "sms")}  variant={type.includes("sms")?"filled":"outlined" }></Chip>
+                            <Chip label="Image" color="primary"  onClick={()=>onFilter("type", "image")}  variant={type.includes("image")?"filled":"outlined" }></Chip>
+                        </Grid2>
+                    </Grid2>
                 </Box>
                 <Paper sx={{ width:'100%'}}>
                     <List>

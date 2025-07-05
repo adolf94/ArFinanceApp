@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react'
-import {Grid, List, ListItem,ListItemText, Divider, Button, Chip} from '@mui/material'
+import {Grid2 as Grid, List, ListItem,ListItemText, Divider, Button, Chip} from '@mui/material'
 import useSubmitTransaction from "../NewRecordComponents/useSubmitTransaction";
 import { faPersonMilitaryPointing } from "@fortawesome/free-solid-svg-icons";
 import { CreateTransactionDto, HookMessage } from "FinanceApi";
@@ -149,52 +149,52 @@ const HooksTransaction = ({hook, shown}: {hook:HookMessage, shown:boolean})=>{
                             onClick={()=>updateSelected(e)}
                             variant={selected?.subConfig == e.subConfig ? "filled" : "outlined"}></Chip>)}
                         </Grid>
-                        <Grid item sm={12}>
+                        <Grid sm={12}>
                             <List>
                                 <ListItem>
                                     <ListItemText primary={
                                         <Grid container>
-                                            <Grid sm={4}><b>Date:</b> </Grid>
-                                            <Grid sm={8}>{formData.date}</Grid>
+                                            <Grid size={{sm:4}}><b>Date:</b> </Grid>
+                                            <Grid size={{sm:8}}>{formData.date}</Grid>
                                         </Grid>} />
                                 </ListItem>
                                 <Divider />
                                 <ListItem>
                                     <ListItemText primary={
                                         <Grid container>
-                                            <Grid sm={4}><b>Credit:</b> </Grid>
-                                            <Grid sm={8}>{formData.credit?.name}</Grid>
+                                            <Grid size={{sm:4}}><b>Credit:</b> </Grid>
+                                            <Grid size={{sm:8}}>{formData.credit?.name}</Grid>
                                         </Grid>} />
                                 </ListItem>
                                 <Divider />
                                 <ListItem>
                                     <ListItemText primary={
                                         <Grid container>
-                                            <Grid sm={4}><b>Debit:</b> </Grid>
-                                            <Grid sm={8}>{formData.debit?.name}</Grid>
+                                            <Grid size={{sm:4}}><b>Debit:</b> </Grid>
+                                            <Grid size={{sm:8}}>{formData.debit?.name}</Grid>
                                         </Grid>} />
                                 </ListItem>
                                 <Divider />
                                 <ListItem>
                                     <ListItemText primary={
                                         <Grid container>
-                                            <Grid sm={4}><b>Vendor:</b> </Grid>
-                                            <Grid sm={8}>{formData.vendor?.name}</Grid>
+                                            <Grid size={{sm:4}}><b>Vendor:</b> </Grid>
+                                            <Grid size={{sm:8}}>{formData.vendor?.name}</Grid>
                                         </Grid>} />
                                 </ListItem>
                                 <Divider />
                                 <ListItem>
                                     <ListItemText primary={
                                         <Grid container>
-                                            <Grid sm={4}><b>Amount:</b> </Grid>
-                                            <Grid sm={8}>{formData.amount}</Grid>
+                                            <Grid size={{sm:4}}><b>Amount:</b> </Grid>
+                                            <Grid size={{sm:8}}>{formData.amount}</Grid>
                                             </Grid>} />
                                 </ListItem>
                                 <Divider />
                                 <ListItem>
                                     <ListItemText primary={
                                         <Grid container>
-                                            <Grid sm={4}> </Grid>
+                                            <Grid size={{sm:4}}> </Grid>
                                             <Grid sm={8} sx={{alignItems:'right'}}>
                                                 {
                                                     hook.transactionId ? <Button onClick={()=>navigate(`/transactions/${hook.transactionId}`)}>View</Button>

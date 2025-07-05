@@ -1,5 +1,5 @@
 import { BookOnline, TableChart } from "@mui/icons-material"
-import { AppBar, Container, Grid, IconButton, Toolbar, Typography } from "@mui/material"
+import { AppBar, Container, Grid2 as Grid, IconButton, Toolbar, Typography } from "@mui/material"
 import db from "../components/LocalDb";
 import { useConfirm } from "material-ui-confirm";
 import { useQueryClient } from "@tanstack/react-query";
@@ -41,14 +41,14 @@ const Settings = () => {
         </AppBar>
 
 				<Grid container sx={{ pt: 3 } }>
-						<Grid item xs={4} sx={{textAlign:"center" } }>
+						<Grid size={4} sx={{textAlign:"center" } }>
 								<IconButton onClick={resetCache}>
 										<BookOnline sx={{fontSize:"3rem"} } />
 								</IconButton><br />
 								Reset Local Cache
 
 						</Grid>
-						<Grid item xs={4} sx={{ textAlign: "center" }}>
+						<Grid size={4} sx={{ textAlign: "center" }}>
 								<IconButton onClick={resetDb }>
 										<TableChart sx={{ fontSize: "3rem" }} />
 								</IconButton><br />
