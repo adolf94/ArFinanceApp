@@ -27,18 +27,19 @@ jobs:
           python-version: ${{ env.PYTHON_VERSION }}
 
       - name: Create and start virtual environment
+        working-directory: ./FinanceHooks
         run: |
-          cd FinanceHooks
           python -m venv venv
           source venv/bin/activate
 
       - name: Install dependencies
+        working-directory: ./FinanceHooks
         run: pip install -r requirements.txt
 
       # Optional: Add step to run tests here
 
       - name: Zip artifact for deployment
-        run: zip release.zip ./* -r
+        run: zip release.zip ./FinanceHooks/* -r
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
