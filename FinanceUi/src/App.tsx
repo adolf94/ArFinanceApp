@@ -20,7 +20,7 @@ import { createTheme, ThemeProvider } from "@mui/material/styles";
 import history, { NavigateSetter } from "./components/History";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { oauthSignIn } from "./common/GoogleLogin";
-import { CircularProgress, Grid } from '@mui/material'
+import { CircularProgress, Grid2 as Grid } from '@mui/material'
 import { lightGreen, purple, indigo} from '@mui/material/colors';
 import fnApi from "./components/fnApi";
 
@@ -39,9 +39,12 @@ export const queryClient = new QueryClient({
 const theme = createTheme({
   typography: {
     transactionHeaderDate: {
-      fontSize: "1rem",
+      fontSize: "0.75rem",
       fontWeight: "600",
     },
+    body1:{
+      fontSize: "0.75rem",
+    }
   },
     palette: {
         primary: indigo,

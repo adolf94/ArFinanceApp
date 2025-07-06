@@ -3,7 +3,7 @@ import {
   Box,
   Chip,
   Divider,
-  Grid,
+  Grid2 as Grid,
   List,
   ListItem,
   Paper,
@@ -44,18 +44,18 @@ const Daily = (props: DailyViewProps) => {
           container
           sx={{ display: "flex", justifyContent: "space-around" }}
         >
-          <Grid item sx={{ textAlign: "center" }}>
+          <Grid sx={{ textAlign: "center" }}>
             <Typography
               color="success"
-              sx={{ px: 1, alignSelf: "center" }}
+              sx={{ px: 1, alignSelf: "center", display: "block" }}
               variant="transactionHeaderDate"
             >
               Income
             </Typography>
-            <br />
             <Typography
               color="success.light"
-              sx={{ px: 1, alignSelf: "center" }}
+              sx={{ px: 1, alignSelf: "center" ,
+                display: "block"}}
               variant="transactionHeaderDate"
             >
               {totals.income.toLocaleString("en-US", {
@@ -63,7 +63,7 @@ const Daily = (props: DailyViewProps) => {
               })}
             </Typography>
           </Grid>
-          <Grid item sx={{ textAlign: "center" }}>
+          <Grid sx={{ textAlign: "center" }}>
             <Typography
               color="error"
               sx={{ px: 1, alignSelf: "center", display: "block" }}
@@ -76,8 +76,7 @@ const Daily = (props: DailyViewProps) => {
               sx={{
                 px: 1,
                 alignSelf: "center",
-                display: "block",
-                fontColor: "success",
+                display: "block"
               }}
               variant="transactionHeaderDate"
             >
@@ -86,7 +85,7 @@ const Daily = (props: DailyViewProps) => {
               })}
             </Typography>
           </Grid>
-          <Grid item sx={{ textAlign: "center" }}>
+          <Grid sx={{ textAlign: "center" }}>
             <Typography
               sx={{ px: 1, alignSelf: "center", display: "block" }}
               variant="transactionHeaderDate"
@@ -118,98 +117,96 @@ const Daily = (props: DailyViewProps) => {
                 navigate("/transactions/new?date=" + data.dateGroup)
               }
             >
-              <Grid item xs={6}>
-                <Typography sx={{ px: 1 }} variant="transactionHeaderDate">
-                  {data.day}
-                </Typography>{" "}
-                <Chip label={data.dayOfWeek} sx={{ mr: 1 }}></Chip>
-              </Grid>
-              <Grid
-                item
-                xs={3}
-                sx={{
-                  display: "flex",
-                  textAlign: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <Typography
-                  color="green"
-                  sx={{ px: 1, alignSelf: "center", fontColor: "success" }}
-                  variant="transactionHeaderDate"
+                <Grid size={6}>
+                  <Typography sx={{ px: 1 }} variant="transactionHeaderDate">
+                    {data.day}
+                  </Typography>{" "}
+                  <Chip size="small" label={data.dayOfWeek} sx={{ mr: 1 }}></Chip>
+                </Grid>
+                <Grid
+                  size={3}
+                  sx={{
+                    display: "flex",
+                    textAlign: "center",
+                    justifyContent: "center",
+                  }}
                 >
-                  {data.income.toLocaleString("en-US", {
-                    minimumFractionDigits: 2,
-                  })}
-                </Typography>
-              </Grid>
-              <Grid
-                item
-                xs={3}
-                sx={{
-                  display: "flex",
-                  textAlign: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <Typography
-                  color="red"
-                  sx={{ px: 1, alignSelf: "center", fontColor: "danger" }}
-                  variant="transactionHeaderDate"
+                  <Typography
+                    color="green"
+                    sx={{ px: 1, alignSelf: "center", fontColor: "success" }}
+                    variant="transactionHeaderDate"
+                  >
+                    {data.income.toLocaleString("en-US", {
+                      minimumFractionDigits: 2,
+                    })}
+                  </Typography>
+                </Grid>
+                <Grid
+                  size={3}
+                  sx={{
+                    display: "flex",
+                    textAlign: "center",
+                    justifyContent: "center",
+                  }}
                 >
-                  {data.expenses.toLocaleString("en-US", {
-                    minimumFractionDigits: 2,
-                  })}
-                </Typography>
-              </Grid>
+                  <Typography
+                    color="red"
+                    sx={{ px: 1, alignSelf: "center", fontColor: "danger" }}
+                    variant="transactionHeaderDate"
+                  >
+                    {data.expenses.toLocaleString("en-US", {
+                      minimumFractionDigits: 2,
+                    })}
+                  </Typography>
+                </Grid>
             </ListItem>
             <Divider />
-                  {data.items.map((item) => <TransactionListItem item={item} />)}
+                  {data.items.map((item) => <TransactionListItem key={item.id} item={item} />)}
           </List>
         </Paper>
       ))}
           {props.loading && <Paper sx={{ my: 1 }}>
               <List>
                   <ListItem dense>
-                      <Grid item xs={6}>
-                          <Typography sx={{ px: 1 }} variant="transactionHeaderDate">
-                              <Skeleton variant="text" />
-                          </Typography>{" "}
-                      </Grid>
-                      <Grid
-                          item
-                          xs={3}
-                          sx={{
-                              display: "flex",
-                              textAlign: "center",
-                              justifyContent: "center",
-                          }}
-                      >
-                          <Typography
-                              color="green"
-                              sx={{ px: 1, alignSelf: "center", fontColor: "success" }}
-                              variant="transactionHeaderDate"
-                          >
-                              <Skeleton variant="text" width="5rem" />
+                      <Grid container sx={{width:"100%"}}>
+                        <Grid size={6}>
+                            <Typography sx={{ px: 1 }} variant="transactionHeaderDate">
+                                <Skeleton variant="text" />
+                            </Typography>{" "}
+                        </Grid>
+                        <Grid
+                            size={3}
+                            sx={{
+                                display: "flex",
+                                textAlign: "center",
+                                justifyContent: "center",
+                            }}
+                        >
+                            <Typography
+                                color="green"
+                                sx={{ px: 1, alignSelf: "center", fontColor: "success" }}
+                                variant="transactionHeaderDate"
+                            >
+                                <Skeleton variant="text" width="5rem" />
 
-                          </Typography>
-                      </Grid>
-                      <Grid
-                          item
-                          xs={3}
-                          sx={{
-                              display: "flex",
-                              textAlign: "center",
-                              justifyContent: "center",
-                          }}
-                      >
-                          <Typography
-                              color="red"
-                              sx={{ px: 1, alignSelf: "center", fontColor: "danger" }}
-                              variant="transactionHeaderDate"
-                          >
-                              <Skeleton variant="text" width="5rem" />
-                          </Typography>
+                            </Typography>
+                        </Grid>
+                        <Grid
+                            size={3}
+                            sx={{
+                                display: "flex",
+                                textAlign: "center",
+                                justifyContent: "center",
+                            }}
+                        >
+                            <Typography
+                                color="red"
+                                sx={{ px: 1, alignSelf: "center", fontColor: "danger" }}
+                                variant="transactionHeaderDate"
+                            >
+                                <Skeleton variant="text" width="5rem" />
+                            </Typography>
+                        </Grid>
                       </Grid>
                   </ListItem>
                   <Divider />

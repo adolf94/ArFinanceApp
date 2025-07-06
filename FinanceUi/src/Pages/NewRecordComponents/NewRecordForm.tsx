@@ -7,7 +7,7 @@
 } from "react";
 import {
   List,
-  Grid,
+  Grid2 as Grid,
   Button,
   TextField,
   ListItem,
@@ -455,12 +455,11 @@ const NewRecordForm = (props: NewRecordFormProps) => {
     return moment(sched.next().toDate()).toISOString();
   };
 
-  return (
-    <>
+  return <Box width="100%">
       <List>
         <ListItem>
-          <Grid container spacing={2}>
-            <Grid item xs={4}>
+          <Grid container width="100%" spacing={2}>
+            <Grid size={4}>
               <Button
                 fullWidth
                 variant={type === "income" ? "contained" : "outlined"}
@@ -469,7 +468,7 @@ const NewRecordForm = (props: NewRecordFormProps) => {
                 Income
               </Button>
             </Grid>
-            <Grid item xs={4}>
+            <Grid size={4}>
               <Button
                 fullWidth
                 variant={type === "expense" ? "contained" : "outlined"}
@@ -478,7 +477,7 @@ const NewRecordForm = (props: NewRecordFormProps) => {
                 Expense
               </Button>
             </Grid>
-            <Grid item xs={4}>
+            <Grid size={4}>
               <Button
                 fullWidth
                 variant={type === "transfer" ? "contained" : "outlined"}
@@ -490,11 +489,11 @@ const NewRecordForm = (props: NewRecordFormProps) => {
           </Grid>
         </ListItem>
         <ListItem>
-          <Grid container sx={{textAlign:'right'}}>
-            <Grid item xs={4}sx={{textAlign:'left'}}>
+          <Grid container sx={{width:"100%",textAlign:'right'}}>
+            <Grid size={4}sx={{textAlign:'left'}}>
               {hooks.hook&&<PillPopover text={hooks.hook?.rawMsg}><Chip label="Notification Text" size="small" variant="filled" color="primary" ></Chip></PillPopover>}
             </Grid>
-            <Grid item xs={8}>
+            <Grid size={8}>
               {hooks.configs.map(e=>
                 <Chip  color="primary" size="small" label={e.displayName}
                   variant={hooks.selectedConfig?.subConfig == e.subConfig? "filled":"outlined"}
@@ -507,14 +506,14 @@ const NewRecordForm = (props: NewRecordFormProps) => {
           </Grid>
         </ListItem>
         <ListItem>
-          <Grid container>
-            <Grid item xs={4} alignItems="center">
+          <Grid container width="100%" >
+            <Grid size={4} alignItems="center">
               <FormLabel>Date/Time</FormLabel>
             </Grid>
-            <Grid item xs={8}>
+            <Grid size={8}>
               <DateTimePicker
                 //renderInput={(params) => <TextField {...params} value={moment(params.value).toLocaleString()} fullWidth variant="standard" onClick={() => view.setViewContext({ type: null, groupId: "892f20e5-b8dc-42b6-10c9-08dabb20ff77", onChange: () => { } })} />}*/}
-                value={formData.date}
+                value={moment(formData.date)}
                 onChange={(newValue) => {
                   if(moment.isMoment(newValue))
                   setFormData((prevData) => {
@@ -538,48 +537,90 @@ const NewRecordForm = (props: NewRecordFormProps) => {
                     return { ...prevData, date: newValue.toISOString() };
                   });
                 }}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    //value={moment(params.value).toLocaleString()}
-                    fullWidth
-                    variant="standard"
-                    onClick={(evt) => {
+
+                slots={{
+                  inputAdornment: (params)=><InputAdornment position="end">
+                     <IconButton
+                      onClick={() => {
+                        setSchedule((prev) => {
+                          prev.enabled = !prev.enabled;
+                          if (!prev.enabled) {
+                            prev.cronId = "";
+                            prev.cronExpression = "";
+                          }
+                          return {
+                            ...prev,
+                            lastTransactionDate: formData.date,
+                          };
+                        });
+                      }}
+                    >
+                      <IcoRepeat />
+                    </IconButton>
+                    {params.children}
+                  </InputAdornment>
+                }}
+                slotProps={{
+                  textField:{
+                    fullWidth:true,
+                    variant:"standard",
+                    onFocus:(evt) => {
                       view.setViewContext({
                         type: null,
                         groupId: "892f20e5-b8dc-42b6-10c9-08dabb20ff77",
                         onChange: () => {},
                       });
-                      if (params.onClick) params.onClick(evt);
-                    }}
-                    //ts-ignore
-                    InputProps={{
-                      //ts-ignore
-                      endAdornment: (
-                        <>
-                          {params.InputProps.endAdornment}
-                          <IconButton
-                            onClick={() => {
-                              setSchedule((prev) => {
-                                prev.enabled = !prev.enabled;
-                                if (!prev.enabled) {
-                                  prev.cronId = "";
-                                  prev.cronExpression = "";
-                                }
-                                return {
-                                  ...prev,
-                                  lastTransactionDate: formData.date,
-                                };
-                              });
-                            }}
-                          >
-                            <IcoRepeat />
-                          </IconButton>
-                        </>
-                      ),
-                    }}
-                  />
-                )}
+                      // if (params.onClick) params.onClick(evt);
+                    }
+                    // slotProps:{
+                    //   endAdornment:(props)=><>
+                    //            <IconButton
+                    //              onClick={() => {
+                    //                setSchedule((prev) => {
+                    //                  prev.enabled = !prev.enabled;
+                    //                  if (!prev.enabled) {
+                    //                    prev.cronId = "";
+                    //                    prev.cronExpression = "";
+                    //                  }
+                    //                  return {
+                    //                    ...prev,
+                    //                    lastTransactionDate: formData.date,
+                    //                  };
+                    //                });
+                    //              }}
+                    //            >
+                    //              <IcoRepeat />
+                    //            </IconButton>
+                    //          </>
+                    // }
+                    // slotProps:{
+                    //   input:(params)=>({
+                    //     endAdornment: (
+                    //       <>
+                    //         {/* {params.endAdornment} */}
+                    //         <IconButton
+                    //           onClick={() => {
+                    //             setSchedule((prev) => {
+                    //               prev.enabled = !prev.enabled;
+                    //               if (!prev.enabled) {
+                    //                 prev.cronId = "";
+                    //                 prev.cronExpression = "";
+                    //               }
+                    //               return {
+                    //                 ...prev,
+                    //                 lastTransactionDate: formData.date,
+                    //               };
+                    //             });
+                    //           }}
+                    //         >
+                    //           <IcoRepeat />
+                    //         </IconButton>
+                    //       </>
+                    //     )
+                    //   })
+                    // }
+                  }
+                }}
               />
             </Grid>
           </Grid>
@@ -588,10 +629,10 @@ const NewRecordForm = (props: NewRecordFormProps) => {
           <>
             <ListItem>
               <Grid container>
-                <Grid item xs={4}>
+                <Grid size={4}>
                   <FormLabel>Schedule</FormLabel>
                 </Grid>
-                <Grid item xs={8}>
+                <Grid size={8}>
                   <DropdownSelect
                     options={cronOptions}
                     getOptionValue={(opt) => opt.cron}
@@ -614,10 +655,10 @@ const NewRecordForm = (props: NewRecordFormProps) => {
             </ListItem>
             <ListItem>
               <Grid container>
-                <Grid item xs={4} alignItems="center">
+                <Grid size={4} alignItems="center">
                   <FormLabel>End Date</FormLabel>
                 </Grid>
-                <Grid item xs={8}>
+                <Grid size={8}>
                   <DropdownSelect
                     options={getCronIterations()}
                     getOptionValue={(opt) => opt.iteration}
@@ -641,11 +682,11 @@ const NewRecordForm = (props: NewRecordFormProps) => {
           </>
         )}
         <ListItem>
-          <Grid container>
-            <Grid item xs={4} alignItems="center">
+          <Grid container width="100%" >
+            <Grid size={4} alignItems="center">
               <FormLabel>{type == "transfer" ? "From:" : "Asset:"}</FormLabel>
             </Grid>
-            <Grid item xs={8}>
+            <Grid size={8}>
               <TextField
                 fullWidth
                 autoComplete="off"
@@ -678,11 +719,11 @@ const NewRecordForm = (props: NewRecordFormProps) => {
           </Grid>
         </ListItem>
         <ListItem>
-          <Grid container>
-            <Grid item xs={4} alignItems="center">
+          <Grid container width="100%" >
+            <Grid size={4} alignItems="center">
               <FormLabel>Vendor</FormLabel>
             </Grid>
-            <Grid item xs={8}>
+            <Grid size={8}>
               <VendorTextField
                 autoComplete="off"
                 fullWidth
@@ -711,15 +752,15 @@ const NewRecordForm = (props: NewRecordFormProps) => {
           </Grid>
         </ListItem>
         <ListItem>
-          <Grid container>
-            <Grid item xs={4} alignItems="center">
+          <Grid container width="100%" >
+            <Grid size={4} alignItems="center">
               <FormLabel>
                 {(type == "transfer"
                   ? "To"
                   : type.charAt(0).toUpperCase() + type.slice(1)) + ":"}
               </FormLabel>
             </Grid>
-            <Grid item xs={8}>
+            <Grid size={8}>
               <TextField
                 autoComplete="off"
                 fullWidth
@@ -746,11 +787,11 @@ const NewRecordForm = (props: NewRecordFormProps) => {
           </Grid>
         </ListItem>
         <ListItem>
-          <Grid container>
-            <Grid item xs={4} alignItems="center">
+          <Grid container width="100%" >
+            <Grid size={4} alignItems="center">
               <FormLabel>Amount</FormLabel>
             </Grid>
-            <Grid item xs={8}>
+            <Grid size={8}>
               {/*@ts-ignore*/}
               <NumberInput
                 inputProps={{ min: 0, style: { textAlign: "right" } }}
@@ -828,8 +869,8 @@ const NewRecordForm = (props: NewRecordFormProps) => {
           />
         </ListItem>
         <ListItem>
-          <Grid container spacing={2}>
-            <Grid item xs={transId=="new"?4:8}>
+          <Grid container spacing={2} width="100%" >
+            <Grid size={transId=="new"?4:8}>
               <Button
                   fullWidth
                   variant="contained"
@@ -841,7 +882,7 @@ const NewRecordForm = (props: NewRecordFormProps) => {
                     : "Confirm"}
               </Button>
             </Grid>
-            {transId == 'new' && <Grid item xs={5}>
+            {transId == 'new' && <Grid size={5}>
               <Button
                   fullWidth
                   variant="contained"
@@ -852,7 +893,7 @@ const NewRecordForm = (props: NewRecordFormProps) => {
                 Submit and New
               </Button>
             </Grid>}
-            <Grid item xs={transId=="new"?3:4}>
+            <Grid size={transId=="new"?3:4}>
               <Link to="/records">
                 <Button fullWidth variant="outlined">
                   Cancel
@@ -948,8 +989,7 @@ const NewRecordForm = (props: NewRecordFormProps) => {
           internalKey="amount"
         />
       </Portal>
-    </>
-  );
+    </Box>
 };
 
 export default NewRecordForm;

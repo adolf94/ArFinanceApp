@@ -1,4 +1,4 @@
-﻿import { Button, Grid, MenuItem, Menu, AppBar, Toolbar } from "@mui/material";
+﻿import { Button, Grid2 as Grid, MenuItem, Menu, AppBar, Toolbar } from "@mui/material";
 import React, { useState } from "react";
 import Accounts from "./Accounts";
 import { Typography } from "@mui/material";
@@ -57,9 +57,11 @@ const AccountsPage = (props) => {
           <UserPanel />
         </Toolbar>
       </AppBar>
-      <Grid container>
+      
+      <Grid container width="100%" sx={{justifyContent:'center'}}>
         <Grid
           container
+          size={8}
           sx={{ pt: 3 }}
           direction="row-reverse"
           justifyContent="flex-start"
@@ -71,7 +73,7 @@ const AccountsPage = (props) => {
                       <AddCircleRounded /> Account
             </Button>
         </Grid>
-        <Grid container>
+        <Grid container size={8}>
           <Accounts></Accounts>
         </Grid>
 

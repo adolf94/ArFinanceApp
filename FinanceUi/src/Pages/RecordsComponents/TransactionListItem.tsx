@@ -1,10 +1,11 @@
-import { Alert, Grid, ListItem, Skeleton, Typography } from "@mui/material";
+import { Alert, Box, Grid2 as Grid, ListItem, Skeleton, Typography } from "@mui/material";
 import { enqueueSnackbar } from "notistack";
 import { ErrorBoundary } from "react-error-boundary";
 import { useNavigate } from "react-router-dom";
 import { addToTransactions, ensureTransactionAcctData, fetchTransactionById, TRANSACTION } from "../../repositories/transactions";
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
+import numeral from "numeral";
 
 
 
@@ -24,7 +25,7 @@ const LoadingListItem = () => {
 
     return <ListItem>
         <Grid container>
-            <Grid item xs={4} sm={3}>
+            <Grid size={{xs:4, sm:3}}>
                 <Typography sx={{ px: 1 }} variant="body1">
                     <Skeleton variant="text" width="4rem" />
                 </Typography>
@@ -32,10 +33,10 @@ const LoadingListItem = () => {
                     <Skeleton variant="text" width="7rem" />
                 </Typography>
             </Grid>
-            <Grid item xs={4} sm={5}>
+            <Grid size={{xs:4, sm:5}}>
                 <Skeleton variant="text" width="7rem" />
             </Grid>
-            <Grid item xs={4} sx={{ alignItems: "end" }}>
+            <Grid size={4} sx={{ alignItems: "end" }}>
                     <Skeleton variant="text" width="4rem" />
 
             </Grid>
@@ -49,42 +50,88 @@ const RenderListItem = ({ item }) => {
 
 
     return <ListItem onClick={() => navigate("../transactions/" + item.id)}>
-        <Grid container>
-            <Grid item xs={4} sm={3}>
-                <Typography sx={{ px: 1 }} variant="body1">
+        <Box width="100%">
+            <Grid container sx={{display:{xs:'none', sm:'flex'}}}>
+                <Grid size={{xs:4, sm:3}}>
+                    <Typography sx={{ px: 1 }} variant="body1">
+                        {item.type === "transfer"
+                            ? "Transfer"
+                            : item.type === "expense"
+                                ? item.debit.name
+                                : item.credit.name}
+                    </Typography>
+                    <Typography sx={{ px: 1 }} variant="body1">
+                        {item.vendor?.name}
+                    </Typography>
+                </Grid>
+                <Grid size={{xs:4, sm:5}}>
+                    <Typography sx={{ fontWeight: 600 }} variant="body1">
+                        {item.description || ""}
+                    </Typography>
+                    <Typography variant="body1">
+
                     {item.type === "transfer"
-                        ? "Transfer"
+                        ? item.credit.name + " => " + item.debit.name
                         : item.type === "expense"
-                            ? item.debit.name
-                            : item.credit.name}
-                </Typography>
-                <Typography sx={{ px: 1 }} variant="body1">
-                    {item.vendor?.name}
-                </Typography>
-            </Grid>
-            <Grid item xs={4} sm={5}>
-                <Typography sx={{ fontWeight: 600 }} variant="body1">
-                    {item.description || ""}
-                </Typography>
-                {item.type === "transfer"
-                    ? item.credit.name + " => " + item.debit.name
-                    : item.type === "expense"
-                        ? item.credit.name
-                        : item.debit.name}
-            </Grid>
-            <Grid item xs={4} sx={{ textAlign: "right" }}>
+                            ? item.credit.name
+                            : item.debit.name}
+                    </Typography>
+                </Grid>
+                <Grid size={4} sx={{ textAlign: "right" }}>
+                    
                 <Typography
-                    color={fontColorOnType(item.type)}
-                    sx={{ px: 1, fontWeight: 600 }}
-                    variant="body1"
-                >
-                    P{" "}
-                    {item.amount.toLocaleString("en-US", {
-                        minimumFractionDigits: 2,
-                    })}
-                </Typography>
+                        color={fontColorOnType(item.type)}
+                        sx={{ px: 1, fontWeight: 600 }}
+                        variant="body1"
+                    >
+                        {numeral(item.amount).format("P 0,0.00")}
+                    </Typography>
+                </Grid>
             </Grid>
-        </Grid>
+            <Grid container sx={{display:{sm:'none'}}}>
+               <Grid container size={9}>
+                    <Grid size={6}>
+                        <Typography variant="body1">
+                            {item.type === "transfer"
+                                ? "Transfer"
+                                : item.type === "expense"
+                                    ? item.debit.name
+                                    : item.credit.name}
+                        </Typography>
+                    </Grid>
+                    <Grid size={6}>
+                        <Typography variant="body1">
+
+                            {item.type === "transfer"
+                                ? item.credit.name + " => " + item.debit.name
+                                : item.type === "expense"
+                                    ? item.credit.name
+                                    : item.debit.name}
+                        </Typography>
+                    </Grid>
+                    <Grid size={12}>
+                            
+                        <Typography sx={{ fontWeight: 600 }} variant="body1">
+                            {item.description || ""}
+                        </Typography>
+                    </Grid>
+                    <Grid size={12}>
+                        <Typography variant="body1">
+                            {item.vendor?.name}
+                        </Typography>
+                    </Grid>
+               </Grid>
+               <Grid size={3}>
+                    <Typography
+                        color={fontColorOnType(item.type)}
+                        sx={{ px: 1, fontWeight: 600 }}
+                        variant="body1"
+                    >
+                        {numeral(item.amount).format("P 0,0.00")}
+                    </Typography>
+               </Grid>
+            </Grid>
+        </Box>
     </ListItem>
 }
 
@@ -105,7 +152,7 @@ const FallbackListItem = (itemId) => {
 
         return <ListItem>
             <Grid container >
-                <Grid item xs={12}>
+                <Grid xs={12}>
                     <Alert color="warning" onClick={refetch} severity="error" variant="outlined" >
 
                         <Typography sx={{ px: 1, color: 'red', fontWeight: 'red' }} variant="body1"> Something went wrong here </Typography>

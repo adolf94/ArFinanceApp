@@ -1,4 +1,4 @@
-import { Box, Grid, Paper } from "@mui/material";
+import { Box, Grid2 as Grid, Paper } from "@mui/material";
 import { Transaction } from "FinanceApi";
 import moment from "moment";
 import React, { useContext, useState } from "react";

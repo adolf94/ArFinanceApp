@@ -6,7 +6,7 @@ from flask import Flask, request, Response, redirect, url_for,app
 from azure.cosmos  import CosmosClient, DatabaseProxy
 from uuid_extensions import uuid7
 from FlaskApp.cosmos_modules import add_to_app, add_to_persist
-from FlaskApp.notif_handler import handle_notif
+from FlaskApp import notif_modules
 from FlaskApp.sms_handler import handle_sms
 from FlaskApp.upload_handler import handle_upload
 
@@ -46,7 +46,7 @@ def phone_hook():
     data = request.get_json()
 
     if data["action"] == "notif_post":
-        extracted = handle_notif(data)
+        extracted = notif_modules.handler(data)
         raw = data["notif_msg"]
     elif data["action"] == "sms_receive":
         extracted = handle_sms(data) 

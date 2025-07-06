@@ -4,7 +4,7 @@ import { ACCOUNT, fetchAccounts } from "../../repositories/accounts";
 import {
   Box,
   Dialog,
-  Grid,
+  Grid2 as Grid,
   IconButton,
   List,
   ListItem,
@@ -527,14 +527,14 @@ function SelectAccount(props: SelectAccountProps<any>) {
   };
 
   const filteredVendors = (vendors || []).filter(
-    (f) => f.name.indexOf(searchQuery.toLowerCase()) > -1,
+    (f) => f.name.toLowerCase().indexOf(searchQuery.toLowerCase()) > -1,
   );
 
   return (
     <Grid container>
-      <Grid item xs={12} sx={{ px: 2, pt: 1 }}>
+      <Grid size={12} sx={{ px: 2, pt: 1 }}>
         <Grid container sx={{ display: "flex", justifyItems: "center" }}>
-          <Grid item sx={{ flexGrow: 1 }}>
+          <Grid sx={{ flexGrow: 1 }}>
             {props.selectType == "vendor" ? (
               <TextField
                 value={searchQuery}
@@ -549,7 +549,7 @@ function SelectAccount(props: SelectAccountProps<any>) {
               </Typography>
             )}
           </Grid>
-          <Grid item sx={{ flexShrink: 1 }}>
+          <Grid sx={{ flexShrink: 1 }}>
             <IconButton onClick={() => onClose()}>
               <Close />
             </IconButton>
@@ -558,7 +558,7 @@ function SelectAccount(props: SelectAccountProps<any>) {
       </Grid>
       {props.selectType === "account" && (
         <>
-          <Grid item xs={6}> 
+          <Grid size={6}> 
             {groupLoading ? <List sx={{p:2}}>
               <ListItemText sx={{my:1}} primary={<Skeleton variant="text" width="100%"/>} />
               <ListItemText sx={{my:1}} primary={<Skeleton variant="text" width="100%"/>} />
@@ -584,7 +584,7 @@ function SelectAccount(props: SelectAccountProps<any>) {
                 })}
             </List>}
           </Grid>
-          <Grid item xs={6}>
+          <Grid size={6}>
             <List>
               {(accounts || [])
                 .filter((e) => acctGroup && e.accountGroupId === acctGroup?.id)
@@ -602,7 +602,7 @@ function SelectAccount(props: SelectAccountProps<any>) {
         </>
       )}
       {props.selectType === "vendor" && (
-        <Grid item xs={8}>
+        <Grid size={8}>
         {vendorLoading ? <List sx={{p:2}}>
             <ListItemText sx={{my:1}} primary={<Skeleton variant="text" width="100%"/>} />
             <ListItemText sx={{my:1}} primary={<Skeleton variant="text" width="100%"/>} />
@@ -622,9 +622,9 @@ function SelectAccount(props: SelectAccountProps<any>) {
             ))}
             {searchQuery &&
               !filteredVendors.some((f) => f.name.startsWith(searchQuery)) && (
-                <ListItem button onClick={createNewVendor}>
+                <ListItemButton onClick={createNewVendor}>
                   Add "{searchQuery}"
-                </ListItem>
+                </ListItemButton>
               )}
           </List>
         }

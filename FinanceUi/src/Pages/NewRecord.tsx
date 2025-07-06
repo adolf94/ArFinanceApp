@@ -5,7 +5,7 @@ import {
   IconButton,
   Toolbar,
   Typography,
-  Grid,
+  Grid2 as Grid,
   useTheme,
   useMediaQuery,
   Box,
@@ -84,11 +84,11 @@ const NewRecordPage = (props) => {
         </Toolbar>
       </AppBar>
       <SelectAccountContext.Provider value={{ ...selectView, setViewContext }}>
-        <Grid container sx={{flexDirection:'row-reverse'}}>
-          <Grid item xs={6}>
+        <Grid container sx={{flexDirection:'row-reverse', width:"100%"}}>
+          <Grid size={6}>
             <Box ref={con}></Box>
           </Grid>
-          <Grid item xs={12} lg={6}>
+          <Grid size={{xs:12, lg:6}}>
             <NewRecordForm
               selectPortal={con.current}
             />

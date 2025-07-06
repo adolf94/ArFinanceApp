@@ -1,5 +1,5 @@
 import { ArrowDownward,  Attachment, Event, CheckCircle,  AccountBalanceWalletRounded, QrCode2, AccountBalance, Check, CheckCircleOutlined, AssignmentTurnedInOutlined, ArrowCircleLeft, Paid, RequestQuote, AccountCircle, AccountBox, Clear, ExpandMore, ExpandLess, Task, Refresh } from "@mui/icons-material"
-import { Accordion, AccordionDetails, AccordionSummary,  Grid,  Typography,List,  ListItem, ListItemText, ListItemIcon, Tooltip, Divider, Chip,  Button, Stack, IconButton, CircularProgress, Box, Skeleton, Menu, MenuItem, ClickAwayListener } from "@mui/material"
+import { Accordion, AccordionDetails, AccordionSummary,  Grid2 as Grid,  Typography,List,  ListItem, ListItemText, ListItemIcon, Tooltip, Divider, Chip,  Button, Stack, IconButton, CircularProgress, Box, Skeleton, Menu, MenuItem, ClickAwayListener } from "@mui/material"
 import LayerIcon from "../../common/LayerIcon";
 import { lazy, Suspense, useEffect, useState } from "react";
 import selectionByHook, { getReferenceName } from "./selectionByHook";
@@ -148,20 +148,18 @@ const HooksAccordion = ({notif, onDelete, onCancel }) => {
     return <>
         <Accordion  slotProps={{ transition: { unmountOnExit: true } }} expanded={expanded} onChange={()=>setExpanded(!expanded)}>
             <Grid container sx={{justifyContent:'space-between'}}>
-                <Grid  sm={11} sx={{width:'auto'}}>
+                <Grid size={11}>
                     <AccordionSummary
                         aria-controls="panel1-content"
                         id="panel1-header"
                     >
-
                             <Stack>
                                 <Typography component="span"> {notif.transactionId && <Task color="success"/>} { notif.rawMsg} </Typography>
                                 <Typography component="span" sx={{fontSize:'0.75rem', color:'grey'}} >{moment(notif.date).fromNow()}</Typography>
-
                             </Stack>
                     </AccordionSummary>
                 </Grid>
-                <Grid sm={1} sx={{shrink:1, textAlign:'right'}}>
+                <Grid size={1} sx={{shrink:1, textAlign:'right'}}>
                     {notif.transactionId ? <Box  sx={{display:'inline-flex', position:'relative', padding:1, top:"8px"}}>
                         <Task color="success"/></Box> : 
                             (notif.extractedData.success == false || notif.extractedData.success.toLowerCase() == "false") && <DeleteLoading onClick={()=>onDelete(notif.id)} onCancel={()=>onCancel(notif.id)} onCommit={()=>{}} seconds={5}></DeleteLoading>}
@@ -189,8 +187,8 @@ const HooksAccordion = ({notif, onDelete, onCancel }) => {
                 </Grid>
             </Grid>
             <AccordionDetails>
-                <Grid container sx={{alignItems:'start'}}>
-                    <Grid md={6}>
+                <Grid container width="100%" sx={{alignItems:'start'}}>
+                    <Grid size={{md:6}}>
                         <List>
                                 
                         {
@@ -228,7 +226,7 @@ const HooksAccordion = ({notif, onDelete, onCancel }) => {
                                 }
                         </List>
                     </Grid>
-                    <Grid container md={6} sx={{justifyContent:"flex-start"}}>
+                    <Grid container size={{md:6}} sx={{justifyContent:"flex-start"}}>
                         <Suspense fallback={<Skeleton variant="text" height="4rem"/>}>
                             <HooksTransaction hook={notif} shown={expanded} />
                         </Suspense>

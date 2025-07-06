@@ -5,12 +5,13 @@ import {
   useMediaQuery,
   ListItem,
   ListItemText,
-  Grid,
+  Grid2 as Grid,
   ListItemButton,
   Stack,
   Box,
   CircularProgress,
   Skeleton,
+  Typography,
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { useQuery } from "@tanstack/react-query";
@@ -37,7 +38,7 @@ const Accounts = (props) => {
   });
 
   return (
-  <Grid item xs={12}>
+  <Grid size={12}>
         {(loadingGroups || loadingAccts) && <Box sx={{ textAlign: "center" }}>
         <CircularProgress />
         </Box>}
@@ -53,14 +54,16 @@ const Accounts = (props) => {
               .filter((a) => e.id === a.accountGroupId && !a.resetEndOfPeriod)
               
               .map((a: Account) => (
-                <ListItem key={a.id}>
-                  <Grid container sx={{ pt: 1 }}>
-                    <Grid item xs={a.periodStartDay===1 ? 9:6}>
+                <ListItem dense key={a.id}>
+                  <Grid container sx={{ pt: 1, width:'100%' }}>
+                    <Grid size={a.periodStartDay===1 ? 9:6}>
                       <Grid
                         key={e.id}
                         onClick={() => navigate("/accounts/" + a.id)}
                       >
-                        {a.name}
+                        <Typography variant="body1">
+                          {a.name}
+                        </Typography>
                       </Grid>
                     </Grid>
                    {/* {a.periodStartDay !== 1 && (
@@ -77,11 +80,12 @@ const Accounts = (props) => {
                    /> :
                      
                       <Grid
-                        item
-                        xs={3}
+                        size={3}
                         sx={{ alignContent: "center", textAlign: "end" }}
                       >
-                        {numeral(a.balance).format("0,0.00")}
+                        <Typography variant="body1">
+                          {numeral(a.balance).format("0,0.00")}
+                        </Typography>
                       </Grid>
                     }
                   </Grid>
