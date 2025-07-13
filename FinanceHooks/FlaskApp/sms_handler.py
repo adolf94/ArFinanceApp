@@ -1,8 +1,4 @@
 
-
-
-
-
 from FlaskApp.regex_utility import get_regex_match, regex_matches_tolist
 
 

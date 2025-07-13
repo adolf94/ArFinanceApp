@@ -219,6 +219,28 @@
         "debit": "recipientAcct",
         "remarks": "BDO payment to ${$.recipientName}. Ref: ${$.reference}",
         "comments": ""
+    },
+    {
+        "config": "sms_unionbank_paydirect",
+        "subConfig": "unionbankPayDirect",
+        "displayName": "UB Pay Direct",
+        "type": "transfer",
+        "vendor": "recipientName",
+        "credit": "ownAcct",
+        "debit": "recipientName",
+        "remarks": "UB Paydirect Transfer to payment to ${$.recipientName}. Ref: ${$.reference}",
+        "comments": ""
+    },
+    {
+        "config": "sms_unionbank_paydirect",
+        "subConfig": "unionbankPayDirect",
+        "displayName": "UB PD Payment",
+        "type": "expense",
+        "vendor": "recipientName",
+        "credit": "ownAcct",
+        "debit": "recipientName",
+        "remarks": "UB Paydirect Payment to ${$.recipientName}. Ref: ${$.reference}",
+        "comments": ""
     }
 
 ]

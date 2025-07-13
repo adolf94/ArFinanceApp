@@ -93,6 +93,7 @@ def read_screenshot(image_location, lines):
 
     app = read_from_filename(image_location)
 
+    confs_to_test = filter(lambda c: c["app"] == app, imageConfigs)
 
     extracted_data = {
         "matchedConfig" : "img",
@@ -109,6 +110,7 @@ def read_screenshot(image_location, lines):
         logging.error(f"No config that matches the image")
         return extracted_data
 
+    name = conf_to_use['name']
     for pi, prop in enumerate(conf_to_use["properties"]):
 
         indexForLook = -1

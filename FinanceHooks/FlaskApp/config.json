@@ -274,8 +274,8 @@
             "regex": "(You have received ([0-9\\.]+) of GCash from ([A-Za-z\\ ,.]+) with account ending in ([A-Za-z0-9]+). Your new balance is ([0-9\\.]+) [0-9\\-\\ :AMP]+. Ref. No. ([A-Z0-9]+).)",
             "conditions":[{
                 "property": "notif_title",
-                "method": "equals",
-                "valueString": "You have received money in GCash!"
+                "operation": "equals",
+                "value": "You have received money in GCash!"
             }],
             "properties":[
                 {
@@ -307,8 +307,8 @@
             "app": "com.globe.gcash.android",            
             "conditions":[{
                 "property": "notif_title",
-                "method": "equals",
-                "valueString": "You have received money in GCash!"
+                "operation": "equals",
+                "value": "You have received money in GCash!"
             }]
         },
         {
@@ -323,8 +323,8 @@
             "regex": "(You have transferred Php ([0-9\\.,]*) to ([A-Za-z,\\. ]+) account ending in (X+[0-9a-zA-Z]+). Your new balance is Php ([0-9\\.,]+). Ref. No. ([a-zA-Z0-9]+))",
             "conditions":[{
                 "property": "notif_title",
-                "method": "equals",
-                "valueString": "Bank Transfer Successful"
+                "operation": "equals",
+                "value": "Bank Transfer Successful"
             }],
             "properties":[
                 {
@@ -356,8 +356,8 @@
             "regex": "(Hi ([A-Z ]+), your payment to ([A-Za-z0-9 ]+) of PHP ([0-9,\\.]+) has been successfully posted Ref.no. ([0-9]+).)",
             "conditions":[{
                 "property": "notif_title",
-                "method": "equals",
-                "valueString": "Pay Merchant"
+                "operation": "equals",
+                "value": "Pay Merchant"
             }],
             "properties":[
                 {
@@ -382,8 +382,8 @@
             "regex": "(You have received Php ([0-9\\.,]+) from ([A-Za-z ]+) on *([0-9PMAMN\\/ :]+). Your new wallet balance is Php ([0-9,\\.]+). Ref. no. ([0-9]+).)",
             "conditions":[{
                 "property": "notif_title",
-                "method": "equals",
-                "valueString": "Top Up"
+                "operation": "equals",
+                "value": "Top Up"
             }],
             "properties":[
                 {
@@ -416,6 +416,22 @@
             "app": "com.indivara.bpi",
             "conditions":[]
         }
+    ],
+    "sms":[
+
+        {
+            "name":"sms_bpi_cashless_incomplete",
+            "app": "BPI",
+            "regex": "(\\[BPI\\] DO NOT SHARE: Use your SECRET one-time PIN [0-9]+ to complete your Cardless Withdrawal of PHP ([0-9,]+). For the Order ID, go to your BPI app's inbox.)",
+            "conditions":[],
+            "properties":[
+                {
+                    "property":"amount",
+                    "regexIndex": 1
+                }
+            ]
+
+        }
     ]
 }
-     
+       

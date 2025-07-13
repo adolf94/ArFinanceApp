@@ -8,7 +8,7 @@ import re
 from FlaskApp.regex_utility import get_regex_match, regex_matches_tolist
 
 
-def handle_notif(data):
+def __init__(data):
     current_directory = Path(os.path.dirname(os.path.abspath(__file__)))
     config_path = os.path.join(current_directory.parent, 'config.json')
     # Path to the JSON file in the same directory
@@ -16,18 +16,19 @@ def handle_notif(data):
 
     config = json.load(configFile)
 
-    notif_config = config["notification"]
+    sms_config = config["sms"]
 
     output = {
         "data":{
-            "matchedConfig" : "notif",
+            "matchedConfig" : "sms",
             "success" : False
             
         },
         "location":{}
     }
+
     
-    conf_to_use = filter(lambda c: c["app"] == data["notif_pkg"], notif_config)
+    conf_to_use = filter(lambda c: c["sender"] == data["sms_rcv_sender"], sms_config)
 
     current_reg = None
     for reg in conf_to_use:
@@ -38,29 +39,29 @@ def handle_notif(data):
             break
 
         if "regex" in reg:
-            searc = get_regex_match(reg["regex"], data["notif_msg"])
+            searc = get_regex_match(reg, data["sms_rcv_msg"])
         if "success" in reg and reg["success"] == False:
             break
         if searc is not None:
             break
-     
+
     if current_reg == None:
         output["data"]["success"] = False
-        output["data"]["matchedConfig"] = "notif"
+        output["data"]["matchedConfig"] = "sms"
         return output
-
 
     if  "success" in reg and current_reg["success"] == False: 
         output["data"]["matchedConfig"] = current_reg["name"]
         output["data"]["success"] = False
         return output
-     
+
     if searc is None: return output
 
     output["data"]["success"] = True
     values = regex_matches_tolist(searc)
-    name = current_reg["name"]
-    for pi, prop in enumerate(current_reg["properties"]):
+
+    for pi, prop in enumerate(conf_to_use["properties"]):
+        name = prop["name"]
         value = ""
         loc = None
         if "regexIndex" in prop:
@@ -88,25 +89,7 @@ def handle_notif(data):
     
         output["data"][prop["property"]] = value
         output["location"][prop["property"]] = loc
-    output["data"]["matchedConfig"] = name
     return output
 
-def run_conditions(data, condition):
-    # if list of dict, do and
-    if len(condition) == 0:
-        return True
-    if all(isinstance(item, dict) for item in condition):
-        return all(run_and_condition(data, conditionItem) for conditionItem in condition)
-    # else:
-
-    
-def run_and_condition(data, condition):
-
-    if "operation" in condition:
-        if condition["operation"] in ["eq","equals","equal", "=", "=="]:
-            return data[condition["property"]] == condition["value"]
-    else: 
-        return False
-        
-
-        
+def run_conditions(data,condition):
+    return True
