@@ -106,7 +106,7 @@ const DeleteLoading = ({onCommit,onClick, onCancel : propsCancel, seconds})=>{
     }
 
     
-    return <IconButton onClick={()=>enabled?onCancel(): onInitialize()}>{enabled ? <Tooltip title="Cancel">
+    return <IconButton size="small" onClick={()=>enabled?onCancel(): onInitialize()}>{enabled ? <Tooltip title="Cancel">
             <CircularProgress variant={value >= 100? "indeterminate" : "determinate"} value={value} sx={{width:"20px!important", height:"20px!important"}}/>
         </Tooltip>
         : <Clear />}
@@ -148,10 +148,8 @@ const HooksAccordion = ({notif, onDelete, onCancel }) => {
     return <>
         <Accordion  slotProps={{ transition: { unmountOnExit: true } }} expanded={expanded} onChange={()=>setExpanded(!expanded)}>
             <Grid container sx={{justifyContent:'space-between'}}>
-                <Grid size={11}>
+                <Grid  size={{xs:9,md:10}}>
                     <AccordionSummary
-                        aria-controls="panel1-content"
-                        id="panel1-header"
                     >
                             <Stack>
                                 <Typography component="span"> {notif.transactionId && <Task color="success"/>} { notif.rawMsg} </Typography>
@@ -159,12 +157,12 @@ const HooksAccordion = ({notif, onDelete, onCancel }) => {
                             </Stack>
                     </AccordionSummary>
                 </Grid>
-                <Grid size={1} sx={{shrink:1, textAlign:'right'}}>
+                <Grid size={{xs:3,md:2}} sx={{shrink:1, textAlign:'right'}}>
                     {notif.transactionId ? <Box  sx={{display:'inline-flex', position:'relative', padding:1, top:"8px"}}>
                         <Task color="success"/></Box> : 
                             (notif.extractedData.success == false || notif.extractedData.success.toLowerCase() == "false") && <DeleteLoading onClick={()=>onDelete(notif.id)} onCancel={()=>onCancel(notif.id)} onCommit={()=>{}} seconds={5}></DeleteLoading>}
 
-                    <IconButton onClick={(evt)=>setAnchor(evt.target)}>
+                    <IconButton size="small" onClick={(evt)=>setAnchor(evt.target)}>
                         <ExpandMore />
                     </IconButton>
                         <Menu anchorEl={anchor} open={showMenu}>

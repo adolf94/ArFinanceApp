@@ -182,6 +182,20 @@ def current_version_file():
     migration = reduce(lambda x,y: x if x["id"] > y["id"] else y, history)
     return migration
 
+
+
+
+def get_latest_migration():
+    files = []
+    
+    for file in  os.listdir("migrations"):
+        if os.path.isfile(os.path.join("migrations", file)):
+            files = files + [file]
+    out = sorted(files, key=lambda x: int(x.split("_")[0]))
+    last = out[-1]
+    return last.split(".")[0]
+
+
 def select_data_dir(msg = "Select a folder to restore"):
 
     dir = os.listdir("./data")
@@ -196,7 +210,6 @@ def loadFiles():
     containers = {}
     for file in dir:
         container = file.split(".")[0]
-        print(container)
         stringJson = open(backupfolder + "/" + file, mode="r", encoding="utf8")
         containers[container] = json.load(stringJson)
 
@@ -382,6 +395,36 @@ elif to_do == "Restore Persist":
             bar.next()
         bar.finish()
     print(f"Completed insert in HookMessages")
+
+
+elif to_do == "Migrate":
+    source = inquirer.select(
+        message="Data Source?",
+        choices=["Database", "Folder"],
+    ).execute()
+
+    if source == "Folder":
+        backupname = select_data_dir()
+        which_db = get_db_list(True)
+        db = loadFiles()
+        migration_name = current_version_file()["id"]
+        latest_migration_name = get_latest_migration()
+        migration = load_config_from_file(latest_migration_name)
+        db = migration.reset_ledgers(db)
+        asyncio.run(import_data(db, migration))
+    else:
+            which_db = get_db_list(False)
+            backupname = "temp"
+            dir = os.listdir("./data/")
+            if(dir != None):
+                for file in dir:
+                    os.remove(file)
+            export_data()
+            db = loadFiles()
+            migration_name = current_version_file()["id"]
+            migration = load_config_from_file(migration_name)
+            db = migration.reset_ledgers(db)
+            asyncio.run(import_data(db, migration))
 
 else:
     source = inquirer.select(

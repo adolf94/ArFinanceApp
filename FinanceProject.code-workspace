@@ -20,7 +20,15 @@
 		},
 		{
 			"path": "FinanceHooks"
+		},
+		{
+			"path": "FinanceFunction"
+		},
+		{
+			"path": "MigrationPython"
 		}
 	],
-	"settings": {}
+	"settings": {
+		"debug.internalConsoleOptions": "neverOpen"
+	}
 }

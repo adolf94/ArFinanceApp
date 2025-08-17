@@ -10,5 +10,7 @@ namespace FinanceFunction.Data
 		{
 				
 						public Task<int> SaveChangesAsync();
+						public Task SetUpdated<T>(T item);	
+
 		}
 }

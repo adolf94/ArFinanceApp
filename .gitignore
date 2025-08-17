@@ -13,3 +13,6 @@ CosmosMigrations/backuppersist.json
 MigrationPython/data
 /MigrationPython/migrations/__pycache__
 pythonhttp/local.settings.json
+__azurite_db_blob__.json
+__azurite_db_blob_extent__.json
+FinanceFunction/__blobstorage__

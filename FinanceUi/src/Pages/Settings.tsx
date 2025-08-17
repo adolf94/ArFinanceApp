@@ -1,8 +1,9 @@
 import { BookOnline, TableChart } from "@mui/icons-material"
-import { AppBar, Container, Grid2 as Grid, IconButton, Toolbar, Typography } from "@mui/material"
+import { AppBar, Box, Container, Grid2 as Grid, IconButton, Toolbar, Typography } from "@mui/material"
 import db from "../components/LocalDb";
 import { useConfirm } from "material-ui-confirm";
 import { useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
 
 
 
@@ -11,6 +12,7 @@ const Settings = () => {
 
 		const confirm = useConfirm();
 		const queryClient = useQueryClient()
+		const navigate = useNavigate()
 
 		const resetDb = () => {
 				confirm({ description: "Are you sure you want to delete the Local Db?", title:"Confirm" })
@@ -39,7 +41,7 @@ const Settings = () => {
                 </Typography>
             </Toolbar>
         </AppBar>
-
+			<Box sx={{width:"100%"}}>
 				<Grid container sx={{ pt: 3 } }>
 						<Grid size={4} sx={{textAlign:"center" } }>
 								<IconButton onClick={resetCache}>
@@ -54,7 +56,14 @@ const Settings = () => {
 								</IconButton><br />
 								Reset Local Database
 						</Grid>
+						<Grid size={4} sx={{ textAlign: "center" }}>
+								<IconButton onClick={()=>navigate("./hooks") }>
+										<TableChart sx={{ fontSize: "3rem" }} />
+								</IconButton><br />
+								Hooks Configuration
+						</Grid>
 				</Grid>
+			</Box>
 		</>
 }
 

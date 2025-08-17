@@ -33,6 +33,8 @@ namespace FinanceFunction.Data.CosmosRepo
         public DbSet<HookReference> HookReferences { get; set; }
         public DbSet<BlobFile> Files { get; set; }
 
+        public DbSet<HookConfig> HookConfigs { get; set; }
+
 				public Guid InterestIncomeId { get; set; } = Guid.Parse("742070bd-e68b-45c9-a1f7-021916127731");
 
 
@@ -232,7 +234,9 @@ namespace FinanceFunction.Data.CosmosRepo
 
             builder.Entity<InputLogs>().HasPartitionKey(e => e.Path).ToContainer("AuditLogs");
 
-            
+            builder.Entity<HookConfig>().HasPartitionKey(e => e.Type)
+                .HasKey(e => e.NameKey);
+            builder.Entity<HookConfig>().ToContainer("HookConfigs");
 
 
             base.OnModelCreating(builder);
@@ -278,6 +282,7 @@ namespace FinanceFunction.Data.CosmosRepo
             services.AddScoped<IMonthlyTransactionRepo, MonthlyTransactionRepo>();
             services.AddScoped<IHookReferenceRepo, HookReferenceRepo>();
             services.AddScoped<IBlobFileRepo, BlobFileRepo>();
+            services.AddScoped<IHookConfigRepo, HookConfigRepo>();
 
 						return services;
         }

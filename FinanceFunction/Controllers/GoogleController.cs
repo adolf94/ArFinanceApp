@@ -108,12 +108,12 @@ public class GoogleController
 						}
 				}
 
-				int tokenLifetime = 300;
+				int tokenLifetime = 360 * 4;
 				GoogleClaimResponse? currentToken = JsonSerializer.Deserialize<GoogleClaimResponse>(result);
 				if (string.IsNullOrEmpty(currentToken!.refresh_token))
 				{
 						_logger.LogWarning("No refresh token was received!");
-						tokenLifetime = 60;
+						// tokenLifetime = 60;
 				}
 
 				//byte[] byteData = Convert.FromBase64String(currentToken!.id_token.Split(".")[1]);

@@ -12,6 +12,7 @@ import ViewAccount from "./Pages/Accounts/ViewAccount";
 import Settings from "./Pages/Settings";
 import { Navigate } from "react-router-dom";
 import Notifications from "./Pages/Notifications.js";
+import HooksSettings from "./Pages/Settings/Hooks";
 
 const AppRoutes: (PathRouteProps | IndexRouteProps | LayoutRouteProps)[] = [
   {
@@ -43,6 +44,10 @@ const AppRoutes: (PathRouteProps | IndexRouteProps | LayoutRouteProps)[] = [
     path: "/settings",
       element: <Settings />,
     },
+    {
+      path: "/settings/hooks",
+        element: <HooksSettings />,
+      },
     {
         path: "/notifications",
         element: <Notifications />,

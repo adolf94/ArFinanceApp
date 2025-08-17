@@ -19,6 +19,8 @@ public class AppProfile : Profile
 				CreateMap<AccountCreateDto, Account>()
 					.ForMember(e => e.PartitionKey, opt => opt.MapFrom((e) => "default"));
 
+				CreateMap<HookConfig, HookConfig>();
+
 		}
 
 

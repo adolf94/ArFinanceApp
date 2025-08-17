@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore.ChangeTracking;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -16,11 +17,17 @@ namespace FinanceFunction.Data.CosmosRepo
 						_context = context;
 						_cancelToken = token;
 				}
-
+		
+				public async Task SetUpdated<T>(T item)
+				{
+						EntityEntry entry = _context.Entry(item!);
+						entry.State = Microsoft.EntityFrameworkCore.EntityState.Modified;
+						await Task.CompletedTask;
+				}
 				public async Task<int> SaveChangesAsync()
 				{
 						
-						var i = await _context.SaveChangesAsync(_cancelToken);
+						var i = await _context.SaveChangesAsync(_cancelToken); 
 						_context.ChangeTracker.Clear();
 						return i;
 				}
