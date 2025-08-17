@@ -24,15 +24,26 @@ def add_to_persist(container,record):
     return record
 
 
-def get_record(container, guid):
+def get_record(container, guid, partition = "default"):
     db = open_db(dbName)
     container = db.get_container_client(container)
     try:
-        item = container.read_item(guid, partition_key="default")
+        item = container.read_item(guid, partition_key=partition)
         return item
     except exceptions.CosmosResourceNotFoundError:
         return None
 
+
+def get_all_records_by_partition(container, partition = "default"):
+    db = open_db(dbName)
+    container = db.get_container_client(container)
+    try:
+        item = container.query_items("Select * from c where c.Type=@partition",parameters=[
+            {"name": "@partition","value": partition}
+        ], partition_key=partition)
+        return item
+    except exceptions.CosmosResourceNotFoundError:
+        return None
 
     
 

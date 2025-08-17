@@ -1,1 +1,1 @@
-[ "amount","ownAcct", "recipientAcct", "reference", "senderAcct","senderName"]
+[ "amount","newBalance", "ownAcct", "recipientAcct","recipientBank", "reference", "senderAcct","senderName"]

@@ -5,6 +5,7 @@ import os
 from pathlib import Path
 import re
 
+from FlaskApp.cosmos_modules import get_all_records_by_partition
 from FlaskApp.regex_utility import get_regex_match, regex_matches_tolist
 
 
@@ -14,9 +15,8 @@ def handle_notif(data):
     # Path to the JSON file in the same directory
     configFile = open(config_path, 'r')
 
-    config = json.load(configFile)
 
-    notif_config = config["notification"]
+    notif_config = get_all_records_by_partition("HookConfigs", "notif_")
 
     output = {
         "data":{
@@ -27,19 +27,19 @@ def handle_notif(data):
         "location":{}
     }
     
-    conf_to_use = filter(lambda c: c["app"] == data["notif_pkg"], notif_config)
+    conf_to_use = filter(lambda c: c["App"] == data["notif_pkg"], notif_config)
 
     current_reg = None
     for reg in conf_to_use:
         searc = None
         current_reg = reg
 
-        if run_conditions(data, reg["conditions"]) == False:
+        if run_conditions(data, reg["Conditions"]) == False:
             break
 
-        if "regex" in reg:
-            searc = get_regex_match(reg["regex"], data["notif_msg"])
-        if "success" in reg and reg["success"] == False:
+        if "Regex" in reg:
+            searc = get_regex_match(reg["Regex"], data["notif_msg"])
+        if "Success" in reg and reg["Success"] == False:
             break
         if searc is not None:
             break
@@ -50,8 +50,8 @@ def handle_notif(data):
         return output
 
 
-    if  "success" in reg and current_reg["success"] == False: 
-        output["data"]["matchedConfig"] = current_reg["name"]
+    if  "Success" in reg and current_reg["Success"] == False: 
+        output["data"]["matchedConfig"] = current_reg["Name"]
         output["data"]["success"] = False
         return output
      
@@ -59,35 +59,35 @@ def handle_notif(data):
 
     output["data"]["success"] = True
     values = regex_matches_tolist(searc)
-    name = current_reg["name"]
-    for pi, prop in enumerate(current_reg["properties"]):
+    name = current_reg["Name"]
+    for pi, prop in enumerate(current_reg["Properties"]):
         value = ""
         loc = None
-        if "regexIndex" in prop:
-            index = int(prop["regexIndex"])
+        if prop["RegexIndex"] is not None:
+            index = int(prop["RegexIndex"])
             value = values[index]['group']
             loc = values[index]['span']
             
-        if "extractRegex" in prop:
-            if "getMatch" in prop:
-                match = re.search(prop["extractRegex"], value)
-                value = match.group(int(prop["getMatch"]))
+        if prop["ExtractRegex"] is not None:
+            if "GetMatch" in prop:
+                match = re.search(prop["ExtractRegex"], value)
+                value = match.group(int(prop["GetMatch"]))
             else:
-                property = prop['property']
+                property = prop['Property']
                 print(f"getMatch is required when using extractRegex. conf:{name}, prop:{property} ")
                 
         
-        if "removeRegex" in prop:
-            for string in list(prop["removeRegex"]):
+        if prop["RemoveRegex"] is not None:
+            for string in list(prop["RemoveRegex"]):
                 value = value.replace(string,"")
 
                 
-        if "replaceRegex" in prop:
-            for r in list(prop["replaceRegex"]):
-                value = value.replace(r["f"],r["t"])
+        if prop["ReplaceRegex"] is not None:
+            for r in list(prop["ReplaceRegex"]):
+                value = value.replace(r["F"],r["T"])
     
-        output["data"][prop["property"]] = value
-        output["location"][prop["property"]] = loc
+        output["data"][prop["Property"]] = value
+        output["location"][prop["Property"]] = loc
     output["data"]["matchedConfig"] = name
     return output
 
@@ -102,9 +102,9 @@ def run_conditions(data, condition):
     
 def run_and_condition(data, condition):
 
-    if "operation" in condition:
-        if condition["operation"] in ["eq","equals","equal", "=", "=="]:
-            return data[condition["property"]] == condition["value"]
+    if condition["Operation"] is not None:
+        if condition["Operation"] in ["eq","equals","equal", "=", "=="]:
+            return data[condition["Property"]] == condition["Value"]
     else: 
         return False
         
