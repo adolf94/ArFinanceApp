@@ -12,7 +12,7 @@ from uuid_extensions import uuid7
 
 from FlaskApp.ai_modules import extract_from_ia
 from FlaskApp.ai_modules.extract_data import identify_from_filename
-from FlaskApp.ai_modules.image_functions import read_screenshot
+from FlaskApp.ai_modules.image_functions import read_from_filename, read_screenshot
 from FlaskApp.cosmos_modules import add_to_app, add_to_persist
 
 
@@ -45,23 +45,32 @@ def handle_upload(request : Request):
     if request.content_type == "application/octet-stream":
     
         if not request.data:
-            return Response(json.dumps({"error":"no file found"}) , 400, content_type="application/json")
+            return {
+                "error": True,
+                "message": "no file found"
+            }
         if 'original_filepath' not in request.headers:
-            return Response(json.dumps({"error":"no file name found"}) , 400, content_type="application/json")
+            return {
+                "error": True,
+                "message": "no file name found"
+            }
         originalFilepath = request.headers["original_filepath"] 
         originalFileName = secure_filename(originalFilepath)
         if not allowed_file(originalFileName):
-            return Response(json.dumps({"error":"not allowed"}) , 400, content_type="application/json")
-        
+            return {
+                "error": True,
+                "message": "not allowed"
+            }
         with open(local_file_path, 'wb') as f:
             f.write(request.data)
 
     else:
 
         if 'file' not in request.files:
-            return Response(json.dumps({"error":"no file found"}) , 400, content_type="application/json")
-        
-        logging.info("found file in files")
+            return {
+                "error": True,
+                "message": "no file found"
+            }
 
         file = request.files['file']
         logging.info("found " + file.filename)
@@ -69,21 +78,26 @@ def handle_upload(request : Request):
         # If the user does not select a file, the browser submits an
         # empty file without a filename.
         if file.filename == '':
-            return Response(json.dumps({"error":"no file name found"}) , 400, content_type="application/json")
+            return {
+                "error": True,
+                "message": "no file name found"
+            }
         originalFileName = secure_filename(file.filename)  
         if not allowed_file(originalFileName):
-            return Response(json.dumps({"error":"not allowed"}) , 400, content_type="application/json")
-        
+            return {
+                "error": True,
+                "message": "not allowed"
+            }
         file.save(local_file_path)  
 
         logging.info("file saved ")
     fileId = id.replace("-","")
     fileType = originalFileName.split(".",1)[-1]
     blob_name = fileId + "." + fileType
-        
     logging.info("start upload to azure ")
-    upload_result = upload_to_azure(local_file_path,blob_name)
-    logging.info(upload_result)
+    upload_to_azure(local_file_path,blob_name)
+    image_extract = extract_from_ia(local_file_path)
+    app = read_from_filename(originalFileName)
     record = {
         "id":id,
         "Container": container_name,
@@ -92,44 +106,22 @@ def handle_upload(request : Request):
         "OriginalFileName":originalFileName,
         "MimeType": file.mimetype ,
         "FileKey": blob_name,
+        "Lines": image_extract["data"],
         "$type": "BlobFile",
+        "App":app,
         "DateCreated": datetime.datetime.now(datetime.UTC).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "Status":"Active"
     }
     add_to_app("Files", record)
-
-
-    image_extract = extract_from_ia(local_file_path)
-
-    output = read_screenshot(originalFileName, image_extract["lines"])
-
-    newItem = { 
-        "Id" : id,
-        "id": id,  
-        "Date": datetime.datetime.now(datetime.UTC).strftime("%Y-%m-%dT%H:%M:%SZ"),
-        "JsonData": {
-            "lines":image_extract["lines"],
-            "action":"image_upload",
-            "imageId": id,
-            "fileName":originalFileName,
-            "timestamp": datetime.datetime.now(datetime.UTC).strftime("%Y-%m-%dT%H:%M:%SZ") 
-        },
-        "ExtractedData": output,
-        "Location": image_extract["data"],
-        "RawMsg":originalFileName + " image upload",
-        "Type":"notif",
-        "MonthKey": datetime.datetime.now().strftime("%Y-%m-01"),
-        "PartitionKey":"default",
-        "$type": "HookMessage",
-        "_ttl": 60*24*60*60,
-        "IsHtml":False
+    return {
+        "error" : False,
+        "file" : file,
+        "image_extract": image_extract,
+        "local_file_path" : local_file_path,
+        "original_file_name" : originalFileName,
+        "record": record
     }
-
-    add_to_app("HookMessages", newItem)
-    add_to_persist("HookMessages", newItem)
-
-
-    return  newItem
+    
 
 
 def upload_to_azure(file_path, blob_name):

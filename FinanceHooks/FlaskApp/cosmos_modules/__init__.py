@@ -1,6 +1,6 @@
 
 import os
-from azure.cosmos  import CosmosClient, DatabaseProxy
+from azure.cosmos  import CosmosClient, DatabaseProxy,exceptions
 
 dbName = os.environ["COSMOS_DB"]
 dbName2 = os.environ["COSMOS_DB2"]
@@ -24,7 +24,14 @@ def add_to_persist(container,record):
     return record
 
 
-
+def get_record(container, guid):
+    db = open_db(dbName)
+    container = db.get_container_client(container)
+    try:
+        item = container.read_item(guid, partition_key="default")
+        return item
+    except exceptions.CosmosResourceNotFoundError:
+        return None
 
 
     

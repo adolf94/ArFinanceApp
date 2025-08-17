@@ -244,6 +244,26 @@
             "conditions":[]
         },
         {
+            "name":"notif_moveit_charge_ride",
+            "regex":"(Your Mastercard ([0-9]+) has been charged P ([\\.0-9,]+) for booking ([A-Z\\-0-9]+)\\.)",
+            "app": "com.moveit.app.customer",
+            "conditions":[],
+            "properties":[
+                {
+                    "property": "ownAcct",
+                    "regexIndex": 1
+                },
+                {
+                    "property": "amount",
+                    "regexIndex": 2
+                },
+                {
+                    "property": "reference",
+                    "regexIndex": 3
+                }
+            ]
+        },
+        {
             "name":"notif_gcash_receive",
             "app": "com.globe.gcash.android",
             "regex": "(You have received PHP ([0-9\\.]+) of GCash from ([A-Z\\*\\ \\.]+) ([0-9]*)\\.)",
@@ -431,6 +451,177 @@
                 }
             ]
 
+        },
+        {
+            "name":"sms_bpi_card_otp",
+            "app": "BPI",
+            "regex": "(This OTP is to approve your purchase at ([A-Z\\-a-z0-9 ]+) amounting to PHP ([0-9\\.,]+) using your Primary BPI credit card ending in ([0-9]+))",
+            "conditions":[],
+            "properties":[
+                {
+                    "property":"amount",
+                    "regexIndex": 2
+                },
+                {
+                    "property":"recipientName",
+                    "regexIndex": 1
+                },
+                {
+                    "property":"ownAcct",
+                    "regexIndex": 3
+                }
+            ]
+
+        },
+        {
+            "name":"sms_bpi",
+            "success":false,
+            "app": "BPI",
+            "conditions":[]
+        },
+        {
+            "name":"sms_unionbank_paydirect",
+            "app": "Unionbank",
+            "regex": "(You paid P([0-9\\.,]+) to ([A-Za-z\\ ]+) using your UnionBank Credit Card ending in ([0-9]+). Reference No.: ([\\.A-Z0-9]+). Thank you for using UnionBank PayDirect!)",
+            "conditions":[],
+            "properties":[
+                {
+                    "property":"amount",
+                    "regexIndex": 1
+                },
+                {
+                    "property":"recipientName",
+                    "regexIndex": 2
+                },
+                {
+                    "property":"ownAcct",
+                    "regexIndex": 3
+                },
+                {
+                    "property":"reference",
+                    "regexIndex": 4
+                }
+            ]
+
+        },
+        {
+            "name":"sms_unionbank_card",
+            "app": "UnionBank",
+            "regex": "(Thank you for using your UnionBank Credit card ending in ([0-9]+) for the amount PHP ([\\.0-9,]+) at ([A-Za-z0-9 ]+). For inquiries call \\+632-8841-8600. Ref# ([0-9]+))",
+            "conditions":[],
+            "properties":[
+                {
+                    "property":"amount",
+                    "regexIndex": 2
+                },
+                {
+                    "property":"recipientName",
+                    "regexIndex": 3
+                },
+                {
+                    "property":"ownAcct",
+                    "regexIndex": 1
+                }
+            ]
+
+        },
+        {
+            "name":"sms_unionbank_card2",
+            "app": "UnionBank",
+            "regex": "(Thank you for using your UnionBank Credit Card ending in ([0-9]+) for the amount of PHP ([\\.0-9,]+) at ([A-Za-z0-9 ]+).)",
+            "conditions":[],
+            "properties":[
+                {
+                    "property":"amount",
+                    "regexIndex": 2
+                },
+                {
+                    "property":"recipientName",
+                    "regexIndex": 3
+                },
+                {
+                    "property":"ownAcct",
+                    "regexIndex": 1
+                }
+            ]
+
+        },
+        {
+            "name":"sms_unionbank_card_otp",
+            "app": "UnionBank",
+            "regex": "([0-9]+ is your one-time pin to confirm payment of PHP ([0-9\\.,]+) to ([A-Za-z0-9]+) on your card ending with ([0-9]+).)",
+            "conditions":[],
+            "properties":[
+                {
+                    "property":"amount",
+                    "regexIndex": 1
+                },
+                {
+                    "property":"recipientName",
+                    "regexIndex": 2
+                },
+                {
+                    "property":"ownAcct",
+                    "regexIndex": 3
+                }
+            ]
+
+        },
+        {
+            "name":"sms_unionbank",
+            "success":false,
+            "app": "UnionBank",
+            "conditions":[]
+        },
+        {
+            "name":"sms_maybank_withdrawal",
+            "app": "MaybankPH",
+            "regex": "(PHP ([0-9,\\.]+) was withdrawn from ([0-9X]+) on ([0-9A-Z\\-\\/:]+) at TERMINAL [0-9]+. For inquiries, please call [\\()0-9]+.)",
+            "conditions":[],
+            "properties":[
+                {
+                    "property":"amount",
+                    "regexIndex": 1
+                },
+                {
+                    "property":"ownAcct",
+                    "regexIndex": 2
+                }
+            ]
+
+        },
+        {
+            "name":"sms_maybank",
+            "success":false,
+            "app": "MaybankPH",
+            "conditions":[]
+        },
+        {
+            "name":"sms_hsbc_cardused",
+            "app": "HSBC",
+            "regex": "(YOUR HSBC CARD ENDING IN [\\*]* ([0-9]+) WAS USED AT ([A-Z ]+) ON ([0-9\\/]+ AT [0-9\\:]+) IN THE AMOUNT OF PHP([0-9\\.,]+). PLS CALL 0279768000 FOR ANY CONCERNS.)",
+            "conditions":[],
+            "properties":[
+                {
+                    "property":"recipientName",
+                    "regexIndex": 2
+                },
+                {
+                    "property":"amount",
+                    "regexIndex": 4
+                },
+                {
+                    "property":"ownAcct",
+                    "regexIndex": 1
+                }
+            ]
+
+        },
+        {
+            "name":"sms_hsbc",
+            "success":false,
+            "app": "HSBC",
+            "conditions":[]
         }
     ]
 }

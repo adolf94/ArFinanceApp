@@ -29,6 +29,7 @@ def read_from_filename(filename):
     fileName_withoutExt = filename.split(".", 5)[0]
     pattern = r"Screenshot_([0-9]+)_([0-9]+)_([A-Za-z0-9]+)"
     match = re.search(pattern, fileName_withoutExt, re.IGNORECASE)
+    if match == None: return ""
     app = match.group(3).lower()
     return app
 
@@ -80,7 +81,7 @@ def get_from_test_files(image_path):
 
 
 
-def read_screenshot(image_location, lines):
+def read_screenshot(app, lines):
     current_directory = Path(os.path.dirname(os.path.abspath(__file__)))
     config_path = os.path.join(current_directory.parent, 'config.json')
     # Path to the JSON file in the same directory
@@ -91,9 +92,7 @@ def read_screenshot(image_location, lines):
     imageConfigs = config["image"]
 
 
-    app = read_from_filename(image_location)
-
-    confs_to_test = filter(lambda c: c["app"] == app, imageConfigs)
+    confs_to_test = filter(lambda c: c["app"] == app.lower(), imageConfigs)
 
     extracted_data = {
         "matchedConfig" : "img",
