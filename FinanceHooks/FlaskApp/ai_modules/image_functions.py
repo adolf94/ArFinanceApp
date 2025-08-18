@@ -14,6 +14,8 @@ from azure.ai.vision.imageanalysis import ImageAnalysisClient
 from azure.ai.vision.imageanalysis.models import VisualFeatures
 from azure.identity import DefaultAzureCredential
 
+from FlaskApp.cosmos_modules import get_all_records_by_partition
+
 
 ENV = os.getenv("ENVIRONMENT")
 
@@ -51,14 +53,14 @@ def run_and_condition(condition, lines):
 
     allText = "\n".join(lines)
 
-    if "includeText" in condition:
-        match = re.search(condition["includeText"],allText)
+    if condition["IncludeText"] is not None:
+        match = re.search(condition["IncludeText"],allText)
         if match == None:
             return False
-    if "hasLine" in condition:
+    if condition["HasLine"] is not None:
         hasLine = False
         for line in lines:
-            if line.strip() == condition["hasLine"]:
+            if line.strip() == condition["HasLine"]:
                 hasLine = True
                 break
         return hasLine
@@ -89,10 +91,10 @@ def read_screenshot(app, lines):
 
     config = json.load(configFile)
 
-    imageConfigs = config["image"]
+    imageConfigs = get_all_records_by_partition("HookConfigs", "img_")
 
 
-    confs_to_test = filter(lambda c: c["app"] == app.lower(), imageConfigs)
+    confs_to_test = filter(lambda c: c["App"] == app.lower(), imageConfigs)
 
     extracted_data = {
         "matchedConfig" : "img",
@@ -104,45 +106,45 @@ def read_screenshot(app, lines):
         logging.error(f"No config associated with {app}")
         return extracted_data
     try:
-        conf_to_use = next(x for x in confs_to_test if run_conditions(x["conditions"], lines))
+        conf_to_use = next(x for x in confs_to_test if run_conditions(x["Conditions"], lines))
     except StopIteration:
         logging.error(f"No config that matches the image")
         return extracted_data
 
-    name = conf_to_use['name']
-    for pi, prop in enumerate(conf_to_use["properties"]):
+    name = conf_to_use['Name']
+    for pi, prop in enumerate(conf_to_use["Properties"]):
 
         indexForLook = -1
-        if "lookFor" in prop:
-            indexForLook = next((i for i, line in enumerate(lines) if line.strip() == prop["lookFor"]), -1)
+        if prop["LookFor"] is not None:
+            indexForLook = next((i for i, line in enumerate(lines) if line.strip() == prop["LookFor"]), -1)
 
 
-        if "lookForRegex" in prop:
-            indexForLook = next((i for i, line in enumerate(lines) if re.search(prop["lookForRegex"], line.strip()) != None and i > indexForLook), -1)
+        if prop["LookForRegex"] is not None:
+            indexForLook = next((i for i, line in enumerate(lines) if re.search(prop["LookForRegex"], line.strip()) != None and i > indexForLook), -1)
 
-        indexToGet = indexForLook if "getValueAfter" not in prop else indexForLook + int(prop["getValueAfter"])
+        indexToGet = indexForLook if prop["GetValueAfter"] is None else indexForLook + int(prop["GetValueAfter"])
         value = lines[indexToGet].strip()
 
 
-        if "extractRegex" in prop:
-            if "getMatch" in prop:
-                match = re.search(prop["extractRegex"], value)
-                value = match.group(int(prop["getMatch"]))
+        if prop["ExtractRegex"] is not None:
+            if prop["getMatch"] is not None:
+                match = re.search(prop["ExtractRegex"], value)
+                value = match.group(int(prop["GetMatch"]))
             else:
                 property = prop['property']
                 print(f"getMatch is required when using extractRegex. conf:{name}, prop:{property} ")
                 
         
-        if "removeRegex" in prop:
-            for string in list(prop["removeRegex"]):
+        if prop["RemoveRegex"] is not None:
+            for string in list(prop["RemoveRegex"]):
                 value = value.replace(string,"")
 
                 
-        if "replaceRegex" in prop:
-            for r in list(prop["replaceRegex"]):
-                value = value.replace(r["f"],r["t"])
+        if prop["ReplaceRegex"] is not None:
+            for r in list(prop["ReplaceRegex"]):
+                value = value.replace(r["F"],r["T"])
 
-        extracted_data[prop["property"]] = value
+        extracted_data[prop["Property"]] = value
 
     extracted_data["matchedConfig"] = f"img_{name}"
     extracted_data["success"] = True
