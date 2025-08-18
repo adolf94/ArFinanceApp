@@ -5,6 +5,7 @@ import os
 from pathlib import Path
 import re
 
+from FlaskApp.cosmos_modules import get_all_records_by_partition
 from FlaskApp.regex_utility import get_regex_match, regex_matches_tolist
 
 
@@ -16,7 +17,7 @@ def __init__(data):
 
     config = json.load(configFile)
 
-    sms_config = config["sms"]
+    sms_config = get_all_records_by_partition("HookConfigs", "sms_")
 
     output = {
         "data":{
@@ -28,7 +29,7 @@ def __init__(data):
     }
 
     
-    conf_to_use = filter(lambda c: c["sender"] == data["sms_rcv_sender"], sms_config)
+    conf_to_use = filter(lambda c: c["Sender"] == data["sms_rcv_sender"], sms_config)
 
     current_reg = None
     for reg in conf_to_use:
@@ -38,9 +39,9 @@ def __init__(data):
         if run_conditions(data, reg["conditions"]) == False:
             break
 
-        if "regex" in reg:
+        if "Regex" in reg:
             searc = get_regex_match(reg, data["sms_rcv_msg"])
-        if "success" in reg and reg["success"] == False:
+        if "Success" in reg and reg["Success"] == False:
             break
         if searc is not None:
             break
@@ -50,8 +51,8 @@ def __init__(data):
         output["data"]["matchedConfig"] = "sms"
         return output
 
-    if  "success" in reg and current_reg["success"] == False: 
-        output["data"]["matchedConfig"] = current_reg["name"]
+    if  "Success" in reg and current_reg["Success"] == False: 
+        output["data"]["matchedConfig"] = current_reg["Name"]
         output["data"]["success"] = False
         return output
 
@@ -60,33 +61,32 @@ def __init__(data):
     output["data"]["success"] = True
     values = regex_matches_tolist(searc)
 
-    for pi, prop in enumerate(conf_to_use["properties"]):
-        name = prop["name"]
+    for pi, prop in enumerate(conf_to_use["Properties"]):
+        name = prop["Name"]
         value = ""
         loc = None
-        if "regexIndex" in prop:
-            index = int(prop["regexIndex"])
+        if prop["RegexIndex"] is not None:
+            index = int(prop["RegexIndex"])
             value = values[index]['group']
             loc = values[index]['span']
             
-        if "extractRegex" in prop:
-            if "getMatch" in prop:
-                match = re.search(prop["extractRegex"], value)
-                value = match.group(int(prop["getMatch"]))
+        if prop["ExtractRegex"] is not None:
+            if "GetMatch" in prop:
+                match = re.search(prop["ExtractRegex"], value)
+                value = match.group(int(prop["GetMatch"]))
             else:
-                property = prop['property']
+                property = prop['Property']
                 print(f"getMatch is required when using extractRegex. conf:{name}, prop:{property} ")
                 
         
-        if "removeRegex" in prop:
-            for string in list(prop["removeRegex"]):
+        if prop["RemoveRegex"] is not None:
+            for string in list(prop["RemoveRegex"]):
                 value = value.replace(string,"")
 
                 
-        if "replaceRegex" in prop:
-            for r in list(prop["replaceRegex"]):
-                value = value.replace(r["f"],r["t"])
-    
+        if prop["ReplaceRegex"] is not None:
+            for r in list(prop["ReplaceRegex"]):
+                value = value.replace(r["F"],r["T"])
         output["data"][prop["property"]] = value
         output["location"][prop["property"]] = loc
     return output
