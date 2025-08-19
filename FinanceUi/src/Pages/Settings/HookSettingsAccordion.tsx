@@ -87,7 +87,7 @@ const HookSettingsAccordion = (props : HookSettingsAccordionProps)=>{
         if(!form.name) return false;
         if(!form.app) return false;
         if(!form.success) return true;
-        if(!form.regex) return false;
+        if(!form.regex && settingsState.tab != "img_") return false;
         if(form.properties.length == 0) return false;
         return true
     },[form])
@@ -189,7 +189,7 @@ const HookSettingsAccordion = (props : HookSettingsAccordionProps)=>{
                         <Typography variant="body2">Properties</Typography>
                         {
                             settingsState.tab == "img_" ? <HooksAddProperty item={null} onSave={(data)=>{
-                                    setForm({...form, properties:[form.properties,...data]})
+                                    setForm({...form, properties:[...form.properties,data]})
                                 }} isNew/>
                                  : <HooksRegexProperties regex={form.regex} currentProperties={form.properties} onSave={(data)=>setForm({...form, properties:data})}/>
                         }

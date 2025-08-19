@@ -14,20 +14,22 @@ const TextFieldWithAdornmentLabel = (props : TextFieldWithAdornmentLabelProps & 
 
 
     return <TextField {...props}
-    value={props.value || ""}
+    value={(props.value === null || props.value === undefined) ? "" : props.value}
     onChange={(evt)=>{
         setValue(evt.target.value)
-        props.onChange({...evt, target : {...evt.target, value: (props.hasCheckbox && evt.target.value == "") ? null :evt.target.value }})
+        props.onChange({...evt, target : {...evt.target, value: (props.hasCheckbox && evt.target.value === "") ? null :evt.target.value }})
     }}
     label=""
-    slotProps={{input: {
-        startAdornment:<InputAdornment position="start">{props.label}</InputAdornment>,
-        endAdornment: !props.hasCheckbox ? null : <InputAdornment position="end"><Checkbox checked={!!props.value} size="small" onChange={(evt)=>{
-            if(evt.target.checked){
-                props.onChange({...evt, target : {...evt.target, value: stgValue}})
-            }else{
-                props.onChange({...evt, target : {...evt.target, value: null}})
-            }
+    slotProps={{
+        ...props.slotProps,
+        input: {
+            startAdornment:<InputAdornment position="start">{props.label}</InputAdornment>,
+            endAdornment: !props.hasCheckbox ? null : <InputAdornment position="end"><Checkbox checked={props.value !== null && props.value !==undefined && props.value !== ""} size="small" onChange={(evt)=>{
+                if(evt.target.checked){
+                    props.onChange({...evt, target : {...evt.target, value: stgValue}})
+                }else{
+                    props.onChange({...evt, target : {...evt.target, value: null}})
+                }
             
         }}/></InputAdornment>
     }}}

@@ -41,7 +41,7 @@ namespace FinanceFunction.Models
 						public string? LookFor { get; set; }
 						public string? LookForRegex { get; set; }
 						public int? GetValueAfter { get; set; }
-						public List<ReplaceRegexConfig>? ReplaceRegex { get; set; }
+						public List<ReplaceRegexConfig>? ReplaceRegex { get; set; } = new List<ReplaceRegexConfig>();
 						public string? ExtractRegex { get; set; }
 						public int? GetMatch { get; set; }
 						public string[]? RemoveRegex { get; set; }
