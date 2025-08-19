@@ -11,20 +11,17 @@ interface ImagePropertyExtract {
     extractRegex?: string | null,
     getMatch?: Number | null,
     removeRegex: string[]
+    replaceRegex: any[]
 }
 const defaultValue: ImagePropertyExtract  = {
     "property":"",
     "lookFor":"",
+    "lookForRegex":"",
     "getValueAfter" : 0,
     "extractRegex":"",
     "getMatch":null,
     "replaceRegex": [],
     "removeRegex": []
-}
-
-const LookPropertyValues = {
-    lookFor : "Look For",
-    lookForRegex : "Look For Regex"
 }
 
 
@@ -78,23 +75,7 @@ const ReplaceRegexItem = (({item, isNew, onSave}: {item:any, isNew?:boolean, onS
 const HooksAddProperty = ({item,isNew, onSave} : {item:any, isNew?:boolean, onSave:(data)=>void}) =>{
     const [show,setShow] = useState(false)
     const [form, setForm] = useState(item || defaultValue)
-    const [lookProperty, setLookProperty] = useState(item?.lookForRegex?"lookForRegex":"lookFor")
-    const [anchorEl, setAnchorEl] = useState(null);
 
-    const handleLookForClick = (event) => {
-        setAnchorEl(event.currentTarget);
-    };
-    
-    const handleLookSelect = (value) => {
-        let propValue = form[lookProperty]
-        setLookProperty(value)
-        setForm({
-            ...form,
-            [lookProperty]: null,
-            [value]: propValue
-        })
-        setAnchorEl(null);
-    };
     const handleSave = ()=>{
         onSave(form)
         if(!item)setForm(defaultValue)
@@ -135,15 +116,12 @@ const HooksAddProperty = ({item,isNew, onSave} : {item:any, isNew?:boolean, onSa
                         </Select>
                     </Grid>
                     <Grid size={12} sx={{pt:1}}>
-                        <TextFieldWithAdornmentLabel sx={{textAlign:"center"}} label={
-                            <>
-                                <Typography sx={{cursor:"pointer"}} onClick={handleLookForClick}>{LookPropertyValues[lookProperty]}</Typography>  <ArrowDropDown fontSize="small" sx={{pl:1}}/>
-                                <Menu open={!!anchorEl} anchorEl={anchorEl}>
-                                    <MenuItem onClick={()=>handleLookSelect("lookFor")}>Look For</MenuItem>
-                                    <MenuItem onClick={()=>handleLookSelect("lookForRegex")}>Look For Regex</MenuItem>
-                                </Menu>
-                            </>
-                        } value={form[lookProperty]} onChange={e=>setForm({...form,[lookProperty]:e.target.value})}
+                        <TextFieldWithAdornmentLabel hasCheckbox sx={{textAlign:"center"}} label="Look For" value={form.lookFor} onChange={e=>setForm({...form,lookFor:e.target.value})}
+                             size="small" fullWidth />
+
+                    </Grid>
+                    <Grid size={12} sx={{pt:1}}>
+                        <TextFieldWithAdornmentLabel hasCheckbox sx={{textAlign:"center"}} label="Look For Regex" value={form.lookForRegex} onChange={e=>setForm({...form,lookForRegex:e.target.value})}
                              size="small" fullWidth />
 
                     </Grid>
