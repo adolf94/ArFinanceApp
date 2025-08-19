@@ -127,11 +127,11 @@ def read_screenshot(app, lines):
 
 
         if prop["ExtractRegex"] is not None:
-            if prop["getMatch"] is not None:
+            if prop["GetMatch"] is not None:
                 match = re.search(prop["ExtractRegex"], value)
                 value = match.group(int(prop["GetMatch"]))
             else:
-                property = prop['property']
+                property = prop['Property']
                 print(f"getMatch is required when using extractRegex. conf:{name}, prop:{property} ")
                 
         
