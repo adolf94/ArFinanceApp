@@ -35,7 +35,7 @@ const HooksSettings = ()=>{
 
 
     const getMaxPriority = ()=>{
-        return data.reduce((p,c,i)=>{
+        return (data || []).reduce((p,c,i)=>{
             if(p > c.priorityOrder) return p;
             return c.priorityOrder;
         },0)
