@@ -38,6 +38,7 @@ const data =
 }
 
 interface HookSettingsAccordionProps {
+    onCancel?: ()=>void,
     value?: {
         name:string,
         nameKey:string,
@@ -100,6 +101,12 @@ const HookSettingsAccordion = (props : HookSettingsAccordionProps)=>{
         }
     }
 
+    const handleNameSave = ()=>{
+            setForm({...form, nameKey:`${settingsState.tab}${form.name}`})
+            setEditName(false)
+            setExpanded(true)
+    }
+
     return  <Accordion expanded={expanded}>
         {!editName? 
         <Grid container sx={{justifyContent:'space-between'}}>
@@ -127,17 +134,18 @@ const HookSettingsAccordion = (props : HookSettingsAccordionProps)=>{
                         setForm({...form,name:evt.target.value})
                     }} 
                         size="small" fullWidth
+                        onKeyDown={(evt)=>{
+                            if(evt.key.toLowerCase() == "enter"){
+                                handleNameSave()
+                            }
+                        }}
                          slotProps={{
                             input: {
                                 startAdornment:<InputAdornment position="start">
                                     {settingsState.tab}
                                 </InputAdornment>,
                                 endAdornment:<InputAdornment position="end">
-                                    <IconButton onClick={()=>{
-                                        setForm({...form, nameKey:`${settingsState.tab}${form.name}`})
-                                        setEditName(false)
-                                        setExpanded(true)
-                                    }}>
+                                    <IconButton onClick={handleNameSave}>
                                         <Check/>
                                     </IconButton>
                                 </InputAdornment>
@@ -212,7 +220,11 @@ const HookSettingsAccordion = (props : HookSettingsAccordionProps)=>{
             <Grid container sx={{justifyContent:"end", pt:1}}>
                 <Grid>
                     <Button variant="outlined" color="success" disabled={!isSubmittable} onClick={()=>handleSave()}>Save</Button>
-                    <Button>Cancel</Button>
+                    <Button onClick={()=>{
+                        setForm(defaultValue) 
+                        setExpanded(false)
+                        !!props.onCancel && props.onCancel()
+                    }}>Cancel</Button>
                 </Grid>
             </Grid>
         </AccordionDetails>

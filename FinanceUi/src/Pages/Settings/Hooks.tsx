@@ -35,7 +35,7 @@ const HooksSettings = ()=>{
 
 
     const getMaxPriority = ()=>{
-        return data.reduce((p,c,i)=>{
+        return (data || []).reduce((p,c,i)=>{
             if(p > c.priorityOrder) return p;
             return c.priorityOrder;
         },0)
@@ -109,7 +109,7 @@ const HooksSettings = ()=>{
                             </Grid>
                         </Grid>
                         <Grid size={12}>
-                            { newHook && <HookSettingsAccordion onSave={newConfig} />}
+                            { newHook && <HookSettingsAccordion onSave={newConfig}  onCancel={()=>setNewHook(false)}/>}
                         </Grid>
                         <Grid size={12}>
                             {!isLoading && (data || []).map(e=><HookSettingsAccordion key={e.nameKey} value={e} onSave={updateConfig} />)}
