@@ -37,7 +37,7 @@ def __init__(data):
         current_reg = reg
 
         if run_conditions(data, reg["conditions"]) == False:
-            break
+            continue
 
         if "Regex" in reg:
             searc = get_regex_match(reg, data["sms_rcv_msg"])

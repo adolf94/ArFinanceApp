@@ -34,8 +34,8 @@ def handle_notif(data):
         searc = None
         current_reg = reg
 
-        if run_conditions(data, reg["Conditions"]) == False:
-            break
+        if run_conditions(data, reg["conditions"]) == False:
+            continue
 
         if "Regex" in reg:
             searc = get_regex_match(reg["Regex"], data["notif_msg"])
