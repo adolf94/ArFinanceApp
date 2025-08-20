@@ -53,13 +53,27 @@ namespace FinanceFunction.Controllers
 						var dto = await req.ReadFromJsonAsync<HookConfig>();
 						if (dto!.NameKey != nameKey) return new BadRequestResult();
 
-						var item = await _repo.GetOneByName(dto.NameKey);
+						var item = await _repo.GetOneByName(dto.NameKey, dto.Type);
 
 						_mapper.Map(dto, item);
 
 						await _db.SetUpdated(item);
 						await _db.SaveChangesAsync();
 						return new NoContentResult();
+				}
+
+				[Function("GetOneConfig")]
+				public async Task<IActionResult> GetOneConfig([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "types/{type}/hookconfig/{nameKey}")] HttpRequest req, string nameKey, string type)
+				{
+
+						if (!_user.IsAuthenticated) return new UnauthorizedResult();
+						if (!_user.IsAuthorized("finance_user")) return new ForbidResult();
+
+
+						var item = await _repo.GetOneByName(nameKey, type);
+
+						if (item == null) return new NotFoundResult();
+						return new OkObjectResult(item);
 				}
 
 

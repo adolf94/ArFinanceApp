@@ -11,7 +11,7 @@ namespace FinanceFunction.Data
 		{
 				public Task<IEnumerable<HookConfig>> GetConfigByType(string type);
 				public Task<HookConfig> Create(HookConfig item);
-				public Task<HookConfig?> GetOneByName(string name);
+				public Task<HookConfig?> GetOneByName(string name, string type);
 
 		}
 }

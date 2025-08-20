@@ -10,10 +10,23 @@ export const getConfigsByType = (type)=>{
 
     return api.get(`types/${type}/hookConfigs`)
         .then(e=>{
+            e.data.forEach(e => {
+                queryClient.setQueryData([HOOK_CONFIG, {nameKey:e.nameKey}], e)
+            });
             return e.data.sort((a,b)=>a.priorityOrder - b.priorityOrder)
         })
 }
 
+
+export const getConfigById = (id : string)=>{
+    let type = id.split("_")[0] + "_"
+
+
+    return api(`types/${type}/hookconfig/${id}`)
+        .then(e=>{
+            return e.data
+        })
+}
 
 export const useMutateHookConfig = ()=>{
 
@@ -25,6 +38,7 @@ export const useMutateHookConfig = ()=>{
         },
         onSuccess:(data)=>{
             queryClient.setQueryData([HOOK_CONFIG, {type:data.type}], (prev : any[])=>[...(prev||[]),data])
+            queryClient.setQueryData([HOOK_CONFIG, {nameKey:data.nameKey}], data)
         }
     })
 
@@ -35,6 +49,7 @@ export const useMutateHookConfig = ()=>{
         },
         onSuccess:(data)=>{
             queryClient.setQueryData([HOOK_CONFIG, {type:data.type}], (prev : any[])=>replaceById(data, (prev || []), "nameKey"))
+            queryClient.setQueryData([HOOK_CONFIG, {nameKey:data.nameKey}], data)
         }
     })
 

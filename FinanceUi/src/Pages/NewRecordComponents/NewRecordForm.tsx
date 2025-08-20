@@ -50,6 +50,7 @@ import { logReferenceInstance } from "../../repositories/hookReference";
 import useSubmitTransaction from "./useSubmitTransaction";
 import numeral, { Numeral } from "numeral";
 import PillPopover from "./PillPopover";
+import { getConfigById, HOOK_CONFIG } from "../../repositories/hookConfig";
 
 const cronOptions = [
   { name: "Monthly", cron: "0 0 DD * *" },
@@ -240,7 +241,11 @@ const NewRecordForm = (props: NewRecordFormProps) => {
                 queryFn: () => getOneHookMsg(hookId, moment(date).format("YYYY-MM-01") ),
               })
               if(!!hook) {
-                configs = hookMappings.filter(e=>e.config==hook.extractedData?.matchedConfig)
+                let hookConfig = await queryClient.ensureQueryData({
+                  queryKey:[HOOK_CONFIG, {nameKey:hook.extractedData?.matchedConfig }],
+                  queryFn: ()=>getConfigById(hook.extractedData?.matchedConfig)
+                })
+                configs = hookConfig.subConfigs
               }
               if(!!hook.transactionId){
                 navigate(`../transactions/${hook.transactionId}`)

@@ -32,9 +32,9 @@ namespace FinanceFunction.Data.CosmosRepo
 						return item;
 				}
 
-				public async Task<HookConfig?> GetOneByName(string name)
+				public async Task<HookConfig?> GetOneByName(string name, string type)
 				{
-						var item = await _context.HookConfigs.FindAsync(name);
+						var item = await _context.HookConfigs.Where(e=>e.NameKey == name && e.Type == type).FirstOrDefaultAsync();
 						return item;
 				}
 		}

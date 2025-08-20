@@ -9,6 +9,7 @@ import HooksRegexProperties from "./HooksRegexProperties"
 import { faPingPongPaddleBall } from "@fortawesome/free-solid-svg-icons"
 import { setDifferenceDependencies } from "mathjs"
 import HooksAddProperty from "./HooksAddProperty"
+import HookSubConfigModal  from "./HookSubConfigModal"
 
 const data =  
 {
@@ -62,6 +63,7 @@ const defaultValue = {
     enabled:true,
     conditions:[],
     displayText:"",
+    subConfigs:[],
     properties:[]
 }
 
@@ -217,7 +219,10 @@ const HookSettingsAccordion = (props : HookSettingsAccordionProps)=>{
                 </Grid>
             </Grid>
             <Divider />
-            <Grid container sx={{justifyContent:"end", pt:1}}>
+            <Grid container sx={{justifyContent:"space-between", pt:1}}>
+                <Grid>
+                    <HookSubConfigModal data={form} onDataChange={(subConfigs)=>setForm({...form, subConfigs:subConfigs})}/>
+                </Grid>
                 <Grid>
                     <Button variant="outlined" color="success" disabled={!isSubmittable} onClick={()=>handleSave()}>Save</Button>
                     <Button onClick={()=>{
