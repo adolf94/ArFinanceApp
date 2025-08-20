@@ -111,7 +111,7 @@ def read_screenshot(app, lines):
         logging.error(f"No config that matches the image")
         return extracted_data
 
-    name = conf_to_use['Name']
+    name = conf_to_use['NameKey']
     for pi, prop in enumerate(conf_to_use["Properties"]):
 
         indexForLook = -1
@@ -146,7 +146,7 @@ def read_screenshot(app, lines):
 
         extracted_data[prop["Property"]] = value
 
-    extracted_data["matchedConfig"] = f"img_{name}"
+    extracted_data["matchedConfig"] = name
     extracted_data["success"] = True
 
     return extracted_data

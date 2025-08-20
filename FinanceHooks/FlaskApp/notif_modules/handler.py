@@ -34,7 +34,7 @@ def handle_notif(data):
         searc = None
         current_reg = reg
 
-        if run_conditions(data, reg["conditions"]) == False:
+        if run_conditions(data, reg["Conditions"]) == False:
             continue
 
         if "Regex" in reg:
@@ -59,7 +59,7 @@ def handle_notif(data):
 
     output["data"]["success"] = True
     values = regex_matches_tolist(searc)
-    name = current_reg["Name"]
+    name = current_reg["NameKey"]
     for pi, prop in enumerate(current_reg["Properties"]):
         value = ""
         loc = None
