@@ -172,7 +172,7 @@ export const fetchTransactionsByMonthKey = async (year: number, month: number, o
         let data = origData.find(e=>e.id === d.id)
         if(data && data.epochUpdated === d.epochUpdated) return data
 
-        return fnApi(` transactions/${d.id}`)
+        return fnApi(`transactions/${d.id}`)
           .then(res=>res.data)
     }))
 
