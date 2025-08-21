@@ -51,7 +51,7 @@ def handle_notif(data):
 
 
     if  "Success" in reg and current_reg["Success"] == False: 
-        output["data"]["matchedConfig"] = current_reg["Name"]
+        output["data"]["matchedConfig"] = current_reg["id"]
         output["data"]["success"] = False
         return output
      
@@ -59,7 +59,7 @@ def handle_notif(data):
 
     output["data"]["success"] = True
     values = regex_matches_tolist(searc)
-    name = current_reg["NameKey"]
+    name = current_reg["id"]
     for pi, prop in enumerate(current_reg["Properties"]):
         value = ""
         loc = None

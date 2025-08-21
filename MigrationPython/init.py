@@ -90,11 +90,15 @@ def export_data():
 
 
 
-async def import_data(container_data, migration):
+async def import_data(container_data, migration, type = "restore"):
     table_data = migration.table_metadata()
 
     for con in table_data:
         conDict = dict(con)
+        if("ResetOnMigration" in conDict and 
+           conDict["ResetOnMigration"] == False and type == "migration") : continue
+        if("ResetOnReset" in conDict and 
+           conDict["ResetOnReset"] == False and type == "reset") : continue
         db = client.get_database_client(which_db)
 
         try:
@@ -179,7 +183,7 @@ def current_version_file():
     file  = "data/" + backupname + "/__EfMigrations.json"
     data = open(file, mode="r", encoding="utf8")
     history = json.load(data)
-    migration = reduce(lambda x,y: x if x["id"] > y["id"] else y, history)
+    migration = reduce(lambda x,y: x if int(x["id"].split("_")[0]) > int(y["id"].split("_")[0]) else y, history)
     return migration
 
 
@@ -230,7 +234,7 @@ if to_do == "Restore":
     db = loadFiles()
     migration_name = current_version_file()["id"]
     migration = load_config_from_file(migration_name)
-    asyncio.run(import_data(db, migration))
+    asyncio.run(import_data(db, migration, "restore"))
 
 
 
@@ -410,21 +414,22 @@ elif to_do == "Migrate":
         migration_name = current_version_file()["id"]
         latest_migration_name = get_latest_migration()
         migration = load_config_from_file(latest_migration_name)
-        db = migration.reset_ledgers(db)
-        asyncio.run(import_data(db, migration))
+        db = migration.up_migration(db)
+        db["__EfMigrations"].append({"id": latest_migration_name })
+        asyncio.run(import_data(db, migration, "migration"))
     else:
             which_db = get_db_list(False)
             backupname = "temp"
-            dir = os.listdir("./data/")
-            if(dir != None):
-                for file in dir:
-                    os.remove(file)
+            # dir = os.listdir("./data/temp")
+            # if(dir != None):
+            #     for file in dir:
+            #         os.remove(file)
             export_data()
             db = loadFiles()
-            migration_name = current_version_file()["id"]
+            migration_name = get_latest_migration()
             migration = load_config_from_file(migration_name)
-            db = migration.reset_ledgers(db)
-            asyncio.run(import_data(db, migration))
+            db = migration.up_migration(db)
+            asyncio.run(import_data(db, migration, "migration"))
 
 else:
     source = inquirer.select(
@@ -439,7 +444,7 @@ else:
         migration_name = current_version_file()["id"]
         migration = load_config_from_file(migration_name)
         db = migration.reset_ledgers(db)
-        asyncio.run(import_data(db, migration))
+        asyncio.run(import_data(db, migration, "reset"))
     else:
         which_db = get_db_list(False)
         backupname = "temp"
@@ -452,6 +457,6 @@ else:
         migration_name = current_version_file()["id"]
         migration = load_config_from_file(migration_name)
         db = migration.reset_ledgers(db)
-        asyncio.run(import_data(db, migration))
+        asyncio.run(import_data(db, migration, "reset"))
 
 

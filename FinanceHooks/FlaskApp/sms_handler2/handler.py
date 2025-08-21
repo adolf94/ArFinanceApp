@@ -51,7 +51,7 @@ def handle_sms(data):
 
 
     if  "success" in reg and current_reg["success"] == False: 
-        output["data"]["matchedConfig"] = current_reg["name"]
+        output["data"]["matchedConfig"] = current_reg["id"]
         output["data"]["success"] = False
         return output
      
@@ -59,7 +59,7 @@ def handle_sms(data):
 
     output["data"]["success"] = True
     values = regex_matches_tolist(searc)
-    name = current_reg["name"]
+    name = current_reg["id"]
     for pi, prop in enumerate(current_reg["properties"]):
         value = ""
         loc = None

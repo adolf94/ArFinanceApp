@@ -52,7 +52,7 @@ def __init__(data):
         return output
 
     if  "Success" in reg and current_reg["Success"] == False: 
-        output["data"]["matchedConfig"] = current_reg["Name"]
+        output["data"]["matchedConfig"] = current_reg["id"]
         output["data"]["success"] = False
         return output
 
@@ -62,7 +62,7 @@ def __init__(data):
     values = regex_matches_tolist(searc)
 
     for pi, prop in enumerate(conf_to_use["Properties"]):
-        name = prop["Name"]
+        name = prop["id"]
         value = ""
         loc = None
         if prop["RegexIndex"] is not None:

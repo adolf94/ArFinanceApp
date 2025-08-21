@@ -7,6 +7,10 @@ from functools import reduce
 
 
 def up_migration(db):
+
+    for row in db["HookConfigs"]:
+        row["SubConfigs"] = []
+
     return db
     # return db
 
@@ -212,89 +216,110 @@ def table_metadata():
         {
             "Container": "Account",
             "PartitionKeyPath": "/PartitionKey",
+            "ResetOnMigration": False,
             "mapper": lambda e : ({**e})
         },
         {
             "Container": "AccountBalance",
+            "ResetOnMigration": False,
             "PartitionKeyPath": "/PartitionKey"
         },
         {
             "Container": "AccountGroup",
+            "ResetOnMigration": False,
             "PartitionKeyPath": "/PartitionKey",
             "mapper": lambda e : {**e }
         },
         {
             "Container": "AccountType",
+            "ResetOnMigration": False,
             "PartitionKeyPath": "/PartitionKey"
         },
         {
             "Container": "AuditLogs",
+            "ResetOnMigration": False,
             "PartitionKeyPath": "/Path",
         },
         {
             "Container": "Files",
+            "ResetOnMigration": False,
             "PartitionKeyPath": "/PartitionKey",
         },
         {
             "Container": "CoopOption",
+            "ResetOnMigration": False,
             "PartitionKeyPath":"/AppId",
         },
         {
             "Container":"ScheduledTransactions",
+            "ResetOnMigration": False,
             "PartitionKeyPath":"/PartitionKey"
         },
         {
             "Container": "LoanPayments",
+            "ResetOnMigration": False,
             "PartitionKeyPath": "/AppId",
         },
         {
             "Container": "HookMessages",
+            "ResetOnMigration": False,
             "PartitionKeyPath": "/MonthKey",
             "mapper": lambda e : { **e, "Status": "New", "MonthKey":parse(e["Date"]).strftime("%Y-%m-01")}
         },
         {
             "Container": "LedgerEntries",
+            "ResetOnMigration": False,
             "PartitionKeyPath": "/MonthGroup"
         },
         {
             "Container": "LedgerAccounts",
+            "ResetOnMigration": False,
             "PartitionKeyPath": "/PartitionKey"
         },
         {
             "Container": "LoanProfiles",
+            "ResetOnMigration": False,
             "PartitionKeyPath": "/AppId"
         },
         {
             "Container": "Loans",
+            "ResetOnMigration": False,
             "PartitionKeyPath":"/AppId",
         },
         {
             "Container": "MemberProfiles",
+            "ResetOnMigration": False,
             "PartitionKeyPath":"/AppId"
         },
         {
             "Container": "Payments",
+            "ResetOnMigration": False,
             "PartitionKeyPath":"/AppId"
         },
         {
             "Container":"Transaction",
+            "ResetOnMigration": False,
             "PartitionKeyPath":"/PartitionKey",
             "mapper": lambda e : { **e, "MonthKey": parse(e.Date).strftime("%Y-%m-01")}
         },
         {
             "Container":"User",
+            "ResetOnMigration": False,
             "PartitionKeyPath":"/PartitionKey"
         },
         {
             "Container":"Vendor",
+            "ResetOnMigration": False,
             "PartitionKeyPath":"/PartitionKey"
         },
         {
             "Container":"MonthTransactions",
+            "ResetOnMigration": False,
             "PartitionKeyPath":"/PartitionKey"
         },
         {
             "Container":"HookReferences",
+            "ResetOnMigration": False,
             "PartitionKeyPath":"/PartitionKey"
         },
         {

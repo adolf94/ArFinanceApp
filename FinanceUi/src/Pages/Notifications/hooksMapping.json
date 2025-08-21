@@ -112,7 +112,7 @@
     },
     {
         "config": "sms_unionbank_card_otp",
-        "subConfig": "smsUnionbankCardPaymentOtp",
+        "subConfig": "smsUnionbankCardPayment",
         "displayName": "UB Card transaction",
         "type": "expense",
         "vendor": "recipientName",

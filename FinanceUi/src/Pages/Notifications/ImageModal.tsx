@@ -31,7 +31,7 @@ const ImageModal = ({id} : {id:string})=>{
                             result(item)
                         };
                                         
-                        reader.readAsDataURL(resp.data);
+                        reader.readAsDataURL(new Blob([resp.data]));
                     })
                                 
             
@@ -55,6 +55,7 @@ const ImageModal = ({id} : {id:string})=>{
         <Dialog open={open} onClose={()=>setOpen(false)}>
             <DialogContent>
                 {!data ? <CircularProgress size="3rem"/> :
+                    //@ts-ignore
                     <Box component="img" sx={{maxHeight:"85vh"}} src={data}></Box>
                 } 
             </DialogContent>

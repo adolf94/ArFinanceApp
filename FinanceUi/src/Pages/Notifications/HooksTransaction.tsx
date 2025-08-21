@@ -10,12 +10,18 @@ import { queryClient } from '../../App';
 import db from '../../components/LocalDb';
 import { fetchTransactionById } from '../../repositories/transactions';
 import { useNavigate } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
+import { getConfigById, HOOK_CONFIG } from '../../repositories/hookConfig';
 
 
 const HooksTransaction = ({hook, shown}: {hook:HookMessage, shown:boolean})=>{
     const [selected, setSelected] = useState<any>(null)
-    const [confs, setConfs] = useState<any[]>([])
     const navigate = useNavigate()
+
+    const {data:confs, isLoading} = useQuery({
+        queryKey:[HOOK_CONFIG, {nameKey:hook.extractedData?.matchedConfig}],
+        queryFn:()=>getConfigById(hook.extractedData?.matchedConfig)
+    })
 
     const [reference, setReference] = useState({
         vendor:"",
@@ -32,14 +38,8 @@ const HooksTransaction = ({hook, shown}: {hook:HookMessage, shown:boolean})=>{
         type:""
     })
     const submitTransaction = useSubmitTransaction({transaction:formData, schedule:null, notification: hook, hookConfig: selected, onConfirm:()=>{
-
     }} )
 
-    useEffect(()=>{
-        setConfs(()=>{
-            return configs.filter(e=>e.config == hook.extractedData?.matchedConfig )
-        })
-    },[hook.extractedData?.matchedConfig])
 
 
     useEffect(()=>{
@@ -144,12 +144,12 @@ const HooksTransaction = ({hook, shown}: {hook:HookMessage, shown:boolean})=>{
 
 
     return <>
-    <Grid sm={12} sx={{textAlign:'center'}}>
-                            {confs.map(e=><Chip label={e.displayName} color="primary" clickable
+    <Grid size={12} sx={{textAlign:'center'}}>
+                            {(confs?.subConfigs||[]).map(e=><Chip label={e.displayName} color="primary" clickable
                             onClick={()=>updateSelected(e)}
                             variant={selected?.subConfig == e.subConfig ? "filled" : "outlined"}></Chip>)}
                         </Grid>
-                        <Grid sm={12}>
+                        <Grid size={12}>
                             <List>
                                 <ListItem>
                                     <ListItemText primary={
