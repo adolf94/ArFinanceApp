@@ -193,6 +193,7 @@ public class HookMessagesController
 				});
 
 				await _repo.DeleteHook(item);
+				await _db.SaveChangesAsync();
 				var newItem = await _repo.GetOneHook(Guid.Parse(body!.Id));
 				return new CreatedResult("api/hookmessages/" + body.Id!, newItem);
 

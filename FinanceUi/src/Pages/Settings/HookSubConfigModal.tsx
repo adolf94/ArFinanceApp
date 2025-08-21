@@ -31,6 +31,10 @@ const DropdownWithFixed = (props : TextFieldProps & {onChange:(val:string)=>void
         props.onChange(evt.target.value)
     }
 
+    useEffect(()=>{
+        setIsFixed(value.substring(0,6)=="fixed|")
+    },[value])
+
     return !isFixed ? <TextField   
         size="small"
         fullWidth 

@@ -75,6 +75,7 @@ public class HookMessagesRepo : IHookMessagesRepo
 		public async Task<bool> DeleteHook(HookMessage hook)
 		{
 				_context.Entry(hook).State = EntityState.Deleted;
+				
 				string constr = AesOperation.DecryptString(Environment.GetEnvironmentVariable("ENV_PASSKEY")!, 
 						_iconfig.GetConnectionString("CosmosDb")!);
 				CosmosClient client = new CosmosClient(constr);
