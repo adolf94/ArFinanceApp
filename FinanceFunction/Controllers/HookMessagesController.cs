@@ -105,14 +105,29 @@ public class HookMessagesController
 				if (!_user.IsAuthorized("finance_user")) return new ForbidResult();
 
 				var body = await req.ReadFromJsonAsync<IEnumerable<string>>();
+				HookMessage[] toDelete = Array.Empty<HookMessage>(); 
+				if(body.Count() > 5)
+				{
+						var items = await _repo.GetHookMessagesMonthAsync(month);
+						toDelete = items.Where(e => body!.Contains(e.Id.ToString()))
+								.ToArray();
+				}
+				else
+				{
+#pragma warning disable CS8619 // Nullability of reference types in value doesn't match target type.
+						toDelete = body!.Select(e =>
+						{
+								var key = month.ToString("yyyy-MM-01");
+								var item = _repo.GetOneHookWithMonth(Guid.Parse(e), key).GetAwaiter().GetResult();
+								return item;
+						}).Where(e => e != null).ToArray();
+#pragma warning restore CS8619 // Nullability of reference types in value doesn't match target type.
+
+				}
 
 
-				var items = await _repo.GetHookMessagesMonthAsync(month);
-				var toDelete = items.Where(e => body!.Contains(e.Id.ToString()))
-						.ToList();
 
-
-				BlobContainerClient? blobSvc = null;
+						BlobContainerClient? blobSvc = null;
 
 				for (var i = 0; i < toDelete.Count(); i++)
 				{
