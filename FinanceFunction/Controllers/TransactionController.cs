@@ -4,6 +4,7 @@ using FinanceFunction.Dtos;
 using FinanceFunction.Models;
 using FinanceFunction.Utilities;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
@@ -166,6 +167,21 @@ namespace FinanceFunction
 						Dictionary<string, AccountBalance> balances = new Dictionary<string, AccountBalance>();
 						Dictionary<string, MonthlyTransaction> monthly = new Dictionary<string, MonthlyTransaction>();
 
+						var creditAcctOfNew = _account.GetOne(dto.CreditId);
+						if (creditAcctOfNew == null)
+						{
+								_logger.LogError("dto.CreditId is not a valid AccountId");
+								return new BadRequestResult();
+						}
+						
+
+						var debitAcctOfNew = _account.GetOne(dto.DebitId);
+						if (debitAcctOfNew == null)
+						{
+								_logger.LogError("dto.DebitId is not a valid AccountId");
+								return new BadRequestResult();
+						}
+
 
 
 						accounts[transaction.CreditId] = _account.UpdateCreditAcct(transaction.CreditId, -transaction.Amount);
@@ -182,9 +198,9 @@ namespace FinanceFunction
 						monthly[bal.MonthKey] = bal;
 
 						_mapper.Map(dto, transaction);
-						var creditBal = await _bal.CreateBalances(accounts[dto.CreditId], dto.Date, false);
+						var creditBal = await _bal.CreateBalances(creditAcctOfNew, dto.Date, false);
 						accounts[dto.CreditId] = _account.UpdateCreditAcct(dto.CreditId, dto.Amount);
-
+						 
 						if (creditBal == null)
 						{
 								throw new Exception($"creditbal was null for some reason: creditId:{dto.CreditId}, date:{dto.Date.ToString("yyyy-MM")}, transactionId: {dto.Id}");
@@ -198,7 +214,7 @@ namespace FinanceFunction
 								IsDebit = false
 						});
 
-						var debitBal = await _bal.CreateBalances(accounts[dto.DebitId], dto.Date, false);  
+						var debitBal = await _bal.CreateBalances(debitAcctOfNew, dto.Date, false);  
 						accounts[dto.DebitId] = _account.UpdateDebitAcct(dto.DebitId, dto.Amount);
 
 						if (debitBal == null)
