@@ -176,6 +176,7 @@ public class HookMessagesController
 				var httpClient = new HttpClient();
 				httpClient.BaseAddress = new Uri(_config.FinanceHook.HookUrl);
 				httpClient.DefaultRequestHeaders.Add("x-api-key", _config.FinanceHook.Key);
+				httpClient.DefaultRequestHeaders.Add("x-allow-dup", true);
 
 
 				var jsonString = JsonSerializer.Serialize(item.JsonData);

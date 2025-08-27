@@ -53,7 +53,7 @@ def run_and_condition(condition, lines):
 
     allText = "\n".join(lines)
 
-    if condition["IncludeText"] is not None:
+    if  "IncludeText" in condition and condition["IncludeText"] is not None:
         match = re.search(condition["IncludeText"],allText)
         if match == None:
             return False

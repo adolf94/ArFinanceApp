@@ -96,7 +96,11 @@ def handle_upload(request : Request):
     blob_name = fileId + "." + fileType
     logging.info("start upload to azure ")
     upload_to_azure(local_file_path,blob_name)
+
+
+    #TODO: Create function to use existing file in Azure. instead of being reuploaded
     image_extract = extract_from_ia(local_file_path)
+
     app = read_from_filename(originalFileName)
     record = {
         "id":id,

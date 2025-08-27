@@ -5,8 +5,26 @@ import os
 from pathlib import Path
 import re
 
-from FlaskApp.cosmos_modules import get_all_records_by_partition
+from FlaskApp import tz, utcstr_to_datetime
+from FlaskApp.cosmos_modules import get_all_records_by_partition, open_db
 from FlaskApp.regex_utility import get_regex_match, regex_matches_tolist
+
+dbName = os.environ["COSMOS_DB"]
+
+def check_duplicate_notif(data):
+    db = open_db(dbName)
+    container = db.get_container_client("HookMessages")
+    partition = utcstr_to_datetime(data["timestamp"]).astimezone(tz()).strftime("%Y-%m-01")
+
+    items = container.query_items("SELECT * from c where c.JsonData.notif_id = @notifId", parameters=[
+            {"name": "@notifId","value": data["notif_id"]}
+    ] , partition_key=partition )
+
+    try:
+        item = next(items)
+        return item
+    except StopIteration:
+        return None
 
 
 def handle_notif(data):
@@ -28,7 +46,7 @@ def handle_notif(data):
     }
     
     conf_to_use = filter(lambda c: c["App"] == data["notif_pkg"], notif_config)
-
+    
     current_reg = None
     for reg in conf_to_use:
         searc = None
