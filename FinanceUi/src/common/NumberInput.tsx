@@ -35,17 +35,26 @@ const NumberInput = (props: any) => {
   return (
     <>
     <TextField
-      inputProps={{
-        min: 0,
-        style: { textAlign: "right" },
-        ...props.inputProps,
+      slotProps={{
+        input: {
+          min: 0,
+          sx:{ textAlign: "right" },
+          ...props.slotProps.input
+        },
+        ...(props.slotProps || {})
       }}
+      // inputProps={{
+      //   min: 0,
+      //   style: { textAlign: "right" },
+      //   ...props.inputProps,
+      // }}
       fullWidth
       variant="standard"
       //InputProps={{
       //   endAdornment: <IconButton onClick={() => setSelectProps(prev => ({ ...selectAccountProps, show: true, dest: "amount" }))} ><Calculate /></IconButton>
       //}}
       {...props}
+       
       onKeyPress={(event) => {
         if(props.onKeyPress && props.onKeyPress(event)) {
         }
@@ -66,11 +75,10 @@ const NumberInput = (props: any) => {
           }}
       value={value}
       onChange={onChange}
-      helperText={isFocused.toString()}
       //value={numeral(formData.amount).format("0,0.00")} onBlur={(e) => setFormData({ ...formData, amount: numeral(e.target.value).value() })}
       //onChange={(e) => setFormData({ ...formData, amount: numeral(e.target.value).value() })}
       //onClick={() => setSelectProps((prev) => ({ ...prev, dest: "amount" }))}
-    />{isFocused}</>
+    /></>
   );
 };
 

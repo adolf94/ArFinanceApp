@@ -1,4 +1,4 @@
-import { Box, Grid2 as Grid, Paper } from "@mui/material";
+import { Box, Grid2 as Grid, Paper, Typography } from "@mui/material";
 import { Transaction } from "FinanceApi";
 import moment from "moment";
 import React, { useContext, useState } from "react";
@@ -114,8 +114,7 @@ const Calendar = (props: CalendarProps) => {
           }}
         >
           <Grid
-            item
-            xs={1}
+            size={1}
             sx={{
               borderRight: 1,
               borderStyleRight: "solid",
@@ -123,11 +122,10 @@ const Calendar = (props: CalendarProps) => {
               py: 2,
             }}
           >
-            Sun
+            <Typography variant="body2">Sun</Typography>
           </Grid>
           <Grid
-            item
-            xs={1}
+            size={1}
             sx={{
               borderRight: 1,
               borderStyleRight: "solid",
@@ -135,11 +133,10 @@ const Calendar = (props: CalendarProps) => {
               py: 2,
             }}
           >
-            Mon
+            <Typography variant="body2">Mon</Typography>
           </Grid>
           <Grid
-            item
-            xs={1}
+            size={1}
             sx={{
               borderRight: 1,
               borderStyleRight: "solid",
@@ -147,11 +144,10 @@ const Calendar = (props: CalendarProps) => {
               py: 2,
             }}
           >
-            Tue
+            <Typography variant="body2">Tue</Typography>
           </Grid>
           <Grid
-            item
-            xs={1}
+            size={1}
             sx={{
               borderRight: 1,
               borderStyleRight: "solid",
@@ -159,11 +155,10 @@ const Calendar = (props: CalendarProps) => {
               py: 2,
             }}
           >
-            Wed
+            <Typography variant="body2">Wed</Typography>
           </Grid>
           <Grid
-            item
-            xs={1}
+            size={1}
             sx={{
               borderRight: 1,
               borderStyleRight: "solid",
@@ -171,11 +166,10 @@ const Calendar = (props: CalendarProps) => {
               py: 2,
             }}
           >
-            Thu
+            <Typography variant="body2">Thu</Typography>
           </Grid>
           <Grid
-            item
-            xs={1}
+            size={1}
             sx={{
               borderRight: 1,
               borderStyleRight: "solid",
@@ -183,11 +177,10 @@ const Calendar = (props: CalendarProps) => {
               py: 2,
             }}
           >
-            Fri
+            <Typography variant="body2">Fri</Typography>
           </Grid>
           <Grid
-            item
-            xs={1}
+            size={1}
             sx={{
               borderRight: 1,
               borderStyleRight: "solid",
@@ -195,7 +188,7 @@ const Calendar = (props: CalendarProps) => {
               py: 2,
             }}
           >
-            Sat
+            <Typography variant="body2">Sat</Typography>
           </Grid>
         </Grid>
         {view.map((week,index) => (
@@ -207,8 +200,7 @@ const Calendar = (props: CalendarProps) => {
           >
             {week.map((day) => (
               <Grid
-                item
-                    xs={1}
+                size={1}
                     key={day.dateISO }
                 sx={{
                   borderRight: 1,
@@ -219,7 +211,10 @@ const Calendar = (props: CalendarProps) => {
                   fontSize:'x-small'
                 }}
               >
-                <Box>{day.dayOfMonth}</Box>
+                <Box sx={{pl:'4px',pt:'2px'}}>
+                  
+                  <Typography variant="body1">{day.dayOfMonth}</Typography>
+                </Box>
                 {!day.isCurrentMonth ? (
                   <Box></Box>
                 ) : (

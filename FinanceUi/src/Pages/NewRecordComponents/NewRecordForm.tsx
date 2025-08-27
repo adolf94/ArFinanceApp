@@ -51,6 +51,7 @@ import useSubmitTransaction from "./useSubmitTransaction";
 import numeral, { Numeral } from "numeral";
 import PillPopover from "./PillPopover";
 import { getConfigById, HOOK_CONFIG } from "../../repositories/hookConfig";
+import AccountTextField from "./AccountTextField";
 
 const cronOptions = [
   { name: "Monthly", cron: "0 0 DD * *" },
@@ -99,7 +100,7 @@ const NewRecordForm = (props: NewRecordFormProps) => {
 
   
   const [formData, setFormData] = useState<
-      Partial<Transaction & ScheduledTransactions>
+      Partial<Transaction & ScheduledTransactions>  
         >({ ...defaultValue, id: v7() });
   const [hooks, setHooks] = useState(defaultHooksValue)
 
@@ -692,15 +693,11 @@ const NewRecordForm = (props: NewRecordFormProps) => {
               <FormLabel>{type == "transfer" ? "From:" : "Asset:"}</FormLabel>
             </Grid>
             <Grid size={8}>
-              <TextField
-                fullWidth
-                autoComplete="off"
-                variant="standard"
-                value={
-                  type === "income"
-                    ? formData.debit?.name || ""
-                    : formData.credit?.name || ""
-                }
+              <AccountTextField type={type} creditOn={["expense", "transfer"]} debitOn={["income"]}
+                showReference={!!hooks.selectedConfig} 
+                hookReference={hooks.references}
+                debit={formData.debit}
+                credit={formData.credit}
                 onFocus={(evt) =>{
                   evt.target.blur()
                   setSelectProps({
@@ -709,15 +706,7 @@ const NewRecordForm = (props: NewRecordFormProps) => {
                     dest: "source",
                   })
                 }}
-                helperText={!!hooks.selectedConfig?type === "income"
-                  ? hooks.references?.debit 
-                  : hooks.references?.credit : ""}
-                
-                // slotProps={{
-                //   input: {
-                //     startAdornment: <InputAdornment position="start">kg</InputAdornment>,
-                //   },
-                // }}
+
 
               />
             </Grid>
@@ -766,15 +755,11 @@ const NewRecordForm = (props: NewRecordFormProps) => {
               </FormLabel>
             </Grid>
             <Grid size={8}>
-              <TextField
-                autoComplete="off"
-                fullWidth
-                variant="standard"
-                value={
-                  type === "income"
-                    ? formData.credit?.name || ""
-                    : formData.debit?.name || ""
-                }
+              <AccountTextField type={type} creditOn={["income"]} debitOn={["expense", "transfer"]}
+                showReference={!!hooks.selectedConfig} 
+                hookReference={hooks.references}
+                debit={formData.debit}
+                credit={formData.credit}
                 onFocus={(evt) =>{
                   evt.target.blur()
                   setSelectProps({
@@ -783,10 +768,8 @@ const NewRecordForm = (props: NewRecordFormProps) => {
                     dest: "destination",
                   })
                 }}
-                
-                helperText={!!hooks.selectedConfig? type === "income"
-                  ? hooks.references?.credit 
-                  : hooks.references?.debit : ""} 
+
+
               />
             </Grid>
           </Grid>
@@ -841,21 +824,38 @@ const NewRecordForm = (props: NewRecordFormProps) => {
                 }}
                 
                 
-                InputProps={{
-                  endAdornment: (
-                    <IconButton
-                      onClick={() =>
-                        setSelectProps((prev) => ({
-                          ...selectAccountProps,
-                          show: true,
-                          dest: "amount",
-                          operation:""
-                        }))
-                      }
-                    >
-                      <Calculate />
-                    </IconButton>
-                  ),
+                // InputProps={{
+                //   endAdornment: (
+                //     <IconButton
+                //       onClick={() =>
+                //         setSelectProps((prev) => ({
+                //           ...selectAccountProps,
+                //           show: true,
+                //           dest: "amount",
+                //           operation:""
+                //         }))
+                //       }
+                //     >
+                //       <Calculate />
+                //     </IconButton>
+                //   ),
+                // }}
+                          
+                slotProps={{
+                  input:{
+                    endAdornment: <IconButton
+                    onClick={() =>
+                      setSelectProps((prev) => ({
+                        ...selectAccountProps,
+                        show: true,
+                        dest: "amount",
+                        operation:""
+                      }))
+                    }
+                  >
+                    <Calculate />
+                  </IconButton>
+                  }
                 }}
               />
             </Grid>
