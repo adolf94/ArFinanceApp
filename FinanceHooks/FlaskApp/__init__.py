@@ -10,6 +10,7 @@ from FlaskApp.cosmos_modules import add_to_app, add_to_persist, get_record
 from FlaskApp.notif_modules.handler import check_duplicate_notif, handle_notif
 from FlaskApp.sms_handler2.handler import handle_sms
 from FlaskApp.upload_handler import handle_upload
+from FlaskApp.utils import utcstr_to_datetime
 
 
 
@@ -19,7 +20,7 @@ endpoint = os.environ["COSMOS_ENDPOINT"]
 key = os.environ["COSMOS_KEY"]
 dbName = os.environ["COSMOS_DB"]
 apiKey = os.environ["API_KEY"]
-tz_default = "Asia/Manila"
+tz_default = pytz.timezone(os.environ["TIMEZONE"])
 
 
 @app.route("/")
@@ -48,7 +49,7 @@ def phone_hook():
     if data["action"] == "notif_post":
         if(data["notif_msg"] == None):
             data["error"] = "No notif content"
-            logging.info(logging.INFO, json.dumps(data))
+            logging.info(json.dumps(data))
             return Response( {"message" : "No notif content" }, 400, content_type="application/json" )
         
         allow_duplicate = request.headers.get("x-allow-dup", type=str)
@@ -130,6 +131,9 @@ def file_hook_handler():
                                      "imageId" : upload_result["record"]["id"] }), 400, content_type="application/json")
         
     
+    utc_aware_dt = datetime.datetime.now(datetime.UTC)
+
+
 
     id=uuid7( as_type='str')
     newItem = { 
@@ -147,7 +151,7 @@ def file_hook_handler():
         "Location": upload_result["image_extract"]["data"],
         "RawMsg":upload_result["original_file_name"] + " image upload",
         "Type":"notif",
-        "MonthKey": datetime.datetime.now(tz()).strftime("%Y-%m-01"),
+        "MonthKey": utc_aware_dt.astimezone(tz_default).strftime("%Y-%m-01"),
         "PartitionKey":"default",
         "$type": "HookMessage",
         "_ttl": 60*24*60*60,
@@ -160,25 +164,6 @@ def file_hook_handler():
     return Response( json.dumps(newItem) , 201, content_type="application/json")
  
 
-
-def tz():
-    return tz_default
-
-def utcstr_to_datetime(str):
-    if not str.endswith('Z'):
-        str = str + "Z"
-
-
-    try:
-            # It's a UTC timestamp
-            naive_dt = datetime.datetime.strptime(str, "%Y-%m-%dT%H:%M:%SZ")
-            utc_aware_dt = pytz.utc.localize(naive_dt)
-            return utc_aware_dt
-            # It's a non-UTC timestamp
-    except ValueError:
-        # Catch any malformed strings that don't match either format
-        
-        return pytz.utc.localize(datetime.datetime(datetime.UTC))
 
 
 if __name__ == "__main__":

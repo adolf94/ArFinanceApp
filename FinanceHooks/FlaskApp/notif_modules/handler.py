@@ -5,16 +5,20 @@ import os
 from pathlib import Path
 import re
 
-from FlaskApp import tz, utcstr_to_datetime
+import pytz
+
 from FlaskApp.cosmos_modules import get_all_records_by_partition, open_db
 from FlaskApp.regex_utility import get_regex_match, regex_matches_tolist
+from FlaskApp.utils import utcstr_to_datetime
 
 dbName = os.environ["COSMOS_DB"]
+
+tz_default = pytz.timezone(os.environ["TIMEZONE"])
 
 def check_duplicate_notif(data):
     db = open_db(dbName)
     container = db.get_container_client("HookMessages")
-    partition = utcstr_to_datetime(data["timestamp"]).astimezone(tz()).strftime("%Y-%m-01")
+    partition = utcstr_to_datetime(data["timestamp"]).astimezone(tz_default).strftime("%Y-%m-01")
 
     items = container.query_items("SELECT * from c where c.JsonData.notif_id = @notifId", parameters=[
             {"name": "@notifId","value": data["notif_id"]}
@@ -28,11 +32,6 @@ def check_duplicate_notif(data):
 
 
 def handle_notif(data):
-    current_directory = Path(os.path.dirname(os.path.abspath(__file__)))
-    config_path = os.path.join(current_directory.parent, 'config.json')
-    # Path to the JSON file in the same directory
-    configFile = open(config_path, 'r')
-
 
     notif_config = get_all_records_by_partition("HookConfigs", "notif_")
 

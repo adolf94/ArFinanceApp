@@ -61,7 +61,7 @@ const AccountsPage = (props) => {
       <Grid container width="100%" sx={{justifyContent:'center'}}>
         <Grid
           container
-          size={8}
+          size={{xs:12,md:8}}
           sx={{ pt: 3 }}
           direction="row-reverse"
           justifyContent="flex-start"
@@ -73,7 +73,7 @@ const AccountsPage = (props) => {
                       <AddCircleRounded /> Account
             </Button>
         </Grid>
-        <Grid container size={8}>
+        <Grid container size={{xs:12,md:8}}>
           <Accounts></Accounts>
         </Grid>
 

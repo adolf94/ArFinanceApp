@@ -9,9 +9,8 @@ import { useQuery } from "@tanstack/react-query";
 import { Account, AccountBalance } from "FinanceApi";
 import { ACCOUNT_BALANCE, getBalancesByDate } from "../../repositories/accountBalance";
 import moment from "moment";
-import { AccountBalance } from "@mui/icons-material";
 import numeral from "numeral";
-import { Grid2 as Grid, LinearProgress, Skeleton, Typography } from "@mui/material";
+import { Grid2 as Grid, LinearProgress, Skeleton, Tooltip, Typography } from "@mui/material";
 
 interface CreditStatementBalanceProps {
   account: Account;
@@ -44,7 +43,9 @@ const CreditStatementBalance = (props: CreditStatementBalanceProps) => {
             sx={{ alignContent: "center", textAlign: "end" }}
         >
             <Typography variant="body1">
-              {isLoading ? <Skeleton variant="text" /> : numeral(acctBalance.balance + payments).format("0,0.00")  }
+              {isLoading ? <Skeleton variant="text" /> : <Tooltip title={numeral(acctBalance.balance).format("0,0.00")}> 
+                          <Typography>{payments > acctBalance.balance? "0.00" : numeral(acctBalance.balance + payments).format("0,0.00")}</Typography> 
+                        </Tooltip>  }
             </Typography>
         </Grid>
         <Grid

@@ -37,7 +37,7 @@ const db = new Dexie('FinanceApp') as Dexie & {
     transactions: '&id, monthKey',
     monthTransactions: '&monthKey',
       accountBalances: '&id,accountId',
-    accounts: '&id, type',
+    accounts: '&id, type, accountGroupId',
     hookMessages: '&id,monthKey,transactionId',
     images:"&id"
   });

@@ -29,6 +29,8 @@ import {
   VENDOR,
 } from "../../repositories/vendors";
 import Calculator from "../../components/Calculator";
+import { useLiveQuery } from "dexie-react-hooks";
+import db from "../../components/LocalDb";
 
 interface SelectAccountProps<T> {
   value: T;
@@ -85,11 +87,13 @@ function SelectAccount(props: SelectAccountProps<any>) {
       placeholderData:[],
       queryFn: fetchGroups,
   });
-  const { data: stgAccounts, isLoading: acctLoading } = useQuery({
-      queryKey: [ACCOUNT], 
-      placeholderData:[], 
-      queryFn: fetchAccounts,
-  });
+  // const { data: stgAccounts, isLoading: acctLoading } = useQuery({
+  //     queryKey: [ACCOUNT], 
+  //     placeholderData:[], 
+  //     queryFn: fetchAccounts,
+  // });
+  const [acctGroup, setAcctGroup] = useState<(AccountGroup | Vendor) & { hotkey : string }>();
+  const stgAccounts = useLiveQuery(()=>db.accounts.where("accountGroupId").equals(acctGroup?.id || "").toArray(), [acctGroup?.id])
   const { data: vendors, isLoading: vendorLoading } = useQuery<Vendor[]>({
     queryKey: [VENDOR],
       placeholderData:[],
@@ -98,7 +102,6 @@ function SelectAccount(props: SelectAccountProps<any>) {
   const [searchQuery, setSearchQuery] = useState("");
   const mutateVendor = useMutateVendor();
 
-  const [acctGroup, setAcctGroup] = useState<(AccountGroup | Vendor) & { hotkey : string }>();
   const [acct, setAcct] = useState<Account>();
     const [hotkey,setHotkey] = useState<string>("")
     const [type,setType] = useState<string>("")
@@ -147,7 +150,6 @@ function SelectAccount(props: SelectAccountProps<any>) {
 
             },[])
 
-        console.log("grpcommon", commonStart)
         // stgAcctGroups
         //     .filter((e) => e.accountTypeId === props.typeId)
         //     .map((v,i,s)=>{
@@ -231,7 +233,9 @@ function SelectAccount(props: SelectAccountProps<any>) {
                 }
                 console.log(hotkeyItem)
                 return returnItem
-        })
+            })
+            .toSorted((a,b)=>a.name == b.name?0:
+                             a.name > b.name ? 1 : -1)
     },[stgAcctGroups, props.typeId])
     
     
@@ -240,7 +244,7 @@ function SelectAccount(props: SelectAccountProps<any>) {
 
 
         let commonStart = stgAccounts
-            .filter((e) => e.accountGroupId === acctGroup.id)
+            // .filter((e) => e.accountGroupId === acctGroup.id)
             .reduce((prev,cur,ci,s)=>{
                 //will check if string has match
                 // s.forEach((sv,si,ss)=>{
@@ -348,7 +352,8 @@ function SelectAccount(props: SelectAccountProps<any>) {
                 console.log(hotkeyItem)
                 return returnItem
             })
-        
+            .toSorted((a,b)=>a.name == b.name?0:
+                             a.name > b.name ? 1 : -1)
         
         //
         // return stgAccounts

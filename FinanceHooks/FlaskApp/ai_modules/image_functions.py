@@ -84,13 +84,6 @@ def get_from_test_files(image_path):
 
 
 def read_screenshot(app, lines):
-    current_directory = Path(os.path.dirname(os.path.abspath(__file__)))
-    config_path = os.path.join(current_directory.parent, 'config.json')
-    # Path to the JSON file in the same directory
-    configFile = open(config_path, 'r')
-
-    config = json.load(configFile)
-
     imageConfigs = get_all_records_by_partition("HookConfigs", "img_")
 
 
@@ -126,7 +119,7 @@ def read_screenshot(app, lines):
         value = lines[indexToGet].strip()
 
 
-        if prop["ExtractRegex"] is not None:
+        if prop["ExtractRegex"] is not None or prop["ExtractRegex"] != "":
             if prop["GetMatch"] is not None:
                 match = re.search(prop["ExtractRegex"], value)
                 value = match.group(int(prop["GetMatch"]))

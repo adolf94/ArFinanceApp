@@ -9,13 +9,11 @@ from FlaskApp.cosmos_modules import get_all_records_by_partition
 from FlaskApp.regex_utility import get_regex_match, regex_matches_tolist
 
 
-def handle_sms(data):
-    current_directory = Path(os.path.dirname(os.path.abspath(__file__)))
-    config_path = os.path.join(current_directory.parent, 'config.json')
-    # Path to the JSON file in the same directory
-    configFile = open(config_path, 'r')
+ 
 
-    config = json.load(configFile)
+
+def handle_sms(data):
+    # Path to the JSON file in the same directory
 
     notif_config = get_all_records_by_partition("HookConfigs", "sms_")
 
