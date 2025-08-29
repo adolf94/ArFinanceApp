@@ -101,7 +101,7 @@ const Calendar = (props: CalendarProps) => {
   }, [records]);
 
   return (
-    <Box>
+    <Box sx={{ my: 1, maxHeight: "80vh", overflow: "overlay" }}>
       <Paper sx={{ p: 1, my: 1 }}>
         <Grid
           container

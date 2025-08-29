@@ -106,36 +106,7 @@ def read_screenshot(app, lines):
 
     name = conf_to_use['id']
     for pi, prop in enumerate(conf_to_use["Properties"]):
-
-        indexForLook = -1
-        if prop["LookFor"] is not None:
-            indexForLook = next((i for i, line in enumerate(lines) if line.strip() == prop["LookFor"]), -1)
-
-
-        if prop["LookForRegex"] is not None:
-            indexForLook = next((i for i, line in enumerate(lines) if re.search(prop["LookForRegex"], line.strip()) != None and i > indexForLook), -1)
-
-        indexToGet = indexForLook if prop["GetValueAfter"] is None else indexForLook + int(prop["GetValueAfter"])
-        value = lines[indexToGet].strip()
-
-
-        if prop["ExtractRegex"] is not None or prop["ExtractRegex"] != "":
-            if prop["GetMatch"] is not None:
-                match = re.search(prop["ExtractRegex"], value)
-                value = match.group(int(prop["GetMatch"]))
-            else:
-                property = prop['Property']
-                print(f"getMatch is required when using extractRegex. conf:{name}, prop:{property} ")
-                
-        
-        if prop["RemoveRegex"] is not None:
-            for string in list(prop["RemoveRegex"]):
-                value = value.replace(string,"")
-
-                
-        if prop["ReplaceRegex"] is not None:
-            for r in list(prop["ReplaceRegex"]):
-                value = value.replace(r["F"],r["T"])
+        value = extract_property(prop, lines, name)
 
         extracted_data[prop["Property"]] = value
 
@@ -143,3 +114,37 @@ def read_screenshot(app, lines):
     extracted_data["success"] = True
 
     return extracted_data
+
+
+def extract_property(prop, lines, name):
+
+    indexForLook = -1
+    if prop["LookFor"] is not None:
+        indexForLook = next((i for i, line in enumerate(lines) if line.strip() == prop["LookFor"]), -1)
+
+
+    if prop["LookForRegex"] is not None and prop["LookForRegex"] != "":
+        indexForLook = next((i for i, line in enumerate(lines) if re.search(prop["LookForRegex"], line.strip()) != None and i > indexForLook), -1)
+
+    indexToGet = indexForLook if prop["GetValueAfter"] is None else indexForLook + int(prop["GetValueAfter"])
+    value = lines[indexToGet].strip()
+
+
+    if prop["ExtractRegex"] is not None or prop["ExtractRegex"] != "":
+        if prop["GetMatch"] is not None:
+            match = re.search(prop["ExtractRegex"], value)
+            value = match.group(int(prop["GetMatch"]))
+        else:
+            property = prop['Property']
+            print(f"getMatch is required when using extractRegex. conf:{name}, prop:{property} ")
+            
+    
+    if prop["RemoveRegex"] is not None:
+        for string in list(prop["RemoveRegex"]):
+            value = value.replace(string,"")
+
+    if prop["ReplaceRegex"] is not None:
+        for r in list(prop["ReplaceRegex"]):
+            value = value.replace(r["F"],r["T"])
+
+    return value

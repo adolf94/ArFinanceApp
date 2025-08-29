@@ -75,7 +75,7 @@ def phone_hook():
             data["app"] = item["App"]
  
 
-        timestamp = utcstr_to_datetime(data["DateCreated"])
+        timestamp = utcstr_to_datetime(data["timestamp"])
         lines = []
         for line in item["Lines"]:
             lines.append(line["text"]) 
@@ -131,6 +131,13 @@ def file_hook_handler():
                                      "imageId" : upload_result["record"]["id"] }), 400, content_type="application/json")
         
     
+
+    if(data["success"] == False): 
+        return Response( json.dumps({"message": "No matching config.", 
+                                     "imageId" : upload_result["record"]["id"] }), 400, content_type="application/json")
+
+
+
     utc_aware_dt = datetime.datetime.now(datetime.UTC)
 
 
@@ -143,7 +150,7 @@ def file_hook_handler():
         "JsonData": {
             "lines":upload_result["image_extract"]["lines"],
             "action":"image_upload",
-            "imageId": id,
+            "imageId": upload_result["record"]["id"],
             "fileName":upload_result["original_file_name"],
             "timestamp": datetime.datetime.now(datetime.UTC).strftime("%Y-%m-%dT%H:%M:%SZ") 
         },
