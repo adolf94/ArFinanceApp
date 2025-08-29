@@ -9,6 +9,7 @@ import NewAccountGroup from "./Accounts/SettingAccountGroup";
 import NewAccount from "./Accounts/SettingsNewAccount";
 import UserPanel from "../components/UserPanel.js";
 import { useSearchParams } from "react-router-dom";
+import AccountChart from "./Accounts/AccountsChart";
 
 const AccountsPage = (props) => {
   const [showType, setShowType] = useState(false);
@@ -58,25 +59,30 @@ const AccountsPage = (props) => {
         </Toolbar>
       </AppBar>
       
-      <Grid container width="100%" sx={{justifyContent:'center'}}>
-        <Grid
-          container
-          size={{xs:12,md:8}}
-          sx={{ pt: 3 }}
-          direction="row-reverse"
-          justifyContent="flex-start"
-              >
-            <Button variant="outlined" onClick={() => setShowGroup(true)}>
-                      <AddCircleRounded /> Group
-            </Button>
-                  <Button variant="outlined" onClick={() => setShowAccount(true)}>
-                      <AddCircleRounded /> Account
-            </Button>
-        </Grid>
+      <Grid container width="100%" direction="row-reverse">
+          <Grid
+            container
+            size={{xs:12}}
+            sx={{ pt: 3 }}
+            direction="row-reverse"
+            justifyContent="flex-start"
+                >
+              <Button variant="outlined" onClick={() => setShowGroup(true)}>
+                        <AddCircleRounded /> Group
+              </Button>
+                    <Button variant="outlined" onClick={() => setShowAccount(true)}>
+                        <AddCircleRounded /> Account
+              </Button>
+          </Grid>
         <Grid container size={{xs:12,md:8}}>
-          <Accounts></Accounts>
-        </Grid>
 
+          <Grid container size={{xs:12}}>
+            <Accounts></Accounts>
+          </Grid>
+        </Grid>
+        <Grid container size={{xs:12,md:4}} sx={{justifyContent:"center"}}>
+            <AccountChart />
+        </Grid>
         <SettingsAccountType
           show={showType}
           handleClose={() => setShowType(false)}
