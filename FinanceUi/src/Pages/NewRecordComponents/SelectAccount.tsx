@@ -240,7 +240,7 @@ function SelectAccount(props: SelectAccountProps<any>) {
     
     
     const accounts = useMemo(()=>{
-        if(!acctGroup) return []
+        if(!acctGroup || !stgAccounts) return []
 
 
         let commonStart = stgAccounts

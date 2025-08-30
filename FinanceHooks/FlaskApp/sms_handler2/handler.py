@@ -26,7 +26,7 @@ def handle_sms(data):
         "location":{}
     }
     
-    conf_to_use = filter(lambda c: c["App"] == data["sms_rcv_sender"], notif_config)
+    conf_to_use = filter(lambda c: c["App"].lower() == data["sms_rcv_sender"].lower(), notif_config)
 
     current_reg = None
     for reg in conf_to_use:

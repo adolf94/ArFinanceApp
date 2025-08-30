@@ -88,6 +88,7 @@ export const useMutateAccount = () => {
         .then((e) => e.data);
     },
     onSuccess: (data: Account) => {
+      db.accounts.put({...data, dateUpdated: moment().toDate()})
       queryClient.setQueryData([ACCOUNT, { id: data.id }], data);
       queryClient.setQueryData([ACCOUNT], (prev: Account[]) => [
         ...(prev || []),
