@@ -3,16 +3,17 @@ import {
   LayoutRouteProps,
   PathRouteProps,
 } from "react-router";
-import { Home } from "./components/Home";
-import React from "react";
-import AccountsPage from "./Pages/AccountsPage";
-import NewRecordPage from "./Pages/NewRecord";
-import Records from "./Pages/Records";
-import ViewAccount from "./Pages/Accounts/ViewAccount";
-import Settings from "./Pages/Settings";
+import React, { lazy, Suspense } from "react";
 import { Navigate } from "react-router-dom";
-import Notifications from "./Pages/Notifications.js";
-import HooksSettings from "./Pages/Settings/Hooks";
+import Loader from "./components/Loader";
+
+const AccountsPage = lazy(() => import("./Pages/AccountsPage.tsx"));
+const HooksSettings = lazy(() => import("./Pages/Settings/Hooks.tsx"));
+const NewRecordPage = lazy(() => import("./Pages/NewRecord.tsx"));
+const Notifications = lazy(() => import("./Pages/Notifications.js"));
+const Records = lazy(() => import("./Pages/Records.tsx"));
+const Settings = lazy(() => import("./Pages/Settings.tsx"));
+const ViewAccount = lazy(() => import("./Pages/Accounts/ViewAccount.tsx"));
 
 const AppRoutes: (PathRouteProps | IndexRouteProps | LayoutRouteProps)[] = [
   {
@@ -21,37 +22,69 @@ const AppRoutes: (PathRouteProps | IndexRouteProps | LayoutRouteProps)[] = [
   },
   {
     path: "/records/:monthStr/:view",
-    element: <Records />,
+    element: (
+      <Suspense fallback={<Loader />}>
+        <Records />
+      </Suspense>
+    ),
   },
   {
     path: "/records",
-    element: <Records />,
+    element: (
+      <Suspense fallback={<Loader />}>
+        <Records />
+      </Suspense>
+    ),
   },
   {
     path: "/transactions/:transId",
-    
-    element: <NewRecordPage />,
+
+    element: (
+      <Suspense fallback={<Loader />}>
+        <NewRecordPage />
+      </Suspense>
+    ),
   },
   {
     path: "/accounts/:acctId",
-    element: <ViewAccount />,
+    element: (
+      <Suspense fallback={<Loader />}>
+        <ViewAccount />
+      </Suspense>
+    ),
   },
   {
     path: "/accounts",
-    element: <AccountsPage />,
+    element: (
+      <Suspense fallback={<Loader />}>
+        <AccountsPage />
+      </Suspense>
+    ),
   },
   {
     path: "/settings",
-      element: <Settings />,
-    },
-    {
-      path: "/settings/hooks",
-        element: <HooksSettings />,
-      },
-    {
-        path: "/notifications",
-        element: <Notifications />,
-    },
+    element: (
+      <Suspense fallback={<Loader />}>
+        <Settings />
+      </Suspense>
+    ),
+  },
+  {
+    path: "/settings/hooks",
+    element: (
+      <Suspense fallback={<Loader />}>
+        <HooksSettings />
+      </Suspense>
+    ),
+  },
+  {
+    path: "/notifications",
+    element: (
+      <Suspense fallback={<Loader />}>
+        <Notifications />
+      </Suspense>
+    ),
+  },
 ];
 
 export default AppRoutes;

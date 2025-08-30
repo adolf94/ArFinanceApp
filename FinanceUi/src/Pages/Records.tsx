@@ -247,7 +247,7 @@ const Records = () => {
         <Grid size={{xs:12,sm:8}}>
           <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
             <Tabs
-              value={view}
+              value={view || "daily"}
               onChange={handleChange}
               aria-label="basic tabs example"
             >

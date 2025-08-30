@@ -23,6 +23,7 @@ import { oauthSignIn } from "./common/GoogleLogin";
 import { CircularProgress, Grid2 as Grid } from '@mui/material'
 import { lightGreen, purple, indigo} from '@mui/material/colors';
 import fnApi from "./components/fnApi";
+import Loader from "./components/Loader";
 
 export const queryClient = new QueryClient({
   defaultOptions: {
@@ -157,11 +158,7 @@ const TheApp = (props) => {
     <DropdownContext.Provider value={{ ...dropdown, set: setDropdownValue }}>
           <SnackbarProvider autoHideDuration={1000} >
               {msalInitialized ? <Routes>{RouteMapper(AppRoutes)}</Routes>
-                  : <Grid container sx={{ justifyContent: 'center' } }>
-                      <Grid>
-                        <CircularProgress />
-                      </Grid>
-                  </Grid>
+                  : <Loader />
                 }
           </SnackbarProvider>
           <NavigateSetter />
