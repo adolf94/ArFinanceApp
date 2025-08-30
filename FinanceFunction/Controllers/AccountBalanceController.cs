@@ -4,7 +4,9 @@ using FinanceFunction.Utilities;
 using Google.Protobuf.WellKnownTypes;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Azure.Cosmos.Serialization.HybridRow;
 using Microsoft.Azure.Functions.Worker;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using System;
 using System.Collections.Generic;
@@ -63,6 +65,38 @@ namespace FinanceFunction.Controllers
 						if (result == null) return new NotFoundResult();
 
 						return await Task.FromResult(new OkObjectResult(result));
+				}
+
+				[Function("GetAcctByFilter")]
+				public async Task<IActionResult> GetAcctByFilter([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "accountbalance")]
+						HttpRequest req)
+				{
+						if (!_user.IsAuthenticated) return new UnauthorizedResult();
+						if (!_user.IsAuthorized("finance_user")) return new ForbidResult();
+
+
+						var query = await _repo.GetAll();
+
+						if (req.Query.ContainsKey("accountId")) query = query.Where(e => e.AccountId == Guid.Parse(req.Query["accountId"].First()!));
+						if (req.Query.ContainsKey("from"))
+						{
+								DateTime from;
+								DateTime.TryParse(req.Query["from"].First(), out from);
+								if (from == DateTime.MinValue)  return new BadRequestResult();
+								query = query.Where(e => e.DateStart >= from);
+						}
+						if (req.Query.ContainsKey("to"))
+						{
+								DateTime to;
+								DateTime.TryParse(req.Query["to"].First(), out to);
+								if (to == DateTime.MinValue) return new BadRequestResult();
+								query = query.Where(e => e.DateStart <= to);
+						}
+						var result = await query.ToArrayAsync();
+
+
+						return await Task.FromResult(new OkObjectResult(result));
+
 				}
 		}
 }

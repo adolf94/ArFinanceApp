@@ -36,7 +36,7 @@ const db = new Dexie('FinanceApp') as Dexie & {
   db.version(1).stores({
     transactions: '&id, monthKey',
     monthTransactions: '&monthKey',
-      accountBalances: '&id,accountId',
+      accountBalances: '&id,accountId, dateStart',
     accounts: '&id, type, accountGroupId',
     hookMessages: '&id,monthKey,transactionId',
     images:"&id"

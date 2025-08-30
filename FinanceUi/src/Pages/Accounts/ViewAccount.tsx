@@ -40,6 +40,7 @@ import {
 import numeral from "numeral";
 import TransactionListItem from "../RecordsComponents/TransactionListItem.js";
 import { useOfflineData } from "../../components/LocalDb/useOfflineData";
+import AccountHistoryBarChart from "./AccountHistoryBarChart";
 
 
 const fabGreenStyle = {
@@ -197,7 +198,7 @@ const ViewAccount = () => {
       </AppBar>
       <Grid container spacing={1} sx={{ width:"100%" , mt: 2 }}>
         <Grid size={{md:5}} sx={{ display: { xs: "none", md: "block" } }}>
-          Charts Here
+          <AccountHistoryBarChart acctId={acctId} date={month.format("yyyy-MM-01")} />
         </Grid>
         <Grid size={{md:7,xs:12}}>
           <Paper sx={{ my: 1, p: 2 }}>

@@ -12,6 +12,7 @@ namespace FinanceFunction.Data
 
 				public Task<AccountBalance?> GetOne(Account acct, DateTime date);
 
+				public Task<IQueryable<AccountBalance>> GetAll();
 				
 
 				public IQueryable<AccountBalance> GetByDate(DateTime date);

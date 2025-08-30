@@ -18,7 +18,7 @@ const AccountChart = ()=>{
 	})
   const data = useLiveQuery(()=>db.accounts.toArray(),[])
 
-	const computed = useMemo<>(()=>{
+	const computed = useMemo(()=>{
 		if(!groups || !data) return[
 			{
 				id: "assets",

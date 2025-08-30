@@ -220,5 +220,10 @@ namespace FinanceFunction.Data.CosmosRepo
         { 
             throw new NotImplementedException();
         }
-    }
+
+				public async Task<IQueryable<AccountBalance>> GetAll()
+				{
+            return await Task.FromResult(_context.AccountBalances!);
+				}
+		}
 }
