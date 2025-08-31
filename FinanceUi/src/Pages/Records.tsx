@@ -35,6 +35,7 @@ import { useOfflineData } from "../components/LocalDb/useOfflineData";
 import React from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import db from "../components/LocalDb";
+import TotalTab from "./RecordsComponents/Total";
 
 interface RecordViewTransaction {
   dateGroup: string;
@@ -264,6 +265,9 @@ const Records = () => {
             </div>
             <div role="tabpanel" hidden={view !== "calendar"}>
               <Calendar records={records || []} />
+            </div>
+            <div role="tabpanel" hidden={view !== "total"}>
+              <TotalTab records={records} date={month.format("YYYY-MM-01")}/>
             </div>
             <div role="tabpanel" hidden={view !== ""}>
               3

@@ -13,6 +13,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace FinanceFunction.Controllers
 {
@@ -39,16 +40,19 @@ namespace FinanceFunction.Controllers
 						var creditParam = req.Query.Where(e=>e.Key=="credit").FirstOrDefault();
 						var credit = creditParam.Value == true;
 
-						IEnumerable<AccountBalance> result;
+						IQueryable<AccountBalance> result;
 						if (credit == true)
 						{
 								result = _repo.GetByDateCredit(date);
 						}
 						else
 						{
-								result = _repo.GetByDate(date);
+								result =  await _repo.GetAll();
+								result = result.Where(e => e.DateStart == date);
 						}
-						return await Task.FromResult(new OkObjectResult(result));
+
+						var output = await result.ToArrayAsync();
+						return await Task.FromResult(new OkObjectResult(output));
 				}
 
 				[Function("GetAcctByBalanceId")]

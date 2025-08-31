@@ -3,13 +3,13 @@ import {
     Account, 
     CreateTransactionDto,
     NewTransactionResponseDto,
-    Transaction,
     Vendor,
 } from "FinanceApi";
+import { Transaction } from "../components/LocalDb/AppDb";
 import { queryClient } from "../App";
 import moment from "moment";
 import { VENDOR, fetchVendorById } from "./vendors";
-import { ACCOUNT, fetchAccounts, fetchByAccountId } from "./accounts";
+import { ACCOUNT, fetchAccounts, fetchByAccountId, localPutAccount } from "./accounts";
 import { AxiosResponse } from "axios";
 import replaceById from "../common/replaceById";
 import {closeSnackbar, enqueueSnackbar } from "notistack";
@@ -461,8 +461,7 @@ export const useMutateTransaction = () => {
 
                 let accounts = e.data.accounts;
                 accounts.forEach(a => {
-                    queryClient.setQueryData([ACCOUNT, { id: a.id }], a);
-                    db.accounts.put(a)
+                    localPutAccount(a)
                 })
 
 

@@ -1,5 +1,6 @@
+import { MakeOptional } from '@mui/x-date-pickers/internals';
 import Dexie, {  EntityTable } from 'dexie';
-import { Account, AccountBalance as AccountBalanceApi, HookMessage, MonthlyTransaction as MTransactionFromApi, Transaction } from 'FinanceApi';
+import { Account as ApiAccount, AccountBalance as AccountBalanceApi, HookMessage, MonthlyTransaction as MTransactionFromApi,  Transaction as ApiTransaction} from 'FinanceApi';
 
 
 
@@ -21,6 +22,22 @@ export interface Image {
   id:string,
   data: string
 }
+
+export interface Account extends MakeOptional<ApiAccount & {
+  type : string
+}, 'type'> {
+
+}
+
+
+export interface Transaction extends MakeOptional<ApiTransaction & {
+  dateUpdated : Date,
+  debit: Account,
+  credit: Account
+}, 'dateUpdated'> {
+
+}
+
 
 
 const db = new Dexie('FinanceApp') as Dexie & {

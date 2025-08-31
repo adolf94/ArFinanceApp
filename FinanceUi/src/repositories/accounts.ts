@@ -10,6 +10,7 @@ import db from "../components/LocalDb";
 import moment from "moment";
 import fnApi from "../components/fnApi";
 import { ACCOUNT_GROUP, fetchGroups } from "./accountgroups";
+import { e } from "mathjs";
 
 export const ACCOUNT = "account";
 
@@ -18,24 +19,10 @@ export const fetchAccounts = () => {
 
 
   return fnApi.get("accounts").then(async (res) => {
-
-    var groups = await queryClient.ensureQueryData<AccountGroup[]>({
-        queryKey: [ACCOUNT_GROUP], queryFn: fetchGroups
-    })
-
-
-
-    res.data.forEach((acct) => {
-      var group = groups.find(e=>e.id == acct.accountGroupId)
-
-      acct.type = group.accountTypeId
-
-      queryClient.setQueryData([ACCOUNT, { id: acct.id }], acct);
-      db.accounts.put({...acct, type: group.accountTypeId, dateUpdated: moment().toDate()})
-    });
+      let newData = localPutAccount(res.data)
       let last = localStorage.getItem("last_transaction");
       if(!last) localStorage.setItem("last_transaction", res.headers["x-last-trans"])
-    return res.data;
+    return newData;
   });
 };
 
@@ -99,3 +86,26 @@ export const useMutateAccount = () => {
 
     return { createAsync: create.mutateAsync, createExt:create };
 };
+
+
+export const localPutAccount = async (account: Account | Account[]) => {
+  var groups = await queryClient.ensureQueryData<AccountGroup[]>({
+    queryKey: [ACCOUNT_GROUP], queryFn: fetchGroups
+  })
+
+  const getGroup = (id)=>groups.find(g=>g.id == id)
+  let toPut
+  if(Array.isArray(account)){
+    toPut = account.map(e=>({...e, type:getGroup(e.accountGroupId).accountTypeId, dateUpdated: moment().toDate()}))
+    toPut.forEach(acct=>{
+      queryClient.setQueryData([ACCOUNT, { id: toPut.id }], acct);
+    })
+    db.accounts.bulkPut(toPut)
+  }else{
+    toPut = {...account, type:getGroup(account.accountGroupId).accountTypeId, dateUpdated: moment().toDate()}
+    queryClient.setQueryData([ACCOUNT, { id: toPut.id }], toPut);
+    db.accounts.put(toPut)
+  }
+  return toPut
+}
+

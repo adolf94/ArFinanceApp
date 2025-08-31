@@ -56,7 +56,7 @@ const AccountChart = ()=>{
 					}
 					p.asset = [...p.asset,item]
 				}else{
-					item.amount += c.balance
+					item.value += c.balance
 				}
 				asset += c.balance
 			}else{

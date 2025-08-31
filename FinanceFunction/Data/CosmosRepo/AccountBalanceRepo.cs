@@ -210,9 +210,9 @@ namespace FinanceFunction.Data.CosmosRepo
 
 
 
-        public IQueryable<AccountBalance> GetByDate(DateTime date)
+        public Task<IQueryable<AccountBalance>> GetByDate(DateTime date)
         {
-            throw new NotImplementedException();
+            return Task.FromResult( _context.AccountBalances!.Where(e => e.DateStart == date));
             //TODO -- logic for Credit cards 
         }
 

@@ -13,12 +13,12 @@ import { BarChart } from "@mui/x-charts";
 import numeral from "numeral";
 
 
-interface AccountHistoryBarChart {
+interface AccountHistoryBarChartProps {
     acctId: string;
     date: string
 }
 
-const AccountHistoryBarChart = ({acctId, date}) => {
+const AccountHistoryBarChart = ({acctId, date} : AccountHistoryBarChartProps) => {
     const fromDate = useMemo(()=>moment(date).add(-5, 'month').format("YYYY-MM-01"),[date])
     const [loading,setLoading] = useState(true)
 
