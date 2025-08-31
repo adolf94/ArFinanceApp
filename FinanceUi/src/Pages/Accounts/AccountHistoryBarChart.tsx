@@ -11,7 +11,7 @@ import { Box, Card, Grid2 as Grid } from "@mui/material";
 import { AccountBalance } from "FinanceApi";
 import { BarChart } from "@mui/x-charts";
 import numeral from "numeral";
-
+import useMeasure from 'react-use-measure'
 
 interface AccountHistoryBarChartProps {
     acctId: string;
@@ -21,6 +21,7 @@ interface AccountHistoryBarChartProps {
 const AccountHistoryBarChart = ({acctId, date} : AccountHistoryBarChartProps) => {
     const fromDate = useMemo(()=>moment(date).add(-5, 'month').format("YYYY-MM-01"),[date])
     const [loading,setLoading] = useState(true)
+    const [ref, bounds] = useMeasure();
 
 
     const acctBalances = useLiveQuery(()=>db.accountBalances.filter(e=>e.accountId===acctId 
@@ -78,12 +79,13 @@ const AccountHistoryBarChart = ({acctId, date} : AccountHistoryBarChartProps) =>
     return <Grid size={12} sx={{p:3}}>
       <Card>
           <CardBody>
-						<Box sx={{ flexGrow: 1, justifyItems:"center"}}>
+						<Box sx={{width:"100%", display:"block"}} ref={ref}>
               {(acctBalances|| []).length > 0 &&
               <BarChart
                 xAxis={[{ scaleType: 'band', dataKey: 'month' }]}
                 series={computed.series}
                 dataset={computed.dataset}
+                width={bounds.width}
                 height={300}
               />}
             </Box>

@@ -197,7 +197,7 @@ const ViewAccount = () => {
         </Toolbar>
       </AppBar>
       <Grid container spacing={1} sx={{ width:"100%" , mt: 2 }}>
-        <Grid size={{md:5}} sx={{ display: "block" }}>
+        <Grid container size={{xs:12,md:5}}>
         {/* <Grid size={{md:5}} sx={{ display: { xs: "none", md: "block" } }}> */}
           <AccountHistoryBarChart acctId={acctId} date={month.format("yyyy-MM-01")} />
         </Grid>
