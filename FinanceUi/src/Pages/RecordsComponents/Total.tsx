@@ -70,7 +70,7 @@ const TotalTab = ({date,records} : TotalTabProps) => {
 
 
   const {data:balances, isLoading} = useDexieDataWithQuery({
-    dexieData : ()=>db.accountBalances.where("startDate")
+    dexieData : ()=>db.accountBalances.where("dateStart")
       .equals(moment(date).format("YYYY-MM-DDTHH:mm:ss")).toArray(),
     queryParams : {
       queryKey: [
@@ -81,7 +81,7 @@ const TotalTab = ({date,records} : TotalTabProps) => {
       
     },
     dataToDbFunction : (data)=>{
-      return db.accountBalances.bulkAdd(data)
+      return db.accountBalances.bulkPut(data)
     }
   },[date,type])
 

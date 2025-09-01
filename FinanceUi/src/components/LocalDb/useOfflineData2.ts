@@ -20,6 +20,7 @@ export function  useDexieDataWithQuery<T>( props : UseDexieDataWithQuery<T>, dep
     const [loading, setLoading] = useState(true)
     const [outputData,setOutputData] = useState<T|undefined>(undefined)
 
+
     // const outputData = useLiveQuery<T>(()=>props.dexieData(),[...deps,loading])
 
     useEffect(()=>{
