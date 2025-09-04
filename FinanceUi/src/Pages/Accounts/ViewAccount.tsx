@@ -2,8 +2,10 @@ import {
     Add,
   ArrowLeft,
   ArrowLeftOutlined,
+  BarChart,
   ChevronLeft as IcoChevronLeft,
   ChevronRight as IcoChevronRight,
+  ListAlt,
 } from "@mui/icons-material";
 import {
   AppBar,
@@ -197,7 +199,17 @@ const ViewAccount = () => {
         </Toolbar>
       </AppBar>
       <Grid container spacing={1} sx={{ width:"100%" , mt: 2 }}>
-        <Grid container size={{xs:12,md:5}}>
+        <Grid container size={12} sx={{justifyContent:"end"}}>
+          <Grid>
+            <IconButton>
+              <BarChart />
+            </IconButton>
+            <IconButton>
+              <ListAlt />
+            </IconButton>
+          </Grid>
+        </Grid>
+        <Grid size={{xs:12,md:5}}>
         {/* <Grid size={{md:5}} sx={{ display: { xs: "none", md: "block" } }}> */}
           <AccountHistoryBarChart acctId={acctId} date={month.format("yyyy-MM-01")} />
         </Grid>

@@ -1,10 +1,5 @@
 
 import { useMemo, useState } from "react";
-import {
-  fetchByAcctMonth,
-  fetchTransactionsByMonth,
-  TRANSACTION,
-} from "../repositories/transactions";
 import { useQuery } from "@tanstack/react-query";
 import { Account, AccountBalance } from "FinanceApi";
 import { ACCOUNT_BALANCE, getBalancesByDate } from "../../repositories/accountBalance";
@@ -44,7 +39,7 @@ const CreditStatementBalance = (props: CreditStatementBalanceProps) => {
         >
             <Typography variant="body1">
               {isLoading ? <Skeleton variant="text" /> : <Tooltip title={numeral(acctBalance.balance).format("0,0.00")}> 
-                          <Typography>{payments > acctBalance.balance? "0.00" : numeral(acctBalance.balance + payments).format("0,0.00")}</Typography> 
+                          <Typography>{payments > -acctBalance.balance? "0.00" : numeral(acctBalance.balance + payments).format("0,0.00")}</Typography> 
                         </Tooltip>  }
             </Typography>
         </Grid>

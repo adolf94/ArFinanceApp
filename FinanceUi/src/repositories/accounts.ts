@@ -26,6 +26,8 @@ export const fetchAccounts = () => {
   });
 };
 
+// fetchByAcctId => fetchAccounts => localPutAcct
+// fetchByAcctId => localPutAcct
 export const fetchByAccountId = async (id: string, force: boolean = false) => {
 
     //[ACCOUNT, { id: acct.id }]
@@ -45,21 +47,15 @@ export const fetchByAccountId = async (id: string, force: boolean = false) => {
 
     return fnApi.get("accounts/" + id).then(async (e) => {
 
+      var ensuredAccount = await localPutAccount(e.data)
 
-      var groups = await queryClient.ensureQueryData<AccountGroup[]>({
-          queryKey: [ACCOUNT_GROUP], queryFn: fetchGroups
-      })
-
-      var group = groups.find(g=>g.id == e.data.accountGroupId)
-      e.data.type = group.accountTypeId
-
-        queryClient.setQueryData([ACCOUNT] , replaceById(e.data,accountCache))
-        return e.data;
+        queryClient.setQueryData([ACCOUNT] , replaceById(ensuredAccount,accountCache))
+        return ensuredAccount;
       });
 };
 
+//useMutate => onSuccess => localPutAcct
 export const useMutateAccount = () => {
-  const queryClient = useQueryClient();
 
   const create = useMutation({
     mutationFn: (data: Partial<Account>) => {
@@ -75,12 +71,7 @@ export const useMutateAccount = () => {
         .then((e) => e.data);
     },
     onSuccess: (data: Account) => {
-      db.accounts.put({...data, dateUpdated: moment().toDate()})
-      queryClient.setQueryData([ACCOUNT, { id: data.id }], data);
-      queryClient.setQueryData([ACCOUNT], (prev: Account[]) => [
-        ...(prev || []),
-        data,
-      ]);
+      localPutAccount(data)
     },
   });
 
@@ -104,6 +95,7 @@ export const localPutAccount = async (account: Account | Account[]) => {
   }else{
     toPut = {...account, type:getGroup(account.accountGroupId).accountTypeId, dateUpdated: moment().toDate()}
     queryClient.setQueryData([ACCOUNT, { id: toPut.id }], toPut);
+    queryClient.setQueryData([ACCOUNT] , (prev : Account[])=>replaceById(toPut,prev))
     db.accounts.put(toPut)
   }
   return toPut

@@ -74,16 +74,7 @@ const Records = () => {
   const { view, monthStr } = useParams();
   const month = moment(monthStr);
     const navigate = useNavigate();
-  //   const { data: records, isLoading: loadingRecords  } = useQuery({
-  //   queryKey: [
-  //     TRANSACTION,
-  //     { month: month.get("month") , year: month.get("year") },
-  //   ],
-  //   queryFn: () =>
-  //     fetchTransactionsByMonthKey(month.get("year"), month.get("month"), false),
-  //   placeholderData:[]
-  // });
-    //const records = useMemo(()=>[],[])
+
 
     const { isLoading:loadingRecords } = useOfflineData({
         defaultData: [],
@@ -96,9 +87,10 @@ const Records = () => {
     let key = moment([month.get("year"),  month.get("month"),1]).format("YYYY-MM-01")
     let monthData = await db.monthTransactions.where("monthKey").equals( key ).first();
     if(!monthData) return null;
-    return Promise.all( monthData.transactions.map((tr)=>{
-      return db.transactions.where("id").equals(tr.id).first()
-    }))
+    return Promise.all( 
+      monthData.transactions.map((tr)=>{
+        return db.transactions.where("id").equals(tr.id).first()
+      }))
   }, [month.get("year"),  month.get("month")])
 
   const [dailies, setDailies] = useState([]);
@@ -108,40 +100,6 @@ const Records = () => {
     expense: 0,
     total: 0,
   });
-
-    //useEffect(() => {
-    //    console.debug("called useOfflineData useEffect " )
-    //    let mode = "offline"
-    //    //if (!isLoading) return;
-    //    //setLoading(true)
-    //    //const fetch = () => {
-    //    //fetching = true
-    //    ////setFetching(true)
-    //    //inputs.getOnlineData().then((data) => {
-    //    //    setData(data)
-    //    //    mode = "online"
-    //    //    setFetching(false)
-    //    //    setLoading(false)
-    //    //}).catch(() => {
-    //    //    //setFetching(false)
-    //    //    //setLoading(false)
-    //    //})
-    //    if (mode === "online") return;
-    //    fetchTransactionsByMonthKey(month.get("year"), month.get("month"), false).then((data) => {
-    //        setRecords(data)
-    //        mode = "online"
-    //        setLoading(false)
-    //    })
-
-    //    fetchTransactionsByMonthKey(month.get("year"), month.get("month"), true).then((data) => {
-    //        setLoading(false)
-    //        if (mode === "offline") setRecords(data)
-    //        //if (!fetching && !fetched && !inputs.offlineOnly ) fetch()
-    //    })
-
-
-
-    //}, [monthStr])
 
 
 
@@ -254,8 +212,8 @@ const Records = () => {
             >
               <Tab label="Daily" value="daily" />
               <Tab label="Calendar" value="calendar" />
-              <Tab label="Weekly" value="weekly" />
-              <Tab label="Monthly" value="monthly" />
+              {/* <Tab label="Weekly" value="weekly" />
+              <Tab label="Monthly" value="monthly" /> */}
               <Tab label="Total" value="total" />
             </Tabs>
           </Box>

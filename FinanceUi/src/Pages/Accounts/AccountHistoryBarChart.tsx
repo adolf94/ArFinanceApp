@@ -37,12 +37,12 @@ const AccountHistoryBarChart = ({acctId, date} : AccountHistoryBarChartProps) =>
             console.log(data)
             setLoading(false)
         })
-    },[date,date,acctId])
+    },[date,acctId])
         
 
     const computed = useMemo(()=>{
       let d = (acctBalances || []).map((bal:AccountBalance)=>{
-        let monthStr = moment(bal.dateStart).format("MMM YYYY")
+        let monthStr = moment(bal.dateStart).format("MMM")
         let output =bal.transactions.reduce((p,tr)=>{
           if(tr.amount >= 0){
             p.inflow += tr.amount
@@ -76,32 +76,24 @@ const AccountHistoryBarChart = ({acctId, date} : AccountHistoryBarChartProps) =>
 
  
 
-    return <Grid size={12} sx={{p:3}}>
+    return <Grid size={12} sx={{px:3}}>
       <Card>
           <CardBody>
 						<Box sx={{width:"100%", display:"block"}} ref={ref}>
               {(acctBalances|| []).length > 0 &&
               <BarChart
+                yAxis={[{
+                  valueFormatter:value=>numeral(value).format("0 a")
+                }]}
                 xAxis={[{ scaleType: 'band', dataKey: 'month' }]}
                 series={computed.series}
                 dataset={computed.dataset}
                 width={bounds.width}
-                height={300}
+                height={250}
               />}
             </Box>
             
 
-            {/* <BarChart
-              dataset={dataset}
-              xAxis={[{ scaleType: 'band', dataKey: 'month' }]}
-              series={[
-                { dataKey: 'london', label: 'London', valueFormatter },
-                { dataKey: 'paris', label: 'Paris', valueFormatter },
-                { dataKey: 'newYork', label: 'New York', valueFormatter },
-                { dataKey: 'seoul', label: 'Seoul', valueFormatter },
-              ]}
-              {...chartSetting}
-            /> */}
           </CardBody>
       </Card>
     </Grid>

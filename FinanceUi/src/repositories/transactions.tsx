@@ -9,7 +9,7 @@ import { Transaction } from "../components/LocalDb/AppDb";
 import { queryClient } from "../App";
 import moment from "moment";
 import { VENDOR, fetchVendorById } from "./vendors";
-import { ACCOUNT, fetchAccounts, fetchByAccountId, localPutAccount } from "./accounts";
+import { ACCOUNT,  fetchByAccountId, localPutAccount } from "./accounts";
 import { AxiosResponse } from "axios";
 import replaceById from "../common/replaceById";
 import {closeSnackbar, enqueueSnackbar } from "notistack";
@@ -153,6 +153,7 @@ export const addToTransactions = (item: Transaction, replace: boolean) => {
 
 };
 
+
 export const fetchTransactionsByMonthKey = async (year: number, month: number, offline: boolean) => {
   console.debug("fetchTransactionsByMonthKey",  { year, month });
   let key = moment([year, month,1]).format("YYYY-MM-01")
@@ -180,11 +181,11 @@ export const fetchTransactionsByMonthKey = async (year: number, month: number, o
   
   let monthlytransaction = await queryClient.ensureQueryData({
     queryKey: [MONTHLY_TRANSACTION, {monthKey: key}],
-    queryFn: ()=>fnApi.get(`monthlytransaction/${key}`).then((e:MonthlyTransaction)=>e.data)
+    queryFn: ()=>fnApi.get<MonthlyTransaction>(`monthlytransaction/${key}`).then((e)=>e.data)
   }) 
   let transactions = [] as Transaction[]
   if(!hasData){
-     transactions = await fnApi<Transaction[]>("transactions", { params: { year, month : month + 1 }, noLastTrans: false })
+     transactions = await fnApi<Transaction[]>("transactions", { params: { year, month : month + 1 }})
         .then(res=>res.data) as Transaction[]
   }else{
     transactions = await Promise.all(monthlytransaction.transactions.map(
@@ -476,7 +477,7 @@ export const useMutateTransaction = () => {
                             ACCOUNT_BALANCE,
                             { accountId: b.accountId, date: moment(b.dateStart).format("YYYY-MM-01") }]
                             , b)
-                      db.accountBalances.put({...b, dateUpdated:moment().toISOString()})
+                      db.accountBalances.put({...b, dateUpdated:moment().toDate()})
                     }
                 })
                 e.data.monthly.forEach(m => {
@@ -485,7 +486,7 @@ export const useMutateTransaction = () => {
                     //dont insert if not existing,
                     if (!!item) {
                       queryClient.setQueryData([MONTHLY_TRANSACTION, {monthKey: m.monthKey}], m)
-                      db.monthTransactions.put({...m, dateUpdated:moment().toISOString()})
+                      db.monthTransactions.put({...m, dateUpdated:moment().toDate()})
                     }
                 })
 
@@ -565,14 +566,14 @@ export const useMutateTransaction = () => {
             let item = db.accountBalances.where("id").equals(e.id)
                 .first()
                 //dont insert if not existing,
-              queryClient.setQueryData([MONTHLY_TRANSACTION, {monthKey: e.monthKey}], e)
+              queryClient.setQueryData([MONTHLY_TRANSACTION, {monthKey: e.id}], e)
 
               if(!!item) {
                 queryClient.setQueryData([
                       ACCOUNT_BALANCE,
                       { accountId: e.accountId, date: moment(e.dateStart).format("YYYY-MM-01") }]
                       , e)
-                db.accountBalances.put(e)
+                      db.monthTransactions.put({...e, dateUpdated:moment().toDate()})
               }
           })
           e.data.monthly.forEach(e => {
@@ -581,7 +582,7 @@ export const useMutateTransaction = () => {
               //dont insert if not existing,
               if (!!item) {
                 queryClient.setQueryData([MONTHLY_TRANSACTION, {monthKey: e.monthKey}], e)
-                db.monthTransactions.put(e)
+                db.monthTransactions.put({...e, dateUpdated:moment().toDate()})
               }
           })
 

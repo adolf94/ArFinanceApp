@@ -1,6 +1,5 @@
 ﻿import { useQuery } from "@tanstack/react-query";
 import { ACCOUNT_GROUP, fetchGroups } from "../../repositories/accountgroups";
-import { ACCOUNT, fetchAccounts } from "../../repositories/accounts";
 import {
   Box,
   Dialog,
