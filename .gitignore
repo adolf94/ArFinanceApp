@@ -16,3 +16,5 @@ pythonhttp/local.settings.json
 __azurite_db_blob__.json
 __azurite_db_blob_extent__.json
 FinanceFunction/__blobstorage__
+__blobstorage__
+__azurite_db_table__.json

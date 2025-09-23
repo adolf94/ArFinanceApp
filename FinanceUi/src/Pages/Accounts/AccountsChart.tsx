@@ -126,7 +126,7 @@ const AccountChart = ()=>{
 							<PieChart
 								series={computed}
 								width={400}
-								height={325}
+								height={350}
 								title="Assets vs Liabilities"
 								slotProps={{
 									legend: { hidden: true },

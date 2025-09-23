@@ -6,6 +6,7 @@
     "scripts": {
         "start": "vite",
         "build": "vite build",
+        "buidevld": "vite",
         "prestart": "csharp-models-to-typescript --config=./ring_class_to_ts.json",
         "serve": "vite preview",
         "prettier-watch": "onchange \"**/*\" -- prettier --write --ignore-unknown {{changed}}",
@@ -14,6 +15,8 @@
     },
     "dependencies": {
         "@azure/msal-browser": "^3.7.1",
+        "@dnd-kit/core": "^6.3.1",
+        "@dnd-kit/sortable": "^10.0.0",
         "@emotion/react": "^11.10.5",
         "@emotion/styled": "^11.10.5",
         "@fontsource/roboto": "^4.5.8",

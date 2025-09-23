@@ -1,7 +1,7 @@
 import { Dialog, DialogActions, DialogContent, Grid2 as Grid, MenuItem, Select, TextField, Button } from "@mui/material"
 import { useEffect, useState } from "react"
 import { useHooksSettingsState } from "./Hooks"
-
+import allowedProperties from './allowedProperties.json'
 
 
 interface HooksNewCondition {
@@ -16,6 +16,10 @@ const defaultCondition = {"notif_":{
     property:"",
     value:""
 }, "sms_":{
+    operation:"equals",
+    property:"",
+    value:""
+},"imgai_":{
     operation:"equals",
     property:"",
     value:""
@@ -45,7 +49,22 @@ const HooksNewCondition = ({item, isNew, onChange} : HooksNewCondition)=>{
         <Dialog open={show} maxWidth="sm" fullWidth onClose={()=>setShow(false)}>
             <DialogContent>
 
-                { tabState.tab == "img_" ? <Grid container>
+                { tabState.tab == "imgai_" ? <Grid container>
+                    <Grid size={{md:4}}>
+                        <Select size="small" fullWidth value={form.property} onChange={(evt)=>setForm({...form, property:evt.target.value})}>
+                            {allowedProperties.map(p=> <MenuItem value={p}>{p}</MenuItem>)}
+                        </Select>
+                    </Grid>
+                    <Grid size={{md:3}} sx={{px:1}}>
+                        <Select size="small" fullWidth value={form.operation} onChange={(evt)=>setForm({...form, operation:evt.target.value})}>
+                            <MenuItem value="equals">equals</MenuItem>
+                        </Select>
+                    </Grid>
+                    <Grid size={{md:5}}>
+                            <TextField value={form.value} onChange={(evt)=>setForm({...form, value:evt.target.value})} fullWidth size="small"/>
+                    </Grid>
+                </Grid> 
+                :tabState.tab == "img_" ? <Grid container>
                     <Grid size={{md:3}}>
                         <TextField value="Image" fullWidth disabled size="small"/>
                     </Grid>
@@ -56,7 +75,7 @@ const HooksNewCondition = ({item, isNew, onChange} : HooksNewCondition)=>{
                         <TextField value={form.hasLine} onChange={(evt)=>setForm({...form, hasLine:evt.target.value})} fullWidth size="small"/>
                     </Grid>
                     
-                    </Grid> : <Grid container>
+                    </Grid>  : <Grid container>
                     <Grid size={{md:4}}>
                         <Select size="small" fullWidth value={form.property} onChange={(evt)=>setForm({...form, property:evt.target.value})}>
                                 <MenuItem value="notif_title">notif_title</MenuItem>

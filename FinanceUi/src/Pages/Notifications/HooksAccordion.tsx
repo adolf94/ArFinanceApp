@@ -195,6 +195,7 @@ const HooksAccordion = ({notif, onDelete, onCancel }) => {
                                 {
                                 notif.extractedData && Object.keys(notif.extractedData).map((key:string)=>{
                                         if(!notif.extractedData[key]) return "";
+                                        if(typeof(notif.extractedData[key]) == "object") return "";
                                         if(Icons.hasOwnProperty(key)){
                                                         
                                             return <React.Fragment key={key}><ListItem>

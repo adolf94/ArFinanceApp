@@ -110,6 +110,7 @@ const Notifications = () => {
         setParams({month: monthstr})
     }
 
+
     const refreshQuery = ()=>{
         queryClient.invalidateQueries({queryKey:[HOOK_MESSAGES, { monthKey: params.get("month")}]})
         // queryClient.prefetchQuery({

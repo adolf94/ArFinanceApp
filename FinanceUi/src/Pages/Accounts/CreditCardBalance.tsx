@@ -13,13 +13,17 @@ interface CreditStatementBalanceProps {
 }
 
 const CreditStatementBalance = (props: CreditStatementBalanceProps) => {
-    
+  const viewDate = useMemo(() => {
+    var date = props.account.periodStartDay >= moment().date() ? moment(props.date).clone().add(-1,"month") :  moment(props.date)
+    return moment(date).format("YYYY-MM-DD");
+  }, [props.date]);
+
   const { data: acctBalance, isLoading } = useQuery<AccountBalance>({
     queryKey: [
       ACCOUNT_BALANCE,
-      { accountId: props.account.id, date: moment(props.date).format("yyyy-MM-01") },
+      { accountId: props.account.id, date: moment(viewDate).format("yyyy-MM-01") },
     ],
-    queryFn: () => getBalancesByDate(moment(props.date).format("yyyy-MM-01"), props.account.id),
+    queryFn: () => getBalancesByDate(moment(viewDate).format("yyyy-MM-01"), props.account.id),
   });
 
   const payments = useMemo(()=>{

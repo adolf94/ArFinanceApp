@@ -1,7 +1,6 @@
 import { Add, AddCircle, Warning } from "@mui/icons-material"
-import { Badge, Box, Button, Chip, Dialog, DialogActions, DialogContent, Grid2 as Grid, InputAdornment, List, ListItem, ListItemButton, ListItemText, MenuItem, Select, TextField, TextFieldProps } from "@mui/material"
+import { Badge, Box, Button, Card, CardActions, CardContent, Chip, Dialog, DialogActions, DialogContent, Grid2 as Grid, InputAdornment, List, ListItem, ListItemButton, ListItemText, MenuItem, Select, TextField, TextFieldProps } from "@mui/material"
 import { useEffect, useState } from "react"
-
 
 const types = {
     "transfer":"Transfer",
@@ -109,52 +108,68 @@ const HookSubConfigModal = (props: any)=>{
         setShow(false)
     }
 
+
+    const content = <Grid container>
+        <Grid size={4}>
+            <List > 
+                {items.map((e,i)=><ListItemButton dense onClick={()=>setCurrentIndex(i)} selected={i==currentIndex}>
+                    <ListItemText sx={{whiteSpace:'no-wrap', overflow: "hidden", textOverflow:'ellipsis'}}
+                    primary={<>{e.invalid && <Warning fontSize="0.25rem" color="warning"/>} {e.displayName || "New"}</>} />
+                </ListItemButton>)}
+                <ListItemButton dense  onClick={handleNew}>
+                    <Button size="small" startIcon={<AddCircle /> }>Add</Button>
+                </ListItemButton>
+            </List>
+        </Grid>
+        <Grid container size={8} sx={{borderLeft: "solid", borderLeftSize:"1px", p:1, gap:2}}>
+            <Grid size={12}>
+                <TextField disabled={form.default} fullWidth label="Key" size="small" value={form.subConfig} onChange={(evt)=>setForm({...form,subConfig:evt.target.value})} />
+            </Grid>
+            <Grid size={12}>
+                <TextField disabled={form.default} fullWidth label="Display Name" size="small" value={form.displayName} onChange={(evt)=>setForm({...form,displayName:evt.target.value})} />
+            </Grid>
+            <Grid size={12}>
+                <TextField disabled={form.default} label="Type" select fullWidth size="small" value={form.type} onChange={e=>setForm({...form, type:e.target.value})}>
+                    {Object.keys(types).map(e=><MenuItem key={e} value={e}>{types[e]}</MenuItem>)}
+                </TextField>
+            </Grid>
+            <Grid size={12}>
+                <DropdownWithFixed  disabled={form.default} label="Vendor Source" properties={props.data.properties} value={form.vendor} onChange={(v)=>setForm({...form, vendor:v})}/>
+            </Grid>
+            <Grid size={12}>
+                <DropdownWithFixed  disabled={form.default} label="Debit Source(To)" properties={props.data.properties} value={form.debit} onChange={(v)=>setForm({...form, debit:v})}/>
+            </Grid>
+            <Grid size={12}>
+                <DropdownWithFixed disabled={form.default} label="Credit Source(From)" properties={props.data.properties} value={form.credit} onChange={(v)=>setForm({...form, credit:v})}/>
+            </Grid>
+            <Grid size={12}>
+                <TextField disabled={form.default} fullWidth multiline rows={2} label="Remarks Template" size="small" value={form.remarks} onChange={(v)=>setForm({...form, remarks:v.target.value})} />
+            </Grid>
+        </Grid>
+    </Grid>
+
+    const actionButtons = <Button  disabled={form.default} variant="outlined" onClick={handleSave}>Save</Button>
+    if(props.component == "card") return <>
+        <Card>
+            <CardContent>
+                {content}
+
+            </CardContent>
+            <CardActions>
+                {actionButtons}
+
+            </CardActions>
+        </Card>
+    </>
+        
     return <>
         <Button variant="outlined" color="primary" onClick={()=>setShow(true)}><Badge color="secondary" badgeContent={props.data.subConfigs.length}>Manage SubConfigs</Badge></Button>
         <Dialog open={show} onClose={()=>setShow(false)}>
             <DialogContent>
-                <Grid container>
-                    <Grid size={4}>
-                        <List > 
-                            {items.map((e,i)=><ListItemButton dense onClick={()=>setCurrentIndex(i)} selected={i==currentIndex}>
-                                <ListItemText sx={{whiteSpace:'no-wrap', overflow: "hidden", textOverflow:'ellipsis'}}
-                                primary={<>{e.invalid && <Warning fontSize="0.25rem" color="warning"/>} {e.displayName || "New"}</>} />
-                            </ListItemButton>)}
-                            <ListItemButton dense  onClick={handleNew}>
-                                <Button size="small" startIcon={<AddCircle /> }>Add</Button>
-                            </ListItemButton>
-                        </List>
-                    </Grid>
-                    <Grid container size={8} sx={{borderLeft: "solid", borderLeftSize:"1px", p:1, gap:2}}>
-                        <Grid size={12}>
-                            <TextField disabled={form.default} fullWidth label="Key" size="small" value={form.subConfig} onChange={(evt)=>setForm({...form,subConfig:evt.target.value})} />
-                        </Grid>
-                        <Grid size={12}>
-                            <TextField disabled={form.default} fullWidth label="Display Name" size="small" value={form.displayName} onChange={(evt)=>setForm({...form,displayName:evt.target.value})} />
-                        </Grid>
-                        <Grid size={12}>
-                            <TextField disabled={form.default} label="Type" select fullWidth size="small" value={form.type} onChange={e=>setForm({...form, type:e.target.value})}>
-                                {Object.keys(types).map(e=><MenuItem key={e} value={e}>{types[e]}</MenuItem>)}
-                            </TextField>
-                        </Grid>
-                        <Grid size={12}>
-                            <DropdownWithFixed  disabled={form.default} label="Vendor Source" properties={props.data.properties} value={form.vendor} onChange={(v)=>setForm({...form, vendor:v})}/>
-                        </Grid>
-                        <Grid size={12}>
-                            <DropdownWithFixed  disabled={form.default} label="Debit Source(To)" properties={props.data.properties} value={form.debit} onChange={(v)=>setForm({...form, debit:v})}/>
-                        </Grid>
-                        <Grid size={12}>
-                            <DropdownWithFixed disabled={form.default} label="Credit Source(From)" properties={props.data.properties} value={form.credit} onChange={(v)=>setForm({...form, credit:v})}/>
-                        </Grid>
-                        <Grid size={12}>
-                            <TextField disabled={form.default} fullWidth multiline rows={2} label="Remarks Template" size="small" value={form.remarks} onChange={(v)=>setForm({...form, remarks:v.target.value})} />
-                        </Grid>
-                    </Grid>
-                </Grid>
-            </DialogContent>
+                {content}
+            </DialogContent> 
             <DialogActions>
-                <Button  disabled={form.default} variant="outlined" onClick={handleSave}>Save</Button>
-
+                {actionButtons}
             </DialogActions>
         </Dialog>
     </>

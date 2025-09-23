@@ -1,16 +1,14 @@
-import { Check, CheckCircle, Edit, ExpandLess, ExpandMore } from "@mui/icons-material"
-import { Accordion, AccordionDetails, AccordionSummary, Box, Button, Checkbox, Divider, FormControlLabel, Grid2 as Grid, IconButton, InputAdornment, List, ListItem, ListItemText, Tab, TextField, Typography } from "@mui/material"
+import { Check, CheckCircle, Edit, ExpandLess, ExpandMore,  SwapVert } from "@mui/icons-material"
+import { Accordion, AccordionDetails, AccordionSummary, Box, Menu, Button, Checkbox, Divider, FormControlLabel, Grid2 as Grid, IconButton, InputAdornment, List, ListItem, ListItemText,  Tab, TextField, Typography, MenuItem, ClickAwayListener } from "@mui/material"
 import { useEffect, useMemo, useState } from "react"
 import { useHooksSettingsState } from "./Hooks"
 import HooksConfigProperty from "./HooksConfigProperty"
 import HooksConfigCondition from "./HooksConfigCondition"
 import HooksNewCondition from "./HooksNewCondition"
 import HooksRegexProperties from "./HooksRegexProperties"
-import { faPingPongPaddleBall } from "@fortawesome/free-solid-svg-icons"
-import { setDifferenceDependencies } from "mathjs"
 import HooksAddProperty from "./HooksAddProperty"
+import allowedProperties from './allowedProperties.json'
 import HookSubConfigModal  from "./HookSubConfigModal"
-
 const data =  
 {
     "name":"notif_gcash_receive",
@@ -40,6 +38,9 @@ const data =
 
 interface HookSettingsAccordionProps {
     onCancel?: ()=>void,
+    onPriorityChange?: (direction:string)=>void,
+    i? : number ,
+    totalItems? : number ,
     value?: {
         name:string,
         nameKey:string,
@@ -74,6 +75,9 @@ const HookSettingsAccordion = (props : HookSettingsAccordionProps)=>{
     const [name,setName] = useState("")
     const [editName,setEditName] = useState(!props.value)
     const settingsState = useHooksSettingsState()
+    const [anchor,setAnchor] = useState<any>(null)
+    const showMenu = !!anchor
+
 
     useEffect(()=>{
         if(!props.value){
@@ -84,18 +88,18 @@ const HookSettingsAccordion = (props : HookSettingsAccordionProps)=>{
     },[settingsState.tab])
     
 
-
     const isSubmittable = useMemo(()=>{
         if(!form.name) return false;
         if(!form.app) return false;
         if(!form.success) return true;
-        if(!form.regex && settingsState.tab != "img_") return false;
-        if(form.properties.length == 0) return false;
+        if(!form.regex && ["img_", "imgai_"].indexOf(settingsState.tab) == -1 ) return false;
+        if(form.properties.length == 0 && ["imgai_"].indexOf(settingsState.tab) == -1) return false;
         return true
     },[form])
 
 
     const handleSave = ()=>{
+
         props.onSave(form)
         setExpanded(false)
         if(!props.value){
@@ -103,19 +107,33 @@ const HookSettingsAccordion = (props : HookSettingsAccordionProps)=>{
         }
     }
 
+
+
     const handleNameSave = ()=>{
             setForm({...form, nameKey:`${settingsState.tab}${form.name}`})
             setEditName(false)
             setExpanded(true)
+            //add properties
+            if(settingsState.tab == "imgai_"){
+                setForm({...form, nameKey:`${settingsState.tab}${form.name}`, properties: allowedProperties.map((e)=>({property:e}))})
+            }
     }
 
-    return  <Accordion expanded={expanded}>
+    const handleMove = (dir)=>{
+        props.onPriorityChange(dir)
+        setAnchor(null)
+    }
+
+    // return  <div ref={setNodeRef}  {...attributes} style={style}> 
+    return <Accordion expanded={expanded} >
         {!editName? 
         <Grid container sx={{justifyContent:'space-between'}}>
             <Grid  size={{xs:9,md:10}}>
                 <AccordionSummary 
                     onClick={()=>setExpanded((p)=>!p)}
                 >
+
+
                              <Typography component="span">{form.nameKey}</Typography> 
                              {!props.value && <Edit sx={{fontSize:"12px", pl:1}} onClick={ ()=>{
                                 setEditName(true)
@@ -125,6 +143,20 @@ const HookSettingsAccordion = (props : HookSettingsAccordionProps)=>{
                 </AccordionSummary>
             </Grid>
             <Grid size={{xs:3,md:2}} sx={{pt:1,shrink:1, textAlign:'right'}}>
+                    {props.value && 
+                        <ClickAwayListener onClickAway={()=>setAnchor(null)}>
+                            <Box component="span">
+                                <IconButton size="small" onClick={(evt)=>setAnchor(evt.target)}>
+                                        <SwapVert />
+                                    </IconButton>
+                            </Box>
+                        </ClickAwayListener>
+                        
+                    }
+                    <Menu anchorEl={anchor} open={showMenu}>
+                        {props.i > 0 && <MenuItem onClick={()=>handleMove("up")}>Move up</MenuItem>}
+                        {props.i < props.totalItems - 1 && <MenuItem onClick={()=>handleMove("down")}>Move down</MenuItem>}
+                    </Menu>
                 <IconButton size="small" onClick={()=>setExpanded((p)=>!p)}>
                     {expanded?<ExpandLess />:<ExpandMore />}
                 </IconButton>
@@ -172,47 +204,54 @@ const HookSettingsAccordion = (props : HookSettingsAccordionProps)=>{
                         <Divider />
                         </>
                     }
-                    <Box sx={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+                        <Box sx={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
 
                         <Typography variant="body2">Conditions</Typography>
-                        <HooksNewCondition isNew onChange={(item)=>{
-                            setForm({...form, conditions:[item, ...form.conditions]})
-                        }} />
-                    </Box>
-                    <Box sx={{px:2, width:'100%'}}>
-                        <List dense >
-                            {
-                                form.conditions.map((e,i)=><HooksConfigCondition key={`${i}-${e.property}`} item={e} />)
-                            }
-                        </List>
-                    </Box>
-                    <Divider />
+                            <HooksNewCondition isNew onChange={(item)=>{
+                                setForm({...form, conditions:[item, ...form.conditions]})
+                            }} />
+                        </Box>
+                        <Box sx={{px:2, width:'100%'}}>
+                            <List dense >
+                                {
+                                    form.conditions.map((e,i)=><HooksConfigCondition key={`${i}-${e.property}`} item={e} />)
+                                }
+                            </List>
+                        </Box>
+                        <Divider />
+              
+                {
+                    settingsState.tab != "imgai_" &&<>
                     <Box sx={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
                         <Typography variant="body2">Properties</Typography>
                         {
                             settingsState.tab == "img_" ? <HooksAddProperty item={null} onSave={(data)=>{
                                     setForm({...form, properties:[...form.properties,data]})
                                 }} isNew/>
-                                 : <HooksRegexProperties regex={form.regex} currentProperties={form.properties} onSave={(data)=>setForm({...form, properties:data})}/>
+                                : <HooksRegexProperties regex={form.regex} currentProperties={form.properties} onSave={(data)=>setForm({...form, properties:data})}/>
                         }
                         
                     </Box>
-                
-                    <Box sx={{ px:2, width:'100%'}}>
-                        <List dense >
-                            {
-                                form.properties.map((e,i)=>settingsState.tab == "img_" ? <HooksAddProperty key={`${i}-${e.property}`} item={e} onSave={(data)=>{
-                                                setForm((prev)=>{
-                                                    let state = {...prev}
-                                                    state.properties[i] = data
-                                                    return state
-                                                })
-                                        }} />
-                                    :<HooksConfigProperty key={`${i}-${e.property}`} item={e}/>)
-                            }
-                        </List>
-                    </Box>
-                    <Divider />
+                        <Box sx={{ px:2, width:'100%'}}>
+                            <List dense >
+                                {
+                                    form.properties.map((e,i)=>settingsState.tab == "img_" ? <HooksAddProperty key={`${i}-${e.property}`} item={e} onSave={(data)=>{
+                                                    setForm((prev)=>{
+                                                        let state = {...prev}
+                                                        state.properties[i] = data
+                                                        return state
+                                                    })
+                                            }} />
+                                        :<HooksConfigProperty key={`${i}-${e.property}`} item={e}/>)
+                                }
+                            </List>
+                        </Box>
+                        <Divider />
+                    </>
+                }
+                      
+                      {/* {settingsState.tab == "img_ai_" && <HookSubConfigModal component="card" data={form} onDataChange={(subConfigs)=>setForm({...form, subConfigs:subConfigs})}/> } */}
+                    
                     <Box sx={{ pt:1, pr:2, width:'100%'}}>
                         <TextField label="Display Text" multiline rows={2} size="small"  value={form.displayText} onChange={evt=>setForm({...form, displayText:evt.target.value})} fullWidth sx={{pb:1}}/>
                     </Box>
@@ -235,6 +274,7 @@ const HookSettingsAccordion = (props : HookSettingsAccordionProps)=>{
         </AccordionDetails>
         
     </Accordion>
+//  </div>
 }
 
 export default HookSettingsAccordion

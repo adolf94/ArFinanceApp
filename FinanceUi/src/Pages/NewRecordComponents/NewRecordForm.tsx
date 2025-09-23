@@ -349,6 +349,7 @@ const NewRecordForm = (props: NewRecordFormProps) => {
           creditId: credit?.id,
           vendor,
           vendorId:vendor?.id,
+          reference: hook?.extractedData?.reference || "",
           description: subtituteText(data.remarks, hook) 
         })
 
@@ -857,6 +858,23 @@ const NewRecordForm = (props: NewRecordFormProps) => {
                   </IconButton>
                   }
                 }}
+              />
+            </Grid>
+          </Grid>
+        </ListItem>
+        <ListItem>
+          <Grid container width="100%" >
+            <Grid size={4} alignItems="center">
+              <FormLabel>Reference</FormLabel>
+            </Grid>
+            <Grid size={8}>
+              {/*@ts-ignore*/}
+              <TextField value={formData.reference || ""}
+                fullWidth
+                variant="standard"
+                size="small"
+
+                onChange={(evt)=>setFormData({...formData, reference:evt.target.value})}
               />
             </Grid>
           </Grid>
