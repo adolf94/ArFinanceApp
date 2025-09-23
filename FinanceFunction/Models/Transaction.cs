@@ -31,7 +31,8 @@ namespace FinanceFunction.Models
 
         public string Description { get; set; }
         public string MonthKey { get; set; } = "";
-        public List<string> Notifications { get; set; } = new List<string>();
+        public string Reference { get; set; } = "";
+				public List<string> Notifications { get; set; } = new List<string>();
 
 
         [MaxLength(100)]

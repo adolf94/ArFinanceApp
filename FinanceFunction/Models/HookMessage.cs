@@ -11,7 +11,7 @@ public class HookMessage
 	public string RawMsg { get; set; } = "";
 	public string PartitionKey { get; set; } = "default";
     public JsonDataModel? JsonData { get; set; }
-	public Dictionary<string, string>? ExtractedData { get; set; }
+		public ExtractedDataModel? ExtractedData { get; set; } = null;
 	public bool IsHtml { get; set; } =false;
     public string? Status { get; set; } = "New";
     public Guid? TransactionId { get; set; }
@@ -20,21 +20,32 @@ public class HookMessage
 
 
 		public class ExtractedDataModel
-    {
-		public string matchedConfig { get; set; } = "";
-		public string senderName { get; set; } = "";
-        public string senderAcct { get; set; } = "";
-        public string senderBank { get; set; } = "";
-        public string recipientBank { get; set; } = "";
-		public string recipientAcct { get; set; } = "";
+		{
+				public string matchedConfig { get; set; } = "";
+				public string sourceFilename { get; set; } = "";
+				public string description { get; set; } = "";
+				public string senderName { get; set; } = "";
+				public string senderAcct { get; set; } = "";
+				public string senderBank { get; set; } = "";
+				public string recipientBank { get; set; } = "";
+				public string recipientAcct { get; set; } = "";
+				public string recipientName { get; set; } = "";
 
-        public string reference { get; set; } = "";
-        public string amount { get; set; } = "";
-
-        public string dateTime { get; set; }
+				public string success { get; set; }
 
 
-    }
+				public string reference { get; set; } = "";
+				public string amount { get; set; } = "";
+				public string newBalance { get; set; } = "";
+				public string transactionFee { get; set; } = "";
+
+				public string dateTime { get; set; }
+				public string currency { get; set; } = "";
+
+				public Dictionary<string, string> otherData { get; set; } = new(); 
+
+		}
+
 
 		public class JsonDataModel
 		{
