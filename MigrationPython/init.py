@@ -20,6 +20,7 @@ import urllib3
 
 import os
 
+file_directory = Path(__file__).resolve().parent
 load_dotenv()
 dotenv_vars = dotenv_values()
 
@@ -171,7 +172,7 @@ async def import_data(container_data, migration, type = "restore"):
 
 
 def load_config_from_file(name):
-    file_path = "./migrations/" + name + ".py"
+    file_path = f"{file_directory}/migrations/{name}.py" 
     module_name = "migrate_script"
     spec = importlib.util.spec_from_file_location(module_name, file_path)
     module = importlib.util.module_from_spec(spec)
@@ -180,7 +181,7 @@ def load_config_from_file(name):
 
 
 def current_version_file():
-    file  = "data/" + backupname + "/__EfMigrations.json"
+    file  = f"{file_directory}/data/" + backupname + "/__EfMigrations.json"
     data = open(file, mode="r", encoding="utf8")
     history = json.load(data)
     migration = reduce(lambda x,y: x if int(x["id"].split("_")[0]) > int(y["id"].split("_")[0]) else y, history)
@@ -202,14 +203,14 @@ def get_latest_migration():
 
 def select_data_dir(msg = "Select a folder to restore"):
 
-    dir = os.listdir("./data")
+    dir = os.listdir(f"{file_directory}/data")
     return inquirer.select(
         message=msg,
         choices=dir,
     ).execute()
 
 def loadFiles():
-    backupfolder = "./data/" + backupname
+    backupfolder = f"{file_directory}/data/" + backupname
     dir = os.listdir(backupfolder)
     containers = {}
     for file in dir:
@@ -219,13 +220,11 @@ def loadFiles():
 
     return containers
 
-print(to_do)
-
 
 if to_do == "Restore":
 
     which_db = get_db_list(True)
-    dir = os.listdir("./data")
+    dir = os.listdir(f"{file_directory}/data")
     backupname = inquirer.select(
         message="Select a folder to restore",
         choices=dir,

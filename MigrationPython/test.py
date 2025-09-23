@@ -2,8 +2,9 @@
 
 import os
 import pathlib
+from dateutil.parser import parse
+import pytz
 
-filepath = os.path.abspath(__file__)
-print(__file__)
-print(pathlib.Path(filepath).parent.parent)
-
+tz = pytz.timezone("Asia/Manila")
+daaate = parse("2025-02-28T20:00:00Z").astimezone(tz).strftime("%Y-%m-01")
+print(daaate)
