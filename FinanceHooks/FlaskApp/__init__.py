@@ -1,4 +1,6 @@
 import os
+from FlaskApp.ai_modules import extract_from_ia
+from FlaskApp.ai_modules.image_ai import identify_img_transact_ai, perform_conditions
 from FlaskApp.ai_modules.image_functions import read_from_filename, read_screenshot
 import json
 import datetime
@@ -117,6 +119,14 @@ def file_hook_handler():
     if(upload_result["error"] == True):
         return Response(json.dumps( {"message" : upload_result["message"]} ), 400, content_type="application/json")
 
+    
+    image_extract = extract_from_ia(upload_result["local_file_path"])
+
+    upload_result["record"]["Lines"] = image_extract["data"]
+
+    add_to_app("Files", upload_result["record"])
+
+
     app = read_from_filename(upload_result["original_file_name"])
     if app == "" :
         return Response( json.dumps({"message": "App not parsed" , 
@@ -148,14 +158,14 @@ def file_hook_handler():
         "id": id,  
         "Date": datetime.datetime.now(datetime.UTC).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "JsonData": {
-            "lines":upload_result["image_extract"]["lines"],
+            "lines":image_extract["lines"],
             "action":"image_upload",
             "imageId": upload_result["record"]["id"],
             "fileName":upload_result["original_file_name"],
             "timestamp": datetime.datetime.now(datetime.UTC).strftime("%Y-%m-%dT%H:%M:%SZ") 
         },
         "ExtractedData": data,
-        "Location": upload_result["image_extract"]["data"],
+        "Location": image_extract["data"],
         "RawMsg":upload_result["original_file_name"] + " image upload",
         "Type":"notif",
         "MonthKey": utc_aware_dt.astimezone(tz_default).strftime("%Y-%m-01"),
@@ -171,6 +181,74 @@ def file_hook_handler():
     return Response( json.dumps(newItem) , 201, content_type="application/json")
  
 
+@app.post("/image_ai_hook")
+def image_ai_hook():
+    headeApiKey = request.headers.get("x-api-key", type=str)
+    if(headeApiKey == None or headeApiKey != apiKey ): return Response(status=401)  
+    upload_result = handle_upload(request)
+
+    add_to_app("Files", upload_result["record"])
+
+
+    if(upload_result["error"] == True):
+        return Response(json.dumps( {"message" : upload_result["message"]} ), 400, content_type="application/json")
+
+    #do ai stuff here?
+
+    image_output = identify_img_transact_ai(upload_result["local_file_path"],  upload_result["record"])
+
+
+    app = read_from_filename(upload_result["original_file_name"])
+    if app == "" :
+        return Response( json.dumps({"message": "App not parsed" , 
+                                     "imageId" : upload_result["record"]["id"] }), 400, content_type="application/json")
+                                     
+    utc_aware_dt = datetime.datetime.now(datetime.UTC)
+
+    output = json.loads(image_output.text)
+
+    if(len(output["otherData"]) == 0):
+        output["otherData"] = {
+            "info":"nothing here"
+        }
+
+    output["matchedConfig"] = "imgai_default"
+
+    matched_config = perform_conditions(output)
+    if(matched_config is not None):
+        output["matchedConfig"] = matched_config["id"]
+
+
+    output["success"] = True
+
+    id=uuid7( as_type='str')
+    newItem = { 
+        "Id" : id,
+        "id": id,  
+        "Date": datetime.datetime.now(datetime.UTC).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "JsonData": {
+            "action":"image_ai_upload",
+            "imageId": upload_result["record"]["id"],
+            "fileName":upload_result["original_file_name"],
+            "timestamp": datetime.datetime.now(datetime.UTC).strftime("%Y-%m-%dT%H:%M:%SZ") 
+        },
+        "ExtractedData": output,
+        "Location": {},
+        "RawMsg":output["description"],
+        "Type":"notif",
+        "MonthKey": utc_aware_dt.astimezone(tz_default).strftime("%Y-%m-01"),
+        "PartitionKey":"default",
+        "$type": "HookMessage",
+        "_ttl": 60*24*60*60,
+        "IsHtml":False
+    }
+
+    add_to_app("HookMessages", newItem)
+    add_to_persist("HookMessages", newItem)
+
+
+
+    return Response(json.dumps(newItem), 201, content_type="application/json")
 
 
 if __name__ == "__main__":

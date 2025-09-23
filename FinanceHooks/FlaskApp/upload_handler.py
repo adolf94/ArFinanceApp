@@ -98,7 +98,7 @@ def handle_upload(request : Request):
 
 
     #TODO: Create function to use existing file in Azure. instead of being reuploaded
-    image_extract = extract_from_ia(local_file_path)
+    # image_extract = extract_from_ia(local_file_path)
 
     app = read_from_filename(originalFileName)
     record = {
@@ -109,7 +109,7 @@ def handle_upload(request : Request):
         "OriginalFileName":originalFileName,
         "MimeType": file.mimetype ,
         "FileKey": blob_name,
-        "Lines": image_extract["data"],
+        "Lines": [],
         "$type": "BlobFile",
         "App":app,
         "DateCreated": datetime.datetime.now(datetime.UTC).strftime("%Y-%m-%dT%H:%M:%SZ"),
@@ -119,7 +119,7 @@ def handle_upload(request : Request):
     return {
         "error" : False,
         "file" : file,
-        "image_extract": image_extract,
+        "image_extract": None,
         "local_file_path" : local_file_path,
         "original_file_name" : originalFileName,
         "record": record

@@ -11,4 +11,6 @@ azure.cosmos
 azure.storage.blob 
 azure.identity
 azure-ai-vision-imageanalysis
+google-genai
+Pillow
 pytz
