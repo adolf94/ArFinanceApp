@@ -2,6 +2,7 @@
 import { queryClient } from "../App";
 import api from "../components/api";
 import { ScheduledTransactions } from "FinanceApi";
+import fnApi from "../components/fnApi";
 
 const SCHEDULED_TRANSACTION = "scheduledTransactions";
 
@@ -20,7 +21,7 @@ export const getOne = (id: string) => {
 export const useMutateSchedule = () => {
   const create = useMutation({
     mutationFn: (data: ScheduledTransactions) => {
-      return api.post("scheduledtransactions", data).then((res) => res.data);
+      return fnApi.post("scheduledtransactions", data).then((res) => res.data);
     },
     onSuccess: (data) => {
       queryClient.setQueryData([SCHEDULED_TRANSACTION, { id: data.id }], data);
@@ -29,7 +30,7 @@ export const useMutateSchedule = () => {
 
   const update = useMutation({
     mutationFn: (data: ScheduledTransactions) => {
-      return api.post("scheduledtransactions", data).then((res) => res.data);
+      return fnApi.post("scheduledtransactions", data).then((res) => res.data);
     },
     onSuccess: (data) => {
       queryClient.setQueryData([SCHEDULED_TRANSACTION, { id: data.id }], data);

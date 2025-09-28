@@ -6,6 +6,7 @@ import { addToTransactions, ensureTransactionAcctData, fetchTransactionById, TRA
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import numeral from "numeral";
+import { EventNote } from "@mui/icons-material";
 
 
 
@@ -64,18 +65,26 @@ const RenderListItem = ({ item }) => {
                         {item.vendor?.name}
                     </Typography>
                 </Grid>
-                <Grid size={{xs:4, sm:5}}>
-                    <Typography sx={{ fontWeight: 600 }} variant="body1">
-                        {item.description || ""}
-                    </Typography>
-                    <Typography variant="body1">
+                <Grid container size={{xs:4, sm:5}} sx={{ justifyContent: "start",}}>
+                    <Grid >
+                            {item.scheduleId && 
+                                <EventNote fontSize="small" />
+                            
+                            } 
+                    </Grid>
+                    <Grid sx={{flexGrow:1,  pl:1}}>
+                        <Typography sx={{ fontWeight: 600 }} variant="body1">
+                            {item.description || ""}
+                        </Typography>
+                        <Typography variant="body1">
 
-                    {item.type === "transfer"
-                        ? item.credit.name + " => " + item.debit.name
-                        : item.type === "expense"
-                            ? item.credit.name
-                            : item.debit.name}
-                    </Typography>
+                        {item.type === "transfer"
+                            ? item.credit.name + " => " + item.debit.name
+                            : item.type === "expense"
+                                ? item.credit.name
+                                : item.debit.name}
+                        </Typography>
+                    </Grid>
                 </Grid>
                 <Grid size={4} sx={{ textAlign: "right" }}>
                     

@@ -26,9 +26,10 @@ namespace FinanceFunction
 				private readonly ILogger<TransactionController> _logger;
 				private readonly IHookMessagesRepo _hooks;
 				private readonly CurrentUser _user;
+				private readonly IScheduledTransactionRepo _schedules;
 
 				public TransactionController(ITransactionRepo repo, IAccountRepo acct, IAccountBalanceRepo bal, IMonthlyTransactionRepo monthly,
-						IMapper mapper, ILogger<TransactionController> logger, IHookMessagesRepo hooks, CurrentUser user)
+						IMapper mapper, ILogger<TransactionController> logger, IHookMessagesRepo hooks, CurrentUser user, IScheduledTransactionRepo schedules)
 				{
 						_repo = repo;
 						_account = acct;
@@ -38,6 +39,7 @@ namespace FinanceFunction
 						_logger = logger;
 						_hooks = hooks;
 						_user = user;
+						_schedules = schedules;
 				}
 
 				[Function("GetOneTransaction")]
@@ -62,6 +64,29 @@ namespace FinanceFunction
 
 
 						var dto = await req.ReadFromJsonAsync<CreateTransactionDto>();
+
+						NewTransactionResponseDto response;
+
+						try
+						{
+								response = await CreateOneTransaction(dto);
+						}
+						catch (Exception ex)
+						{
+								if(ex.Message == "BadRequest")
+								{
+										return new BadRequestResult();
+								}
+								throw;
+						}
+
+
+						return await Task.FromResult(new OkObjectResult(response));
+
+				}
+
+				public async Task<NewTransactionResponseDto> CreateOneTransaction(CreateTransactionDto dto)
+				{
 
 						NewTransactionResponseDto response = new NewTransactionResponseDto();
 						Dictionary<Guid, Account> accounts = new Dictionary<Guid, Account>();
@@ -89,7 +114,7 @@ namespace FinanceFunction
 						//get was separated vs update, as create balances was using the updated balance when creating new Account Balance
 						var accDebit = _account.GetOne(dto.DebitId)!;
 
-						var debitBal = await _bal.CreateBalances(accDebit, dto.Date);  
+						var debitBal = await _bal.CreateBalances(accDebit, dto.Date);
 						accDebit = _account.UpdateDebitAcct(dto!.DebitId, dto.Amount);
 						accounts[dto.DebitId] = accDebit;
 						item.BalanceRefs.Add(new BalanceAccount
@@ -132,19 +157,19 @@ namespace FinanceFunction
 						if (result == null)
 						{
 								//transaction.Rollback();
-								return new BadRequestResult();
+								throw new Exception("BadRequest");
 						}
 						//transaction.Commit();
 
 						response.Transaction = result;
-						//_pConf.LastTransactionId = result.Id.ToString();
-						//}
 
-
-
-						return await Task.FromResult(new OkObjectResult(response));
-
+						if (dto.ScheduleId.HasValue)
+						{
+								response.Schedule = await _schedules.ApplyScheduledTransaction(response.Transaction);
+						}
+						return response;
 				}
+
 
 				[Function("UpdateTransactions")]
 				public async Task<IActionResult> UpdateOne([HttpTrigger(AuthorizationLevel.Anonymous, "put", Route = "transactions/{id}")]

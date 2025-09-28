@@ -635,7 +635,7 @@ const NewRecordForm = (props: NewRecordFormProps) => {
         {schedule.enabled && (
           <>
             <ListItem>
-              <Grid container>
+              <Grid container width="100%">
                 <Grid size={4}>
                   <FormLabel>Schedule</FormLabel>
                 </Grid>
@@ -661,7 +661,7 @@ const NewRecordForm = (props: NewRecordFormProps) => {
               </Grid>
             </ListItem>
             <ListItem>
-              <Grid container>
+            <Grid container width="100%">
                 <Grid size={4} alignItems="center">
                   <FormLabel>End Date</FormLabel>
                 </Grid>
@@ -679,7 +679,7 @@ const NewRecordForm = (props: NewRecordFormProps) => {
                         return;
                       } else {
                         setSelectedIteration(value);
-                        setSchedule({ ...schedule, endDate: value.date });
+                        setSchedule({ ...schedule, endDate: value.date, iterations:value.iteration });
                       }
                     }}
                   />

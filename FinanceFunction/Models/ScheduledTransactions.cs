@@ -17,12 +17,17 @@ namespace FinanceFunction.Models
 
 				public DateTime LastTransactionDate { get; set; }
 				public int LastTransactionIndex { get; set; }
+				public int Iterations { get; set; }
 				public DateTime NextTransactionDate { get; set; }
 				public bool Enabled { get; set; } = true;
 
 
 				public Guid? LastTransactionId { get; set; }
 				public Transaction? LastTransaction { get; set; }
+
+				public List<string> TransactionIds { get; set; } = new List<string>();
+				public string Description { get; set; }
+
 				[JsonIgnore]
 				public IEnumerable<Transaction>? Transactions { get; set; }
 				

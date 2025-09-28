@@ -5,8 +5,9 @@ namespace FinanceFunction.Dtos
     public class NewTransactionResponseDto
     {
         public Transaction? Transaction { get; set; }
+        public ScheduledTransactions? Schedule { get; set; }
 
-        public List<Account> Accounts { get; set; } = new List<Account>();
+				public List<Account> Accounts { get; set; } = new List<Account>();
         public List<AccountBalance> Balances { get; set; } = new List<AccountBalance>();
 				public List<MonthlyTransaction> Monthly { get; set; } = new List<MonthlyTransaction>();
 

@@ -14,6 +14,7 @@ using FinanceFunction.Middlewares;
 using FinanceFunction.Utilities;
 using FinanceFunction.Dtos;
 using Microsoft.AspNetCore.Http;
+using FinanceFunction;
 
 var builder = FunctionsApplication.CreateBuilder(args);
 
@@ -30,6 +31,7 @@ builder.Services.Configure<ForwardedHeadersOptions>(options =>
 var config = FnConfigToAppConfig.PrepareConfig();
 builder.Services.AddSingleton(config);
 builder.Services.AddScoped<CurrentUser>();
+builder.Services.AddScoped<TransactionController>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped(typeof(CancellationToken), serviceProvider =>
 {

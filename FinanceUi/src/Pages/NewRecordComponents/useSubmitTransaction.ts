@@ -21,8 +21,7 @@ const useSubmitTransaction = ({transaction : formData,schedule , transactionId:t
       const mutateSchedule = useMutateSchedule();
       const confirm = useConfirm();
         const mutateTransaction = useMutateTransaction()
-        const navigate = useNavigate()
-
+  
       const submitTransaction = async (onWaiting:(props:any)=>any) => {
         
         return new Promise((res,rej)=>{
@@ -37,7 +36,9 @@ const useSubmitTransaction = ({transaction : formData,schedule , transactionId:t
             vendor:formData.vendor,
             date: moment(formData.date).toISOString(),
             dateAdded: moment().toISOString(),
-            description: formData.description || "",
+            description: schedule.enabled? 
+              `Installment 1 of ${schedule.iterations}\n${formData.description}`
+              :(formData.description || ""),
             type: formData.type,
             scheduleId: formData.scheduleId,
             notifications:[]
@@ -47,7 +48,7 @@ const useSubmitTransaction = ({transaction : formData,schedule , transactionId:t
             if (transId === "new") {
               let responseSched;
               if (schedule?.enabled) {
-                responseSched = await mutateSchedule.create(schedule);
+                responseSched = await mutateSchedule.create({...schedule, description: formData.description});
               }
       
       

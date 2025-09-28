@@ -181,7 +181,8 @@ export const fetchTransactionsByMonthKey = async (year: number, month: number, o
   
   let monthlytransaction = await queryClient.ensureQueryData({
     queryKey: [MONTHLY_TRANSACTION, {monthKey: key}],
-    queryFn: ()=>fnApi.get<MonthlyTransaction>(`monthlytransaction/${key}`).then((e)=>e.data)
+    queryFn: ()=>fnApi.get<MonthlyTransaction>(`monthlytransaction/${key}`).then((e)=>e.data),
+    gcTime:600000
   }) 
   let transactions = [] as Transaction[]
   if(!hasData){

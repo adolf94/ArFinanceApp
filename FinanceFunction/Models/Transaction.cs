@@ -24,6 +24,7 @@ namespace FinanceFunction.Models
         public Vendor? Vendor { get; set; }
 
         public DateTime Date { get; set; }
+        public string Reference { get; set; } = "";
         public DateTime DateAdded { get; set; } = DateTime.UtcNow;
         public Guid? ScheduleId { get; set; }
         public ScheduledTransactions? Schedule { get; set; }
@@ -31,7 +32,6 @@ namespace FinanceFunction.Models
 
         public string Description { get; set; }
         public string MonthKey { get; set; } = "";
-        public string Reference { get; set; } = "";
 				public List<string> Notifications { get; set; } = new List<string>();
 
 

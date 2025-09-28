@@ -269,7 +269,7 @@ namespace FinanceFunction.Data.CosmosRepo
             services.AddScoped<IAccountBalanceRepo, AccountBalanceRepo>();
             services.AddScoped<IVendorRepo, VendorRepo>();
             services.AddScoped<IDbHelper, DbHelper>();
-            //services.AddScoped<IScheduledTransactionRepo, ScheduledTransactionRepo>();
+            services.AddScoped<IScheduledTransactionRepo, ScheduledTransactionRepo>();
             services.AddScoped<IUserRepo, UserRepo>();
             //services.AddScoped<ILoanProfileRepo, LoanProfileRepo>();
             //services.AddScoped<ILoanRepo, LoanRepo>();

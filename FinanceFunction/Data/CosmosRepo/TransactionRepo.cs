@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using FinanceFunction.Data;
+using FinanceFunction.Dtos;
 using FinanceFunction.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
@@ -9,12 +10,10 @@ namespace FinanceFunction.Data.CosmosRepo
     public class TransactionRepo : ITransactionRepo
     {
         private readonly AppDbContext _context;
-        private readonly IMapper _mapper;
 
-        public TransactionRepo(AppDbContext context, IMapper mapper)
+				public TransactionRepo(AppDbContext context, IMapper mapper)
         {
             _context = context;
-            _mapper = mapper;
         }
 
 
@@ -83,5 +82,7 @@ namespace FinanceFunction.Data.CosmosRepo
             return items;
 
         }
-    }
+
+
+		}
 }

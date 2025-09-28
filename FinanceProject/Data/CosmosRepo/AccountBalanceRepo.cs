@@ -134,7 +134,7 @@ namespace FinanceApp.Data.CosmosRepo
             {
                 var balances = await _context.AccountBalances!.Where(e => e.AccountId == transaction.CreditId && e.DateStart > transaction.Date)
                     .ToListAsync();
-
+ 
                 balance.AddRange(balances.Select(b =>
                 {
                     b.Balance -= transaction.Amount;
