@@ -51,7 +51,7 @@ namespace FinanceFunction.Data.CosmosRepo
         {
             DateTime currentPeriod = new DateTime(month.Year, month.Month, 1);
             DateTime prevPeriod = new DateTime(month.Year, month.Month, 1).AddMonths(-1);
-            bool isPrevPeriod = acct.PeriodStartDay >= month.Day;
+            bool isPrevPeriod = acct.PeriodStartDay < month.Day;
 
 
 

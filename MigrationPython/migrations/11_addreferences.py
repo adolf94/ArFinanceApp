@@ -28,7 +28,7 @@ def reset_ledgers(db):
 
     def datestr_to_monthKey(string: str):
         tz = pytz.timezone("Asia/Manila")
-        daaate = parse("2025-02-28T20:00:00Z").astimezone(tz).strftime("%Y-%m-01")
+        daaate = parse(string).astimezone(tz).strftime("%Y-%m-01")
         return daaate
 
     minMax = reduce( reduceMinMax, db["Transaction"], {"min":datetime(2025,2,1), "max":datetime(2000,1,1)} )
