@@ -1,5 +1,6 @@
 ﻿using FinanceFunction.Data;
 using FinanceFunction.Models;
+using FinanceFunction.Utilities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
@@ -46,9 +47,11 @@ namespace FinanceFunction.Data.CosmosRepo
 
 
 
-        public async Task<AccountBalance> CreateBalances(Account acct, DateTime month, bool save = true)
+        public async Task<AccountBalance> CreateBalances(Account acct, DateTime utcMonth, bool save = true)
 
         {
+
+            DateTime month = utcMonth.ToMnlTime();
             DateTime currentPeriod = new DateTime(month.Year, month.Month, 1);
             DateTime prevPeriod = new DateTime(month.Year, month.Month, 1).AddMonths(-1);
             bool isPrevPeriod = acct.PeriodStartDay > month.Day;
