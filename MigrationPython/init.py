@@ -74,7 +74,7 @@ def get_db_list(allowNew = False, text = "Which database?", client = client):
 
 
 def export_data():
-    exportPath = "data/" + backupname + "/"
+    exportPath = file_directory + "/data/" + backupname + "/"
     db = client.get_database_client(which_db)
     containers = db.list_containers()
     for cont in containers:

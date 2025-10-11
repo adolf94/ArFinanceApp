@@ -62,7 +62,7 @@ namespace FinanceFunction.Data.CosmosRepo
 				{
 						var now = DateTime.UtcNow;
 						var data = await _context.ScheduledTransactions!.Where(e => e.NextTransactionDate <= now
-							&& e.Enabled = true
+							&& e.Enabled == true
 						
 						).ToListAsync();
 						return data;
