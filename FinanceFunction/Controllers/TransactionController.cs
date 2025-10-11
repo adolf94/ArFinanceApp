@@ -26,9 +26,10 @@ namespace FinanceFunction
 				private readonly ILogger<TransactionController> _logger;
 				private readonly IHookMessagesRepo _hooks;
 				private readonly CurrentUser _user;
+				private readonly IAuditLogRepo _audit;
 				private readonly IScheduledTransactionRepo _schedules;
 
-				public TransactionController(ITransactionRepo repo, IAccountRepo acct, IAccountBalanceRepo bal, IMonthlyTransactionRepo monthly,
+				public TransactionController(ITransactionRepo repo, IAccountRepo acct, IAccountBalanceRepo bal, IMonthlyTransactionRepo monthly, IAuditLogRepo audit,
 						IMapper mapper, ILogger<TransactionController> logger, IHookMessagesRepo hooks, CurrentUser user, IScheduledTransactionRepo schedules)
 				{
 						_repo = repo;
@@ -39,6 +40,7 @@ namespace FinanceFunction
 						_logger = logger;
 						_hooks = hooks;
 						_user = user;
+						_audit = audit;
 						_schedules = schedules;
 				}
 
@@ -65,6 +67,8 @@ namespace FinanceFunction
 
 						var dto = await req.ReadFromJsonAsync<CreateTransactionDto>();
 
+
+
 						NewTransactionResponseDto response;
 
 						try
@@ -87,6 +91,9 @@ namespace FinanceFunction
 
 				public async Task<NewTransactionResponseDto> CreateOneTransaction(CreateTransactionDto dto)
 				{
+
+
+						await _audit.AddLogging(dto, "transactions", "");
 
 						NewTransactionResponseDto response = new NewTransactionResponseDto();
 						Dictionary<Guid, Account> accounts = new Dictionary<Guid, Account>();
@@ -167,6 +174,7 @@ namespace FinanceFunction
 						{
 								response.Schedule = await _schedules.ApplyScheduledTransaction(response.Transaction);
 						}
+						await _audit.UpdateStatus(200, response);
 						return response;
 				}
 
@@ -181,6 +189,7 @@ namespace FinanceFunction
 
 
 
+						await _audit.AddFromRequest(req);
 						var dto = await req.ReadFromJsonAsync<CreateTransactionDto>();
 
 						Transaction? transaction = _repo.GetOneTransaction(id);
@@ -279,6 +288,7 @@ namespace FinanceFunction
 						}
 						//_pConf.LastTransactionId = result.Id.ToString();
 						response.Transaction = result;
+						await _audit.UpdateStatus(200, response);
 
 						return await Task.FromResult(new OkObjectResult(response));
 				}

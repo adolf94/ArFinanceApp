@@ -98,9 +98,11 @@ builder.Services.AddCosmosContext(Configuration);
 
 
 webapp.UseMiddleware<AppMiddleware>();
+webapp.UseMiddleware<AuditMiddleware>();
 
 
 var host = builder.Build();
+
 
 
 

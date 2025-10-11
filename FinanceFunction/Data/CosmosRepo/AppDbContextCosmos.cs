@@ -277,7 +277,7 @@ namespace FinanceFunction.Data.CosmosRepo
             //services.AddScoped<IMemberProfileRepo, MemberProfileRepo>();
             //services.AddScoped<ILedgerAcctRepo, LedgerAcctRepo>();
             //services.AddScoped<ILedgerEntryRepo, LedgerEntryRepo>();
-            //services.AddScoped<IAuditLogsRepo, AuditLogsRepo>();
+            services.AddScoped<IAuditLogRepo, AuditLogRepo>();
             services.AddScoped<IHookMessagesRepo, HookMessagesRepo>();
             services.AddScoped<IMonthlyTransactionRepo, MonthlyTransactionRepo>();
             services.AddScoped<IHookReferenceRepo, HookReferenceRepo>();
