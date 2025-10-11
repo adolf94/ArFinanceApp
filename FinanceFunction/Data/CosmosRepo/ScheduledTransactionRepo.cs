@@ -29,6 +29,13 @@ namespace FinanceFunction.Data.CosmosRepo
 						schedule.LastTransactionId = transaction.Id;
 						schedule.LastTransactionIndex = schedule.LastTransactionIndex + 1;
 						schedule.TransactionIds.Add(transaction.Id.ToString());
+						if(schedule.LastTransactionIndex >= schedule.Iterations)
+						{
+							schedule.Enabled = false;					
+						}
+
+
+
 						await _context.SaveChangesAsync();
 						return schedule;
 
@@ -54,7 +61,10 @@ namespace FinanceFunction.Data.CosmosRepo
 				public async Task<List<ScheduledTransactions>> GetPendingTransactions()
 				{
 						var now = DateTime.UtcNow;
-						var data = await _context.ScheduledTransactions!.Where(e => e.NextTransactionDate <= now).ToListAsync();
+						var data = await _context.ScheduledTransactions!.Where(e => e.NextTransactionDate <= now
+							&& e.Enabled = true
+						
+						).ToListAsync();
 						return data;
 				}
 

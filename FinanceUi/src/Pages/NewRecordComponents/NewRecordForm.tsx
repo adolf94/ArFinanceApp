@@ -206,7 +206,6 @@ const NewRecordForm = (props: NewRecordFormProps) => {
           return {...prevValue}
         })
       }
-      console.log(evt.code)
       if(evt.code === "KeyS" && evt.altKey){
         isSubmittable && submitTransaction(false)
       }
@@ -439,7 +438,7 @@ const NewRecordForm = (props: NewRecordFormProps) => {
       i++;
       items.push({
         date: moment(x.toDate()).toISOString(),
-        iteration: i,
+        iteration: i + (isFuture ? 0 : 1),
         label: `${i + (isFuture ? 0 : 1)} - ${moment(x.toDate()).format("yyyy-MM-DD")}`,
         isMore: false,
       });
