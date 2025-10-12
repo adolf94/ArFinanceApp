@@ -49,7 +49,7 @@ public class ScheduleFunctionCron
                VendorId = last_transaction.VendorId,
                Amount = last_transaction.Amount,
                Type = last_transaction.Type,
-               ScheduleId = last_transaction.ScheduleId,
+               ScheduleId = item.Id,
                Description = $"Installment {item.LastTransactionIndex + 1} of {item.Iterations}\n${item.Description}"
             };
 

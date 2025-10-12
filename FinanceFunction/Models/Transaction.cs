@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 using UUIDNext;
 
 namespace FinanceFunction.Models
@@ -27,7 +28,9 @@ namespace FinanceFunction.Models
         public string Reference { get; set; } = "";
         public DateTime DateAdded { get; set; } = DateTime.UtcNow;
         public Guid? ScheduleId { get; set; }
+        [JsonIgnore]
         public ScheduledTransactions? Schedule { get; set; }
+        [JsonIgnore]
         public ScheduledTransactions? AsLastTransaction { get; set; }
 
         public string Description { get; set; }

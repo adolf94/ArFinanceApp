@@ -154,18 +154,18 @@ namespace FinanceFunction.Data.CosmosRepo
 				}
 
 
-				public async Task<bool> UpdateStatus(int status, object body)
+				public async Task<bool> UpdateStatus(int status, object item)
 				{
 						if (_currentItem == null) return false;
 						_currentItem!["StatusCode"] = status.ToString();
 
-						if(body == null)
+						if(item == null)
 						{
 								_currentItem["Response"] = null;
 						}
 						else
 						{
-								JObject jsonObj = JObject.FromObject(body);
+								JObject jsonObj = JObject.FromObject(item);
 								_currentItem["Response"] = jsonObj;
 
 						}

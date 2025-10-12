@@ -25,47 +25,8 @@ namespace FinanceFunction.Middlewares
 						await next(context);
 						var _audit = httpContext!.RequestServices.GetService<IAuditLogRepo>();
 						var _logger = httpContext!.RequestServices.GetService<ILogger<AuditMiddleware>>();
-						await _audit!.UpdateStatus(httpContext.Response.StatusCode, null);
-
-
-						//if((new[] {"POST","PUT","PATCH" }).Contains(httpContext.Request.Method))
-						//{
-						//		var responseBody = new MemoryStream();
-						//		var originalBodyStream = httpContext.Response.Body;
-						//		httpContext.Response.Body = responseBody;
-
-						//		await next(context);
-						//		try
-						//		{
-						//				await httpContext.Response.CompleteAsync();
-
-
-						//				var body = context.GetHttpResponseData();
-						//				await _audit!.UpdateStatus(httpContext.Response.StatusCode, body.Body);
-
-						//				httpContext.Response.Body.Seek(0, SeekOrigin.Begin);
-						//				await responseBody.CopyToAsync(originalBodyStream);
-
-						//		}
-						//		catch (Exception e)
-						//		{
-						//				_logger!.LogError(e.Message); httpContext.Response.Body.Seek(0, SeekOrigin.Begin);
-						//				await responseBody.CopyToAsync(originalBodyStream);
-						//				httpContext.Response.Body.Seek(0, SeekOrigin.Begin);
-						//				await responseBody.CopyToAsync(originalBodyStream);
-						//				throw;
-						//		}
-						//		finally
-						//		{
-						//				httpContext.Response.Body = originalBodyStream;
-						//				responseBody.Dispose();
-						//		}
-
-						//}
-						//else
-						//{
-
-						//}
+						await _audit!.UpdateStatus(httpContext.Response.StatusCode, item:null);
+						_logger!.LogInformation("AuditMiddleware was Completed");
 
 
 

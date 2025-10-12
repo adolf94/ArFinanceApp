@@ -54,9 +54,9 @@ import { getConfigById, HOOK_CONFIG } from "../../repositories/hookConfig";
 import AccountTextField from "./AccountTextField";
 
 const cronOptions = [
-  { name: "Monthly", cron: "0 0 DD * *" },
-  { name: "Twice a month 15/30", cron: "0 0 15,[L] * *" },
-   { name: "Weekly (Friday)", cron: "0 0 0 * * 5"}
+  { name: "Monthly", cron: "0 16 DD * *" },
+  { name: "Twice a month 15/30", cron: "0 16 15,[L] * *" },
+   { name: "Weekly (Friday)", cron: "0 16 0 * * 5"}
 ];
 
 interface NewRecordFormProps {
@@ -430,7 +430,8 @@ const NewRecordForm = (props: NewRecordFormProps) => {
     let items = [];
     let isFuture = moment(formData.date).isAfter(moment().add(1, "day"));
     let interval = cron.parseExpression(schedule.cronExpression, {
-      startDate: date,
+      startDate: moment.utc(date).format("YYYY-MM-DDTHH:mm:ss"),
+      tz:"UTC"
     });
     let i = 0;
     while (i < iteration) {
@@ -439,7 +440,7 @@ const NewRecordForm = (props: NewRecordFormProps) => {
       items.push({
         date: moment(x.toDate()).toISOString(),
         iteration: i + (isFuture ? 0 : 1),
-        label: `${i + (isFuture ? 0 : 1)} - ${moment(x.toDate()).format("yyyy-MM-DD")}`,
+        label: `${i + (isFuture ? 0 : 1)} - ${moment.utc(x.toDate()).local().format("yyyy-MM-DD")}`,
         isMore: false,
       });
     }
@@ -651,7 +652,7 @@ const NewRecordForm = (props: NewRecordFormProps) => {
                         ...schedule,
                         cronId: value?.cron || "",
                         cronExpression: value
-                          ? moment(formData.date).format(value.cron)
+                          ? moment(formData.date).utc().format(value.cron)
                           : "",
                       });
                     }}

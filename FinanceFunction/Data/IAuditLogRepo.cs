@@ -11,7 +11,7 @@ namespace FinanceFunction.Data
 		{
 				public Task<Guid> AddFromRequest(HttpRequest req);
 				public Task<bool> UpdateStatus(int status, Stream body);
-				public Task<bool> UpdateStatus(int status, object body);
+				public Task<bool> UpdateStatus(int status, object item);
 				public Task<Guid> AddLogging(object requestBody, string path, string ip);
 
 
