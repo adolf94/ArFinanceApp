@@ -23,11 +23,14 @@ namespace FinanceFunction.Middlewares
 				{
 						var httpContext = context.GetHttpContext();
 						await next(context);
-						var _audit = httpContext!.RequestServices.GetService<IAuditLogRepo>();
-						var _logger = httpContext!.RequestServices.GetService<ILogger<AuditMiddleware>>();
-						await _audit!.UpdateStatus(httpContext.Response.StatusCode, item:null);
-						_logger!.LogInformation("AuditMiddleware was Completed");
+						if(httpContext != null)
+						{
+								var _audit = httpContext!.RequestServices.GetService<IAuditLogRepo>();
+								var _logger = httpContext!.RequestServices.GetService<ILogger<AuditMiddleware>>();
+								await _audit!.UpdateStatus(httpContext.Response.StatusCode, item: null);
+								_logger!.LogInformation("AuditMiddleware was Completed");
 
+						}
 
 
 				}
