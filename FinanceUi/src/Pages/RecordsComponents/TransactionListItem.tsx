@@ -97,48 +97,55 @@ const RenderListItem = ({ item }) => {
                     </Typography>
                 </Grid>
             </Grid>
-            <Grid container sx={{display:{sm:'none'}}}>
-               <Grid container size={9}>
-                    <Grid size={6}>
-                        <Typography variant="body1">
-                            {item.type === "transfer"
-                                ? "Transfer"
-                                : item.type === "expense"
-                                    ? item.debit.name
-                                    : item.credit.name}
-                        </Typography>
-                    </Grid>
-                    <Grid size={6}>
-                        <Typography variant="body1">
+            <Grid container sx={{display:{sm:'none'}}} columns={12}>
+                
+                <Grid container size={9}>
+                        <Grid size={6}>
+                            <Typography variant="body1">
+                                {item.type === "transfer"
+                                    ? "Transfer"
+                                    : item.type === "expense"
+                                        ? item.debit.name
+                                        : item.credit.name}
+                            </Typography>
+                        </Grid>
+                        <Grid size={6}>
+                            <Typography variant="body1">
 
-                            {item.type === "transfer"
-                                ? item.credit.name + " => " + item.debit.name
-                                : item.type === "expense"
-                                    ? item.credit.name
-                                    : item.debit.name}
+                                {item.type === "transfer"
+                                    ? item.credit.name + " => " + item.debit.name
+                                    : item.type === "expense"
+                                        ? item.credit.name
+                                        : item.debit.name}
+                            </Typography>
+                        </Grid>
+                        <Grid container size={12}>
+                            <Grid >
+                                    {item.scheduleId && 
+                                        <EventNote fontSize="small" />
+                                    
+                                    } 
+                            </Grid>
+                            <Grid sx={{flexGrow:1}}>
+                                <Typography sx={{ fontWeight: 600 }} variant="body1">
+                                    {item.description || ""}
+                                </Typography>
+                                <Typography variant="body1">
+                                    {item.vendor?.name}
+                                </Typography>
+                            </Grid>
+                        </Grid>
+                </Grid>
+                <Grid size={3} sx={{textAlign:"right"}}>
+                    
+                        <Typography
+                            color={fontColorOnType(item.type)}
+                            sx={{ px: 1, fontWeight: 600 }}
+                            variant="body1"
+                        >
+                            {numeral(item.amount).format("P 0,0.00")}
                         </Typography>
-                    </Grid>
-                    <Grid size={12}>
-                            
-                        <Typography sx={{ fontWeight: 600 }} variant="body1">
-                            {item.description || ""}
-                        </Typography>
-                    </Grid>
-                    <Grid size={12}>
-                        <Typography variant="body1">
-                            {item.vendor?.name}
-                        </Typography>
-                    </Grid>
-               </Grid>
-               <Grid size={3}>
-                    <Typography
-                        color={fontColorOnType(item.type)}
-                        sx={{ px: 1, fontWeight: 600 }}
-                        variant="body1"
-                    >
-                        {numeral(item.amount).format("P 0,0.00")}
-                    </Typography>
-               </Grid>
+                </Grid>
             </Grid>
         </Box>
     </ListItem>

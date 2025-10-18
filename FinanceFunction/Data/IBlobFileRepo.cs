@@ -11,6 +11,7 @@ namespace FinanceFunction.Data
 		public interface IBlobFileRepo
 		{
 				public Task<BlobFile?> GetOneFileinfo(Guid id);
-
+				public Task<IEnumerable<BlobFile>> GetFiles();
+				public Task DeleteRecord(BlobFile file);
 		}
 }

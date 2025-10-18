@@ -6,6 +6,7 @@ import {
 import React, { lazy, Suspense } from "react";
 import { Navigate } from "react-router-dom";
 import Loader from "./components/Loader";
+import ImageGallery from "./Pages/Gallery/ImageGallery";
 
 const AccountsPage = lazy(() => import("./Pages/AccountsPage.tsx"));
 const HooksSettings = lazy(() => import("./Pages/Settings/Hooks.tsx"));
@@ -58,6 +59,14 @@ const AppRoutes: (PathRouteProps | IndexRouteProps | LayoutRouteProps)[] = [
     element: (
       <Suspense fallback={<Loader />}>
         <AccountsPage />
+      </Suspense>
+    ),
+  },
+  {
+    path: "/images",
+    element: (
+      <Suspense fallback={<Loader />}>
+        <ImageGallery />
       </Suspense>
     ),
   },

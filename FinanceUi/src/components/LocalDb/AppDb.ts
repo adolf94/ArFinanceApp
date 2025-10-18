@@ -37,10 +37,12 @@ export interface Transaction extends MakeOptional<ApiTransaction & {
 }, 'dateUpdated'> {
 
 }
+var db;
 
 
+export const initializeDb = ()=>{
 
-const db = new Dexie('FinanceApp') as Dexie & {
+  let dbInternal = new Dexie('FinanceApp') as Dexie & {
     transactions: EntityTable<Transaction, 'id'>,
     monthTransactions: EntityTable<MonthlyTransaction & {dateUpdated : Date}, 'monthKey'>,
     accountBalances: EntityTable<  AccountBalance & { dateUpdated: Date }, 'id'>,
@@ -50,17 +52,20 @@ const db = new Dexie('FinanceApp') as Dexie & {
   };
   
   // Schema declaration:
-  db.version(1).stores({
+  dbInternal.version(1).stores({
     transactions: '&id, monthKey',
     monthTransactions: '&monthKey',
       accountBalances: '&id,accountId, dateStart',
     accounts: '&id, type, accountGroupId',
-    hookMessages: '&id,monthKey,transactionId',
+    hookMessages: '&id,monthKey,transactionId,jsonData.imageId',
     images:"&id"
   });
 
+  db = dbInternal;
 
+}
 
+initializeDb();
 
 // export default class AppDB extends Dexie {
 //     transactions!: EntityTable<Transaction, 'id'>;

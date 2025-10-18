@@ -40,6 +40,7 @@ export function useOfflineData<T>(inputs : UseOfflineDataParams<T>, keys : any[]
         setLoading(true)
         const fetch = () => {
             fetching = true
+            setFetching(true)
             inputs.getOnlineData().then((data) => {
                 setData(data)
                 mode = "online"

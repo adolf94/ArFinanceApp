@@ -1,11 +1,11 @@
-import { Box, CircularProgress, Dialog, DialogContent, Divider, ListItem, ListItemButton, ListItemIcon, ListItemText, Tooltip } from "@mui/material"
-import { useEffect, useState } from "react"
+import { Alert, Box, CircularProgress, Dialog, DialogContent, Divider, ListItem, ListItemButton, ListItemIcon, ListItemText, Tooltip } from "@mui/material"
+import React, { useEffect, useState } from "react"
 import db from "../../components/LocalDb"
 import api from "../../components/fnApi"
 import {Image} from '@mui/icons-material'
 
 
-const ImageModal = ({id} : {id:string})=>{
+const ImageModal = ({id, children} : {id:string, children?: React.JSX})=>{
     const [open,setOpen] = useState(false)
     const [data,setData] = useState<string | ArrayBuffer>("")
     
@@ -35,6 +35,16 @@ const ImageModal = ({id} : {id:string})=>{
                     })
                                 
             
+                }).catch(async (err)=>{
+                    if(err.response.status == "404"){
+                            var item = {
+                                id:id,
+                                data: "404" as string
+                            }
+                            await db.images.put(item)
+                            setData("404");
+                            return (item)
+                    }
                 })
             }
 
@@ -45,17 +55,25 @@ const ImageModal = ({id} : {id:string})=>{
     
 
     return <>
-        <ListItemButton  onClick={()=>setOpen(true)}>
-                <ListItemIcon>
-                        <Image />
-                </ListItemIcon>
-                <ListItemText primary="Image" />
-        </ListItemButton>
-        <Divider />
+        {
+            !children?
+            <>
+            <ListItemButton  onClick={()=>setOpen(true)}>
+                    <ListItemIcon>
+                            <Image />
+                    </ListItemIcon>
+                    <ListItemText primary="Image" />
+            </ListItemButton>
+            <Divider />
+            </>:
+            React.cloneElement(children, {onClick: ()=>setOpen(true)})
+        }
         <Dialog open={open} onClose={()=>setOpen(false)}>
             <DialogContent>
                 {!data ? <CircularProgress size="3rem"/> :
                     //@ts-ignore
+                    data == "404"? 
+                    <Alert variant="outlined" color="error">Not Found</Alert>:
                     <Box component="img" sx={{maxHeight:"85vh"}} src={data}></Box>
                 } 
             </DialogContent>

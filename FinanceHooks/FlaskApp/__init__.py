@@ -69,6 +69,11 @@ def phone_hook():
         timestamp = utcstr_to_datetime(data["timestamp"])
         raw = data["sms_rcv_sender"] + ": " + data["sms_rcv_msg"]
          
+
+        
+
+
+
     elif data["action"] == "image_upload":
         item = get_record("Files", data["imageId"])
         if(item == None): return Response(status=404)
@@ -198,10 +203,6 @@ def image_ai_hook():
     image_output = identify_img_transact_ai(upload_result["local_file_path"],  upload_result["record"])
 
 
-    app = read_from_filename(upload_result["original_file_name"])
-    if app == "" :
-        return Response( json.dumps({"message": "App not parsed" , 
-                                     "imageId" : upload_result["record"]["id"] }), 400, content_type="application/json")
                                      
     utc_aware_dt = datetime.datetime.now(datetime.UTC)
 

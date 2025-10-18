@@ -186,7 +186,7 @@ const HooksAccordion = ({notif, onDelete, onCancel }) => {
             </Grid>
             <AccordionDetails>
                 <Grid container width="100%" sx={{alignItems:'start'}}>
-                    <Grid size={{md:6}}>
+                    <Grid size={{xs:12,md:6}}>
                         <List>
                                 
                         {

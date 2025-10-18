@@ -2,6 +2,7 @@
 using Azure.Storage.Sas;
 using FinanceFunction.Models;
 using Microsoft.EntityFrameworkCore;
+using System.ComponentModel;
 
 namespace FinanceFunction.Data.CosmosRepo
 {
@@ -19,6 +20,11 @@ namespace FinanceFunction.Data.CosmosRepo
 				public async Task<BlobFile?> GetOneFileinfo(Guid id)
 				{
 						return await _context.Files.Where(e => e.Id == id).FirstOrDefaultAsync(_token);
+				}
+
+				public async Task<IEnumerable<BlobFile>> GetFiles()
+				{
+						return await _context.Files.ToArrayAsync();
 				}
 
 				public async Task<Uri?> CreateServiceSASContainer(
@@ -54,6 +60,13 @@ namespace FinanceFunction.Data.CosmosRepo
 								// Client object is not authorized via Shared Key
 								return null;
 						}
+				}
+
+				public async Task DeleteRecord(BlobFile file) {
+
+						_context.Entry(file).State = EntityState.Deleted;
+						await Task.CompletedTask;
+				
 				}
 
 

@@ -37,10 +37,17 @@ public class HookMessagesRepo : IHookMessagesRepo
 
 		public async Task<IEnumerable<HookMessage>> GetHookMessagesMonthAsync(DateTime date)
 		{
-        string key = date.ToString("yyyy-MM-01");
+				string key = date.ToString("yyyy-MM-01");
 				return await _context.HookMessages!
-            .Where(e=>e.MonthKey == key)
-            .ToArrayAsync(_token);
+						.Where(e => e.MonthKey == key)
+						.ToArrayAsync(_token);
+		}
+
+		public async Task<IEnumerable<HookMessage>> GetHookByFile(string fileId)
+		{
+				return await _context.HookMessages!
+						.Where(e => e.JsonData!.imageId == fileId)
+						.ToArrayAsync(_token);
 		}
 
 

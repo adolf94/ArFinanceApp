@@ -76,7 +76,7 @@ const Records = () => {
     const navigate = useNavigate();
 
 
-    const { isLoading:loadingRecords } = useOfflineData({
+    const { isLoading:loadingRecords, isFetching } = useOfflineData({
         defaultData: [],
         offlineOnly : false,
         initialData: ()=>fetchTransactionsByMonthKey(month.get("year"), month.get("month"), true),

@@ -50,7 +50,7 @@ public class ScheduleFunctionCron
                Amount = last_transaction.Amount,
                Type = last_transaction.Type,
                ScheduleId = item.Id,
-               Description = $"Installment {item.LastTransactionIndex + 1} of {item.Iterations}\n${item.Description}"
+               Description = $"Installment {item.LastTransactionIndex + 1} of {item.Iterations}\n{item.Description}"
             };
 
             await _trc.CreateOneTransaction(new_transaction);

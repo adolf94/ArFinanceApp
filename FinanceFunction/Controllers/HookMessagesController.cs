@@ -47,7 +47,20 @@ public class HookMessagesController
 				return new OkObjectResult(items);
     }
 
-    [Function("GetHooksByMonth")]
+		[Function("GetHookByImageId")]
+		public async Task<IActionResult> GetByImage([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "file/{fileId}/hookmessages")]
+				HttpRequest req, string fileId)
+		{
+
+				if (!_user.IsAuthenticated) return new UnauthorizedResult();
+				if (!_user.IsAuthorized("finance_user")) return new ForbidResult();
+
+				var items = await _repo.GetHookByFile(fileId);
+				return new OkObjectResult(items);
+		}
+
+
+		[Function("GetHooksByMonth")]
     public async Task<IActionResult> GetHooksByMonth([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "month/{monthkey}/hookmessages")]
         HttpRequest req, DateTime monthkey)
     {
