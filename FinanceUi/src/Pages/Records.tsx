@@ -219,7 +219,7 @@ const Records = () => {
           </Box>
           <RecordsContext.Provider value={{ records: dailies, totals, month }}>
             <div role="tabpanel" hidden={view !== "daily"}>
-                          <Daily records={records} loading={loadingRecords} />
+                          <Daily records={records} loading={loadingRecords} isFetching={isFetching}/>
             </div>
             <div role="tabpanel" hidden={view !== "calendar"}>
               <Calendar records={records || []} />

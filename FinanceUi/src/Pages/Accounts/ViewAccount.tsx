@@ -9,6 +9,7 @@ import {
 } from "@mui/icons-material";
 import {
   AppBar,
+  Box,
   Chip,
   colors,
   Divider,
@@ -199,6 +200,7 @@ const ViewAccount = () => {
         </Toolbar>
       </AppBar>
       <Grid container spacing={1} sx={{ width:"100%" , mt: 2 }}>
+        <Box sx={{ my: 1, maxHeight: "80vh", overflow: "overlay" }}>
         <Grid container size={12} sx={{justifyContent:"end"}}>
           <Grid>
             <IconButton>
@@ -421,9 +423,11 @@ const ViewAccount = () => {
             </Paper>
           ))}
         </Grid>
+      
+        </Box>
       </Grid>
-          <Link to="/transactions/new" state={{credit:account} }>
-              <Fab color="primary" sx={fabGreenStyle}>
+      <Link to="/transactions/new" state={{credit:account} }>
+          <Fab color="primary" sx={fabGreenStyle}>
         <Add fontSize="large"/> 
           {/*<FontAwesomeIcon color="inherit" icon={faPlus} size="xl" />*/}
         </Fab>

@@ -20,6 +20,7 @@ import TransactionListItem from "./TransactionListItem";
 interface DailyViewProps {
     records: Transaction[];
     loading: boolean;
+    isFetching: boolean;
 }
 
 interface RecordViewTransaction {
@@ -108,6 +109,10 @@ const Daily = (props: DailyViewProps) => {
           </Grid>
         </Grid>
       </Paper>
+      { props.isFetching && 
+      <Alert color="info"  variant="outlined">
+        Still loading transactions...
+      </Alert> }
       {records.map((data) => (
           <Paper sx={{ my: 1 }} key={data.dateGroup}>
           <List>
