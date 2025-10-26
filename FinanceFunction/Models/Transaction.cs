@@ -24,8 +24,11 @@ namespace FinanceFunction.Models
         public Guid? VendorId { get; set; }
         public Vendor? Vendor { get; set; }
 
-        public DateTime Date { get; set; }
-        public string Reference { get; set; } = "";
+        public bool Audited { get; set; }
+
+				public DateTime Date { get; set; }
+				public DateTime DateOlder { get; set; }
+				public string Reference { get; set; } = "";
         public DateTime DateAdded { get; set; } = DateTime.UtcNow;
         public Guid? ScheduleId { get; set; }
         [JsonIgnore]

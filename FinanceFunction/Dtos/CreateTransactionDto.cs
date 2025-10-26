@@ -12,8 +12,12 @@
 
 				public Guid? ScheduleId { get; set; }
 
-		public List<string> Notifications { get; set; } = new List<string>();
-		public string Reference { get; set; }
+				public List<string> Notifications { get; set; } = new List<string>();
+				public string Reference { get; set; }
 
 				public string Description { get; set; } = string.Empty;
+		}
+		public class UpdateTransactionDto : CreateTransactionDto
+		{
+
 		}

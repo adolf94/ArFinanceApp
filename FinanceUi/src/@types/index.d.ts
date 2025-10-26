@@ -1,5 +1,5 @@
 declare module 'FinanceApi' {
-    // ..\FinanceProject\Models\Account.cs
+    // ..\FinanceFunction\Models\Account.cs
     export interface Account {
         id: string;
         name?: string;
@@ -16,7 +16,7 @@ declare module 'FinanceApi' {
         partitionKey: string;
     }
 
-    // ..\FinanceProject\Models\AccountBalance.cs
+    // ..\FinanceFunction\Models\AccountBalance.cs
     export interface AccountBalance {
         id: string;
         accountId: string;
@@ -30,7 +30,7 @@ declare module 'FinanceApi' {
         transactions: BalanceTransaction[];
     }
 
-    // ..\FinanceProject\Models\AccountGroup.cs
+    // ..\FinanceFunction\Models\AccountGroup.cs
     export interface AccountGroup {
         id: string;
         name?: string;
@@ -42,7 +42,7 @@ declare module 'FinanceApi' {
         partitionKey: string;
     }
 
-    // ..\FinanceProject\Models\AccountType.cs
+    // ..\FinanceFunction\Models\AccountType.cs
     export interface AccountType {
         id: string;
         name?: string;
@@ -51,7 +51,7 @@ declare module 'FinanceApi' {
         partitionKey: string;
     }
 
-    // ..\FinanceProject\Models\AppConfig.cs
+    // ..\FinanceFunction\Models\AppConfig.cs
     export interface AppConfig {
         cosmosEndpoint: string;
         cosmosKey: string;
@@ -63,9 +63,23 @@ declare module 'FinanceApi' {
         smsConfig: SmsConfiguration;
         financeHook: AppHookConfig;
         apps: Application[];
+        blobClient: BlobClientConfig;
     }
 
-    // ..\FinanceProject\Models\CoopOption.cs
+    // ..\FinanceFunction\Models\BlobFile.cs
+    export interface BlobFile {
+        id: string;
+        container: string;
+        partitionKey: string;
+        service: string;
+        originalFileName: string;
+        mimeType: string;
+        fileKey: string;
+        dateCreated: string;
+        status: string;
+    }
+
+    // ..\FinanceFunction\Models\CoopOption.cs
     export interface CoopOption {
         appId: string;
         year: number;
@@ -76,32 +90,48 @@ declare module 'FinanceApi' {
         installmentCount: number;
     }
 
-    // ..\FinanceProject\Models\CoopOption.cs
+    // ..\FinanceFunction\Models\CoopOption.cs
     export interface FrequencyOptions {
     }
 
-    // ..\FinanceProject\Models\CoopOption.cs
+    // ..\FinanceFunction\Models\CoopOption.cs
     export interface CoopOptionFrequency {
         name: string;
         cron: string;
     }
 
-    // ..\FinanceProject\Models\Currency.cs
+    // ..\FinanceFunction\Models\Currency.cs
     export interface Currency {
         currencyId: number;
         currencyName: string;
         currencyCode: string;
     }
 
-    // ..\FinanceProject\Models\HookMessage.cs
+    // ..\FinanceFunction\Models\HookConfig.cs
+    export interface HookConfig {
+        nameKey: string;
+        name: string;
+        app: string;
+        regex: string;
+        type: string;
+        displayText: string;
+        priorityOrder: number;
+        conditions: Condition[];
+        properties: ExtractProperty[];
+        subConfigs: SubHookConfig[];
+        enabled: boolean;
+        success: boolean;
+    }
+
+    // ..\FinanceFunction\Models\HookMessage.cs
     export interface HookMessage {
         id: string;
         date: string;
         type: string;
         rawMsg: string;
         partitionKey: string;
-        jsonData?: Record<string, string>;
-        extractedData?: Record<string, string>;
+        jsonData?: JsonDataModel;
+        extractedData?: ExtractedDataModel;
         isHtml: boolean;
         status?: string;
         transactionId?: string;
@@ -109,7 +139,7 @@ declare module 'FinanceApi' {
         timeToLive?: number;
     }
 
-    // ..\FinanceProject\Models\HookReference.cs
+    // ..\FinanceFunction\Models\HookReference.cs
     export interface HookReference {
         id: string;
         referenceName: string;
@@ -121,7 +151,7 @@ declare module 'FinanceApi' {
         configHits: Record<string, number>;
     }
 
-    // ..\FinanceProject\Models\InputLogs.cs
+    // ..\FinanceFunction\Models\InputLogs.cs
     export interface InputLogs {
         guid: string;
         dateLogged: string;
@@ -133,7 +163,7 @@ declare module 'FinanceApi' {
         partitionKey: string;
     }
 
-    // ..\FinanceProject\Models\LedgerAccounts.cs
+    // ..\FinanceFunction\Models\LedgerAccounts.cs
     export interface LedgerAccount {
         ledgerAcctId: string;
         dateAdded: string;
@@ -144,7 +174,7 @@ declare module 'FinanceApi' {
         partitionKey: string;
     }
 
-    // ..\FinanceProject\Models\LedgerEntry.cs
+    // ..\FinanceFunction\Models\LedgerEntry.cs
     export interface LedgerEntry {
         entryId: string;
         entryGroupId: string;
@@ -159,7 +189,7 @@ declare module 'FinanceApi' {
         amount: number;
     }
 
-    // ..\FinanceProject\Models\Loan.cs
+    // ..\FinanceFunction\Models\Loan.cs
     export interface Loan {
         id: string;
         appId: string;
@@ -185,11 +215,11 @@ declare module 'FinanceApi' {
         ledgerEntryId: string;
     }
 
-    // ..\FinanceProject\Models\Loan.cs
+    // ..\FinanceFunction\Models\Loan.cs
     export interface NoNavigationLoanProfile extends LoanProfile {
     }
 
-    // ..\FinanceProject\Models\LoanPayment.cs
+    // ..\FinanceFunction\Models\LoanPayment.cs
     export interface LoanPayment {
         id: string;
         date: string;
@@ -201,7 +231,7 @@ declare module 'FinanceApi' {
         againstPrincipal: boolean;
     }
 
-    // ..\FinanceProject\Models\LoanProfile.cs
+    // ..\FinanceFunction\Models\LoanProfile.cs
     export interface LoanProfile {
         profileId: string;
         appId: string;
@@ -209,10 +239,9 @@ declare module 'FinanceApi' {
         interestPerMonth: number;
         computePerDay: boolean;
         interestFactor: string;
-        fixed: FixedInterests[];
     }
 
-    // ..\FinanceProject\Models\MemberProfile.cs
+    // ..\FinanceFunction\Models\MemberProfile.cs
     export interface MemberProfile {
         appId: string;
         year: number;
@@ -226,14 +255,14 @@ declare module 'FinanceApi' {
         contributions: Contribution[];
     }
 
-    // ..\FinanceProject\Models\MonthlyTransaction.cs
+    // ..\FinanceFunction\Models\MonthlyTransaction.cs
     export interface MonthlyTransaction {
         monthKey: string;
         partitionKey: string;
         transactions: TransactionRef[];
     }
 
-    // ..\FinanceProject\Models\PaymentRecord.cs
+    // ..\FinanceFunction\Models\PaymentRecord.cs
     export interface PaymentRecord {
         id: string;
         appId: string;
@@ -249,13 +278,13 @@ declare module 'FinanceApi' {
         loanPayments: LoanPayment[];
     }
 
-    // ..\FinanceProject\Models\Role.cs
+    // ..\FinanceFunction\Models\Role.cs
     export interface Role {
         roleName: string;
         partitionKey: string;
     }
 
-    // ..\FinanceProject\Models\ScheduledTransactions.cs
+    // ..\FinanceFunction\Models\ScheduledTransactions.cs
     export interface ScheduledTransactions {
         id: string;
         cronExpression: string;
@@ -265,14 +294,17 @@ declare module 'FinanceApi' {
         endDate: string;
         lastTransactionDate: string;
         lastTransactionIndex: number;
+        iterations: number;
         nextTransactionDate: string;
         enabled: boolean;
         lastTransactionId?: string;
         lastTransaction?: Transaction;
+        transactionIds: string[];
+        description: string;
         partitionKey: string;
     }
 
-    // ..\FinanceProject\Models\Transaction.cs
+    // ..\FinanceFunction\Models\Transaction.cs
     export interface Transaction {
         id: string;
         epochUpdated: number;
@@ -286,11 +318,12 @@ declare module 'FinanceApi' {
         addByUser?: User;
         vendorId?: string;
         vendor?: Vendor;
+        audited: boolean;
         date: string;
+        dateOlder: string;
+        reference: string;
         dateAdded: string;
         scheduleId?: string;
-        schedule?: ScheduledTransactions;
-        asLastTransaction?: ScheduledTransactions;
         description: string;
         monthKey: string;
         notifications: string[];
@@ -298,14 +331,14 @@ declare module 'FinanceApi' {
         balanceRefs: BalanceAccount[];
     }
 
-    // ..\FinanceProject\Models\Transaction.cs
+    // ..\FinanceFunction\Models\Transaction.cs
     export interface BalanceAccount {
         accountBalanceKey: string;
         accountId: string;
         isDebit: boolean;
     }
 
-    // ..\FinanceProject\Models\User.cs
+    // ..\FinanceFunction\Models\User.cs
     export interface User {
         id: string;
         userName?: string;
@@ -324,7 +357,7 @@ declare module 'FinanceApi' {
         partitionKey: string;
     }
 
-    // ..\FinanceProject\Models\Vendor.cs
+    // ..\FinanceFunction\Models\Vendor.cs
     export interface Vendor {
         id: string;
         name?: string;
@@ -332,7 +365,7 @@ declare module 'FinanceApi' {
         partitionKey: string;
     }
 
-    // ..\FinanceProject\Models\WeeklyBalance.cs
+    // ..\FinanceFunction\Models\WeeklyBalance.cs
     export interface WeeklyBalance {
         accountId: string;
         account?: Account;
@@ -340,120 +373,6 @@ declare module 'FinanceApi' {
         startBalance: number;
         endBalance: number;
         partitionKey: string;
-    }
-
-    // ..\FinanceProject\Dto\AccountCreateDto.cs
-    export interface AccountCreateDto {
-        name?: string;
-        accountGroupId?: string;
-        foreignExchange: number;
-        balance: number;
-        currBalance: number;
-        periodStartDay: number;
-        resetEndOfPeriod: boolean;
-        minMonth: string;
-        maxMonth: string;
-    }
-
-    // ..\FinanceProject\Dto\AppProfile.cs
-    export interface AppProfile extends Profile {
-    }
-
-    // ..\FinanceProject\Dto\CreateLoanDto.cs
-    export interface CreateLoanDto {
-        userId: string;
-        coborrowerId: string;
-        date: string;
-        expectedPayments: Loan.PaymentPlan[];
-        sourceAcctId: string;
-        loanProfile: NoNavigationLoanProfile;
-        disbursementAccount?: DisbursementAccount;
-        principal: number;
-    }
-
-    // ..\FinanceProject\Dto\CreateMemberProfileDto.cs
-    export interface CreateMemberProfileDto {
-        shares: number;
-    }
-
-    // ..\FinanceProject\Dto\CreateTransactionDto.cs
-    export interface CreateTransactionDto {
-        id: string;
-        creditId: string;
-        vendorId?: string;
-        debitId: string;
-        amount: number;
-        date: string;
-        type: string;
-        notifications: string[];
-        description: string;
-    }
-
-    // ..\FinanceProject\Dto\CreateUserDto.cs
-    export interface CreateUserDto {
-        id: string;
-        userName?: string;
-        name: string;
-        googleName?: string;
-        mobileNumber: string;
-        otpCode?: number;
-        otpGuid?: string;
-    }
-
-    // ..\FinanceProject\Dto\GoogleIdTokenClaims.cs
-    export interface GoogleIdTokenClaims {
-        email: string;
-        name: string;
-        audience: string;
-    }
-
-    // ..\FinanceProject\Dto\HookRefLogDto.cs
-    export interface HookRefLogDto {
-        referenceName: string;
-        vendorId?: string;
-        type: string;
-        accountId?: string;
-        subConfig: string;
-    }
-
-    // ..\FinanceProject\Dto\LedgerProfile.cs
-    export interface LedgerProfile extends Profile {
-    }
-
-    // ..\FinanceProject\Dto\LoansProfile.cs
-    export interface LoansProfile extends Profile {
-    }
-
-    // ..\FinanceProject\Dto\NewContributionDto.cs
-    export interface NewContributionDto extends MemberProfile.Contribution {
-        destinationAccount: string;
-    }
-
-    // ..\FinanceProject\Dto\NewLedgerEntryDto.cs
-    export interface NewLedgerEntryDto {
-        date: string;
-        debitId: string;
-        creditId: string;
-        description: string;
-        amount: number;
-    }
-
-    // ..\FinanceProject\Dto\NewTransactionResponseDto.cs
-    export interface NewTransactionResponseDto {
-        transaction?: Transaction;
-        accounts: Account[];
-        balances: AccountBalance[];
-        monthly: MonthlyTransaction[];
-        notifications: HookMessage[];
-    }
-
-    // ..\FinanceProject\Dto\UserWithClaims.cs
-    export interface GoogleClaimResponse {
-        accessToken: string;
-        refreshToken: string;
-        idToken: string;
-        expiresIn: number;
-        scope: string;
     }
 
 }

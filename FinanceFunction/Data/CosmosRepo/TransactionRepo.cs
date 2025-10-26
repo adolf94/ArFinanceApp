@@ -83,6 +83,11 @@ namespace FinanceFunction.Data.CosmosRepo
 
         }
 
+        public async Task<IEnumerable<Transaction>> GetTransactionsForAudit()
+				{
+						var items = await _context.Transactions!.Where(e => !e.Audited).ToArrayAsync();
+						return items;
 
+				}
 		}
 }

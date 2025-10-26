@@ -21,6 +21,8 @@ import urllib3
 import os
 
 file_directory = Path(__file__).resolve().parent
+app_directory = Path(__file__).resolve().parent
+migration_path = ""
 load_dotenv()
 dotenv_vars = dotenv_values()
 
@@ -172,7 +174,7 @@ async def import_data(container_data, migration, type = "restore"):
 
 
 def load_config_from_file(name):
-    file_path = f"{file_directory}/migrations/{name}.py" 
+    file_path = f"{migration_path}/{name}.py" 
     module_name = "migrate_script"
     spec = importlib.util.spec_from_file_location(module_name, file_path)
     module = importlib.util.module_from_spec(spec)
@@ -187,14 +189,20 @@ def current_version_file():
     migration = reduce(lambda x,y: x if int(x["id"].split("_")[0]) > int(y["id"].split("_")[0]) else y, history)
     return migration
 
-
+def select_migrations_folder():
+    dir = os.listdir(f"{app_directory}/migrations")
+    selected_path = inquirer.select(
+        message="Select a db schema migrations",
+        choices=dir,
+    ).execute()
+    return f"migrations/{selected_path}"
 
 
 def get_latest_migration():
     files = []
     
-    for file in  os.listdir("migrations"):
-        if os.path.isfile(os.path.join("migrations", file)):
+    for file in  os.listdir(migration_path):
+        if os.path.isfile(os.path.join(migration_path, file)):
             files = files + [file]
     out = sorted(files, key=lambda x: int(x.split("_")[0]))
     last = out[-1]
@@ -223,6 +231,7 @@ def loadFiles():
 
 if to_do == "Restore":
 
+    migration_path = select_migrations_folder()
     which_db = get_db_list(True)
     dir = os.listdir(f"{file_directory}/data")
     backupname = inquirer.select(
@@ -374,6 +383,7 @@ elif to_do == "Reset Persist":
 elif to_do == "Restore Persist":
     
     backupname = select_data_dir()
+    migration_path = select_migrations_folder()
     which_db = get_db_list(True,text="Select Db")
     db = client.get_database_client(which_db)
 
@@ -401,6 +411,7 @@ elif to_do == "Restore Persist":
 
 
 elif to_do == "Migrate":
+    migration_path = select_migrations_folder()
     source = inquirer.select(
         message="Data Source?",
         choices=["Database", "Folder"],
@@ -435,6 +446,7 @@ else:
         message="Data Source?",
         choices=["Database", "Folder"],
     ).execute()
+    migration_path = select_migrations_folder()
 
     if source == "Folder":
         backupname = select_data_dir()

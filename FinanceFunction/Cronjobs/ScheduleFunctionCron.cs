@@ -23,10 +23,10 @@ public class ScheduleFunctionCron
     }
 
     [Function("ScheduleFunctionCron")]
-    public async Task Run([TimerTrigger("0 30 8 * * *")] TimerInfo myTimer)
+    public async Task ScheduleFunctionCronFn([TimerTrigger("0 30 8 * * *")] TimerInfo myTimer)
     {
 
-        var dues = await _repo.GetPendingTransactions();
+       var dues = await _repo.GetPendingTransactions();
 
         for (int i = 0; i < dues.Count(); i++)
         {
@@ -66,4 +66,11 @@ public class ScheduleFunctionCron
             _logger.LogInformation("Next timer schedule at: {nextSchedule}", myTimer.ScheduleStatus.Next);
         }
     }
+
+    [Function("AuditTransactionsCron")]
+    public async Task AuditTransactionCron([TimerTrigger("0 30 8 * * *")] TimerInfo myTimer)
+    {
+
+    }
+
 }

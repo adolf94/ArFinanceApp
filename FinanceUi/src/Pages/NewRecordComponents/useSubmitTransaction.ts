@@ -36,6 +36,7 @@ const useSubmitTransaction = ({transaction : formData,schedule , transactionId:t
             vendor:formData.vendor,
             date: moment(formData.date).toISOString(),
             dateAdded: moment().toISOString(),
+            reference: formData.reference,
             description: schedule.enabled? 
               `Installment 1 of ${schedule.iterations}\n${formData.description}`
               :(formData.description || ""),

@@ -49,7 +49,7 @@ def handle_sms(data):
         return output
 
 
-    if  "success" in reg and current_reg["Success"] == False: 
+    if  "Success" in reg and current_reg["Success"] == False: 
         output["data"]["matchedConfig"] = current_reg["id"]
         output["data"]["success"] = False
         return output

@@ -8,8 +8,7 @@ namespace FinanceFunction.Models
 
         public string PartitionKey { get; set; } = "default";
 
-
-        public List<TransactionRef> Transactions { get; set; } = new List<TransactionRef>();
+				public List<TransactionRef> Transactions { get; set; } = new List<TransactionRef>();
          
         public class TransactionRef
         {

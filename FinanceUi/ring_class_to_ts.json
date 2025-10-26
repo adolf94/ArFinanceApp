@@ -1,8 +1,8 @@
 {
   "include": [
-    "../FinanceProject/Models/*.cs",
-    "../FinanceProject/Dto/*.cs",
-    "../FinanceProject/QueryParams/*.cs"
+    "../FinanceFunction/Models/*.cs",
+    "../FinanceFunction/Dto/*.cs",
+    "../FinanceFunction/QueryParams/*.cs"
   ],
   "exclude": [],
   "namespace": "'FinanceApi'",

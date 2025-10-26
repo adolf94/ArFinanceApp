@@ -118,11 +118,17 @@ namespace FinanceFunction.Data.CosmosRepo
 
 
             AccountBalance bal = await CreateBalances(acct, transaction.Date);
-
+            bool hasRemove = false;
             if (reverse)
 						{
-								bal.EndingBalance += transaction.Amount;
-								bal.Transactions = bal.Transactions.Where(e => e.TransactionId != transaction.Id).ToList();
+                var toRemove = bal.Transactions.Where(e => e.TransactionId == transaction.Id).FirstOrDefault();
+
+                if (toRemove != null)
+                {
+                    hasRemove = true;
+										bal.EndingBalance += transaction.Amount;
+										bal.Transactions = bal.Transactions.Where(e => e.TransactionId != transaction.Id).ToList();
+								}
             }
             else
 						{
@@ -145,8 +151,8 @@ namespace FinanceFunction.Data.CosmosRepo
                 for(var i = 0; i<balances.Count(); i++)
 								{
 										var b = await _context.AccountBalances!.FindAsync(balances[i]);
-										b.Balance += transaction.Amount * (reverse ? 1 : -1);
-										b.EndingBalance += transaction.Amount * (reverse ? 1 : -1);
+										b.Balance += transaction.Amount * (hasRemove ? 1 : -1);
+										b.EndingBalance += transaction.Amount * (hasRemove ? 1 : -1);
 
 										balance.Add(b);
 								}
@@ -164,11 +170,18 @@ namespace FinanceFunction.Data.CosmosRepo
             List<AccountBalance> balance = new List<AccountBalance>();
 
             AccountBalance bal = await CreateBalances(acct, transaction.Date)!;
+						bool hasRemove = false;
 
-            if (reverse)
+						if (reverse)
 						{
-								bal.EndingBalance -= transaction.Amount;
-								bal.Transactions = bal.Transactions.Where(e => e.TransactionId != transaction.Id).ToList();
+								var toRemove = bal.Transactions.Where(e => e.TransactionId == transaction.Id).FirstOrDefault();
+
+								if (toRemove != null)
+								{
+										hasRemove = true;
+										bal.EndingBalance -= transaction.Amount;
+										bal.Transactions = bal.Transactions.Where(e => e.TransactionId != transaction.Id).ToList();
+								}
             }
             else
 						{
@@ -190,8 +203,8 @@ namespace FinanceFunction.Data.CosmosRepo
 								for (int i = 0; i < balances.Count; i++)
 								{
 										var b = await _context.AccountBalances!.FindAsync(balances[i].Id)!;
-										b.Balance += transaction.Amount * (reverse ? -1 : 1);
-										b.EndingBalance += transaction.Amount * (reverse ? -1 : 1);
+										b.Balance += transaction.Amount * (hasRemove ? -1 : 1);
+										b.EndingBalance += transaction.Amount * (hasRemove ? -1 : 1);
 										balance.Add(b);
 								}
 
