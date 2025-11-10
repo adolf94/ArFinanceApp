@@ -15,7 +15,8 @@ public class AppProfile : Profile
 
 				CreateMap<UpdateTransactionDto, Transaction>()
 										.ForMember(e => e.EpochUpdated, opt => opt.MapFrom(e => new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds()))
-										.ForMember(e => e.DateOlder, opt => opt.MapFrom((e, o) => e.Date < o.DateOlder ? e.Date : o.DateOlder ))
+										.ForMember(e => e.DateOlder, opt => opt.MapFrom((e, o) => e.Date < o.DateOlder ? e.Date : o.DateOlder))
+										.ForMember(e => e.Notifications, opt => opt.Ignore())
 										.ForMember(e => e.MonthKey, opt => opt.MapFrom(e => e.Date.ToString("yyyy-MM-01")));
 
 				CreateMap<CreateUserDto, User>()

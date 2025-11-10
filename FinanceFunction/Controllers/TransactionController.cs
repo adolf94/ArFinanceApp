@@ -144,7 +144,10 @@ namespace FinanceFunction
 						for (int i = 0; i < item.Notifications.Count(); i++)
 						{
 								var notif = item.Notifications[i];
-								HookMessage? hook = await _hooks.GetOneHook(Guid.Parse(notif));
+								var split = notif.Split("|");
+
+
+								HookMessage? hook = await _hooks.GetOneHookWithMonth( Guid.Parse(split[1]), split[0]);
 								if (hook != null)
 								{
 										hook.TransactionId = item.Id;
@@ -190,7 +193,7 @@ namespace FinanceFunction
 
 
 						await _audit.AddFromRequest(req);
-						var dto = await req.ReadFromJsonAsync<CreateTransactionDto>();
+						var dto = await req.ReadFromJsonAsync<UpdateTransactionDto>();
 
 						Transaction? transaction = _repo.GetOneTransaction(id);
 						if (transaction == null) return new NotFoundResult();

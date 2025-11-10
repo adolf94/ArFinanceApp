@@ -429,7 +429,9 @@ export const ensureTransactionAcctData = async (item) => {
     db.transactions.put(item)
     
     item.notifications.forEach((hookId)=>{
-        db.hookMessages.where("id").equals(hookId).first()
+        let id = hookId.split("|")[1]
+
+        db.hookMessages.where("id").equals(id).first()
         .then(toUpdate=>{
           if(!!toUpdate){
             toUpdate.transactionId = item.id
