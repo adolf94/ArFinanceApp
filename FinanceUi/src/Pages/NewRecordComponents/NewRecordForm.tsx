@@ -31,7 +31,7 @@ import moment from "moment";
 import SelectAccount from "./SelectAccount";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { v4 as uuid, v7 } from "uuid";
-import { Calculate, Repeat as IcoRepeat } from "@mui/icons-material";
+import { Calculate, Repeat as IcoRepeat, Receipt } from "@mui/icons-material";
 import { Account, ScheduledTransactions, Transaction } from "FinanceApi";
 import { fetchTransactionById, useMutateTransaction } from "../../repositories/transactions";
 import {useConfirm} from 'material-ui-confirm'
@@ -52,6 +52,7 @@ import numeral, { Numeral } from "numeral";
 import PillPopover from "./PillPopover";
 import { getConfigById, HOOK_CONFIG } from "../../repositories/hookConfig";
 import AccountTextField from "./AccountTextField";
+import ViewNotifDialog from "./ViewNotifDialog";
 
 const cronOptions = [
   { name: "Monthly", cron: "0 16 DD * *" },
@@ -277,14 +278,16 @@ const NewRecordForm = (props: NewRecordFormProps) => {
                 return e
               })
             })
-
+          
 
 
         }
       })();
   }, [transId, query, queryClient]);
 
+  useEffect(()=>{
 
+  },[formData.notifications])
 
   const onSelectedConfigChange = async (data)=>{
 
@@ -880,16 +883,23 @@ const NewRecordForm = (props: NewRecordFormProps) => {
           </Grid>
         </ListItem>
         <ListItem>
-          <TextField
-            fullWidth
-            label="Description"
-            value={formData.description}
-            onChange={(e) =>
-              setFormData({ ...formData, description: e.target.value })
-            }
-            variant="standard"
-            maxRows="2"
-          />
+          <Grid container sx={{width:"100%"}}>
+            <Grid sx={{flexShrink:1}}>
+              <ViewNotifDialog notifs={formData.notifications}/>
+            </Grid>
+            <Grid sx={{flexGrow:1}}>
+              <TextField
+                fullWidth
+                label="Description"
+                value={formData.description}
+                onChange={(e) =>
+                  setFormData({ ...formData, description: e.target.value })
+                }
+                variant="standard"
+                maxRows="2"
+              />
+            </Grid>
+          </Grid>
         </ListItem>
         <ListItem>
           <Grid container spacing={2} width="100%" >

@@ -1,4 +1,4 @@
-import { BookOnline, Collections, TableChart } from "@mui/icons-material"
+import { BookOnline, Collections, PendingActions, TableChart } from "@mui/icons-material"
 import { AppBar, Box, Container, Grid2 as Grid, IconButton, Toolbar, Typography } from "@mui/material"
 import db from "../components/LocalDb";
 import { useConfirm } from "material-ui-confirm";
@@ -70,6 +70,12 @@ const Settings = () => {
 								<Collections sx={{ fontSize: "3rem" }} />
 							</IconButton><br />
 							Images
+						</Grid>
+						<Grid size={4} sx={{ textAlign: "center", py:2 }}>
+							<IconButton onClick={()=>navigate("./scheduled")}>
+								<PendingActions sx={{ fontSize: "3rem" }} />
+							</IconButton><br />
+							Scheduled Transactions
 						</Grid>
 				</Grid>
 			</Box>

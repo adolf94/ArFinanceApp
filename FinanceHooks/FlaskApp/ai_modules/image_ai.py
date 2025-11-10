@@ -21,17 +21,17 @@ def identify_img_transact_ai(localpath, file_record):
         - sourceFilename : string - the filename of the image used.
         - reference : string - the reference number that can be used in later time. for record purposes
         - datetime : datetime- the date and time the transaction was executed in the format of "YYYY-MM-DDTHH:mm:ssZ". Convert from GMT +8:00 if it was not provided
-        - senderAcct  : string - (source account) the account used to send / pay as mentioned in the screenshot
+        - senderAcct  : string - (source account) the account number used to send / pay as mentioned in the screenshot
         - senderBank  : string - (source bank) the bank of the account used to send / pay as mentioned in the screenshot
         - senderName  : string - the name or nickname used to send / pay as mentioned in the screenshot
         - recipientAcct  : string - the destination account number of the transfer.
         - recipientBank  : string - the bank of the account of the recipient
-        - recipientName  : string - the name or nickname of the recipient account as shown in the image. For Bills pay, this is the type of bill paid.
-        - amount : decimal - the paid/transfered amount
+        - recipientName  : string - the name or nickname of the recipient account as shown in the image. For Bills pay, this is the type of bill paid. It can be the merchant name
+        - amount : decimal - the paid/transfered amount, always make this a positive number even if the picture indicates a negative number
         - transactionFee : decimal - the fee for the transaction (default value:0.00)
         - currency : string - the payment currency (default value: PHP)
         - otherData : json_object - key-value pairs of details that are not yet captured but can be used for referencing the transaction
-        ```````
+        ``````` 
     """
 
 

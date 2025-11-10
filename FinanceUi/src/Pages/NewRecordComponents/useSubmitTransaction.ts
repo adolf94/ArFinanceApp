@@ -57,7 +57,7 @@ const useSubmitTransaction = ({transaction : formData,schedule , transactionId:t
               console.log(newItem)
       
               if(conf){
-                newItem.notifications = [notification.id]
+                newItem.notifications = [`${notification.monthKey}|${notification.id}`]
                 const isCreditRefSameAsVendor = conf.vendor == conf.credit
                 const isDebitRefSameAsVendor = conf.vendor == conf.debit
       

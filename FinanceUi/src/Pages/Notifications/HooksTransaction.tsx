@@ -143,10 +143,17 @@ const HooksTransaction = ({hook, shown}: {hook:HookMessage, shown:boolean})=>{
     }
 
 
+    const navigateToAdd = ()=>{
+        let timestamp = hook.extractedData.datetime || hook.jsonData.timestamp
+        navigate(`/transactions/new?hookId=${hook.id}&date=${moment(timestamp).format("YYYY-MM-DD")}`)
+    }
+
+
     return <>
     <Grid size={12} sx={{textAlign:'center'}}>
                             {(confs?.subConfigs||[]).map(e=><Chip label={e.displayName} color="primary" clickable
                             onClick={()=>updateSelected(e)}
+                            key={e.id}
                             variant={selected?.subConfig == e.subConfig ? "filled" : "outlined"}></Chip>)}
                         </Grid>
                         <Grid size={12}>
@@ -200,7 +207,7 @@ const HooksTransaction = ({hook, shown}: {hook:HookMessage, shown:boolean})=>{
                                                     hook.transactionId ? <Button onClick={()=>navigate(`/transactions/${hook.transactionId}`)}>View</Button>
                                                         : <>
                                                         <Button disabled={!submittable()} >Submit</Button>
-                                                        <Button onClick={()=>navigate(`/transactions/new?hookId=${hook.id}&date=${moment(hook.jsonData.timestamp).format("YYYY-MM-DD")}`)}>More</Button>
+                                                        <Button onClick={navigateToAdd}>More</Button>
                                                     </>
                                                 }
                                                 

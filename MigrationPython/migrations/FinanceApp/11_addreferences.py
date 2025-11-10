@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta, timezone
 import pytz
 import json
+import re
 from dateutil.parser import parse
 from dateutil.relativedelta import relativedelta
 from functools import reduce
@@ -25,6 +26,11 @@ def reset_ledgers(db):
         if currentDate > p["max"]: p["max"] = currentDate
         return p    
     
+    def date_to_MonthKey(d: datetime):
+        tz = pytz.timezone("Asia/Manila")
+        daaate = d.astimezone(tz).strftime("%Y-%m-01")
+        return daaate
+        
 
     def datestr_to_monthKey(string: str):
         tz = pytz.timezone("Asia/Manila")
@@ -33,8 +39,8 @@ def reset_ledgers(db):
 
     minMax = reduce( reduceMinMax, db["Transaction"], {"min":datetime(2025,2,1), "max":datetime(2000,1,1)} )
     minMax = {
-        "min": datestr_to_monthKey(minMax["min"] + relativedelta(months=-1)),
-        "max": datestr_to_monthKey(minMax["max"]),
+        "min": datestr_to_monthKey((minMax["min"] + relativedelta(months=-1)).strftime("%Y-%m-01")),
+        "max": datestr_to_monthKey(minMax["max"].strftime("%Y-%m-01")),
         }
 
     print("set min and max dates")
@@ -58,8 +64,8 @@ def reset_ledgers(db):
                 "$type": "AccountBalance",
                 "Year": month.year,
                 "Month": month.month,
-                "DateStart": datestr_to_monthKey(month.replace(day=c["PeriodStartDay"])),
-                "DateEnd": datestr_to_monthKey(month.replace(day=c["PeriodStartDay"]) + relativedelta(months=1)),
+                "DateStart": date_to_MonthKey(month.replace(day=c["PeriodStartDay"])),
+                "DateEnd": date_to_MonthKey(month.replace(day=c["PeriodStartDay"]) + relativedelta(months=1)),
                 "Balance": 0,
                 "EndingBalance": 0,
                 "PartitionKey": "default",
@@ -111,6 +117,7 @@ def reset_ledgers(db):
 			"EpochUpdated":epoch 
 		})
 
+
     def updateBalances (transactionId, acctId,date,epoch, amount):
         acct = AccountDictionary[acctId]
         isPrevPeriod = parse(date).day < acct["PeriodStartDay"]
@@ -139,11 +146,12 @@ def reset_ledgers(db):
     
 
     tz = pytz.timezone("Asia/Manila")
+    db["HookMessages"] = list(map(lambda e: {**e,"Status": "New", "$type":"HookMessage","MonthKey":datestr_to_monthKey(e["Date"])}, db["HookMessages"]))
 
 
     for tran in db["Transaction"]:
         tran["EpochUpdated"] = parse(tran["DateAdded"]).timestamp()
-        tran["MonthKey"] = datestr_to_monthKey(tran["Date"], tzinfos=tz)
+        tran["MonthKey"] = datestr_to_monthKey(tran["Date"])
 
         updateMonthBal(tran["id"], tran["Date"], tran["EpochUpdated"])
 
@@ -155,8 +163,19 @@ def reset_ledgers(db):
         creditKey = updateBalances(tran["id"], tran["CreditId"], tran["Date"], tran["EpochUpdated"]
                                   , -tran["Amount"])
         
-        tran["Reference"] = tran["reference"] if tran["reference"] is not None else ""
-        
+        tran["Reference"] = "" if ("Reference" not in tran or tran["Reference"] is None) else tran["Reference"]
+
+        for i,notif in enumerate(tran["Notifications"]):
+            if not re.search(r"^([0-9]{4}-[0-9]{2}-[0-9]{2}\|)", notif):
+                n = next((item for item in db["HookMessages"] if item["id"] == notif), None)
+                if n is not None:
+                    new_key = n["MonthKey"] + "|" + notif
+                    tran["Notifications"][i] = new_key
+                    print(f"{n["MonthKey"]} => {new_key}")
+                else: 
+                    tran["Notifications"] = [item for item in tran["Notifications"] if item != notif ]
+                    print(f"{notif} not found.")
+
         tran["BalanceRefs"] = [
             {
                 "AccountId": tran["DebitId"],
@@ -214,7 +233,6 @@ def reset_ledgers(db):
     db["AccountBalance"] = final_acctBals
     
 
-    db["HookMessages"] = list(map(lambda e: {**e,"Status": "New", "$type":"HookMessage","MonthKey":datestr_to_monthKey(e["Date"], tzinfos=tz)}, db["HookMessages"]))
 
     return db
 

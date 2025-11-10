@@ -1,4 +1,4 @@
-import { ArrowDownward,  Attachment, Event, CheckCircle,  AccountBalanceWalletRounded, QrCode2, AccountBalance, Check, CheckCircleOutlined, AssignmentTurnedInOutlined, ArrowCircleLeft, Paid, RequestQuote, AccountCircle, AccountBox, Clear, ExpandMore, ExpandLess, Task, Refresh } from "@mui/icons-material"
+import { ArrowDownward,  Attachment, Event, CheckCircle,  AccountBalanceWalletRounded, QrCode2, AccountBalance, Check, CheckCircleOutlined, AssignmentTurnedInOutlined, ArrowCircleLeft, Paid, RequestQuote, AccountCircle, AccountBox, Clear, ExpandMore, ExpandLess, Task, Refresh, PriceCheck, InfoOutlined } from "@mui/icons-material"
 import { Accordion, AccordionDetails, AccordionSummary,  Grid2 as Grid,  Typography,List,  ListItem, ListItemText, ListItemIcon, Tooltip, Divider, Chip,  Button, Stack, IconButton, CircularProgress, Box, Skeleton, Menu, MenuItem, ClickAwayListener } from "@mui/material"
 import LayerIcon from "../../common/LayerIcon";
 import { lazy, Suspense, useEffect, useState } from "react";
@@ -20,8 +20,7 @@ const camelToSpace = (str:string)=>{
     .replace(/^./, function(str){ return str.toUpperCase(); })
 }
 
-
-const Icons = { 
+export const Icons = { 
     "matchedConfig" : {
         icon: <AssignmentTurnedInOutlined  color="primary"/>,
     },
@@ -39,6 +38,12 @@ const Icons = {
     },
     "amount":{
         icon: <Paid  color="primary"/>
+    },
+    "sourceFilename":{
+        icon: <Attachment  color="primary"/>
+    },
+    "transactionFee": {
+        icon: <PriceCheck color="primary"/>
     },
     "senderBank":{
         icon:<LayerIcon bottomIcon={<ArrowCircleLeft sx={{backgroundColor:'white', borderRadius:'8px', rotate:'135deg'}} color="primary" fontSize="0.25rem"/>}>
@@ -214,7 +219,7 @@ const HooksAccordion = ({notif, onDelete, onCancel }) => {
                                             return <ListItem key={key}>
                                                 <ListItemIcon>
                                                     <Tooltip title={camelToSpace(key)}>
-                                                        <Attachment />
+                                                        <InfoOutlined />
                                                     </Tooltip>
                                                 </ListItemIcon>
                                                 <ListItemText primary={notif.extractedData[key]} />

@@ -439,6 +439,8 @@ elif to_do == "Migrate":
             migration_name = get_latest_migration()
             migration = load_config_from_file(migration_name)
             db = migration.up_migration(db)
+            db["__EfMigrations"].append({"id": migration_name })
+            
             asyncio.run(import_data(db, migration, "migration"))
 
 else:
@@ -454,15 +456,16 @@ else:
         db = loadFiles()
         migration_name = current_version_file()["id"]
         migration = load_config_from_file(migration_name)
+        print(migration_name)
         db = migration.reset_ledgers(db)
         asyncio.run(import_data(db, migration, "reset"))
     else:
         which_db = get_db_list(False)
         backupname = "temp"
         dir = os.listdir("./data/")
-        if(dir != None):
-            for file in dir:
-                os.remove(file)
+        # if(dir != None):
+        #     for file in dir:
+        #         os.remove(file)
         export_data()
         db = loadFiles()
         migration_name = current_version_file()["id"]

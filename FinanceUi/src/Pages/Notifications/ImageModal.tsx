@@ -74,7 +74,7 @@ const ImageModal = ({id, children} : {id:string, children?: React.JSX})=>{
                     //@ts-ignore
                     data == "404"? 
                     <Alert variant="outlined" color="error">Not Found</Alert>:
-                    <Box component="img" sx={{maxHeight:"85vh"}} src={data}></Box>
+                    <Box component="img" sx={{maxHeight:"85vh", maxWidth:"100%"}} src={data}></Box>
                 } 
             </DialogContent>
         </Dialog>
