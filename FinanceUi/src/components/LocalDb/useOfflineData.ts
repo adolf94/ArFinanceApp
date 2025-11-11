@@ -60,7 +60,12 @@ export function useOfflineData<T>(inputs : UseOfflineDataParams<T>, keys : any[]
         inputs.initialData().then((data)=>{
             setLoading(false)
             if (mode === "offline") setData(data)
-            if (!fetching && !fetched && !inputs.offlineOnly ) fetch()
+            if (!fetching && !fetched && !inputs.offlineOnly ) fetch(
+                ()=>{
+                    mode = "online"
+                    fetching = false
+                    fetched = true
+                })
         }).catch((ex) => {
             fetching = true
             fetch(

@@ -96,10 +96,33 @@ namespace FinanceFunction.Controllers
 								if (to == DateTime.MinValue) return new BadRequestResult();
 								query = query.Where(e => e.DateStart <= to);
 						}
-						var result = await query.ToArrayAsync();
+						List<AccountBalance> result = await query.ToListAsync();
 
+						if (req.Query.ContainsKey("to"))
+						{
+								DateTime to;
+								DateTime.TryParse(req.Query["to"].First(), out to);
+								var lastItem = result.OrderBy(e => e.DateStart).Last();
+								if(lastItem.DateStart < to)
+								{
+										while (lastItem.DateStart < to)
+										{
+												var dateend = lastItem.DateEnd.AddMonths(1);
+												var item = new AccountBalance(lastItem.DateEnd.Year, lastItem.DateEnd.Month, lastItem.AccountId)
+												{
+														PartitionKey = "default",
+														Balance = lastItem.EndingBalance,
+														EndingBalance = lastItem.EndingBalance,
+														DateStart = lastItem.DateEnd,
+														DateEnd = dateend,
+												};
+												lastItem = item;
+												result.Add(item);
+										}
+								}
+						}
 
-						return await Task.FromResult(new OkObjectResult(result));
+						return await Task.FromResult(new OkObjectResult(result.ToArray()));
 
 				}
 		}

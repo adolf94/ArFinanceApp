@@ -41,7 +41,7 @@ const AccountHistoryBarChart = ({acctId, date} : AccountHistoryBarChartProps) =>
         
 
     const computed = useMemo(()=>{
-      let d = (acctBalances || []).map((bal:AccountBalance)=>{
+      let d = (acctBalances || []).sort((a,b)=>a.dateStart < b.dateStart ? 1 : -1).map((bal:AccountBalance)=>{
         let monthStr = moment(bal.dateStart).format("MMM")
         let output =bal.transactions.reduce((p,tr)=>{
           if(tr.amount >= 0){
@@ -151,7 +151,8 @@ const AccountHistoryBarChart = ({acctId, date} : AccountHistoryBarChartProps) =>
           </Grid>
         </CardBody>
       </Card>
-      </> } 
+      </> 
+       }  
       <Card>
           <CardBody>
 						<Box sx={{width:"100%", display:"block"}} ref={ref}>
