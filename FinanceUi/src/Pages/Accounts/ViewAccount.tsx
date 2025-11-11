@@ -6,6 +6,7 @@ import {
   ChevronLeft as IcoChevronLeft,
   ChevronRight as IcoChevronRight,
   ListAlt,
+  Refresh,
 } from "@mui/icons-material";
 import {
   AppBar,
@@ -44,6 +45,7 @@ import numeral from "numeral";
 import TransactionListItem from "../RecordsComponents/TransactionListItem.js";
 import { useOfflineData } from "../../components/LocalDb/useOfflineData";
 import AccountHistoryBarChart from "./AccountHistoryBarChart";
+import { queryClient } from "../../App";
 
 
 const fabGreenStyle = {
@@ -73,7 +75,7 @@ interface TransactionWithRunningBal extends Transaction {
 const ViewAccount = () => {
   const { acctId } = useParams();
   const [month, setMonth] = useState(moment());
-  const { data: records, isFetching:recordsLoading } = useOfflineData({
+  const { data: records, isFetching:recordsLoading,refetch } = useOfflineData({
     defaultData:[],
     getOnlineData: () => fetchByAccountMonthKey(acctId, month.year(), month.month(), false),
     initialData: ()=> fetchByAccountMonthKey(acctId, month.year(), month.month(), true),
@@ -100,6 +102,8 @@ const ViewAccount = () => {
       return "success.light";
     }
   };
+
+  
 
   const data = useMemo(() => {
     const totals = {
@@ -169,6 +173,17 @@ const ViewAccount = () => {
     };
   }, [records, acctId, acctBalance]);
 
+  const refetchData = ()=>{
+
+    queryClient.invalidateQueries({queryKey:[
+      ACCOUNT_BALANCE,
+      { accountId: acctId, date: month.format("yyyy-MM-01") },
+    ]})
+    refetch()
+
+  }
+
+
   return (
     <>
       <AppBar position="static">
@@ -205,6 +220,9 @@ const ViewAccount = () => {
             <Grid>
               <IconButton>
                 <BarChart />
+              </IconButton>
+              <IconButton onClick={refetchData}>
+                <Refresh />
               </IconButton>
               <IconButton>
                 <ListAlt />

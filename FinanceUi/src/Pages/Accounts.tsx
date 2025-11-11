@@ -37,10 +37,13 @@ const Accounts = (props) => {
     queryFn: fetchAccounts,
   });
 
+
+
+
   return (
   <Grid size={12}>
         {(loadingGroups || loadingAccts) && <Box sx={{ textAlign: "center" }}>
-        <CircularProgress />
+          <CircularProgress />
         </Box>}
       <List onLoad={() => {}}>
         {(accountGroups || [])

@@ -3,13 +3,16 @@ import React, { useState } from "react";
 import Accounts from "./Accounts";
 import { Typography } from "@mui/material";
 import IconButton from "@mui/material/IconButton"; 
-import {Settings as SettingsIcon, AddCircleRounded} from '@mui/icons-material'
+import {Settings as SettingsIcon, AddCircleRounded, RefreshOutlined} from '@mui/icons-material'
 import SettingsAccountType from "./Accounts/SettingAccountsType";
 import NewAccountGroup from "./Accounts/SettingAccountGroup";
 import NewAccount from "./Accounts/SettingsNewAccount";
 import UserPanel from "../components/UserPanel.js";
 import { useSearchParams } from "react-router-dom";
 import AccountChart from "./Accounts/AccountsChart";
+import { queryClient } from "../App";
+import { ACCOUNT_GROUP } from "../repositories/accountgroups";
+import { ACCOUNT } from "../repositories/accounts";
 
 const AccountsPage = (props) => {
   const [showType, setShowType] = useState(false);
@@ -25,6 +28,13 @@ const AccountsPage = (props) => {
     stateToTrue(true);
     setEllRef(null);
   };
+
+  const refetchAccounts = ()=>{
+    queryClient.invalidateQueries({queryKey:[ACCOUNT_GROUP]})
+    queryClient.invalidateQueries({queryKey:[ACCOUNT]})
+    
+  }
+
 
   return (
     <>
@@ -67,6 +77,9 @@ const AccountsPage = (props) => {
             direction="row-reverse"
             justifyContent="flex-start"
                 >
+              <IconButton onClick={refetchAccounts}>
+                  <RefreshOutlined />
+              </IconButton>
               <Button variant="outlined" onClick={() => setShowGroup(true)}>
                         <AddCircleRounded /> Group
               </Button>

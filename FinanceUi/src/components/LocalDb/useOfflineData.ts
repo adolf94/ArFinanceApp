@@ -18,6 +18,21 @@ export function useOfflineData<T>(inputs : UseOfflineDataParams<T>, keys : any[]
     const [isLoading, setLoading] = useState<boolean>(true)
     const [isFetching, setFetching] = useState<boolean>(false)
 
+    const fetch = (then) => {
+        setFetching(true)
+        inputs.getOnlineData().then((data) => {
+            setData(data)
+            then()
+            setFetching(false)
+            setLoading(false)
+        }).catch((ex) => {
+            setFetching(false)
+            setLoading(false)
+            throw ex;
+        })
+    }
+
+
     useEffect(() => {
         console.debug("called useOfflineData useEffect " + keys.join(","))
         let mode = "offline"
@@ -38,29 +53,23 @@ export function useOfflineData<T>(inputs : UseOfflineDataParams<T>, keys : any[]
             //    //setLoading(false)
         //})
         setLoading(true)
-        const fetch = () => {
-            fetching = true
-            setFetching(true)
-            inputs.getOnlineData().then((data) => {
-                setData(data)
-                mode = "online"
-                fetching = false
-                fetched = true
-                setFetching(false)
-                setLoading(false)
-            }).catch((ex) => {
-                setFetching(false)
-                setLoading(false)
-                throw ex;
-            })
-        }
-        
+
+
+
+
         inputs.initialData().then((data)=>{
             setLoading(false)
             if (mode === "offline") setData(data)
             if (!fetching && !fetched && !inputs.offlineOnly ) fetch()
         }).catch((ex) => {
-            fetch()
+            fetching = true
+            fetch(
+                ()=>{
+                    mode = "online"
+                    fetching = false
+                    fetched = true
+                }
+            )
             throw ex
         })
 
@@ -70,6 +79,7 @@ export function useOfflineData<T>(inputs : UseOfflineDataParams<T>, keys : any[]
 
     return {
         data,
+        refetch : ()=>fetch(()=>{}),
         isFetching,
         isLoading
     }

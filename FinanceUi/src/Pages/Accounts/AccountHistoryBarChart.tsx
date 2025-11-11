@@ -7,12 +7,13 @@ import { useEffect, useMemo, useState } from "react";
 import { queryClient } from "../../App";
 import { ACCOUNT_BALANCE, getAcctBalWithDateRange } from "../../repositories/accountBalance";
 import { CardBody } from "reactstrap";
-import { Alert, Box, Card, CardContent, Grid2 as Grid, Table, TableBody, TableCell, TableContainer, TableRow } from "@mui/material";
+import { Alert, Box, Card, CardContent, Grid2 as Grid, IconButton, Table, TableBody, TableCell, TableContainer, TableRow } from "@mui/material";
 import { AccountBalance } from "FinanceApi";
 import { BarChart } from "@mui/x-charts";
 import numeral from "numeral";
 import useMeasure from 'react-use-measure'
 import useDexieDataWithQuery from "../../components/LocalDb/useOfflineData2";
+import { Error, Refresh } from "@mui/icons-material";
 
 interface AccountHistoryBarChartProps {
     acctId: string;
@@ -21,6 +22,7 @@ interface AccountHistoryBarChartProps {
 
 const AccountHistoryBarChart = ({acctId, date} : AccountHistoryBarChartProps) => {
     const fromDate = useMemo(()=>moment(date).add(-5, 'month').format("YYYY-MM-01"),[date])
+    const [refetching,setRefetching] = useState(false)
     const [ref, bounds] = useMeasure();
 
     const {data:acctBalances, isLoading:loading} = useDexieDataWithQuery({
@@ -102,12 +104,23 @@ const AccountHistoryBarChart = ({acctId, date} : AccountHistoryBarChartProps) =>
 
     },[acctBalances])
 
- 
+    const refreshInconsistencies = ()=>{
+      setRefetching(true)
+      queryClient.fetchQuery({
+        queryKey: [ACCOUNT_BALANCE, {acctId, "start":fromDate,"end":date}],
+        queryFn:()=>getAcctBalWithDateRange(acctId,fromDate,date),
+        staleTime: 0
+      }).then(()=>{
+        setRefetching(false)
+      });
+    }
 
     return <Grid size={12} sx={{px:3}}>
       {balanceValidation.valid ? "" : 
       <>
-      <Alert color="error" sx={{mb:2}}>Data Inconsistencies found</Alert>
+      <Alert icon={<Error />} color="error" sx={{mb:2}} onClick={refreshInconsistencies} >
+        {refetching? "Refetching Data" :"Data Inconsistencies found"}
+      </Alert>
       
       <Card>
         <CardBody>
@@ -138,7 +151,7 @@ const AccountHistoryBarChart = ({acctId, date} : AccountHistoryBarChartProps) =>
           </Grid>
         </CardBody>
       </Card>
-      </>}
+      </> } 
       <Card>
           <CardBody>
 						<Box sx={{width:"100%", display:"block"}} ref={ref}>
