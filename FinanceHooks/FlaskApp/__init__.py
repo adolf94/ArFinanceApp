@@ -207,7 +207,8 @@ def image_ai_hook():
     utc_aware_dt = datetime.datetime.now(datetime.UTC)
 
     output = json.loads(image_output.text)
-
+    if output["app"] is None:
+        output["app"] = ""
     if(len(output["otherData"]) == 0):
         output["otherData"] = {
             "info":"nothing here"

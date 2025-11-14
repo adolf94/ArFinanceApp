@@ -19,7 +19,7 @@ import {
 import { createContext, useState, useMemo } from "react";
 import AccountsPage from "./Accounts";
 
-import { Add } from "@mui/icons-material";
+import { Add, Refresh } from "@mui/icons-material";
 import { useQuery } from "@tanstack/react-query";
 import { Transaction } from "FinanceApi";
 import moment from "moment";
@@ -36,6 +36,7 @@ import React from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import db from "../components/LocalDb";
 import TotalTab from "./RecordsComponents/Total";
+import useDexieDataWithQuery from "../components/LocalDb/useOfflineData2";
 
 interface RecordViewTransaction {
   dateGroup: string;
@@ -76,12 +77,17 @@ const Records = () => {
     const navigate = useNavigate();
 
 
-    const { isLoading:loadingRecords, isFetching } = useOfflineData({
+    const { isLoading:loadingRecords, refetch, isFetching } = useOfflineData({
         defaultData: [],
         offlineOnly : false,
         initialData: ()=>fetchTransactionsByMonthKey(month.get("year"), month.get("month"), true),
         getOnlineData: ()=>fetchTransactionsByMonthKey(month.get("year"), month.get("month"), false)
     }, [monthStr])
+
+    // const {data: monthData} = useDexieDataWithQuery({
+    //   dexieData: db.
+    // })
+
 
   const records = useLiveQuery(async ()=>{
     let key = moment([month.get("year"),  month.get("month"),1]).format("YYYY-MM-01")
@@ -203,34 +209,40 @@ const Records = () => {
               </Box>
           </Paper>
         </Grid>
-        <Grid size={{xs:12,sm:8}}>
-          <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
-            <Tabs
-              value={view || "daily"}
-              onChange={handleChange}
-              aria-label="basic tabs example"
-            >
-              <Tab label="Daily" value="daily" />
-              <Tab label="Calendar" value="calendar" />
-              {/* <Tab label="Weekly" value="weekly" />
-              <Tab label="Monthly" value="monthly" /> */}
-              <Tab label="Total" value="total" />
-            </Tabs>
-          </Box>
-          <RecordsContext.Provider value={{ records: dailies, totals, month }}>
-            <div role="tabpanel" hidden={view !== "daily"}>
-                          <Daily records={records} loading={loadingRecords} isFetching={isFetching}/>
-            </div>
-            <div role="tabpanel" hidden={view !== "calendar"}>
-              <Calendar records={records || []} />
-            </div>
-            <div role="tabpanel" hidden={view !== "total"}>
-              <TotalTab records={records} date={month.format("YYYY-MM-01")}/>
-            </div>
-            <div role="tabpanel" hidden={view !== ""}>
-              3
-            </div>
-          </RecordsContext.Provider>
+        <Grid container size={{xs:12,md:8}}>
+          <Grid container size={12} sx={{ borderBottom: 1, borderColor: "divider", justifyContent:"space-between"}} >
+            <Box sx={{display:"flex"}}>
+              <Tabs
+                value={view || "daily"}
+                onChange={handleChange}
+                aria-label="basic tabs example"
+              >
+                <Tab label="Daily" value="daily" />
+                <Tab label="Calendar" value="calendar" />
+                {/* <Tab label="Weekly" value="weekly" />
+                <Tab label="Monthly" value="monthly" /> */}
+                <Tab label="Total" value="total" />
+              </Tabs>
+            </Box>
+            <Box sx={{display:"flex"}}>
+              <IconButton onClick={refetch}>
+                <Refresh />
+              </IconButton>
+            </Box>
+          </Grid>
+          <Grid size={12}>
+            <RecordsContext.Provider value={{ records: dailies, totals, month }}>
+              <div role="tabpanel" hidden={view !== "daily"}>
+                            <Daily records={records} loading={loadingRecords} isFetching={isFetching}/>
+              </div>
+              <div role="tabpanel" hidden={view !== "calendar"}>
+                <Calendar records={records || []} />
+              </div>
+              <div role="tabpanel" hidden={view !== "total"}>
+                <TotalTab records={records} date={month.format("YYYY-MM-01")}/>
+              </div>
+            </RecordsContext.Provider>
+          </Grid>
         </Grid>
       </Grid>
       <Link to="/transactions/new">
