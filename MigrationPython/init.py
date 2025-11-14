@@ -104,6 +104,7 @@ async def import_data(container_data, migration, type = "restore"):
            conDict["ResetOnReset"] == False and type == "reset") : continue
         db = client.get_database_client(which_db)
 
+    
         try:
             db.delete_container(conDict["Container"])
             print(f"Recreating {conDict["Container"]}")
@@ -126,6 +127,7 @@ async def import_data(container_data, migration, type = "restore"):
 
             while True:
                 current_container = db.get_container_client(conDict["Container"])
+                
                 current_item = svc.get()
                 ii = current_item["i"]
                 

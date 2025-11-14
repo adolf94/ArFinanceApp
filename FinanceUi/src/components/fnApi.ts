@@ -29,7 +29,7 @@ const getTokenFromApi = mm(
   (e) => moment().format("yyyyMMddHHmm"),
 );
 
-export const getToken = async (force : boolean) => {
+export const getToken = async (force? : boolean) => {
   let token = window.sessionStorage.getItem("access_token");
 
   if (!token || force) token = await getTokenFromApi();

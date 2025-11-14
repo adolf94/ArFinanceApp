@@ -304,6 +304,13 @@ declare module 'FinanceApi' {
         partitionKey: string;
     }
 
+    // ..\FinanceFunction\Models\Tag.cs
+    export interface Tag {
+        value: string;
+        count: number;
+        partitionKey: string;
+    }
+
     // ..\FinanceFunction\Models\Transaction.cs
     export interface Transaction {
         id: string;
@@ -327,6 +334,7 @@ declare module 'FinanceApi' {
         description: string;
         monthKey: string;
         notifications: string[];
+        tags: string[];
         partitionKey: string;
         balanceRefs: BalanceAccount[];
     }

@@ -40,8 +40,9 @@ namespace FinanceFunction.Models
         public string MonthKey { get; set; } = "";
 				public List<string> Notifications { get; set; } = new List<string>();
 
+        public List<string> Tags { get; set; } = new List<string>();
 
-        [MaxLength(100)]
+				[MaxLength(100)]
         public string PartitionKey { get; init; } = "default";
         public List<BalanceAccount> BalanceRefs { get; set; } = new List<BalanceAccount>();
 

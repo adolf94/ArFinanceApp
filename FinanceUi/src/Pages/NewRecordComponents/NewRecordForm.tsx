@@ -21,7 +21,8 @@ import {
   IconButton,
   CircularProgress,
   Chip,
-  InputAdornment
+  InputAdornment,
+  MenuItem
 } from "@mui/material";
 import { SelectAccountContext } from "../NewRecord";
 //import { makeStyles } from '@mui/styles'
@@ -31,7 +32,7 @@ import moment from "moment";
 import SelectAccount from "./SelectAccount";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { v4 as uuid, v7 } from "uuid";
-import { Calculate, Repeat as IcoRepeat, Receipt } from "@mui/icons-material";
+import { Add, Calculate, Repeat as IcoRepeat, PlusOneRounded, Receipt } from "@mui/icons-material";
 import { Account, ScheduledTransactions, Transaction } from "FinanceApi";
 import { fetchTransactionById, useMutateTransaction } from "../../repositories/transactions";
 import {useConfirm} from 'material-ui-confirm'
@@ -44,15 +45,14 @@ import { getToken } from "../../components/fnApi";
 import { getOneHookMsg, HOOK_MESSAGES } from "../../repositories/hookMessages";
 import { ACCOUNT, fetchByAccountId } from "../../repositories/accounts";
 import db from "../../components/LocalDb/AppDb";
-import hookMappings from  "../Notifications/hooksMapping.json"
 import selectionByHook, { getReferenceName, subtituteText } from "../Notifications/selectionByHook";
-import { logReferenceInstance } from "../../repositories/hookReference";
 import useSubmitTransaction from "./useSubmitTransaction";
 import numeral, { Numeral } from "numeral";
 import PillPopover from "./PillPopover";
 import { getConfigById, HOOK_CONFIG } from "../../repositories/hookConfig";
 import AccountTextField from "./AccountTextField";
 import ViewNotifDialog from "./ViewNotifDialog";
+import SelectTagField from "./SelectTagField";
 
 const cronOptions = [
   { name: "Monthly", cron: "0 16 DD * *" },
@@ -78,6 +78,7 @@ const defaultValue = {
   debit: null,
   amount: null,
   vendor: null,
+  tags:[],
   description: "",
 };
 
@@ -141,7 +142,11 @@ const NewRecordForm = (props: NewRecordFormProps) => {
     id: v7(),
     lastTransactionDate: moment().toISOString(),
   });
-  
+  const [fieldShow, setFieldShow] = useState({
+    description: false,
+    reference:false,
+    tags:false
+  })
   const resetFormData = ()=>{
     setFormData({ ...defaultValue,credit:formData.credit, creditId:formData.creditId, date: formData.date, id: v7() })
     setHooks(defaultHooksValue)
@@ -235,6 +240,7 @@ const NewRecordForm = (props: NewRecordFormProps) => {
             : moment().toISOString();
 
           let hookId = query.get("hookId")
+          let notifs = []
           if(!!hookId){
               let configs = []
               let hook = await queryClient.ensureQueryData({
@@ -252,6 +258,7 @@ const NewRecordForm = (props: NewRecordFormProps) => {
                 navigate(`../transactions/${hook.transactionId}`)
                 return  
               }
+              notifs = [`${moment(date).format("YYYY-MM-01")}|${hookId}`]
               setHooks({configs,hook, selectedConfig: null})
           }
           
@@ -262,21 +269,34 @@ const NewRecordForm = (props: NewRecordFormProps) => {
                 queryFn: () => fetchByAccountId(query.get("creditId")),
               })
             : null;
-            setFormData({ ...defaultValue, id: v7(), date, credit, creditId: credit?.id });
+            setFormData({ ...defaultValue, id: v7(), date, notifications:notifs, credit, creditId: credit?.id });
         } else {
           let type = "offline"
-          db.transactions.filter(e=>e.id == transId)
+          await db.transactions.filter(e=>e.id == transId)
             .first().then(tr=>{
               if(type == "online") return
+              setFieldShow({
+                description: !!tr.description,
+                reference: !!tr.reference,
+                tags:false
+              })
               setFormData(tr)
             })
 
-          fetchTransactionById(transId)
+          await fetchTransactionById(transId)
             .then(e=>{
+              type = "online"
+              let output = e;
               setFormData((prev)=>{
                 if(prev.id === e.id && prev.epochUpdated === e.epochUpdated) return prev
+                setFieldShow({
+                  description: !!e.description,
+                  reference: !!e.reference,
+                  tags:false
+                })
                 return e
               })
+              
             })
           
 
@@ -339,7 +359,10 @@ const NewRecordForm = (props: NewRecordFormProps) => {
       
       let availDate = hook.jsonData?.timestamp ?? hook.date
       let datetime = moment(availDate).toISOString();
-
+        setFieldShow({
+          description : !!data.remarks,
+          reference: !!hook?.extractedData?.reference
+        })
         setFormData({
           ...formData,
           type:selectedConfig.type,
@@ -865,41 +888,67 @@ const NewRecordForm = (props: NewRecordFormProps) => {
             </Grid>
           </Grid>
         </ListItem>
-        <ListItem>
-          <Grid container width="100%" >
-            <Grid size={4} alignItems="center">
-              <FormLabel>Reference</FormLabel>
-            </Grid>
-            <Grid size={8}>
-              {/*@ts-ignore*/}
-              <TextField value={formData.reference || ""}
-                fullWidth
-                variant="standard"
-                size="small"
+        {fieldShow.reference && 
+          <ListItem>
+            <Grid container width="100%" >
+              <Grid size={4} alignItems="center">
+                <FormLabel>Reference</FormLabel>
+              </Grid>
+              <Grid size={8}>
+                {/*@ts-ignore*/}
+                <TextField value={formData.reference || ""}
+                  fullWidth
+                  variant="standard"
+                  size="small"
 
-                onChange={(evt)=>setFormData({...formData, reference:evt.target.value})}
-              />
+                  onChange={(evt)=>setFormData({...formData, reference:evt.target.value})}
+                />
+              </Grid>
             </Grid>
-          </Grid>
         </ListItem>
+        }
+        {
+          fieldShow.description && <ListItem>
+            <Grid container sx={{width:"100%"}}>
+              <Grid sx={{flexShrink:1}}>
+                <ViewNotifDialog notifs={formData.notifications}/>
+              </Grid>
+              <Grid sx={{flexGrow:1}}>
+                <TextField
+                  fullWidth
+                  label="Description"
+                  value={formData.description}
+                  onChange={(e) =>
+                    setFormData({ ...formData, description: e.target.value })
+                  }
+                  variant="standard"
+                  maxRows="2"
+                />
+              </Grid>
+            </Grid>
+          </ListItem>
+
+        }
         <ListItem>
-          <Grid container sx={{width:"100%"}}>
-            <Grid sx={{flexShrink:1}}>
-              <ViewNotifDialog notifs={formData.notifications}/>
-            </Grid>
-            <Grid sx={{flexGrow:1}}>
-              <TextField
-                fullWidth
-                label="Description"
-                value={formData.description}
-                onChange={(e) =>
-                  setFormData({ ...formData, description: e.target.value })
-                }
-                variant="standard"
-                maxRows="2"
-              />
-            </Grid>
-          </Grid>
+          {!fieldShow.reference && <Chip icon={<Add />} label="Reference" size="small" onClick={()=>setFieldShow({...fieldShow, reference:true})}/> }
+          {!fieldShow.description && <Chip icon={<Add />} label="Description" size="small" onClick={()=>setFieldShow({...fieldShow, description:true})}/>}
+          {!fieldShow.description && <ViewNotifDialog notifs={formData.notifications}>
+            <Chip label="Activity" size="small"/>
+          </ViewNotifDialog>}
+          {
+              (formData.tags || []).map((e,i)=><Chip label={e} color="info" size="small" onDelete={()=>{
+                //@ts-ignore
+                let tags = [...(formData.tags||[])].toSpliced(i,1);
+                setFormData({...formData,tags})
+              }}/>)
+          }
+          {
+            !fieldShow.tags ? <Chip icon={<Add />} label="Tag" size="small" onClick={()=>setFieldShow({...fieldShow,tags:true})}/> : <SelectTagField onAdd={(value)=>{
+              setFormData({...formData,tags: [...(formData.tags||[]),value]})
+            }}/>
+          }
+          
+          
         </ListItem>
         <ListItem>
           <Grid container spacing={2} width="100%" >

@@ -27,10 +27,11 @@ namespace FinanceFunction
 				private readonly IHookMessagesRepo _hooks;
 				private readonly CurrentUser _user;
 				private readonly IAuditLogRepo _audit;
+				private readonly ITagRepo _tags;
 				private readonly IScheduledTransactionRepo _schedules;
 
 				public TransactionController(ITransactionRepo repo, IAccountRepo acct, IAccountBalanceRepo bal, IMonthlyTransactionRepo monthly, IAuditLogRepo audit,
-						IMapper mapper, ILogger<TransactionController> logger, IHookMessagesRepo hooks, CurrentUser user, IScheduledTransactionRepo schedules)
+						ITagRepo tags, IMapper mapper, ILogger<TransactionController> logger, IHookMessagesRepo hooks, CurrentUser user, IScheduledTransactionRepo schedules)
 				{
 						_repo = repo;
 						_account = acct;
@@ -41,6 +42,7 @@ namespace FinanceFunction
 						_hooks = hooks;
 						_user = user;
 						_audit = audit;
+						_tags = tags;
 						_schedules = schedules;
 				}
 
@@ -102,7 +104,7 @@ namespace FinanceFunction
 						//{
 
 						Transaction item = _mapper.Map<Transaction>(dto);
-
+						response.Tags = (await _tags.UpdateTagCount(Array.Empty<string>(), dto.Tags.ToArray())).ToList();
 						//to do -- add try catch with rollback transactions
 
 						//get was separated vs update, as create balances was using the updated balance when creating new Account Balance
@@ -162,7 +164,9 @@ namespace FinanceFunction
 						response.Balances = balances.Values.ToList();
 						response.Monthly = new[] { bal }.ToList();
 
-						Transaction? result = _repo.CreateTransaction(item);
+			Transaction? result = _repo.CreateTransaction(item);
+
+						
 
 						if (result == null)
 						{
@@ -233,7 +237,7 @@ namespace FinanceFunction
 
 						var bal = await _monthly.AddToMonthlyTransaction(transaction, false, true);
 						monthly[bal.MonthKey] = bal;
-
+						response.Tags = (await _tags.UpdateTagCount(transaction.Tags.ToArray(), dto.Tags.ToArray())).ToList();
 						_mapper.Map(dto, transaction);
 						var creditBal = await _bal.CreateBalances(creditAcctOfNew, dto.Date, false);
 						accounts[dto.CreditId] = _account.UpdateCreditAcct(dto.CreditId, dto.Amount);

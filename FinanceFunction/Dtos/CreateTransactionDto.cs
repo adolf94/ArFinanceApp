@@ -11,7 +11,7 @@
 
 
 				public Guid? ScheduleId { get; set; }
-
+				public IEnumerable<string> Tags { get; set; } = Array.Empty<string>();
 				public List<string> Notifications { get; set; } = new List<string>();
 				public string Reference { get; set; }
 

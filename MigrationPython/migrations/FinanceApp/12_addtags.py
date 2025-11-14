@@ -10,8 +10,8 @@ from functools import reduce
 
 def up_migration(db):
 
-    for row in db["HookConfigs"]:
-        row["SubConfigs"] = []
+    for row in db["Transaction"]:
+        row["Tags"] = []
 
     return db
     # return db
@@ -272,30 +272,30 @@ def table_metadata():
             "PartitionKeyPath": "/Path",
         },
         {
-            "Container": "Files",
-            "ResetOnMigration": False,
-            "PartitionKeyPath": "/PartitionKey",
-        },
-        {
             "Container": "CoopOption",
             "ResetOnMigration": False,
             "PartitionKeyPath":"/AppId",
         },
         {
-            "Container":"ScheduledTransactions",
+            "Container": "Files",
             "ResetOnMigration": False,
-            "PartitionKeyPath":"/PartitionKey"
+            "PartitionKeyPath": "/PartitionKey",
         },
         {
-            "Container": "LoanPayments",
+            "Container":"HookConfigs",
             "ResetOnMigration": False,
-            "PartitionKeyPath": "/AppId",
+            "PartitionKeyPath":"/Type"
         },
         {
             "Container": "HookMessages",
             "ResetOnMigration": False,
             "PartitionKeyPath": "/MonthKey",
             "mapper": lambda e : { **e, "Status": "New", "MonthKey":parse(e["Date"]).strftime("%Y-%m-01")}
+        },
+        {
+            "Container":"HookReferences",
+            "ResetOnMigration": False,
+            "PartitionKeyPath":"/PartitionKey"
         },
         {
             "Container": "LedgerEntries",
@@ -313,6 +313,11 @@ def table_metadata():
             "PartitionKeyPath": "/AppId"
         },
         {
+            "Container": "LoanPayments",
+            "ResetOnMigration": False,
+            "PartitionKeyPath": "/AppId",
+        },
+        {
             "Container": "Loans",
             "ResetOnMigration": False,
             "PartitionKeyPath":"/AppId",
@@ -323,15 +328,29 @@ def table_metadata():
             "PartitionKeyPath":"/AppId"
         },
         {
+            "Container":"MonthTransactions",
+            "ResetOnMigration": False,
+            "PartitionKeyPath":"/PartitionKey"
+        },
+        {
             "Container": "Payments",
             "ResetOnMigration": False,
             "PartitionKeyPath":"/AppId"
         },
         {
-            "Container":"Transaction",
+            "Container":"ScheduledTransactions",
             "ResetOnMigration": False,
+            "PartitionKeyPath":"/PartitionKey"
+        },
+        {
+            "Container":"Transaction",
             "PartitionKeyPath":"/PartitionKey",
             "mapper": lambda e : { **e, "MonthKey": parse(e.Date).strftime("%Y-%m-01")}
+        },
+        {
+            "Container":"Tags",
+            "ResetOnMigration": True,
+            "PartitionKeyPath":"/PartitionKey",
         },
         {
             "Container":"User",
@@ -342,21 +361,6 @@ def table_metadata():
             "Container":"Vendor",
             "ResetOnMigration": False,
             "PartitionKeyPath":"/PartitionKey"
-        },
-        {
-            "Container":"MonthTransactions",
-            "ResetOnMigration": False,
-            "PartitionKeyPath":"/PartitionKey"
-        },
-        {
-            "Container":"HookReferences",
-            "ResetOnMigration": False,
-            "PartitionKeyPath":"/PartitionKey"
-        },
-        {
-            "Container":"HookConfigs",
-            "ResetOnMigration": False,
-            "PartitionKeyPath":"/Type"
         }
     ]
      

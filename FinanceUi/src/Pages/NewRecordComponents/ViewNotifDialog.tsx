@@ -1,6 +1,6 @@
 import { InfoOutlined, Receipt } from "@mui/icons-material"
 import { Accordion, AccordionDetails, AccordionSummary, Button, Card, CardContent, Dialog, DialogContent, Divider, IconButton, ListItem, ListItemIcon, ListItemText, Stack, TableBody, TableCell, TableContainer, TableRow, Tooltip } from "@mui/material"
-import { useEffect, useState } from "react"
+import { Children, useEffect, useState } from "react"
 import db from "../../components/LocalDb"
 import { getOneHookMsg } from "../../repositories/hookMessages"
 import ImageModal from "../Notifications/ImageModal"
@@ -81,7 +81,8 @@ const ViewNotif = ({item})=>{
 }
 
 
-const ViewNotifDialog = ({notifs})=>{
+const ViewNotifDialog = (props : any)=>{
+    const {notifs, children} = props
     const [open,setOpen] = useState(false)
     const [hooks, setHooks] = useState([])
 
@@ -103,9 +104,13 @@ const ViewNotifDialog = ({notifs})=>{
 
 
     return <>
-        <IconButton>
+        {
+          !!children ? React.cloneElement(children, {...props, onClick: ()=>setOpen(true)}) :
+          <IconButton>
             <Receipt onClick={()=>setOpen(true)} color={notifs && notifs?.length > 0 ? "info" : "inherit"}/>
-        </IconButton> 
+          </IconButton> 
+        }
+        
         <Dialog open={open} onClose={()=>setOpen(false)} maxWidth="sm">
           <DialogContent>
             <Stack gap={1}>

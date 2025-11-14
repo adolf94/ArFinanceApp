@@ -14,7 +14,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useNavigate } from "react-router-dom";
-import { AccountBalanceWallet, ReceiptLong, History} from "@mui/icons-material";
+import { AccountBalanceWallet, ReceiptLong, History, Settings} from "@mui/icons-material";
 
 const BottomAppBar = (props) => {
   const navigate = useNavigate();
@@ -47,7 +47,7 @@ const BottomAppBar = (props) => {
         <BottomNavigationAction
           value="/settings"
           label={"Settings"}
-          icon={<FontAwesomeIcon icon={faCog} />}
+          icon={<Settings />}
         />
       </BottomNavigation>
     </AppBar>

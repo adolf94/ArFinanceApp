@@ -43,7 +43,7 @@ export const fetchByAccountId = async (id: string, force: boolean = false) => {
         account = accountCache.find(e => e.id === id)
     }
 
-    if(!!account) return account
+    if(!!account) return localPutAccount(account)
 
     return fnApi.get("accounts/" + id).then(async (e) => {
 

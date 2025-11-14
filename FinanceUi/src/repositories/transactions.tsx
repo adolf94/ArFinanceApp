@@ -425,7 +425,6 @@ export const ensureTransactionAcctData = async (item) => {
         queryKey: [ACCOUNT, { id: item.debitId }],
         queryFn: () => fetchByAccountId(item.debitId)
     })
-    
     db.transactions.put(item)
     
     item.notifications.forEach((hookId)=>{
@@ -492,6 +491,12 @@ export const useMutateTransaction = () => {
                       db.monthTransactions.put({...m, dateUpdated:moment().toDate()})
                     }
                 })
+
+                e.data.tags.forEach(t=>{
+                  
+                  db.tags.put({...t, dateUpdated:moment().toDate()})
+                })
+
 
                 item = await ensureTransactionAcctData(item);
               queryClient.setQueryData([TRANSACTION, { id: item.id }], item);

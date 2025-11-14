@@ -12,7 +12,7 @@ namespace FinanceFunction.Dtos
 				public List<MonthlyTransaction> Monthly { get; set; } = new List<MonthlyTransaction>();
 
 				public List<HookMessage> Notifications { get; set; } = new List<HookMessage>();
-           
+        public List<Tag> Tags { get; set; } = new List<Tag>();
 				public class AccountBalanceKey
         {
             public AccountBalanceKey(Guid accountId, int year, int month)

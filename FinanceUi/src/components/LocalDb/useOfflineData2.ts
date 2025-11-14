@@ -13,6 +13,7 @@ interface UseDexieDataWithQuery<T> {
 interface UseDexieDataWithQueryOutput<T>{
     data : T | undefined
     isLoading: boolean
+    reload : ()=>void
 }
 
 export function  useDexieDataWithQuery<T>( props : UseDexieDataWithQuery<T>, deps) : UseDexieDataWithQueryOutput<T> {
@@ -32,19 +33,25 @@ export function  useDexieDataWithQuery<T>( props : UseDexieDataWithQuery<T>, dep
         })
     },[])
 
-    useEffect(()=>{
+    const refetchFromDexie = ()=>{
+        
         new Promise(async (resolve)=>{
             let output = await props.dexieData()
             resolve(output)
         }).then((d : T | undefined)=>{
             setLoading(false)
             setOutputData(d)
-        })            
+        })   
+    }
+
+    useEffect(()=>{       
+        refetchFromDexie()  
     },[...deps, queryLoad])
 
     return {
         data : outputData || props.initialData,
-        isLoading : loading
+        isLoading : loading,
+        reload: refetchFromDexie
     }
 } 
 

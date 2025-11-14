@@ -42,7 +42,8 @@ const useSubmitTransaction = ({transaction : formData,schedule , transactionId:t
               :(formData.description || ""),
             type: formData.type,
             scheduleId: formData.scheduleId,
-            notifications:[]
+            notifications:formData.notifications,
+            tags : formData.tags
           };
       
           const confirmedTransaction = async ()=>{
