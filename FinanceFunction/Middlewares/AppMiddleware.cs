@@ -33,7 +33,13 @@ namespace FinanceFunction.Middlewares
 								ClaimsPrincipal? principal = JwtTokenHelper.ReadClaimsFromJwt(bearer, jwt.secret_key, jwt.issuer, jwt.audience);
 								if (principal != null)
 								{
+										var userId = principal.Claims.FirstOrDefault(e => e.Type == "userId")?.Value;
+										if (string.IsNullOrEmpty(userId))
+										{
+												return next(context);
+										}
 										httpContext.User = principal;
+										_user.UserId = Guid.Parse(userId!);
 										_user.EmailAddress = principal.FindFirstValue(ClaimTypes.Email)!;
 										_user.IsAuthenticated = true;
 										_user.Roles = principal.Claims.Where(e => e.Type == ClaimTypes.Role).Select(e=>e.Value).ToArray();

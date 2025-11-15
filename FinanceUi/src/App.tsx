@@ -24,6 +24,8 @@ import { CircularProgress, Grid2 as Grid } from '@mui/material'
 import { lightGreen, purple, indigo} from '@mui/material/colors';
 import fnApi from "./components/fnApi";
 import Loader from "./components/Loader";
+import Login from "./Pages/Login";
+import { GoogleOAuthProvider } from "@react-oauth/google";
 
 export const queryClient = new QueryClient({
   defaultOptions: {
@@ -177,7 +179,10 @@ export default class App extends Component {
         <LocalizationProvider dateAdapter={AdapterMoment}>
           <QueryClientProvider client={queryClient}>
             <ThemeProvider theme={theme}>
-              <TheApp />
+              <GoogleOAuthProvider clientId={window.webConfig.clientId}>
+                <Login />
+                <TheApp />
+              </GoogleOAuthProvider>
             </ThemeProvider>
             <ReactQueryDevtools
               initialIsOpen={false}

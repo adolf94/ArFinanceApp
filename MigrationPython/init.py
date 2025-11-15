@@ -81,7 +81,7 @@ def export_data():
     containers = db.list_containers()
     for cont in containers:
         items = []
-
+        print(f"Backing up {cont["id"]}")
         container = db.get_container_client(cont["id"],)
         for item in container.read_all_items():
             items.append(item)

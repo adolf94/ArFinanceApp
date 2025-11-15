@@ -92,6 +92,10 @@ def phone_hook():
         raw =  item["OriginalFileName"] + " image upload"
         data = item
 
+    # elif data["action"] == "image_ai_upload":
+    #     item = get_record("Files", data["imageId"])
+    #     if(item == None): return Response(status=404)
+
 
     newItem = {
         "Id" : id,
@@ -224,6 +228,7 @@ def image_ai_hook():
     output["success"] = True
 
     id=uuid7( as_type='str')
+    upload_result["record"]["hookId"] = id
     newItem = { 
         "Id" : id,
         "id": id,  
@@ -247,7 +252,7 @@ def image_ai_hook():
 
     add_to_app("HookMessages", newItem)
     add_to_persist("HookMessages", newItem)
-
+    add_to_app("Files",upload_result["record"])
 
 
     return Response(json.dumps(newItem), 201, content_type="application/json")

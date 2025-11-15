@@ -318,6 +318,11 @@ def table_metadata():
             "PartitionKeyPath": "/AppId",
         },
         {
+            "Container":"LoginLogs",
+            "ResetOnMigration":True,
+            "PartitionKeyPath": "/PartitionKey"
+        },
+        {
             "Container": "Loans",
             "ResetOnMigration": False,
             "PartitionKeyPath":"/AppId",
@@ -355,6 +360,11 @@ def table_metadata():
         {
             "Container":"User",
             "ResetOnMigration": False,
+            "PartitionKeyPath":"/PartitionKey"
+        },
+        {
+            "Container":"UserCredentials",
+            "ResetOnMigration": True,
             "PartitionKeyPath":"/PartitionKey"
         },
         {

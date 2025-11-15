@@ -241,6 +241,17 @@ declare module 'FinanceApi' {
         interestFactor: string;
     }
 
+    // ..\FinanceFunction\Models\LoginLog.cs
+    export interface LoginLog {
+        id: string;
+        jwtId: string;
+        refreshToken: string;
+        expiry: string;
+        username: string;
+        isExpired: boolean;
+        partitionKey: string;
+    }
+
     // ..\FinanceFunction\Models\MemberProfile.cs
     export interface MemberProfile {
         appId: string;
@@ -362,6 +373,12 @@ declare module 'FinanceApi' {
         acctReceivableId?: string;
         liabilitiesId?: string;
         acctEquityId?: string;
+        partitionKey: string;
+    }
+
+    // ..\FinanceFunction\Models\UserCredential.cs
+    export interface UserCredential {
+        id: string;
         partitionKey: string;
     }
 

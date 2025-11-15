@@ -13,6 +13,8 @@ namespace FinanceFunction.Data
 				public Task<User> CreateUser(User user);
 				public Task<User> UpdateUser(User user);
 				public Task<User[]> GetAll();
+				public Task<LoginLog?> CreateLoginLog(string JwtId, Guid userId);
+				public Task<LoginLog> GetLoginLog(string Sid);
 
 		}
 }

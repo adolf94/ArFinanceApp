@@ -32,7 +32,9 @@ namespace FinanceFunction.Data.CosmosRepo
         public DbSet<MonthlyTransaction> MonthTransactions { get; set; }
         public DbSet<HookReference> HookReferences { get; set; }
         public DbSet<BlobFile> Files { get; set; }
-        public DbSet<Tag> Tags { get; set; }
+				public DbSet<Tag> Tags { get; set; }
+				public DbSet<LoginLog> LoginLogs { get; set; }
+				public DbSet<UserCredential> Credentials { get; set; }
 
 				public DbSet<HookConfig> HookConfigs { get; set; }
 
@@ -169,12 +171,23 @@ namespace FinanceFunction.Data.CosmosRepo
                 .ToContainer("Transaction")
                 .HasOne(e => e.Credit).WithMany(e => e.TransactionsAsCredit);
 
-            builder.Entity<Transaction>()
+						builder.Entity<Transaction>()
 
-                .HasPartitionKey(e => e.PartitionKey)
-                .HasKey(c => c.Id);
+								.HasPartitionKey(e => e.PartitionKey)
+								.HasKey(c => c.Id);
 
-            builder.Entity<Transaction>()
+						builder.Entity<LoginLog>()
+
+								.HasPartitionKey(e => e.PartitionKey)
+								.ToContainer("LoginLogs")
+								.HasKey(c => c.Id);
+						builder.Entity<UserCredential>()
+
+								.HasPartitionKey(e => e.PartitionKey)
+								.ToContainer("Credentials")
+								.HasKey(c => c.Id);
+
+						builder.Entity<Transaction>()
                 .Ignore(e => e.Debit).Ignore(e => e.Credit).Ignore(e => e.AsLastTransaction)
                 .Ignore(e => e.Vendor);
 

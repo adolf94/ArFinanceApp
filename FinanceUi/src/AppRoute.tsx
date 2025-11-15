@@ -79,6 +79,14 @@ const AppRoutes: (PathRouteProps | IndexRouteProps | LayoutRouteProps)[] = [
     ),
   },
   {
+    path: "/login",
+    element: (
+      <Suspense fallback={<Loader />}>
+        <Settings />
+      </Suspense>
+    ),
+  },
+  {
     path: "/settings/hooks",
     element: (
       <Suspense fallback={<Loader />}>

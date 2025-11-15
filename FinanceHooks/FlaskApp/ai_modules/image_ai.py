@@ -1,5 +1,8 @@
+from datetime import time
+import logging
 import os
 from google import genai
+from google.genai.errors import APIError
 from google.genai import types
 from PIL import Image
 import json
@@ -7,6 +10,7 @@ import json
 from FlaskApp.cosmos_modules import get_all_records_by_partition
 
 client = genai.Client(api_key=os.environ['GEMINI_API_KEY'])
+max_retries = 3
 
 def identify_img_transact_ai(localpath, file_record):
 
@@ -41,12 +45,39 @@ def identify_img_transact_ai(localpath, file_record):
     config = types.GenerateContentConfig(
         response_mime_type="application/json"
     )
+    for attempt in range(max_retries):
+        try:
+            logging.log(f"Attempt {attempt + 1}...")
+            response = client.models.generate_content(model="gemini-2.5-flash",
+                                                    contents=[image, prompt],
+                                                    config=config
+                                                )
+            
+            return response
+        except APIError as e:
+            # Check for 503 (Service Unavailable/Overloaded) or 429 (Rate Limit)
+            if e.code == 503 or e.code == 429:
+                # Calculate exponential backoff delay
+                wait_time = 2 ** attempt  # e.g., 1, 2, 4, 8, 16 seconds
+                
+                if attempt < max_retries - 1:
+                    print(f"Error {e.code}: Model overloaded/rate limited. Retrying in {wait_time}s...")
+                    time.sleep(wait_time)
+                else:
+                    # Last attempt failed, raise the final error
+                    print(f"Error {e.code}: Failed after {max_retries} attempts.")
+                    raise e
+            else:
+                # Handle other unexpected API errors immediately
+                print(f"An unrecoverable API error occurred (Code {e.code}): {e}")
+                raise e
+        
+        except Exception as e:
+            # Catch other potential errors (e.g., network issues)
+            print(f"An unexpected error occurred: {e}")
+            raise e
 
-    response = client.models.generate_content(model="gemini-2.5-flash",
-                                            contents=[image, prompt],
-                                            config=config
-                                            )
-    return response
+    return None # Should not be reached if max_retries is > 0
 
 def perform_conditions(output):
     

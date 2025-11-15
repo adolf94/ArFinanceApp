@@ -8,7 +8,7 @@
 				public decimal Amount { get; set; }
 				public DateTime Date { get; set; }
 				public string Type { get; set; }
-
+					
 
 				public Guid? ScheduleId { get; set; }
 				public IEnumerable<string> Tags { get; set; } = Array.Empty<string>();
