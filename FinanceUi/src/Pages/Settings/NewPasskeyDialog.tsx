@@ -5,7 +5,7 @@ import { enqueueSnackbar, useSnackbar } from "notistack"
 import * as Passwordless from "@passwordlessdev/passwordless-client"
 
 
-const NewPasskeyDialog = ()=>{
+const NewPasskeyDialog = ({onComplete})=>{
     const [show,setShow] = useState(false)
     const [name,setName] = useState("")
     const toast = useSnackbar()
@@ -24,8 +24,9 @@ const NewPasskeyDialog = ()=>{
                 // credentialNickname is a name you can attach to the passkey - can be any string value
                 const credentialNickname = name;
                 const finalResponse = await passwordless.register(registerToken, credentialNickname);
-                console.log(finalResponse)
                 setName("")
+                setShow(false)
+                onComplete && onComplete(finalResponse.token)
             }).catch((err)=>{
                 enqueueSnackbar(err.message, { variant: 'error' })
             }).finally(()=>

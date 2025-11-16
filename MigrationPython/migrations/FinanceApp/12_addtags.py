@@ -363,11 +363,6 @@ def table_metadata():
             "PartitionKeyPath":"/PartitionKey"
         },
         {
-            "Container":"UserCredentials",
-            "ResetOnMigration": True,
-            "PartitionKeyPath":"/PartitionKey"
-        },
-        {
             "Container":"Vendor",
             "ResetOnMigration": False,
             "PartitionKeyPath":"/PartitionKey"

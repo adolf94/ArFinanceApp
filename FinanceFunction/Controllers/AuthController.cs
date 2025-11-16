@@ -1,5 +1,4 @@
-using Fido2NetLib;
-using Fido2NetLib.Objects;
+
 using FinanceFunction.Data;
 using FinanceFunction.Dtos;
 using FinanceFunction.Models;
@@ -18,8 +17,8 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
-using Fido2NetLib.Serialization;
 using Passwordless;
+using Newtonsoft.Json.Linq;
 namespace FinanceFunction.Controllers;
 
 public class AuthController
@@ -461,6 +460,18 @@ public class AuthController
 						return new ObjectResult(e.Details) { StatusCode = 401 };						
 				}
 
+		}
+
+		[Function("GetPasskeys")]
+		public async Task<IActionResult> GetPasskeys([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "auth/fido/credentials")]
+						HttpRequest req)
+		{
+				if (!_user.IsAuthenticated) return new UnauthorizedResult();
+
+				var credentials = await _fido2.ListCredentialsAsync(_user.UserId.ToString());
+
+
+				return new OkObjectResult(credentials);
 		}
 
 		[Function("LoginWithPasskey")]

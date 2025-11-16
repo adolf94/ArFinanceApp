@@ -34,7 +34,6 @@ namespace FinanceFunction.Data.CosmosRepo
         public DbSet<BlobFile> Files { get; set; }
 				public DbSet<Tag> Tags { get; set; }
 				public DbSet<LoginLog> LoginLogs { get; set; }
-				public DbSet<UserCredential> Credentials { get; set; }
 
 				public DbSet<HookConfig> HookConfigs { get; set; }
 

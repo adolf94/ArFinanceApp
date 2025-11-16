@@ -47,7 +47,7 @@ def identify_img_transact_ai(localpath, file_record):
     )
     for attempt in range(max_retries):
         try:
-            logging.log(f"Attempt {attempt + 1}...")
+            logging.info() f"Attempt {attempt + 1}...")
             response = client.models.generate_content(model="gemini-2.5-flash",
                                                     contents=[image, prompt],
                                                     config=config
@@ -61,20 +61,20 @@ def identify_img_transact_ai(localpath, file_record):
                 wait_time = 2 ** attempt  # e.g., 1, 2, 4, 8, 16 seconds
                 
                 if attempt < max_retries - 1:
-                    print(f"Error {e.code}: Model overloaded/rate limited. Retrying in {wait_time}s...")
+                    logging.warning(f"Error {e.code}: Model overloaded/rate limited. Retrying in {wait_time}s...")
                     time.sleep(wait_time)
                 else:
                     # Last attempt failed, raise the final error
-                    print(f"Error {e.code}: Failed after {max_retries} attempts.")
+                    logging.error(f"Error {e.code}: Failed after {max_retries} attempts.")
                     raise e
             else:
                 # Handle other unexpected API errors immediately
-                print(f"An unrecoverable API error occurred (Code {e.code}): {e}")
+                logging.error(f"An unrecoverable API error occurred (Code {e.code}): {e}")
                 raise e
         
         except Exception as e:
             # Catch other potential errors (e.g., network issues)
-            print(f"An unexpected error occurred: {e}")
+            logging.error(f"An unexpected error occurred: {e}")
             raise e
 
     return None # Should not be reached if max_retries is > 0

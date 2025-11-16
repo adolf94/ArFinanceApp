@@ -15,7 +15,6 @@ namespace FinanceFunction.Data
 				public Task<User[]> GetAll();
 				public Task<LoginLog?> CreateLoginLog(string JwtId, Guid userId);
 				public Task<LoginLog> GetLoginLog(string Sid);
-				public Task<UserCredential[]> GetFidoCredentials(Guid userId);
 
 		}
 }

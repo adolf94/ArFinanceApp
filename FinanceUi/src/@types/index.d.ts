@@ -377,19 +377,6 @@ declare module 'FinanceApi' {
         partitionKey: string;
     }
 
-    // ..\FinanceFunction\Models\UserCredential.cs
-    export interface UserCredential {
-        id: string;
-        credentialId: string;
-        publicKey: string;
-        signCount: uint;
-        userId: string;
-        user: User;
-        deviceName: string;
-        createdDate: string;
-        partitionKey: string;
-    }
-
     // ..\FinanceFunction\Models\Vendor.cs
     export interface Vendor {
         id: string;

@@ -1,11 +1,22 @@
 import { AppBar, Box, Button, Card, CardContent, Dialog, Grid2 as Grid, Grid2, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Toolbar, Typography } from "@mui/material"
 import { CardTitle } from "reactstrap"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import NewPasskeyDialog from "./NewPasskeyDialog"
+import api from "../../components/fnApi"
+import moment from "moment"
 
 
 const SecuritySettings = ()=>{
     const [show,setShow] = useState(true)
+    const [creds,setCreds] = useState([])
+
+    const refreshCredentials = ()=>api.get("/auth/fido/credentials")
+    .then(e=>{
+        setCreds(e.data)
+    })
+    useEffect(()=>{
+        refreshCredentials()
+    },[])
 
 
     return <><AppBar position="static">
@@ -36,7 +47,7 @@ const SecuritySettings = ()=>{
                                 <Typography variant="h6">Security Keys</Typography>
                             </Box>
                             <Box>
-                                <NewPasskeyDialog />
+                                <NewPasskeyDialog onComplete={refreshCredentials}/>
                             </Box>
                         </Grid2>
                     </CardTitle>
@@ -49,12 +60,36 @@ const SecuritySettings = ()=>{
                                             Alias
                                         </TableCell>
                                         <TableCell>
+                                            Device
+                                        </TableCell>
+                                        <TableCell>
                                             DateCreated
+                                        </TableCell>
+                                        <TableCell>
+                                            
                                         </TableCell>
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
-                                    
+                                    {creds.map(e=><TableRow>
+                                        <TableCell>
+                                            {e.nickname}
+                                        </TableCell>
+                                        <TableCell>
+                                            {e.device}
+                                        </TableCell>
+                                        <TableCell>
+                                            {moment(e.createdAt).format("YYYY-MM-DD")}
+                                        </TableCell>
+                                        <TableCell>
+                                            <Button variant="contained" color="warning" size="small"> Revoke / Delete </Button>
+                                        </TableCell>
+                                    </TableRow>)}
+                                    <TableRow>
+                                        <TableCell>
+                                            {}
+                                        </TableCell>
+                                    </TableRow>
                                 </TableBody>
                             </Table>
                         </TableContainer>
