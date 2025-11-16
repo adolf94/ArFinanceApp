@@ -1,3 +1,5 @@
+using Fido2NetLib;
+using Fido2NetLib.Objects;
 using FinanceFunction.Data;
 using FinanceFunction.Dtos;
 using FinanceFunction.Models;
@@ -7,14 +9,17 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
+using System.Buffers.Text;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
-
+using Fido2NetLib.Serialization;
+using Passwordless;
 namespace FinanceFunction.Controllers;
 
 public class AuthController
@@ -23,17 +28,19 @@ public class AuthController
 		private readonly AppConfig _config;
 		private readonly IUserRepo _userRepo;
 		private readonly CurrentUser _user;
+		private readonly IPasswordlessClient _fido2;
 		private readonly IDbHelper _db;
 		private readonly string RequiredRole = "finance_user";
 
-		public readonly int tokenLifetime = 360 * 4;
+		public readonly int tokenLifetime = 60 * 4;
 		public AuthController(ILogger<AuthController> logger, AppConfig config,
-				IUserRepo userRepo, CurrentUser user, IDbHelper db)
+				IUserRepo userRepo, CurrentUser user, IDbHelper db, IPasswordlessClient fido2)
 		{
 				_logger = logger;
 				_config = config;
 				_userRepo = userRepo;
 				_user = user;
+				_fido2 = fido2;
 				_db = db;
 		}
 
@@ -80,13 +87,14 @@ public class AuthController
 								if(log == null) return new UnauthorizedResult();
 								claims.Add(new Claim("userId", user!.Id.ToString()));
 								claims.Add(new Claim("app", "finance"));
+								claims.Add(new Claim("name", user.Name ?? user.EmailAddress));
 								claims.Add(new Claim("type", "access_token"));
 
 								idClaims.Add(new Claim("userId", user!.Id.ToString()));
-								idClaims.Add(new Claim(ClaimTypes.Name, user.Name));
+								idClaims.Add(new Claim(ClaimTypes.Name, user.Name ?? user.EmailAddress));
 								idClaims.Add(new Claim("type", "id_token"));
 
-								claims.Add(new Claim(ClaimTypes.Role, "Registered")); idClaims.Add(new Claim(ClaimTypes.Name, user.Name));
+								claims.Add(new Claim(ClaimTypes.Role, "Registered")); 
 								idClaims.Add(new Claim(ClaimTypes.Role, "Registered"));
 
 								user.Roles.ToList().ForEach(e =>
@@ -183,7 +191,7 @@ public class AuthController
 
 						return new StatusCodeResult(401);
 				}
-				if(item.RefreshToken != body.Refresh_Token || item.Expiry < DateTime.UtcNow || item.MovingExpiry < DateTime.UtcNow)
+				if(item.RefreshToken != refreshToken || item.Expiry < DateTime.UtcNow || item.MovingExpiry < DateTime.UtcNow)
 				{
 						item.IsExpired = true;
 						await _db.SaveChangesAsync();
@@ -199,7 +207,6 @@ public class AuthController
 				byte[] originalBytes = System.Text.Encoding.UTF8.GetBytes(UUIDNext.Uuid.NewRandom().ToString());
 				refreshToken = Convert.ToBase64String(originalBytes);
 
-
 				item.RefreshToken = refreshToken;
 				User? user = await _userRepo.GetById(item.UserId)!;
 
@@ -213,6 +220,7 @@ public class AuthController
 				{
 						new Claim("sub", user.Id.ToString()),
 						new Claim("userId", user.Id.ToString()),
+						new Claim("name", user.Name.ToString()),
 						new Claim("email", user.EmailAddress),
 						new Claim("azp", _config.authConfig.client_id),
 						new Claim("type", "access_token")
@@ -243,7 +251,7 @@ public class AuthController
 
 				await _db.SaveChangesAsync();
 				currentToken.access_token = strClaimToken;
-				currentToken.refresh_token = refreshToken;
+				currentToken.refresh_token = item.Id + "." + refreshToken;
 				return new OkObjectResult(currentToken);
 		}
 
@@ -426,7 +434,141 @@ public class AuthController
 				return await Task.FromResult(new OkObjectResult(currentToken));
 
 				}
+
+		[Function("CreatePasskey")]
+		public async Task<IActionResult> CreatePasskey([HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "auth/fido/create")]
+						HttpRequest req, string alias)
+		{
+
+				if (!_user.IsAuthenticated) return new UnauthorizedResult();
+
+
+				var payload = new RegisterOptions(_user.UserId.ToString(), alias)
+				{
+						Aliases = new HashSet<string> { alias },
+						Username = _user.EmailAddress,
+						DisplayName = _user.Name
+				};
+
+
+				try
+				{
+						var token = await _fido2.CreateRegisterTokenAsync(payload);
+						return new OkObjectResult(token);
+				}
+				catch (PasswordlessApiException e)
+				{
+						return new ObjectResult(e.Details) { StatusCode = 401 };						
+				}
+
 		}
+
+		[Function("LoginWithPasskey")]
+		public async Task<IActionResult> LoginWithPasskey([HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "auth/fido")]
+						HttpRequest req, string token)
+		{
+
+				try
+				{
+						var verifiedUser = await _fido2.VerifyAuthenticationTokenAsync(token);
+
+						var userId = verifiedUser.UserId;
+						GoogleClaimResponse? currentToken = new GoogleClaimResponse();
+						var user = await _userRepo.GetById(Guid.Parse(userId));
+
+
+						if (user == null)
+						{
+								return new UnauthorizedResult();
+						}
+
+
+
+
+						LoginLog? log = await _userRepo.CreateLoginLog(verifiedUser.TokenId.ToString(), user!.Id);
+						if (log == null) return new UnauthorizedResult();
+
+
+						List<Claim> claims = new List<Claim>
+						{
+								new Claim("sub", user.Id.ToString()),
+								new Claim("userId", user.Id.ToString()),
+								new Claim("name", user.Name.ToString()),
+								new Claim("email", user.EmailAddress),
+								new Claim("azp", _config.authConfig.client_id),
+								new Claim("type", "access_token"),
+								new Claim(ClaimTypes.Role, "Registered")
+						};
+
+
+						List<Claim> idClaims = new List<Claim>
+						{
+								new Claim("sub", user.Id.ToString()),
+								new Claim("userId", user.Id.ToString()),
+								new Claim("name", user.Name.ToString()),
+								new Claim("email", user.EmailAddress),
+								new Claim("azp", _config.authConfig.client_id),
+								new Claim("type", "id_token"),
+								new Claim(ClaimTypes.Role, "Registered")
+						};
+
+
+						claims.Add(new Claim(ClaimTypes.Role, "Registered"));
+						idClaims.Add(new Claim(ClaimTypes.Role, "Registered"));
+
+						user.Roles.ToList().ForEach(e =>
+						{
+								idClaims.Add(new Claim(ClaimTypes.Role, e));
+								claims.Add(new Claim(ClaimTypes.Role, e));
+						});
+
+
+						var key = Encoding.UTF8.GetBytes(_config.jwtConfig.secret_key);
+						var accessDescriptor = new SecurityTokenDescriptor
+						{
+								Subject = new ClaimsIdentity(claims.Where(e => e.Type != "aud")),
+								Expires = DateTime.UtcNow.AddMinutes(tokenLifetime),
+								Issuer = _config.jwtConfig.issuer,
+								Audience = _config.jwtConfig.audience,
+								SigningCredentials = new SigningCredentials
+						(new SymmetricSecurityKey(key),
+						SecurityAlgorithms.HmacSha256)
+						};
+
+
+						var idDescriptor = new SecurityTokenDescriptor
+						{
+								Subject = new ClaimsIdentity(idClaims),
+								Expires = DateTime.UtcNow.AddMinutes(tokenLifetime),
+								Issuer = _config.jwtConfig.issuer,
+								Audience = _config.jwtConfig.audience,
+								SigningCredentials = new SigningCredentials
+								(new SymmetricSecurityKey(key),
+								SecurityAlgorithms.HmacSha256)
+						};
+
+
+						var tokenHandler = new JwtSecurityTokenHandler();
+						var accessTokenNew = tokenHandler.CreateToken(accessDescriptor);
+						var strClaimToken = tokenHandler.WriteToken(accessTokenNew);
+						currentToken.access_token = strClaimToken;
+
+						var idTokenNew = tokenHandler.CreateToken(idDescriptor);
+						var strIdToken = tokenHandler.WriteToken(idTokenNew);
+						currentToken.refresh_token = log.Id + "." + log.RefreshToken;
+					
+						return new OkObjectResult(currentToken);
+				}
+				catch (PasswordlessApiException e)
+				{
+						return new JsonResult(e.Details)
+						{
+								StatusCode = 401
+						};
+				}
+
+		}
+}
 
 
 public class RequestTokenBody

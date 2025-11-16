@@ -51,12 +51,14 @@ const getTokenFromApi = mm(
 
 const getTokenViaRefreshToken = ()=>{
   let token = window.localStorage.getItem("refresh_token");
-  return axios.post(`${window.webConfig.api}/google/auth/refresh`,{
+  if(!token) return ""
+  return axios.post(`${window.webConfig.api}/auth/refresh`,{
     refresh_token: token,
     app: 'finance'
   })
   .then((e) => {
     window.sessionStorage.setItem("access_token", e.data.access_token);
+    window.localStorage.setItem("refresh_token", e.data.refresh_token);
     return e.data.access_token;
   })
   .catch(() => {
@@ -229,8 +231,8 @@ api.interceptors.response.use(
     },
     (err) => {
         if (!!err?.response) {
-            if (err.response.status === 401 ) {
-                console.debug("retry with getToken");
+            if (err.response.status === 401 && !err.request.config?.ignore401) {
+
                 handle401(err, axios, ()=>{})
             }
             if(err.response.status === 500){

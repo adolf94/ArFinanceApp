@@ -15,6 +15,7 @@ using FinanceFunction.Utilities;
 using FinanceFunction.Dtos;
 using Microsoft.AspNetCore.Http;
 using FinanceFunction;
+using Passwordless;
 
 var builder = FunctionsApplication.CreateBuilder(args);
 
@@ -31,6 +32,13 @@ builder.Services.Configure<ForwardedHeadersOptions>(options =>
 var config = FnConfigToAppConfig.PrepareConfig();
 builder.Services.AddSingleton(config);
 builder.Services.AddScoped<CurrentUser>();
+builder.Services.Configure<PasswordlessOptions>(Configuration.GetRequiredSection("Passwordless"));
+builder.Services.AddPasswordlessSdk(options =>
+{
+		Configuration.GetRequiredSection("Passwordless").Bind(options);
+});
+
+builder.Services.AddSession();
 builder.Services.AddScoped<TransactionController>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped(typeof(CancellationToken), serviceProvider =>

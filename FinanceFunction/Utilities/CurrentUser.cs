@@ -13,6 +13,7 @@ namespace FinanceFunction.Utilities
 
 				public string[] Roles { get; set; } = Array.Empty<string>();
 				public string App { get; set; } = "";
+				public string Name { get; set; } = "";
 				public bool IsAuthenticated { get; set; } = false;  
 
 

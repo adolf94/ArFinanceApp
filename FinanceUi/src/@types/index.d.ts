@@ -247,7 +247,8 @@ declare module 'FinanceApi' {
         jwtId: string;
         refreshToken: string;
         expiry: string;
-        username: string;
+        movingExpiry: string;
+        userId: string;
         isExpired: boolean;
         partitionKey: string;
     }
@@ -379,6 +380,13 @@ declare module 'FinanceApi' {
     // ..\FinanceFunction\Models\UserCredential.cs
     export interface UserCredential {
         id: string;
+        credentialId: string;
+        publicKey: string;
+        signCount: uint;
+        userId: string;
+        user: User;
+        deviceName: string;
+        createdDate: string;
         partitionKey: string;
     }
 

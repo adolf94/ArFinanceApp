@@ -7,6 +7,7 @@ import React, { lazy, Suspense } from "react";
 import { Navigate } from "react-router-dom";
 import Loader from "./components/Loader";
 import ImageGallery from "./Pages/Gallery/ImageGallery";
+import SecuritySettings from "./Pages/Settings/Security";
 
 const AccountsPage = lazy(() => import("./Pages/AccountsPage.tsx"));
 const HooksSettings = lazy(() => import("./Pages/Settings/Hooks.tsx"));
@@ -91,6 +92,14 @@ const AppRoutes: (PathRouteProps | IndexRouteProps | LayoutRouteProps)[] = [
     element: (
       <Suspense fallback={<Loader />}>
         <HooksSettings />
+      </Suspense>
+    ),
+  },
+  {
+    path: "/settings/security",
+    element: (
+      <Suspense fallback={<Loader />}>
+        <SecuritySettings />
       </Suspense>
     ),
   },

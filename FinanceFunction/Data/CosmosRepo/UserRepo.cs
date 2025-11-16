@@ -114,5 +114,12 @@ namespace FinanceFunction.Data.CosmosRepo
 						return item;
 
 				}
+
+				public async Task<UserCredential[]> GetFidoCredentials(Guid userId)
+				{
+						return await _context.Credentials.Where(e=>e.UserId == userId)
+									.ToArrayAsync();
+				}
+
 		}
 }

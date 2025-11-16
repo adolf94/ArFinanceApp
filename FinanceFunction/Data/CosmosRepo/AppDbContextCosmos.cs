@@ -129,8 +129,7 @@ namespace FinanceFunction.Data.CosmosRepo
                 .HasPartitionKey(e => e.PartitionKey)
                 .HasKey(c => c.Id);
 
-
-            builder.Entity<AccountGroup>()
+						builder.Entity<AccountGroup>()
                 .ToContainer("AccountGroup")
                 .HasPartitionKey(e => e.PartitionKey)
                 .HasKey(c => c.Id);
@@ -180,11 +179,6 @@ namespace FinanceFunction.Data.CosmosRepo
 
 								.HasPartitionKey(e => e.PartitionKey)
 								.ToContainer("LoginLogs")
-								.HasKey(c => c.Id);
-						builder.Entity<UserCredential>()
-
-								.HasPartitionKey(e => e.PartitionKey)
-								.ToContainer("Credentials")
 								.HasKey(c => c.Id);
 
 						builder.Entity<Transaction>()
