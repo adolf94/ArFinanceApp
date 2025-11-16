@@ -33,9 +33,9 @@ namespace FinanceFunction.Middlewares
 								ClaimsPrincipal? principal = JwtTokenHelper.ReadClaimsFromJwt(bearer, jwt.secret_key, jwt.issuer, jwt.audience);
 								if (principal != null)
 								{
-									
 
-										var type = principal.Claims.FirstOrDefault(e=>e.Type == "type" && e.Value == "access_token" )
+
+										var type = principal.Claims.FirstOrDefault(e => e.Type == "type" && e.Value == "access_token");
 										if(type != null)
 										{
 												var userId = principal.Claims.FirstOrDefault(e => e.Type == "userId")?.Value;

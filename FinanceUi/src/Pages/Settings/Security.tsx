@@ -85,11 +85,6 @@ const SecuritySettings = ()=>{
                                             <Button variant="contained" color="warning" size="small"> Revoke / Delete </Button>
                                         </TableCell>
                                     </TableRow>)}
-                                    <TableRow>
-                                        <TableCell>
-                                            {}
-                                        </TableCell>
-                                    </TableRow>
                                 </TableBody>
                             </Table>
                         </TableContainer>
