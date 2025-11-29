@@ -115,7 +115,7 @@ def handle_upload(request : Request):
         "DateCreated": datetime.datetime.now(datetime.UTC).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "Status":"Active"
     }
-    add_to_app("Files", record)
+    # add_to_app("Files", record)
     return {
         "error" : False,
         "file" : file,

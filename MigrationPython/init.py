@@ -149,12 +149,10 @@ async def import_data(container_data, migration, type = "restore"):
                     row["$type"] = row["Discriminator"]       
                 if "Id" in row and "id" in row: 
                     row["id"] = row["Id"]       
-                svc.put({"item":row, "i":i})
+
                 
-            svc.join()
-                
-                # container.upsert_item(row)
-                # bar.next()
+                container.upsert_item(row)
+                bar.next()
         #     tasks = []
         #     for i in range(4):
         #         task = asyncio.create_task(upsert_worker(queue, conDict["Container"], bar, i))
@@ -177,7 +175,7 @@ async def import_data(container_data, migration, type = "restore"):
 
 def load_config_from_file(name):
     file_path = f"{migration_path}/{name}.py" 
-    module_name = "migrate_script"
+    module_name = "up_migration"
     spec = importlib.util.spec_from_file_location(module_name, file_path)
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)

@@ -1,5 +1,5 @@
 import { Check, CheckCircle, Edit, ExpandLess, ExpandMore,  SwapVert } from "@mui/icons-material"
-import { Accordion, AccordionDetails, AccordionSummary, Box, Menu, Button, Checkbox, Divider, FormControlLabel, Grid2 as Grid, IconButton, InputAdornment, List, ListItem, ListItemText,  Tab, TextField, Typography, MenuItem, ClickAwayListener } from "@mui/material"
+import { Accordion, AccordionDetails, AccordionSummary, Box, Menu, Button, Checkbox, Divider, FormControlLabel, Grid2 as Grid, IconButton, InputAdornment, List, ListItem, ListItemText,  Tab, TextField, Typography, MenuItem, ClickAwayListener, RadioGroup, Radio } from "@mui/material"
 import { useEffect, useMemo, useState } from "react"
 import { useHooksSettingsState } from "./Hooks"
 import HooksConfigProperty from "./HooksConfigProperty"
@@ -9,6 +9,7 @@ import HooksRegexProperties from "./HooksRegexProperties"
 import HooksAddProperty from "./HooksAddProperty"
 import allowedProperties from './allowedProperties.json'
 import HookSubConfigModal  from "./HookSubConfigModal"
+import { electricConstantDependencies } from "mathjs"
 const data =  
 {
     "name":"notif_gcash_receive",
@@ -77,7 +78,7 @@ const HookSettingsAccordion = (props : HookSettingsAccordionProps)=>{
     const settingsState = useHooksSettingsState()
     const [anchor,setAnchor] = useState<any>(null)
     const showMenu = !!anchor
-
+    const [selectedProp,setSelectedProp] = useState("regex")
 
     useEffect(()=>{
         if(!props.value){
@@ -106,6 +107,10 @@ const HookSettingsAccordion = (props : HookSettingsAccordionProps)=>{
             setForm(defaultValue) 
         }
     }
+
+    useEffect(()=>{
+        setSelectedProp("regex")
+    },[settingsState.tab])
 
 
 
@@ -199,8 +204,19 @@ const HookSettingsAccordion = (props : HookSettingsAccordionProps)=>{
                 </Grid>
                 <Grid size={8} sx={{pl:1}}>
                     { ["sms_", "notif_"].includes(settingsState.tab) && <>
-
-                        <TextField label="Regex" multiline rows={2} size="small"  value={form.regex} onChange={evt=>setForm({...form, regex:evt.target.value})} fullWidth sx={{pb:1}}/>
+                        {
+                            settingsState.tab == "notif_" && <RadioGroup
+                                aria-labelledby="demo-controlled-radio-buttons-group"
+                                name="controlled-radio-buttons-group"
+                                value={selectedProp}
+                                row
+                                onChange={evt=>setSelectedProp(evt.target.value)}
+                            >
+                                <FormControlLabel value="regex" control={<Radio />} label="Content" />
+                                <FormControlLabel value="titleRegex" control={<Radio />} label="Title" />
+                            </RadioGroup>
+                        }
+                            <TextField label="Regex" multiline rows={2} size="small"  value={form[selectedProp] || ""} onChange={evt=>setForm({...form, [selectedProp]:evt.target.value})} fullWidth sx={{pb:1}}/>
                         <Divider />
                         </>
                     }
@@ -228,7 +244,11 @@ const HookSettingsAccordion = (props : HookSettingsAccordionProps)=>{
                             settingsState.tab == "img_" ? <HooksAddProperty item={null} onSave={(data)=>{
                                     setForm({...form, properties:[...form.properties,data]})
                                 }} isNew/>
-                                : <HooksRegexProperties regex={form.regex} currentProperties={form.properties} onSave={(data)=>setForm({...form, properties:data})}/>
+                                : <HooksRegexProperties regex={form[selectedProp]} currentProperties={form.properties.filter(e=>(selectedProp == "regex" && !e.for) || e.for==selectedProp)} onSave={(data)=>{
+                                    let prev = form.properties
+                                    prev = prev.filter(e=>e.for!=selectedProp || (selectedProp != "regex" || !e.for))
+                                    setForm({...form, properties:[...prev,...data.map(e=>({...e,for:selectedProp}))]})
+                                }}/>
                         }
                         
                     </Box>
@@ -242,7 +262,8 @@ const HookSettingsAccordion = (props : HookSettingsAccordionProps)=>{
                                                         return state
                                                     })
                                             }} />
-                                        :<HooksConfigProperty key={`${i}-${e.property}`} item={e}/>)
+                                        :
+                                        (e.for==selectedProp || (selectedProp == "regex" && !e.for)) &&<HooksConfigProperty key={`${i}-${e.property}`} item={e}/>)
                                 }
                             </List>
                         </Box>

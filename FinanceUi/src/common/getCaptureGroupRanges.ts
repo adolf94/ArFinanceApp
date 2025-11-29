@@ -5,7 +5,7 @@ function getCaptureGroupRanges(regexString) {
     const capturingGroupStarts = []; // Stack to hold start indices
     let inCharacterClass = false;
   
-    for (let i = 0; i < regexString.length; i++) {
+    for (let i = 0; i < (regexString || "").length; i++) {
         const char = regexString[i];
         const nextChar = regexString[i + 1];
         const nextNextChar = regexString[i + 2];

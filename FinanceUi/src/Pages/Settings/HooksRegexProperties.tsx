@@ -82,6 +82,7 @@ const HooksRegexProperties = ({regex, currentProperties, onSave}:HooksRegexPrope
         let data = Object.keys(properties)
             .reduce((p,c,i)=>{
                 if(!!properties[c]) p.push({
+                    
                     regexIndex:Number.parseInt(c),
                     property: properties[c]
                 })

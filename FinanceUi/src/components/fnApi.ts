@@ -78,9 +78,13 @@ export const getToken = async (force? : boolean, config? : AxiosRequestConfig, a
   }else{
     let tokenJson = JSON.parse(window.atob(token!.split(".")[1]));
   
-    if (moment().add(1, "minute").isAfter(tokenJson.exp * 1000 ))
-      // token = await getTokenFromApi();
-    isExpired = true
+    if (moment().add(1, "minute").isAfter(tokenJson.exp * 1000 )){
+      token = await getTokenViaRefreshToken();
+      if(token == ""){
+        isExpired = true
+      }
+    }
+
   }
 
 

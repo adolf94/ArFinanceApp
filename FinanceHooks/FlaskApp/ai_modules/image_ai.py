@@ -5,11 +5,12 @@ from google import genai
 from google.genai.errors import APIError
 from google.genai import types
 from PIL import Image
+import time as t
 import json
 
 from FlaskApp.cosmos_modules import get_all_records_by_partition
-
-client = genai.Client(api_key=os.environ['GEMINI_API_KEY'])
+GOOGLE_GENAI_USE_VERTEXAI=True
+client = genai.Client(api_key=os.environ['GEMINI_API_KEY'], vertexai=True)
 max_retries = 3
 
 def identify_img_transact_ai(localpath, file_record):
@@ -47,7 +48,7 @@ def identify_img_transact_ai(localpath, file_record):
     )
     for attempt in range(max_retries):
         try:
-            logging.info() f"Attempt {attempt + 1}...")
+            logging.info(f"Attempt {attempt + 1}...")
             response = client.models.generate_content(model="gemini-2.5-flash",
                                                     contents=[image, prompt],
                                                     config=config
@@ -62,7 +63,7 @@ def identify_img_transact_ai(localpath, file_record):
                 
                 if attempt < max_retries - 1:
                     logging.warning(f"Error {e.code}: Model overloaded/rate limited. Retrying in {wait_time}s...")
-                    time.sleep(wait_time)
+                    t.sleep(wait_time)
                 else:
                     # Last attempt failed, raise the final error
                     logging.error(f"Error {e.code}: Failed after {max_retries} attempts.")

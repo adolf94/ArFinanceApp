@@ -13,6 +13,7 @@ namespace FinanceFunction.Models
 				public string Name { get; set; } = "";
 				public string App { get; set; } = "";
 				public string Regex { get; set; } = "";
+				public string TitleRegex { get; set; } = "";
 				public string Type { get; set; } = "";
 				public string DisplayText { get; set; } = "";
 				public long PriorityOrder { get; set; } = 0;
@@ -40,6 +41,7 @@ namespace FinanceFunction.Models
 						//Image
 						public string? Property { get; set; }
 						public string? LookFor { get; set; }
+						public string? For { get; set; }
 						public string? LookForRegex { get; set; }
 						public int? GetValueAfter { get; set; }
 						public List<ReplaceRegexConfig>? ReplaceRegex { get; set; } = new List<ReplaceRegexConfig>();

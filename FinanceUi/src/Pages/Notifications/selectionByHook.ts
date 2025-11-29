@@ -53,8 +53,8 @@ const selectionByHook  = async (key : string, hook : HookMessage, tranType, fiel
 }
 
 
-export const subtituteText = (template : string, hook:HookMessage) =>{
-    let vars = template.match(/\$\{([$\.a-zA-Z]+)\}/g)
+export const   subtituteText = (template : string, hook:HookMessage) =>{
+    let vars = template.match(/\$\{([$#\.a-zA-Z]+)\}/g)
     let current = template
     var getDataFromHook = (data)=>{
         let v = data.substring(2,data.length-1)

@@ -8,8 +8,10 @@ import pytz
 import logging
 from flask import Flask, request, Response,app
 from uuid_extensions import uuid7
+from google.genai.errors import APIError
 from FlaskApp.cosmos_modules import add_to_app, add_to_persist, get_record
 from FlaskApp.notif_modules.handler import check_duplicate_notif, handle_notif
+from FlaskApp.regex_utility import substitute_text
 from FlaskApp.sms_handler2.handler import handle_sms
 from FlaskApp.upload_handler import handle_upload
 from FlaskApp.utils import utcstr_to_datetime
@@ -59,7 +61,7 @@ def phone_hook():
         if(allow_duplicate is None):
             exist_notif = check_duplicate_notif(data)
             if( exist_notif is not None ):
-                return Response( {"message" : "Notif already exists", "hookId":exist_notif["id"]} , 409, content_type="application/json" )
+                return Response( json.dumps({"message" : "Notif already exists", "hookId":exist_notif["id"]}) , 409, content_type="application/json" )
 
         extracted = handle_notif(data)
         timestamp = utcstr_to_datetime(data["timestamp"])
@@ -112,6 +114,11 @@ def phone_hook():
         "_ttl": 60*24*60*60,
         "IsHtml":False
     }
+
+
+    if("matched_config" in extracted and extracted["matched_config"] != ""):
+        newItem["RawMsg"] = substitute_text(extracted["matched_config"]["DisplayText"], newItem)
+
     add_to_app("HookMessages", newItem)
     
     add_to_persist("HookMessages", newItem)
@@ -196,17 +203,20 @@ def image_ai_hook():
     if(headeApiKey == None or headeApiKey != apiKey ): return Response(status=401)  
     upload_result = handle_upload(request)
 
-    add_to_app("Files", upload_result["record"])
 
 
     if(upload_result["error"] == True):
         return Response(json.dumps( {"message" : upload_result["message"]} ), 400, content_type="application/json")
 
     #do ai stuff here?
+    try:
+        image_output = identify_img_transact_ai(upload_result["local_file_path"],  upload_result["record"])
+    except APIError as err:
+        if(err.code == 503):
+            logging.log(f"Err with AI model:{err}")
+            add_to_app("Files", upload_result["record"])
 
-    image_output = identify_img_transact_ai(upload_result["local_file_path"],  upload_result["record"])
-
-
+            return Response(json.dumps( {"message" : "AI Too Busy", "fileId": upload_result["record"]["id"]}), 503 , content_type="application/json")
                                      
     utc_aware_dt = datetime.datetime.now(datetime.UTC)
 
@@ -214,9 +224,11 @@ def image_ai_hook():
     if output["app"] is None:
         output["app"] = ""
     if(len(output["otherData"]) == 0):
-        output["otherData"] = {
+        output["otherData"] = {  
             "info":"nothing here"
         }
+    upload_result["AI_data"] = output
+    add_to_app("Files", upload_result["record"])
 
     output["matchedConfig"] = "imgai_default"
 

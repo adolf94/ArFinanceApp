@@ -110,7 +110,7 @@ public class AuthController
 								idClaims.Add(new Claim(ClaimTypes.Role, "Unregistered"));
 						}
 
-
+						        
 						var key = Encoding.UTF8.GetBytes(_config.jwtConfig.secret_key);
 						var accessDescriptor = new SecurityTokenDescriptor
 						{

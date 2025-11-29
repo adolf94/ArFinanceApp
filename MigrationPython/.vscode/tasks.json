@@ -4,12 +4,11 @@
 	"tasks": [
 		{
 			"type": "shell",
-			"isBackground": true,
             "label": "Setup venv",
 			"windows": {
 				"command": ".\\.venv\\Scripts\\activate.bat"
 			},
-			"problemMatcher": []
+			
 		}
     ]
 }

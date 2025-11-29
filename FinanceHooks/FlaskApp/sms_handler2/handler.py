@@ -27,6 +27,7 @@ def handle_sms(data):
     }
     
     conf_to_use = filter(lambda c: c["App"].lower() == data["sms_rcv_sender"].lower(), notif_config)
+    conf_to_use = sorted(conf_to_use,key=lambda item: item["PriorityOrder"])
 
     current_reg = None
     for reg in conf_to_use:

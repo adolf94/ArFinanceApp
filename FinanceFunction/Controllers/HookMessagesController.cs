@@ -79,7 +79,7 @@ public class HookMessagesController
 
 				var item = await _repo.GetOneHook(id);
 				if (item == null) return new NotFoundResult();
-				return new OkObjectResult(item);
+				return new OkObjectResult(item);						
 		}
 
 
