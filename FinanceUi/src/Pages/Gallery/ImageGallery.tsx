@@ -1,8 +1,8 @@
-import { AppBar, Box, Chip, Grid2 as Grid, IconButton, Link, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Toolbar, Typography } from "@mui/material"
+import { AppBar, Box, Chip, Grid2 as Grid, Icon, IconButton, Link, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Toolbar, Typography } from "@mui/material"
 import { useQuery } from "@tanstack/react-query"
 import { BLOB_FILE, getFiles } from "../../repositories/files"
 import ImageModal from "../Notifications/ImageModal"
-import { Delete, ImageSearch, Spellcheck, TaskAlt } from "@mui/icons-material"
+import { AutoAwesome, ChevronLeft, ChevronRight, Delete, ImageSearch, Spellcheck, TaskAlt } from "@mui/icons-material"
 import { useConfirm } from "material-ui-confirm"
 import api from "../../components/fnApi"
 import ImageDataRow from "./ImageDataRow"
@@ -12,7 +12,9 @@ import {
     createColumnHelper,
     flexRender,
     getCoreRowModel,
+    getPaginationRowModel,
     getSortedRowModel,
+    PaginationState,
     SortingState,
     useReactTable,
   } from '@tanstack/react-table'
@@ -21,6 +23,7 @@ import moment from "moment"
 import DeleteButton from "./DeleteButton"
 import { useState } from "react"
 import EditAiData from "./EditAiData"
+import ActionsCell from "./ActionsCell"
 
 
 
@@ -53,10 +56,7 @@ import EditAiData from "./EditAiData"
     columnHelper.display( {
         id:"actions",
         header: () => 'Actions',
-        cell: (info)=><>
-            <EditAiData data={info.row.original.aiData} id={info.row.original.id} setData={()=>{}} reviewed={info.row.original.aiReviewed}/>
-            <DeleteButton id={info.row.original.id} />
-        </>
+        cell: (info)=><ActionsCell row={info.row.original} />
     }),
     // columnHelper.accessor('visits', {
     //   header: () => <span>Visits</span>,
@@ -82,6 +82,12 @@ const ImageGallery = ()=>{
         queryFn: ()=>getFiles()
     })
 
+    
+    const [pagination, setPagination] = useState<PaginationState>({
+        pageIndex: 0,
+        pageSize: 12,
+    })
+
 
     const [sorting, setSorting] = useState<SortingState>([
         {id:"dateCreated", desc:true}
@@ -93,8 +99,12 @@ const ImageGallery = ()=>{
         getCoreRowModel: getCoreRowModel(),
         getSortedRowModel: getSortedRowModel(),
         onSortingChange: setSorting, 
+        
+        getPaginationRowModel: getPaginationRowModel(),
+        onPaginationChange: setPagination,
         state: {
             sorting,
+            pagination
         },
       })
     
@@ -123,7 +133,7 @@ const ImageGallery = ()=>{
     <Grid container sx={{width:"100%", justifyContent:"center"}}>
         <Grid size={{xs:12,md:8}}>
             <TableContainer>
-                <Table>
+                <Table size="small">
                     <TableHead>
                     {table.getHeaderGroups().map(headerGroup => (
                         <TableRow key={headerGroup.id}>
@@ -163,7 +173,22 @@ const ImageGallery = ()=>{
                     </TableBody>
                 </Table>
             </TableContainer>
+            <Box>
+                <IconButton 
+                    onClick={() => table.previousPage()}
+                    disabled={!table.getCanPreviousPage()}>
+                    <ChevronLeft />
+                </IconButton>
+                {table.getState().pagination.pageIndex + 1} of{' '}
+                {table.getPageCount().toLocaleString()}
+                <IconButton
+                    onClick={() => table.nextPage()}
+                    disabled={!table.getCanNextPage()}>
+                    <ChevronRight />
+                </IconButton>
+            </Box>
         </Grid>
+
     </Grid>
     </>
 }

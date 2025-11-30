@@ -13,6 +13,7 @@ import { queryClient } from "../App.jsx";
 import {useDebouncedCallback} from 'use-debounce'
 import { mutateHookMessages } from "../repositories/hookMessages";
 import {Grid2} from "@mui/material";
+import BackdropLoader from "../components/BackdropLoader.jsx";
 
 
 
@@ -223,7 +224,6 @@ const Notifications = () => {
                     </List>
                 </Paper>
             </Grid>
-            
         </Grid>
     </>
 }

@@ -1,4 +1,5 @@
 import os
+from urllib.parse import parse_qs
 from FlaskApp.ai_modules import extract_from_ia
 from FlaskApp.ai_modules.image_ai import identify_img_transact_ai, perform_conditions
 from FlaskApp.ai_modules.image_functions import read_from_filename, read_screenshot
@@ -13,7 +14,7 @@ from FlaskApp.cosmos_modules import add_to_app, add_to_persist, get_record
 from FlaskApp.notif_modules.handler import check_duplicate_notif, handle_notif
 from FlaskApp.regex_utility import substitute_text
 from FlaskApp.sms_handler2.handler import handle_sms
-from FlaskApp.upload_handler import handle_upload
+from FlaskApp.upload_handler import get_azure_file, handle_upload
 from FlaskApp.utils import utcstr_to_datetime
 
 
@@ -125,6 +126,36 @@ def phone_hook():
 
     return Response( json.dumps( newItem ), 201, content_type="application/json")
 
+@app.get("/image_ai_hook/<string:id>")
+def image_ai_hook_reprocess(id):
+    headeApiKey = request.headers.get("x-api-key", type=str)
+    if(headeApiKey == None or headeApiKey != apiKey ): return Response(status=401)  
+
+    record = get_record("Files", id)
+    filePath = get_azure_file(record)
+    
+    
+    #do ai stuff here?
+    try:
+        image_output = identify_img_transact_ai(filePath, record)
+    except APIError as err:
+        if(err.code == 503):
+            logging.log(f"Err with AI model:{err}")
+            add_to_app("Files", record)
+
+            return Response(json.dumps( {"message" : "AI Too Busy", "fileId": id}), 503 , content_type="application/json")
+                                     
+
+    output = json.loads(image_output.text)
+    
+    record["AiData"] = output
+    record["AiReviewed"] = False
+    add_to_app("Files", record)
+
+
+    return Response( json.dumps(output) , 200, content_type="application/json")
+
+    
 
 @app.post("/file_hook")    
 def file_hook_handler():

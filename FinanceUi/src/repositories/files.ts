@@ -16,14 +16,14 @@ export const getFiles = ()=>{
 }
 
 
-export const useMutateBlobFile = ()=>{
+export const useMutateBlobFile = (id? : string | null | undefined)=>{
 
     const del = useMutation({
         mutationFn : (id)=>{
             return api.delete(`file/${id}`)
                 .then(e=>id)
         },
-        onSuccess: (data)=>{
+        onSuccess: (data)=>{            
             queryClient.setQueryData(
                  [BLOB_FILE],
                 (prev: any[])=>{
@@ -34,7 +34,35 @@ export const useMutateBlobFile = ()=>{
             )
         }   
     })
+    const regenerateAiData = useMutation({
+        mutationFn:()=>{
+            return api(`/file/${id}/aidata`, {params:{action:"regenerate"}})
+                .then((res)=>{
+                    return res.data
+                })
+        }, onSuccess:(data)=>{
 
+            let item
+            queryClient.setQueryData([BLOB_FILE], (prev: any[])=>{
+                
+                item = prev.find(e=>e.id == id)
+                if(!item) return prev
+                item.aiData = data
+                item.aiReviewed = false
+                return [...prev];
+            })
+
+            let monthKey = moment(data.dateTime?.datetime || data.dateCreated).format("YYYY-MM-01")
+                
+            queryClient.setQueryData([HOOK_MESSAGES,  { monthKey: monthKey}], (prev: any[])=>{
+                if(!prev) return undefined
+                item = prev.find(e=>e.jsonData?.imageId == id)
+                if(!item) return prev
+                item.extractedData = data
+                return [...prev];
+            })
+        }
+    })
     const updateAiData = useMutation({
         mutationFn:({id,data} : any)=>{
             return api.put(`/files/${id}/aidata`,data)
@@ -64,5 +92,5 @@ export const useMutateBlobFile = ()=>{
 return d
         }
     })
-    return {del,updateAiData}
+    return {del,updateAiData,regenerateAiData}
 }

@@ -11,6 +11,7 @@ import db from "../../components/LocalDb";
 import React from "react";
 import fnApi from "../../components/fnApi";
 import ImageModal from "./ImageModal";
+import EditAiData from "../Gallery/EditAiData";
 const HooksTransaction = lazy(()=>import('./HooksTransaction'))
 
 const camelToSpace = (str:string)=>{
@@ -136,11 +137,14 @@ const HooksAccordion = ({notif, onDelete, onCancel }) => {
         confirm({
             description:"Are you sure to reprocess this notification?"
         }).then(e=>{
-            fnApi.delete(`/hookmessages/${notif.id}/reprocess`)
-                .then(e=>{
-                    db.hookMessages.put(e.data)
-                    db.hookMessages.delete(notif.id)
-                })
+            if(e.confirmed){
+                fnApi.delete(`/hookmessages/${notif.id}/reprocess`)
+                    .then(e=>{
+                        db.hookMessages.put(e.data)
+                        db.hookMessages.delete(notif.id)
+                    })
+
+            }
         })
 
     }
@@ -166,7 +170,7 @@ const HooksAccordion = ({notif, onDelete, onCancel }) => {
                     {notif.transactionId ? <Box  sx={{display:'inline-flex', position:'relative', padding:1, top:"8px"}}>
                         <Task color="success"/></Box> : 
                             (notif.extractedData.success == false || notif.extractedData.success.toLowerCase() == "false") && <DeleteLoading onClick={()=>onDelete(notif.id)} onCancel={()=>onCancel(notif.id)} onCommit={()=>{}} seconds={5}></DeleteLoading>}
-
+                
                     <IconButton size="small" onClick={(evt)=>setAnchor(evt.target)}>
                         <ExpandMore />
                     </IconButton>
@@ -178,6 +182,10 @@ const HooksAccordion = ({notif, onDelete, onCancel }) => {
                                         setAnchor(null)
                                     }}>Copy Message</MenuItem>
                                     <MenuItem disabled={!!notif.transactionId} onClick={reprocess}>Reprocess</MenuItem>
+                                    {!!notif.jsonData.imageId && 
+                                        <EditAiData data={notif.extractedData} setData={()=>{}} id={notif.jsonData.imageId} reviewed={null}>
+                                            <MenuItem>Edit Img Extracted Data</MenuItem>
+                                        </EditAiData>}
                                     {(notif.extractedData.success == true || notif.extractedData.success.toLowerCase() == "true") && !notif.transactionId &&
                                         <MenuItem disabled={!!notif.transactionId} onClick={() => {
                                             onDelete(notif.id)

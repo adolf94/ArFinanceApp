@@ -12,7 +12,7 @@ from uuid_extensions import uuid7
 
 from FlaskApp.ai_modules import extract_from_ia
 from FlaskApp.ai_modules.image_functions import read_from_filename, read_screenshot
-from FlaskApp.cosmos_modules import add_to_app, add_to_persist
+from FlaskApp.cosmos_modules import add_to_app, add_to_persist, get_record
 
 
 endpoint = os.getenv("COSMOS_ENDPOINT")
@@ -189,3 +189,23 @@ def upload_to_azure(file_path, blob_name):
         logging.error(ex)
         return Response(ex, 500)
         
+def get_azure_file(row):
+
+        blob_service_client = None
+        if connection_string != "":
+            blob_service_client = BlobServiceClient.from_connection_string(connection_string)
+            logging.info("found the connection string")
+
+        # # Use DefaultAzureCredential - this will use whatever identity you've configured
+        # # (e.g., environment variables, managed identity, etc.)
+        else:
+            credential = DefaultAzureCredential()
+            blob_service_client = BlobServiceClient(account_url=account_url, credential=credential)
+            logging.info("using default Credential")
+            
+        blob_client = blob_service_client.get_blob_client(container=container_name, blob=row["FileKey"])
+        download = blob_client.download_blob()
+        temp_file = tempfile.NamedTemporaryFile(mode="wb",delete=False)
+        bytesArr = download.readall()
+        temp_file.write(bytesArr)
+        return temp_file.name

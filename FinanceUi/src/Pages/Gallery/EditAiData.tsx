@@ -1,14 +1,21 @@
 import { ImageSearch, Satellite } from "@mui/icons-material"
 import { Box, Button, Dialog, DialogContent, Divider, Grid2 as Grid, IconButton, List, ListItem, ListItemText, Stack, TextField, Typography } from "@mui/material"
-import { useEffect, useState } from "react"
+import { cloneElement, useEffect, useState } from "react"
 import db from "../../components/LocalDb"
 import api from "../../components/fnApi"
 import numeral from "numeral"
-import { faL } from "@fortawesome/free-solid-svg-icons"
 import { useMutateBlobFile } from "../../repositories/files"
 
+interface EditAiDataProps {
+    data: any[],
+    setData: (data)=>void,
+    id: string,
+    reviewed: boolean,
+    children?: JSX.Element
+}
 
-const EditAiData = ({data, setData, id,reviewed})=>{
+
+const EditAiData = ({data, setData, id,reviewed, children}:EditAiDataProps)=>{
     const [state,setState] = useState(data)
     const [open,setOpen] = useState(false)
     const [image,setImage] = useState("")
@@ -74,10 +81,10 @@ const EditAiData = ({data, setData, id,reviewed})=>{
 
 
     return <>
-
+        {!!children ? cloneElement(children, {onClick:()=>setOpen(true) }) :
         <IconButton  disabled={!data}>
             <ImageSearch onClick={()=>setOpen(true)} color={!data? "disabled":"inherit"}/>
-        </IconButton>
+        </IconButton>}
         <Dialog open={open} maxWidth="md" fullWidth onClose={()=>setOpen(false)}>
                 <Box sx={{width:"100%" , minWidth:"40vw"}}>
                     <Grid container >
