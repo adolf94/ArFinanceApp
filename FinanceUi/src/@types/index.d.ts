@@ -77,6 +77,9 @@ declare module 'FinanceApi' {
         fileKey: string;
         dateCreated: string;
         status: string;
+        aiReviewed: boolean;
+        hookId?: string;
+        aiData?: ExtractedDataModel;
     }
 
     // ..\FinanceFunction\Models\CoopOption.cs
@@ -113,6 +116,7 @@ declare module 'FinanceApi' {
         name: string;
         app: string;
         regex: string;
+        titleRegex: string;
         type: string;
         displayText: string;
         priorityOrder: number;

@@ -1,6 +1,8 @@
 import { useMutation } from "@tanstack/react-query"
 import api from "../components/fnApi"
 import { queryClient } from "../App"
+import moment from "moment"
+import { HOOK_MESSAGES } from "./hookMessages"
 
 
 export const BLOB_FILE = "blobFile"
@@ -32,5 +34,33 @@ export const useMutateBlobFile = ()=>{
             )
         }   
     })
-    return {del}
+
+    const updateAiData = useMutation({
+        mutationFn:({id,data} : any)=>{
+            return api.put(`/files/${id}/aidata`,data)
+                .then(()=>{
+                    let item
+                    queryClient.setQueryData([BLOB_FILE], (prev: any[])=>{
+                        item = prev.find(e=>e.id == id)
+                        item.aiData = data
+                        item.aiReviewed = true
+                        return prev;
+                    })
+
+                    let monthKey = moment(data.dateTime?.datetime || data.dateCreated).format("YYYY-MM-01")
+                        
+                    queryClient.setQueryData([HOOK_MESSAGES,  { monthKey: monthKey}], (prev: any[])=>{
+                        if(!prev) return undefined
+                        item = prev.find(e=>e.jsonData?.imageId == id)
+                        if(!!item) return
+                        item.extractedData = data
+                        return prev;
+                    })
+                    return null;
+                })
+        },onSuccess:(d)=>{
+return d
+        }
+    })
+    return {del,updateAiData}
 }

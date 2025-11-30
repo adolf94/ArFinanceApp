@@ -110,6 +110,8 @@ public class HookMessagesController
 		}
 
 
+
+
 		[Function("DeleteManyHook")]
 		public async Task<IActionResult> DeleteHookMany([HttpTrigger(AuthorizationLevel.Anonymous, "delete", Route = "month/{month}/hookmessages")]
 				HttpRequest req, DateTime month)

@@ -32,11 +32,10 @@ public class HookMessage
 				public string recipientName { get; set; } = "";
 
 				public string success { get; set; }
-
+				public string app { get; set; }
 
 				public string reference { get; set; } = "";
 				public string amount { get; set; } = "";
-				public string newBalance { get; set; } = "";
 				public string transactionFee { get; set; } = "";
 
 				public string dateTime { get; set; }

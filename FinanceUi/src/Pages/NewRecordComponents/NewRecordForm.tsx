@@ -227,7 +227,6 @@ const NewRecordForm = (props: NewRecordFormProps) => {
   
 
     useEffect(() => {
-        getToken();
       (async () => {
         if (
           transId == "new"
@@ -326,17 +325,17 @@ const NewRecordForm = (props: NewRecordFormProps) => {
         credit : getReferenceName(selectedConfig.credit, hook),
         debit : getReferenceName(selectedConfig.debit, hook)
       }
+      console.log(references)
+
+      
+      vendor = (!isCreditRefSameAsVendor&&!isDebitRefSameAsVendor) ?selectionByHook("debit", hook, selectedConfig, 
+        [ "vendor"])[0] : null
 
 
-
-      vendor = (!isCreditRefSameAsVendor&&!isDebitRefSameAsVendor) ?selectionByHook(selectedConfig.debit, hook, selectedConfig.type, 
-        [ "vendor"]) : null
-
-
-      let creditVendor = selectionByHook(selectedConfig.credit, hook, selectedConfig.type, 
+      let creditVendor = selectionByHook("credit", hook, selectedConfig, 
         [ "account", ...(isCreditRefSameAsVendor?["vendor"]:[]) ])
       
-      let debitVendor = selectionByHook(selectedConfig.debit, hook, selectedConfig.type, 
+      let debitVendor = selectionByHook("debit", hook, selectedConfig, 
           [ "account", ...(isDebitRefSameAsVendor?["vendor"]:[]) ])
           
 
@@ -353,6 +352,8 @@ const NewRecordForm = (props: NewRecordFormProps) => {
           [debit, vendor] = d
         } else { [debit] = d}
       })
+
+      if (!vendor) [vendor] = await selectionByHook(isCreditRefSameAsVendor?"credit":"debit", hook, selectedConfig, ["vendor"])
       // let vendor = selectionByHook(selectedConfig.vendor, hook, selectedConfig.type, "vendor")
       // let credit = selectionByHook(selectedConfig.credit, hook, selectedConfig.type, "account")
       // let debit = selectionByHook(selectedConfig.debit, hook, selectedConfig.type, "account")

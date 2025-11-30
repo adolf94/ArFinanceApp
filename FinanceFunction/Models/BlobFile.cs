@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static FinanceFunction.Models.HookMessage;
 
 namespace FinanceFunction.Models
 {
@@ -17,6 +18,10 @@ namespace FinanceFunction.Models
 				public string FileKey { get; set; } = "";
 				public DateTime DateCreated { get; set; }	= DateTime.UtcNow;
 				public string Status { get; set; } = "Active";
+				public bool AiReviewed { get; set; } = false;
+				public Guid? hookId { get; set; }
+
+				public ExtractedDataModel? AiData { get; set; }
 
 		}
 }

@@ -1,8 +1,8 @@
-import { AppBar, Box, Grid2 as Grid, IconButton, Link, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Toolbar, Typography } from "@mui/material"
+import { AppBar, Box, Chip, Grid2 as Grid, IconButton, Link, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Toolbar, Typography } from "@mui/material"
 import { useQuery } from "@tanstack/react-query"
 import { BLOB_FILE, getFiles } from "../../repositories/files"
 import ImageModal from "../Notifications/ImageModal"
-import { Delete } from "@mui/icons-material"
+import { Delete, ImageSearch, Spellcheck, TaskAlt } from "@mui/icons-material"
 import { useConfirm } from "material-ui-confirm"
 import api from "../../components/fnApi"
 import ImageDataRow from "./ImageDataRow"
@@ -20,6 +20,7 @@ import { BlobFile } from "FinanceApi"
 import moment from "moment"
 import DeleteButton from "./DeleteButton"
 import { useState } from "react"
+import EditAiData from "./EditAiData"
 
 
 
@@ -32,7 +33,11 @@ import { useState } from "react"
   const columns = [
     columnHelper.accessor(row=>row.originalFileName, {
       cell: info =>  <ImageModal id={info.row.original.id}>
-                  <Link underline="hover">{info.row.original.originalFileName}</Link>
+                  <Link underline="hover">
+                  {info.row.original.originalFileName}
+                  {info.row.original.aiReviewed && <TaskAlt color="success" fontSize="0.75rem"/> }
+                  </Link>
+                  
               </ImageModal>,
       id: "originalFileName",
       header: ()=> <span>Filename</span>
@@ -48,7 +53,10 @@ import { useState } from "react"
     columnHelper.display( {
         id:"actions",
         header: () => 'Actions',
-        cell: (info)=> <DeleteButton id={info.row.original.id} />
+        cell: (info)=><>
+            <EditAiData data={info.row.original.aiData} id={info.row.original.id} setData={()=>{}} reviewed={info.row.original.aiReviewed}/>
+            <DeleteButton id={info.row.original.id} />
+        </>
     }),
     // columnHelper.accessor('visits', {
     //   header: () => <span>Visits</span>,

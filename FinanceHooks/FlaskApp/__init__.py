@@ -227,8 +227,7 @@ def image_ai_hook():
         output["otherData"] = {  
             "info":"nothing here"
         }
-    upload_result["AI_data"] = output
-    add_to_app("Files", upload_result["record"])
+    upload_result["record"]["AiData"] = output
 
     output["matchedConfig"] = "imgai_default"
 

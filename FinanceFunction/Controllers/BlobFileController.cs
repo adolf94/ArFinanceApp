@@ -17,6 +17,7 @@ using FinanceFunction.Models;
 using static FinanceFunction.Models.AppConfig;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.AspNetCore.Http.HttpResults;
+using static FinanceFunction.Models.HookMessage;
 
 namespace FinanceFunction.Controllers
 {
@@ -26,18 +27,20 @@ namespace FinanceFunction.Controllers
 				private readonly CurrentUser _user;
 				private readonly BlobClientConfig _config;
 				private readonly IDbHelper _db;
+				private readonly IHookMessagesRepo _hook;
 				private readonly TokenCredential? credential;
 				private readonly string RequiredRole = "FINANCE_USER";
 				private readonly BlobServiceClient _client;
 			
 
 				public BlobFileController(IBlobFileRepo repo, CurrentUser user, IHostEnvironment env, 
-						AppConfig config, IDbHelper db)
+						AppConfig config, IDbHelper db, IHookMessagesRepo hook)
 				{
 						_repo = repo;
 						_user = user;
 						_config = config.BlobClient;
 						_db = db;
+						_hook = hook; 
 
 						bool isDevelopment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development";
 						if (string.IsNullOrEmpty(_config.ConnectionString))
@@ -63,6 +66,33 @@ namespace FinanceFunction.Controllers
 
 						return new OkObjectResult(files);
 
+				}
+				[Function("UpdateHookAiData")]
+				public async Task<IActionResult> UpdateHookAidata([HttpTrigger(AuthorizationLevel.Anonymous, "put", Route="files/{id}/aidata")]
+							HttpRequest req, Guid id)
+				{
+						if (!_user.IsAuthenticated) return new UnauthorizedResult();
+						if (!_user.IsAuthorized(RequiredRole)) return new ForbidResult();
+
+						var data = await req.ReadFromJsonAsync<ExtractedDataModel>();
+
+						var file = await _repo.GetOneFileinfo(id);
+						if (file == null) return new NotFoundResult();
+
+						file.AiData = data;
+						file.AiReviewed = true;
+						if (file.hookId.HasValue)
+						{
+								var hok = await _hook.GetOneHook(file.hookId.Value);
+								if(hok != null)
+								{
+										hok.ExtractedData = data;
+										hok.TimeToLive = new HookMessage().TimeToLive;
+								}
+						}
+						await _db.SaveChangesAsync();
+						//then update the hook from HookId
+						return new NoContentResult();
 				}
 
 				[Function("GetOneFile")]

@@ -24,7 +24,7 @@ namespace FinanceFunction.Data.CosmosRepo
 
 				public async Task<IEnumerable<BlobFile>> GetFiles()
 				{
-						return await _context.Files.ToArrayAsync();
+						return await _context.Files.ToArrayAsync(_token);
 				}
 
 				public async Task<Uri?> CreateServiceSASContainer(

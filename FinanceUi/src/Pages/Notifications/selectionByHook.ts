@@ -15,10 +15,11 @@ export const getReferenceName = (key : string, hook: HookMessage)=>{
 }
 
 
-const selectionByHook  = async (key : string, hook : HookMessage, tranType, fieldType)  =>  {
-    
+const selectionByHook  = async (destination : "debit" | "credit", hook : HookMessage, selectedConfig, fieldType)  =>  {
+    let {type: tranType, debit, credit} = selectedConfig
+    let key = destination == "credit" ? credit : debit
     let refName = getReferenceName(key,hook)
-    
+    if(!refName) return fieldType.map(e=>null) as  Promise<any>[]
     let hookRef = await queryClient.ensureQueryData({
         queryKey: [HOOK_REFERENCE, {referenceName: refName }],
         queryFn: ()=>getReferencesByName(refName),
@@ -26,8 +27,26 @@ const selectionByHook  = async (key : string, hook : HookMessage, tranType, fiel
     })
 
 
-    let items = hookRef.filter(e=>e.type==tranType || (fieldType.length == 1 && fieldType[0] == "vendor" && e.vendorId != ""))
-        .sort((a,b)=>b.hits - a.hits)
+    let items = hookRef
+    .filter(e=>e.type==tranType || (fieldType.length == 1 && fieldType[0] == "vendor" && e.vendorId != ""))
+        // .filter(e=>(e.type == (tranType == "expense" ? "expense" : e.type)) || (fieldType.length == 1 && fieldType[0] == "vendor" && e.vendorId != "") )
+        .sort((a,b)=>{
+            const aIsTransfer = a.type === tranType;
+            const bIsTransfer = b.type === tranType;
+
+            if (aIsTransfer && !bIsTransfer) {
+                return -1; // 'a' (transfer) comes before 'b'
+            }
+            if (!aIsTransfer && bIsTransfer) {
+                return 1; // 'b' (transfer) comes before 'a'
+            }
+
+            // --- 2. Secondary Sort: 'hits' descending (greater value first) ---
+            // If the types are the same (both transfer OR both not transfer), 
+            // compare 'hits' in descending order.
+            // b.hits - a.hits achieves descending sort.
+            return b.hits - a.hits;
+        })
     if(items.length == 0){
         return fieldType.map(e=>null) as  Promise<any>[]
     }
