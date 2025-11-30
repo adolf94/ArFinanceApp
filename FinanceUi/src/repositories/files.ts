@@ -41,10 +41,12 @@ export const useMutateBlobFile = ()=>{
                 .then(()=>{
                     let item
                     queryClient.setQueryData([BLOB_FILE], (prev: any[])=>{
+                        
                         item = prev.find(e=>e.id == id)
+                        if(!item) return prev
                         item.aiData = data
                         item.aiReviewed = true
-                        return prev;
+                        return [...prev];
                     })
 
                     let monthKey = moment(data.dateTime?.datetime || data.dateCreated).format("YYYY-MM-01")
@@ -52,9 +54,9 @@ export const useMutateBlobFile = ()=>{
                     queryClient.setQueryData([HOOK_MESSAGES,  { monthKey: monthKey}], (prev: any[])=>{
                         if(!prev) return undefined
                         item = prev.find(e=>e.jsonData?.imageId == id)
-                        if(!!item) return
+                        if(!item) return prev
                         item.extractedData = data
-                        return prev;
+                        return [...prev];
                     })
                     return null;
                 })

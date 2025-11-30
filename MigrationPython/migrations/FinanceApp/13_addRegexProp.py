@@ -10,9 +10,9 @@ from functools import reduce
 
 def up_migration(db):
 
-    for row in db["HookConfigs"]:
-        for prop in row["Properties"]:
-            if "For" not in prop : prop["For"] = "regex"
+    # for row in db["HookConfigs"]:
+    #     for prop in row["Properties"]:
+    #         if "For" not in prop : prop["For"] = "regex"
 
     data = {}
     for row in db["HookMessages"]:
