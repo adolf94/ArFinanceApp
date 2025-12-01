@@ -1,5 +1,5 @@
 import { ImageSearch, Satellite } from "@mui/icons-material"
-import { Box, Button, Dialog, DialogContent, Divider, Grid2 as Grid, IconButton, List, ListItem, ListItemText, Stack, TextField, Typography } from "@mui/material"
+import { Box, Button, Dialog, DialogContent, Divider, Grid2 as Grid, IconButton, List, ListItem, ListItemText, Skeleton, Stack, TextField, Typography } from "@mui/material"
 import { cloneElement, useEffect, useState } from "react"
 import db from "../../components/LocalDb"
 import api from "../../components/fnApi"
@@ -7,7 +7,7 @@ import numeral from "numeral"
 import { useMutateBlobFile } from "../../repositories/files"
 
 interface EditAiDataProps {
-    data: any[],
+    data: any,
     setData: (data)=>void,
     id: string,
     reviewed: boolean,
@@ -16,15 +16,15 @@ interface EditAiDataProps {
 
 
 const EditAiData = ({data, setData, id,reviewed, children}:EditAiDataProps)=>{
-    const [state,setState] = useState(data)
+    const [state,setState] = useState<any>(data || {})
     const [open,setOpen] = useState(false)
+    const [loading,setLoading] = useState(true)
     const [image,setImage] = useState("")
     const useFileMutate = useMutateBlobFile()
 
 
     useEffect(()=>{
-        if(!data) return
-        if(!open) return
+        if(!open) return;
          (async ()=>{
             var output = await db.images.where("id").equals(id).first();
             if(!output) {
@@ -63,10 +63,13 @@ const EditAiData = ({data, setData, id,reviewed, children}:EditAiDataProps)=>{
             }
 
             setImage(output.data)
+            setLoading(false)
         })()
 
     },[open,data])
-    
+    useEffect(()=>{
+        setState(data)
+    },[data])    
     const onSaveClicked = ()=>{
         useFileMutate.updateAiData.mutateAsync({
             id:id,
@@ -75,7 +78,7 @@ const EditAiData = ({data, setData, id,reviewed, children}:EditAiDataProps)=>{
             setData(state)
             setOpen(false)
         })
-            
+                    
     }
 
 
@@ -92,7 +95,8 @@ const EditAiData = ({data, setData, id,reviewed, children}:EditAiDataProps)=>{
 
 
                         <Grid>
-                                            <Box component="img" sx={{maxHeight:"85vh", maxWidth:"100%"}} src={image || ""}></Box>
+                                            {loading ? <Skeleton variant="rectangular" height="85vh" sx={{width:{sm:"100%", "85vh"}}}/>:
+                                            <Box component="img" sx={{maxHeight:"85vh", maxWidth:"100%"}} src={image || ""}></Box>}
                         </Grid>
                         <Grid sx={{flexGrow:2}}>
                             <List dense>

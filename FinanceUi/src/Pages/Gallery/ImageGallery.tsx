@@ -95,11 +95,12 @@ const ImageGallery = ()=>{
 
     const table = useReactTable({
         data: (data || []),
+        getRowId:(row)=>row.id,
         columns,
         getCoreRowModel: getCoreRowModel(),
         getSortedRowModel: getSortedRowModel(),
         onSortingChange: setSorting, 
-        
+        autoResetPageIndex: false,
         getPaginationRowModel: getPaginationRowModel(),
         onPaginationChange: setPagination,
         state: {
