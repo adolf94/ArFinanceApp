@@ -45,10 +45,9 @@ export const useMutateBlobFile = (id? : string | null | undefined)=>{
             let item
             queryClient.setQueryData([BLOB_FILE], (prev: any[])=>{
                 
-                item = prev.find(e=>e.id == id)
-                if(!item) return prev
-                item.aiData = data
-                item.aiReviewed = false
+                let i = prev.findIndex(e=>e.id == id)
+                if(i == -1) return prev
+                prev[i] = {...prev[i], aiData : data, aiReviewed : true}
                 return [...prev];
             })
 
@@ -56,9 +55,9 @@ export const useMutateBlobFile = (id? : string | null | undefined)=>{
                 
             queryClient.setQueryData([HOOK_MESSAGES,  { monthKey: monthKey}], (prev: any[])=>{
                 if(!prev) return undefined
-                item = prev.find(e=>e.jsonData?.imageId == id)
-                if(!item) return prev
-                item.extractedData = data
+                let i = prev.findIndex(e=>e.jsonData?.imageId == id)
+                if(i == -1) return prev
+                prev[i] = {...prev[i], extractedData : data}
                 return [...prev];
             })
         }
@@ -69,11 +68,9 @@ export const useMutateBlobFile = (id? : string | null | undefined)=>{
                 .then(()=>{
                     let item
                     queryClient.setQueryData([BLOB_FILE], (prev: any[])=>{
-                        
-                        item = prev.find(e=>e.id == id)
-                        if(!item) return prev
-                        item.aiData = data
-                        item.aiReviewed = true
+                        let i = prev.findIndex(e=>e.id == id)
+                        if(i == -1) return prev
+                        prev[i] = {...prev[i], aiData : data, aiReviewed : true}
                         return [...prev];
                     })
 
@@ -81,15 +78,15 @@ export const useMutateBlobFile = (id? : string | null | undefined)=>{
                         
                     queryClient.setQueryData([HOOK_MESSAGES,  { monthKey: monthKey}], (prev: any[])=>{
                         if(!prev) return undefined
-                        item = prev.find(e=>e.jsonData?.imageId == id)
-                        if(!item) return prev
-                        item.extractedData = data
+                        let i = prev.findIndex(e=>e.jsonData?.imageId == id)
+                        if(i == -1) return prev
+                        prev[i] = {...prev[i], extractedData : data}
                         return [...prev];
                     })
                     return null;
                 })
         },onSuccess:(d)=>{
-return d
+            return d
         }
     })
     return {del,updateAiData,regenerateAiData}

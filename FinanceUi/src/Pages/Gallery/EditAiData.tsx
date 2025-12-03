@@ -95,7 +95,7 @@ const EditAiData = ({data, setData, id,reviewed, children}:EditAiDataProps)=>{
 
 
                         <Grid>
-                                            {loading ? <Skeleton variant="rectangular" height="85vh" sx={{width:{sm:"100%", "85vh"}}}/>:
+                                            {loading ? <Skeleton variant="rectangular" height="85vh" sx={{width:{sm:"100%", md:"30vw"}}}/>:
                                             <Box component="img" sx={{maxHeight:"85vh", maxWidth:"100%"}} src={image || ""}></Box>}
                         </Grid>
                         <Grid sx={{flexGrow:2}}>

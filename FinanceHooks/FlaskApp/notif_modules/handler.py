@@ -35,7 +35,7 @@ def check_duplicate_notif(data):
 def handle_notif(data):
 
     notif_config = get_all_records_by_partition("HookConfigs", "notif_")
-
+    titleSearc = None
     output = {
         "data":{
             "matchedConfig" : "notif",
@@ -57,7 +57,7 @@ def handle_notif(data):
 
         if "Regex" in reg:
             searc = get_regex_match(reg["Regex"], data["notif_msg"])
-        if "TitleRegex" in reg:
+        if "TitleRegex" in reg and reg["TitleRegex"] is not None:
             titleSearc = get_regex_match(reg["TitleRegex"], data["notif_title"])
         if "Success" in reg and reg["Success"] == False:
             break
@@ -81,7 +81,7 @@ def handle_notif(data):
 
     notif_matches = [searc, titleSearc]
     for ii, searched in enumerate(notif_matches):
-        if searched is not None:    
+        if searched is not None and searched != "":    
             values = regex_matches_tolist(searched)
             name = current_reg["id"]
             frm = "regex" if ii == 0 else "titleRegex"
