@@ -45,10 +45,17 @@ export const useMutateBlobFile = (id? : string | null | undefined)=>{
             let item
             queryClient.setQueryData([BLOB_FILE], (prev: any[])=>{
                 
-                let i = prev.findIndex(e=>e.id == id)
-                if(i == -1) return prev
-                prev[i] = {...prev[i], aiData : data, aiReviewed : true}
-                return [...prev];
+                return prev.map(row=>{
+                    if (row.id === id) {
+                        item = {
+                            ...row,
+                            aiData: data,
+                            aiReviewed: true
+                        };
+                        return {...item}
+                    }
+                    return row; // Return the original reference for non-matching items
+                })
             })
 
             let monthKey = moment(data.dateTime?.datetime || data.dateCreated).format("YYYY-MM-01")
@@ -68,10 +75,18 @@ export const useMutateBlobFile = (id? : string | null | undefined)=>{
                 .then(()=>{
                     let item
                     queryClient.setQueryData([BLOB_FILE], (prev: any[])=>{
-                        let i = prev.findIndex(e=>e.id == id)
-                        if(i == -1) return prev
-                        prev[i] = {...prev[i], aiData : data, aiReviewed : true}
-                        return [...prev];
+                                    
+                            return prev.map(row=>{
+                                if (row.id === id) {
+                                    item = {
+                                        ...row,
+                                        aiData: data,
+                                        aiReviewed: true
+                                    };
+                                    return {...item}
+                                }
+                                return row; // Return the original reference for non-matching items
+                            })
                     })
 
                     let monthKey = moment(data.dateTime?.datetime || data.dateCreated).format("YYYY-MM-01")
