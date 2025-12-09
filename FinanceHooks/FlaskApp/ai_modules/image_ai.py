@@ -21,7 +21,7 @@ def identify_img_transact_ai(localpath, file_record):
         Possible keys are
         ```````
         - transactionType  : string -  the transaction executed (Samples: "bills_pay", "pay_merchant", "transfer", "transfer_via_instapay", "transfer_via_pesonet"). If it shows transfer to other bank use  "transfer_via_instapay"
-        - app: string - the app name source of the screenshot
+        - app: string - the app name source of the screenshot. You may use the filename or the image to determine the app (however, do not use the notification bar to determine the appname). 
         - description : string - description for the transaction, include a summary, recipient name for the transaction. Be more concise on the text. Make it at least 60 characters.
         - sourceFilename : string - the filename of the image used.
         - reference : string - the reference number that can be used in later time. for record purposes
@@ -36,7 +36,7 @@ def identify_img_transact_ai(localpath, file_record):
         - transactionFee : decimal - the fee for the transaction (default value:0.00)
         - currency : string - the payment currency (default value: PHP)
         - otherData : json_object - key-value pairs of details that are not yet captured but can be used for referencing the transaction
-        ``````` 
+        ```````  
     """
 
 

@@ -29,7 +29,7 @@ client = ImageAnalysisClient(SERVICE_ENDPOINT, CREDENTIAL)
 
 def read_from_filename(filename):
     fileName_withoutExt = filename.split(".", 5)[0]
-    pattern = r"Screenshot_([0-9]+)_([0-9]+)_([A-Za-z0-9]+)"
+    pattern = r"Screenshot_([0-9]+)_([0-9]+)_([_A-Za-z0-9]+)"
     match = re.search(pattern, fileName_withoutExt, re.IGNORECASE)
     if match == None: return ""
     app = match.group(3).lower()

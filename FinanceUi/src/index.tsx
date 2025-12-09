@@ -13,7 +13,7 @@ const root = createRoot(rootElement);
 console.log(import.meta);
 root.render(
   <BrowserRouter basename={baseUrl}>
-    <App />
+      <App />
   </BrowserRouter>,
 );
 

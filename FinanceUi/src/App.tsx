@@ -26,6 +26,7 @@ import fnApi from "./components/fnApi";
 import Loader from "./components/Loader";
 import Login from "./Pages/Login";
 import { GoogleOAuthProvider } from "@react-oauth/google";
+import { AuthContext, AuthContextProvider } from "./components/UserInfoContext";
 
 export const queryClient = new QueryClient({
   defaultOptions: {
@@ -180,8 +181,10 @@ export default class App extends Component {
           <QueryClientProvider client={queryClient}>
             <ThemeProvider theme={theme}>
               <GoogleOAuthProvider clientId={window.webConfig.clientId}>
-                <Login />
-                <TheApp />
+                <AuthContextProvider>
+                  <Login />
+                  <TheApp />
+                </AuthContextProvider>
               </GoogleOAuthProvider>
             </ThemeProvider>
             <ReactQueryDevtools

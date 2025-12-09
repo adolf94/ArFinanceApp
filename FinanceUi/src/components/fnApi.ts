@@ -49,7 +49,7 @@ const getTokenFromApi = mm(
 );
 
 
-const getTokenViaRefreshToken = ()=>{
+export const getTokenViaRefreshToken = ()=>{
   let token = window.localStorage.getItem("refresh_token");
   if(!token) return ""
   return axios.post(`${window.webConfig.api}/auth/refresh`,{
