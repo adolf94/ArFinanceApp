@@ -40,9 +40,9 @@ def reset_ledgers(db):
         if currentDate > p["max"]: p["max"] = currentDate
         return p    
     
-    def date_to_MonthKey(d: datetime):
+    def date_to_MonthKey(d: datetime, day: int = 1):
         tz = pytz.timezone("Asia/Manila")
-        daaate = d.astimezone(tz).strftime("%Y-%m-01")
+        daaate = d.astimezone(tz).replace(day=day).strftime("%Y-%m-%d")
         return daaate
         
 
@@ -78,8 +78,8 @@ def reset_ledgers(db):
                 "$type": "AccountBalance",
                 "Year": month.year,
                 "Month": month.month,
-                "DateStart": date_to_MonthKey(month.replace(day=c["PeriodStartDay"])),
-                "DateEnd": date_to_MonthKey(month.replace(day=c["PeriodStartDay"]) + relativedelta(months=1)),
+                "DateStart": date_to_MonthKey(month, c["PeriodStartDay"]),
+                "DateEnd": date_to_MonthKey(month + relativedelta(months=1), c["PeriodStartDay"]),
                 "Balance": 0,
                 "EndingBalance": 0,
                 "PartitionKey": "default",
