@@ -117,8 +117,8 @@ def phone_hook():
     }
 
 
-    if("matched_config" in extracted and  "DisplayText" in extracted["matched_config"] 
-       and extracted["matched_config"] is not None and extracted["matched_config"]["DisplayText"] is not None and extracted["matched_config"]["DisplayText"] != "") :
+    if("matched_config" in extracted and extracted["matched_config"] is not None   
+       and "DisplayText" in extracted["matched_config"] and extracted["matched_config"]["DisplayText"] is not None and extracted["matched_config"]["DisplayText"] != "") :
         newItem["RawMsg"] = substitute_text(extracted["matched_config"]["DisplayText"], newItem)
 
     add_to_app("HookMessages", newItem)
