@@ -358,7 +358,7 @@ const NewRecordForm = (props: NewRecordFormProps) => {
       // let credit = selectionByHook(selectedConfig.credit, hook, selectedConfig.type, "account")
       // let debit = selectionByHook(selectedConfig.debit, hook, selectedConfig.type, "account")
       
-      let availDate = hook.jsonData?.timestamp ?? hook.date
+      let availDate = hook.extractedData?.datetime ?? hook.jsonData?.timestamp ?? hook.date
       let datetime = moment(availDate).toISOString();
         setFieldShow({
           description : !!data.remarks,

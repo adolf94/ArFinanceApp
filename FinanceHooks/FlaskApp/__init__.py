@@ -11,6 +11,7 @@ from flask import Flask, request, Response,app
 from uuid_extensions import uuid7
 from google.genai.errors import APIError
 from FlaskApp.cosmos_modules import add_to_app, add_to_persist, get_record
+from FlaskApp.email_modules import process_unread_emails
 from FlaskApp.notif_modules.handler import check_duplicate_notif, handle_notif
 from FlaskApp.regex_utility import substitute_text
 from FlaskApp.sms_handler2.handler import handle_sms
@@ -126,6 +127,12 @@ def phone_hook():
     add_to_persist("HookMessages", newItem)
 
     return Response( json.dumps( newItem ), 201, content_type="application/json")
+
+
+@app.get("/test_email")
+def test_email():
+    process_unread_emails()
+    return Response("", 200)
 
 @app.get("/image_ai_hook/<string:id>")
 def image_ai_hook_reprocess(id):

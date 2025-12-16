@@ -4,7 +4,8 @@
 
 azure-functions
 flask
-
+beautifulsoup4
+bleach
 uuid_v7
 uuid7
 azure.cosmos
@@ -14,3 +15,4 @@ azure-ai-vision-imageanalysis
 google-genai
 Pillow
 pytz
+tinycss2
