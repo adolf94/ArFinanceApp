@@ -1,0 +1,120 @@
+from datetime import time
+import logging
+import os
+from google import genai
+from google.genai.errors import APIError
+from google.genai import types
+from PIL import Image
+import time as t
+import json
+
+from cosmos_modules import get_all_records_by_partition
+GOOGLE_GENAI_USE_VERTEXAI=True
+client = genai.Client(api_key=os.environ['GEMINI_API_KEY'], vertexai=True)
+max_retries = 3
+
+def identify_img_transact_ai(localpath, file_record):
+
+    prompt = f"""
+        I have provided a screenshot of a transaction, provide the information show in json format. I have provided a default or just leave it blank if the data is not available. The original filename is {file_record["OriginalFileName"]}
+
+        Possible keys are
+        ```````
+        - transactionType  : string -  the transaction executed (Samples: "bills_pay", "pay_merchant", "transfer", "transfer_via_instapay", "transfer_via_pesonet"). If it shows transfer to other bank use  "transfer_via_instapay"
+        - app: string - the app name source of the screenshot. You may use the filename or the image to determine the app (however, do not use the notification bar to determine the appname). 
+        - description : string - description for the transaction, include a summary, recipient name for the transaction. Be more concise on the text. Make it at least 60 characters.
+        - sourceFilename : string - the filename of the image used.
+        - reference : string - the reference number that can be used in later time. for record purposes
+        - datetime : datetime- the date and time the transaction was executed in the format of "YYYY-MM-DDTHH:mm:ssZ". Convert from GMT +8:00 if it was not provided
+        - senderAcct  : string - (source account) the account number used to send / pay as mentioned in the screenshot
+        - senderBank  : string - (source bank) the bank of the account used to send / pay as mentioned in the screenshot
+        - senderName  : string - the name or nickname used to send / pay as mentioned in the screenshot
+        - recipientAcct  : string - the destination account number of the transfer.
+        - recipientBank  : string - the bank of the account of the recipient
+        - recipientName  : string - the name or nickname of the recipient account as shown in the image. For Bills pay, this is the type of bill paid. It can be the merchant name
+        - amount : decimal - the paid/transfered amount, always make this a positive number even if the picture indicates a negative number
+        - transactionFee : decimal - the fee for the transaction (default value:0.00)
+        - currency : string - the payment currency (default value: PHP)
+        - otherData : json_object - key-value pairs of details that are not yet captured but can be used for referencing the transaction
+        ```````  
+    """
+
+
+        
+    image = Image.open(localpath)
+
+    config = types.GenerateContentConfig(
+        response_mime_type="application/json"
+    )
+    for attempt in range(max_retries):
+        try:
+            logging.info(f"Attempt {attempt + 1}...")
+            response = client.models.generate_content(model="gemini-2.5-flash",
+                                                    contents=[image, prompt],
+                                                    config=config
+                                                )
+            
+            return response
+        except APIError as e:
+            # Check for 503 (Service Unavailable/Overloaded) or 429 (Rate Limit)
+            if e.code == 503 or e.code == 429:
+                # Calculate exponential backoff delay
+                wait_time = 2 ** attempt  # e.g., 1, 2, 4, 8, 16 seconds
+                
+                if attempt < max_retries - 1:
+                    logging.warning(f"Error {e.code}: Model overloaded/rate limited. Retrying in {wait_time}s...")
+                    t.sleep(wait_time)
+                else:
+                    # Last attempt failed, raise the final error
+                    logging.error(f"Error {e.code}: Failed after {max_retries} attempts.")
+                    raise e
+            else:
+                # Handle other unexpected API errors immediately
+                logging.error(f"An unrecoverable API error occurred (Code {e.code}): {e}")
+                raise e
+        
+        except Exception as e:
+            # Catch other potential errors (e.g., network issues)
+            logging.error(f"An unexpected error occurred: {e}")
+            raise e
+
+    return None # Should not be reached if max_retries is > 0
+
+def perform_conditions(output):
+    
+    imageConfigs = get_all_records_by_partition("HookConfigs", "imgai_")
+
+    confs_to_test = filter(lambda c: c["App"] == output["app"].lower(), imageConfigs)
+
+    
+    current_reg = None
+    for reg in confs_to_test:
+
+        if run_conditions(output, reg["Conditions"]) == True:
+            current_reg = reg
+            break
+
+    return current_reg
+
+
+def run_conditions(data, condition):
+    # if list of dict, do and
+    if len(condition) == 0:
+        return True
+    if all(isinstance(item, dict) for item in condition):
+        return all(run_and_condition(data, conditionItem) for conditionItem in condition)
+    # else:
+
+    
+def run_and_condition(data, condition):
+
+    if condition["Operation"] is not None:
+        if condition["Operation"] in ["eq","equals","equal", "=", "=="]:
+            return data[condition["Property"]] == condition["Value"]
+        if condition["Operation"] in ["or"]:
+            return run_conditions(data, condition["conditions"])
+    else: 
+        return False
+        
+
+        

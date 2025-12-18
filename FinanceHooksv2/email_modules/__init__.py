@@ -18,7 +18,7 @@ from bleach.css_sanitizer import CSSSanitizer
 
 from bs4 import BeautifulSoup
 
-from FlaskApp.cosmos_modules import add_to_app, add_to_persist # <-- New Import
+from cosmos_modules import add_to_app, add_to_persist # <-- New Import
 
 GMAIL_USER =  os.environ.get("SECONDARY_EMAIL","")
 GMAIL_APP_PASSWORD = os.environ.get("SECONDARY_EMAIL_PW","")

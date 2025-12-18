@@ -1,0 +1,18 @@
+# DO NOT include azure-functions-worker in this file
+# The Python Worker is managed by Azure Functions platform
+# Manually managing azure-functions-worker may cause unexpected issues
+
+azure-functions
+flask
+beautifulsoup4
+bleach
+uuid_v7
+uuid7
+azure.cosmos
+azure.storage.blob 
+azure.identity
+azure-ai-vision-imageanalysis
+google-genai
+Pillow
+pytz
+tinycss2

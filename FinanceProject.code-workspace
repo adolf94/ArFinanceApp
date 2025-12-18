@@ -26,6 +26,10 @@
 		},
 		{
 			"path": "MigrationPython"
+		},
+		{
+			"name": "FinanceHooksv2",
+			"path": "FinanceHooksv2"
 		}
 	],
 	"settings": {
