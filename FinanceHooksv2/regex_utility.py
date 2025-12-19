@@ -3,7 +3,7 @@ import re
 
 def get_regex_match(pattern, text):
 
-    matches = re.finditer(pattern, text)
+    matches = re.finditer(pattern, text, flags=re.IGNORECASE)
     for m in matches:
         return m
     return None

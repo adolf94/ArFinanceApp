@@ -121,12 +121,12 @@ namespace FinanceFunction.Controllers
 
 								//var jsonString = JsonSerializer.Serialize(item.JsonData);
 								//StringContent content = new StringContent(jsonString, Encoding.UTF8, "application/json");
-								var response = await httpClient.GetAsync($"/image_ai_hook/{id}");
+								var response = await httpClient.GetAsync($"api/image_ai_hook/{id}");
 								if (response.StatusCode == System.Net.HttpStatusCode.NotFound) return new NotFoundResult();
 								response.EnsureSuccessStatusCode();
 
 						}
-
+						 
 
 						var item = await _repo.GetOneFileinfo(id);
 						if (item == null) return new NotFoundResult();

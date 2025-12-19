@@ -85,7 +85,7 @@ public class HookMessagesController : ControllerBase
 
 				var jsonString = JsonSerializer.Serialize(item.JsonData);
 				StringContent content = new StringContent(jsonString, Encoding.UTF8, "application/json");
-				var response = await httpClient.PostAsync("/phone_hook", content);
+				var response = await httpClient.PostAsync("/api/phone_hook", content);
 				HookHookReprocess? body = new();
 				response.EnsureSuccessStatusCode();
 

@@ -33,6 +33,6 @@
 		}
 	],
 	"settings": {
-		"debug.internalConsoleOptions": "neverOpen"
+		"azureFunctions.deploySubpath": "\\FinanceHooksv2"
 	}
 }

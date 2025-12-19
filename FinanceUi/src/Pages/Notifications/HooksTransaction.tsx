@@ -202,7 +202,7 @@ const HooksTransaction = ({hook, shown}: {hook:HookMessage, shown:boolean})=>{
                                     <ListItemText primary={
                                         <Grid container>
                                             <Grid size={{sm:4}}> </Grid>
-                                            <Grid sm={8} sx={{alignItems:'right'}}>
+                                            <Grid size={8} sx={{alignItems:'right'}}>
                                                 {
                                                     hook.transactionId ? <Button onClick={()=>navigate(`/transactions/${hook.transactionId}`)}>View</Button>
                                                         : <>

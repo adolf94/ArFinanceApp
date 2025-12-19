@@ -52,6 +52,7 @@ def process_with_ai(item):
         - reference : string - the reference number that can be used in later time. for record purposes
         - datetime : datetime- the date and time the transaction was executed in the format of "YYYY-MM-DDTHH:mm:ssZ". Convert from GMT +8:00 if it was not provided
         - senderAcct  : string - (source account) the account number used to send / pay as mentioned in the screenshot
+        - success: bool - if the email is a financial transaction or not.
         - senderBank  : string - (source bank) the bank of the account used to send / pay as mentioned in the screenshot
         - senderName  : string - the name or nickname used to send / pay as mentioned in the screenshot
         - recipientAcct  : string - the destination account number of the transfer.
