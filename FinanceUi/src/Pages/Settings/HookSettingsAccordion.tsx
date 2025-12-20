@@ -9,39 +9,12 @@ import HooksRegexProperties from "./HooksRegexProperties"
 import HooksAddProperty from "./HooksAddProperty"
 import allowedProperties from './allowedProperties.json'
 import HookSubConfigModal  from "./HookSubConfigModal"
-import { electricConstantDependencies } from "mathjs"
-const data =  
-{
-    "name":"notif_gcash_receive",
-    "app": "com.globe.gcash.android",
-    "regex": "(You have received PHP ([0-9\\.]+) of GCash from ([A-Z\\*\\ \\.]+) ([0-9]*)\\.)",
-    "conditions":[{
-        "property": "notif_title",
-        "operation": "equals",
-        "value": "You have received money in GCash!"
-    }],
-    "properties":[
-        {
-            "property": "senderName",
-            "regexIndex": 2
-        },
-        {
-            "property":"senderAcct",
-            "regexIndex": 3
-        },
-        {
-            "property":"amount",
-            "regexIndex": 1
-        }
-    ]
-
-}
-
 interface HookSettingsAccordionProps {
     onCancel?: ()=>void,
     onPriorityChange?: (direction:string)=>void,
     i? : number ,
     totalItems? : number ,
+    tab: string,
     value?: {
         name:string,
         nameKey:string,
@@ -75,7 +48,7 @@ const HookSettingsAccordion = (props : HookSettingsAccordionProps)=>{
     const [form,setForm] = useState(props.value || defaultValue)
     const [name,setName] = useState("")
     const [editName,setEditName] = useState(!props.value)
-    const settingsState = useHooksSettingsState()
+    const settingsState = {tab: props.tab}
     const [anchor,setAnchor] = useState<any>(null)
     const showMenu = !!anchor
     const [selectedProp,setSelectedProp] = useState("regex")
@@ -93,8 +66,8 @@ const HookSettingsAccordion = (props : HookSettingsAccordionProps)=>{
         if(!form.name) return false;
         if(!form.app) return false;
         if(!form.success) return true;
-        if(!form.regex && ["img_", "imgai_"].indexOf(settingsState.tab) == -1 ) return false;
-        if(form.properties.length == 0 && ["imgai_"].indexOf(settingsState.tab) == -1) return false;
+        if(!form.regex && ["img_", "imgai_","email_"].indexOf(settingsState.tab) == -1 ) return false;
+        if(form.properties.length == 0 && ["imgai_,email_"].indexOf(settingsState.tab) == -1) return false;
         return true
     },[form])
 
@@ -119,7 +92,7 @@ const HookSettingsAccordion = (props : HookSettingsAccordionProps)=>{
             setEditName(false)
             setExpanded(true)
             //add properties
-            if(settingsState.tab == "imgai_"){
+            if(["imgai_", "email_"].includes(settingsState.tab)){
                 setForm({...form, nameKey:`${settingsState.tab}${form.name}`, properties: allowedProperties.map((e)=>({property:e}))})
             }
     }
@@ -237,7 +210,7 @@ const HookSettingsAccordion = (props : HookSettingsAccordionProps)=>{
                         <Divider />
               
                 {
-                    settingsState.tab != "imgai_" &&<>
+                    !["imgai_","email_"].includes(settingsState.tab) &&<>
                     <Box sx={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
                         <Typography variant="body2">Properties</Typography>
                         {

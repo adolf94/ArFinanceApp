@@ -251,9 +251,10 @@ def file_hook_handler(req: func.HttpRequest) -> func.HttpResponse:
 
 @app.route(route="email_trigger", methods=["GET"], auth_level=func.AuthLevel.ANONYMOUS)
 def email_trigger(req: func.HttpRequest) -> func.HttpResponse:
-    request = req
-    headeApiKey = request.headers.get("x-api-key", "")
-    if(headeApiKey == None or headeApiKey != apiKey ): return func.HttpResponse(status_code=401)  
+    process_unread_emails()
+    # request = req
+    # headeApiKey = request.headers.get("x-api-key", "")
+    # if(headeApiKey == None or headeApiKey != apiKey ): return func.HttpResponse(status_code=401)  
     return func.HttpResponse( "" ,status_code=204, mimetype="application/json")
 
 @app.route(route="image_ai_hook", methods=["POST"], auth_level=func.AuthLevel.ANONYMOUS)

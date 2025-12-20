@@ -187,7 +187,7 @@ public class HookMessagesController
 				httpClient.BaseAddress = new Uri(_config.FinanceHook.HookUrl);
 				httpClient.DefaultRequestHeaders.Add("x-api-key", _config.FinanceHook.Key);
 				httpClient.DefaultRequestHeaders.Add("x-allow-dup", "true");
-				var response = await httpClient.GetAsync("/api/process_emails");
+				var response = await httpClient.GetAsync("/api/email_trigger");
 
 				return new NoContentResult();
 		}

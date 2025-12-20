@@ -18,7 +18,7 @@ from bleach.css_sanitizer import CSSSanitizer
 
 from bs4 import BeautifulSoup
 
-from cosmos_modules import add_to_app, add_to_persist # <-- New Import
+from cosmos_modules import add_to_app, add_to_persist, get_all_records_by_partition # <-- New Import
 
 GMAIL_USER =  os.environ.get("SECONDARY_EMAIL","")
 GMAIL_APP_PASSWORD = os.environ.get("SECONDARY_EMAIL_PW","")
@@ -46,7 +46,8 @@ def process_with_ai(item):
 
         I would expect the following keys in JSON format
         ```````
-        - transactionType  : string -  the transaction executed (Samples: "bills_pay", "pay_merchant", "transfer", "transfer_via_instapay", "transfer_via_pesonet"). If it shows transfer to other bank use  "transfer_via_instapay"
+        - transactionType  : string -  the transaction executed  (Use only these values: "bills_pay", "pay_merchant", "transfer", "transfer_via_instapay", "transfer_via_pesonet")
+                    . If it shows transfer to other bank use  "transfer_via_instapay"  (add in otherData if the transaction is not any of the above values as "exactTransactionType" )
         - app: string - Use gmail since the source application is gmail
         - description : string - description for the transaction, include a summary, recipient name for the transaction. Be more concise on the text. Make it at least 60 characters.
         - reference : string - the reference number that can be used in later time. for record purposes
@@ -126,7 +127,7 @@ def process_unread_emails():
         print(f"Found {len(email_ids)} unread emails. Starting analysis...")
 
 
-        output = []
+        arr = []
 
         for e_id in email_ids:
             e_id_str = e_id.decode()
@@ -159,6 +160,14 @@ def process_unread_emails():
             output["matchedConfig"] = "email_default"
 
             
+            rules = get_all_records_by_partition("HookConfigs", "email_")
+            rules = sorted(rules,key=lambda item: item["PriorityOrder"])
+            for rule in rules:
+                if(run_conditions({"JsonData": body, "ExtractedData":output}, rule["Conditions"])):
+                    output["matchedConfig"] = rule["id"]
+                    break
+                
+
             utc_aware_dt = datetime.datetime.now(datetime.UTC)
             id=uuid7( as_type='str')
             newItem = { 
@@ -177,9 +186,11 @@ def process_unread_emails():
                 "IsHtml":False
             }
 
+
+
             add_to_app("HookMessages", newItem)
             add_to_persist("HookMessages", newItem)
-            output.append(newItem)
+            arr.append(newItem)
     except imaplib.IMAP4.error as e:
         print(f"\nIMAP Login Error: {e}")
         print("Please check your email address, ensure IMAP is enabled in Gmail settings, and verify the 16-character App Password is correct.")
@@ -195,7 +206,7 @@ def process_unread_emails():
         except:
             pass # Ignore if connection was never established
     
-        return output
+    return arr
 # --- MAIN EXTRACTION FUNCTION (Prioritizing HTML) ---
 def get_ai_ready_body(msg):
     """
@@ -482,3 +493,33 @@ def sanitize_html(html_content: str) -> str:
     )
     
     return cleaned_html
+
+
+def run_conditions(data, condition):
+    # if list of dict, do and
+    if len(condition) == 0:
+        return True
+    if all(isinstance(item, dict) for item in condition):
+        return all(run_and_condition(data, conditionItem) for conditionItem in condition)
+    # else:
+
+    
+def run_and_condition(data, condition):
+
+    if condition["Operation"] is not None:
+        current_val = data
+        for i, v in enumerate(condition["Property"].split(".")):
+            if(i == 0 and v == "$"): 
+                current_val = data["ExtractedData"]
+                continue
+            if(i == 0 and v == "#"): 
+                current_val = data["JsonData"]
+                continue
+            if(v in current_val):
+                current_val = current_val[v]
+                continue
+        if condition["Operation"] in ["eq","equals","equal", "=", "=="]:
+            return current_val == condition["Value"]
+    else: 
+        return False
+        

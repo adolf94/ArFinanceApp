@@ -131,8 +131,19 @@ def run_conditions(data, condition):
 def run_and_condition(data, condition):
 
     if condition["Operation"] is not None:
+        current_val = data
+        for i, v in enumerate(condition["Property"].split(".")):
+            if(i == 0 and v == "$"): 
+                current_val = data["ExtractedData"]
+                continue
+            if(i == 0 and v == "#"): 
+                current_val = data["JsonData"]
+                continue
+            if(v in current_val):
+                current_val = current_val[v]
+                continue
         if condition["Operation"] in ["eq","equals","equal", "=", "=="]:
-            return data[condition["Property"]] == condition["Value"]
+            return current_val == condition["Value"]
     else: 
         return False
         

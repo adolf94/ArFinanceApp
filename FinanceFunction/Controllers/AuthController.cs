@@ -373,11 +373,11 @@ public class AuthController
 				{
 						claims.Add(new Claim("userId", user!.Id.ToString()));
 						claims.Add(new Claim("app", body.App));
-						claims.Add(new Claim("type", "access_token"));
+						claims.Add(new Claim("typ", "access_token"));
 
 						idClaims.Add(new Claim("userId", user!.Id.ToString()));
 						idClaims.Add(new Claim(ClaimTypes.Name, user.Name));
-						idClaims.Add(new Claim("type", "id_token"));
+						idClaims.Add(new Claim("typ", "id_token"));
 
 						claims.Add(new Claim(ClaimTypes.Role, "Registered")); 
 						idClaims.Add(new Claim(ClaimTypes.Name, user.Name));
@@ -507,7 +507,7 @@ public class AuthController
 								new Claim("name", user.Name.ToString()),
 								new Claim("email", user.EmailAddress),
 								new Claim("azp", _config.authConfig.client_id),
-								new Claim("type", "access_token"),
+								new Claim("typ", "access_token"),
 								new Claim(ClaimTypes.Role, "Registered")
 						};
 
@@ -519,7 +519,7 @@ public class AuthController
 								new Claim("name", user.Name.ToString()),
 								new Claim("email", user.EmailAddress),
 								new Claim("azp", _config.authConfig.client_id),
-								new Claim("type", "id_token"),
+								new Claim("typ", "id_token"),
 								new Claim(ClaimTypes.Role, "Registered")
 						};
 

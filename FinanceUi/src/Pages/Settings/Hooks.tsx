@@ -117,6 +117,7 @@ const HooksSettings = ()=>{
                                 <Tabs value={context.tab} onChange={(_,v)=>onTabChange(v)} variant="scrollable">
                                     <Tab label="Notifications" value="notif_" />
                                     <Tab label="SMS" value="sms_" />
+                                    <Tab label="Emails" value="email_" />
                                     <Tab label="Images(AI)" value="imgai_" />
                                     <Tab label="Images" value="img_" />
                                 </Tabs>
@@ -129,10 +130,10 @@ const HooksSettings = ()=>{
                         </Grid>
                         <Grid size={12}>
                                 
-                                { newHook && <HookSettingsAccordion onSave={newConfig} i={null} onCancel={()=>setNewHook(false)}/>}
+                                { newHook && <HookSettingsAccordion onSave={newConfig} i={null}  tab={context.tab} onCancel={()=>setNewHook(false)}/>}
                         </Grid>
                         <Grid size={12}>
-                                {!isLoading && (data || []).map((e,i)=><HookSettingsAccordion key={e.nameKey} i={i} totalItems={data.length} value={e} onSave={updateConfig} onPriorityChange={(d)=>handlePriorityChange(i,d)} />)}
+                                {!isLoading && (data || []).map((e,i)=><HookSettingsAccordion tab={context.tab} key={e.nameKey} i={i} totalItems={data.length} value={e} onSave={updateConfig} onPriorityChange={(d)=>handlePriorityChange(i,d)} />)}
                         </Grid>
                     </Grid>
                 </Grid>
