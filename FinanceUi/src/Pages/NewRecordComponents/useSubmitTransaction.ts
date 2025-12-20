@@ -86,7 +86,7 @@ const useSubmitTransaction = ({transaction : formData,schedule , transactionId:t
                   accountId: null,
                   vendorId: formData.vendorId ,
                   type:formData.type,
-                  subConfig:notification.selectedConfig.subConfig
+                  subConfig:conf.subConfig
                 }: null
                 
                 logReferenceInstance(crediRef)

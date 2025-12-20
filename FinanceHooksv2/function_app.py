@@ -27,7 +27,7 @@ dbName = os.environ["COSMOS_DB"]
 apiKey = os.environ["API_KEY"]
 tz_default = pytz.timezone(os.environ["TIMEZONE"])
 
-@app.timer_trigger(schedule="0 1/32 2 * * *", arg_name="myTimer", run_on_startup=False,
+@app.timer_trigger(schedule="0 32 */3 * * *", arg_name="myTimer", run_on_startup=False,
               use_monitor=False) 
 def timer_trigger(myTimer: func.TimerRequest) -> None:
     if myTimer.past_due:
