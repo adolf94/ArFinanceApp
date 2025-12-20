@@ -176,7 +176,23 @@ public class HookMessagesController
 		}
 
 
-		[Function("ReprocessHookMessage")]
+		[Function("PollEmails")]
+		public async Task<IActionResult> PollEmails([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "hooktypes/email/hookmessages")]
+				HttpRequest req)
+		{
+				if (!_user.IsAuthenticated) return new UnauthorizedResult();
+				if (!_user.IsAuthorized("finance_user")) return new ForbidResult();
+
+				var httpClient = new HttpClient();
+				httpClient.BaseAddress = new Uri(_config.FinanceHook.HookUrl);
+				httpClient.DefaultRequestHeaders.Add("x-api-key", _config.FinanceHook.Key);
+				httpClient.DefaultRequestHeaders.Add("x-allow-dup", "true");
+				var response = await httpClient.GetAsync("/api/process_emails");
+
+				return new NoContentResult();
+		}
+
+				[Function("ReprocessHookMessage")]
 		public async Task<IActionResult> ReprocessHookMessage([HttpTrigger(AuthorizationLevel.Anonymous, "delete", Route = "hookmessages/{id}/reprocess")]
 				HttpRequest req, Guid id)
 		{

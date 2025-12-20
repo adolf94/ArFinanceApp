@@ -9,6 +9,7 @@ from ai_modules import extract_from_ia
 from ai_modules.image_ai import identify_img_transact_ai, perform_conditions
 from ai_modules.image_functions import read_from_filename, read_screenshot
 from cosmos_modules import add_to_app, add_to_persist, get_record
+from email_modules import process_unread_emails
 from notif_modules.handler import check_duplicate_notif, handle_notif
 from regex_utility import substitute_text
 from sms_handler2.handler import handle_sms
@@ -31,7 +32,7 @@ tz_default = pytz.timezone(os.environ["TIMEZONE"])
 def timer_trigger(myTimer: func.TimerRequest) -> None:
     if myTimer.past_due:
         logging.info('The timer is past due!')
-    
+    process_unread_emails()
     logging.info('Python timer trigger function executed.')
 
 @app.route(route="index", auth_level=func.AuthLevel.ANONYMOUS)
@@ -247,6 +248,13 @@ def file_hook_handler(req: func.HttpRequest) -> func.HttpResponse:
 
     return func.HttpResponse( json.dumps(newItem) ,status_code=201, mimetype="application/json")
  
+
+@app.route(route="email_trigger", methods=["GET"], auth_level=func.AuthLevel.ANONYMOUS)
+def email_trigger(req: func.HttpRequest) -> func.HttpResponse:
+    request = req
+    headeApiKey = request.headers.get("x-api-key", "")
+    if(headeApiKey == None or headeApiKey != apiKey ): return func.HttpResponse(status_code=401)  
+    return func.HttpResponse( "" ,status_code=204, mimetype="application/json")
 
 @app.route(route="image_ai_hook", methods=["POST"], auth_level=func.AuthLevel.ANONYMOUS)
 def image_ai_hook(req: func.HttpRequest) -> func.HttpResponse:

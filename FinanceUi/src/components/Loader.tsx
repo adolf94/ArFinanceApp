@@ -11,7 +11,7 @@ const Loader = () => {
             minHeight: "20vh",
         }}
         >
-        <CircularProgress size={80} />
+          <CircularProgress size={80} />
         </Box>
     </Box>
   );

@@ -13,7 +13,7 @@ import { queryClient } from "../App.jsx";
 import {useDebouncedCallback} from 'use-debounce'
 import { mutateHookMessages } from "../repositories/hookMessages";
 import {Grid2} from "@mui/material";
-import BackdropLoader from "../components/BackdropLoader.jsx";
+import HooksErrorBoundary from "./Notifications/HooksErrorBoundary.jsx";
 
 
 
@@ -23,6 +23,10 @@ const Notifications = () => {
         month: moment().format("YYYY-MM-01")
     })
     const forDelete = useRef([])
+    const [query,setQuery] = useSearchParams()
+
+
+    
     const {deleteMany} = mutateHookMessages(0,params.get("month"))
     const {isFetching} = useQuery({
             queryKey: [HOOK_MESSAGES, { monthKey: params.get("month")}],
@@ -30,8 +34,11 @@ const Notifications = () => {
             gcTime:24*60*60
         })
 
-        const [type,setType] = useState(["sms", "notif", "image"]) 
-        const [success,setSuccess] = useState(["yes"]) 
+    const type = (query.get("type") || "sms,notif,image,email").split(",")
+    const success = (query.get("matched") || "yes").split(",")
+
+
+
     // const {data:hookMessages, isLoading: hookLoading} = useQuery({
     //     queryKey: [HOOK_MESSAGES, { monthKey: params.get("month")}],
     //     queryFn: () => getHooksMessagesByMonth(params.get("month")!),
@@ -47,6 +54,8 @@ const Notifications = () => {
                 if(e.jsonData.action == "sms_receive" && !type.includes("sms")) return false
                 if(e.jsonData.action == "notif_post" && !type.includes("notif")) return false
                 if(e.jsonData.action == "image_upload" && !type.includes("image")) return false
+                if(e.jsonData.action == "image_ai_upload" && !type.includes("image")) return false
+                if(e.jsonData.action == "email_received" && !type.includes("email")) return false
 
                 //success
                 if((!e.extractedData?.success || e.extractedData.success.toLowerCase() == "false") && !success.includes("no")) return false
@@ -82,25 +91,21 @@ const Notifications = () => {
         commitDelete(forDelete.current)
     }
 
-    const onFilter = (type,value)=>{
+    const onFilter = (filterType,value)=>{
 
-        if(type=="type"){
-            setType((prev)=>{
-                if(prev.includes(value)){
-                    return prev.filter(e=>value!=e)
-                }else{
-                    return [...prev,value]
-                }
-            })
+        let prevQuery = query
+        let toFilter= filterType=="type"?type:success
+        if(toFilter.includes(value)){
+            let newValue = toFilter.filter(e=>value!=e)
+            prevQuery.set(filterType,newValue.join(","));
+            setQuery(prevQuery)
         }else{
-            setSuccess((prev)=>{
-                if(prev.includes(value)){
-                    return prev.filter(e=>value!=e)
-                }else{
-                    return [...prev,value]
-                }
-            })
+            let newValue = [...toFilter, value]
+            prevQuery.set(filterType,newValue.join(","));
+            setQuery(prevQuery)
         }
+
+
 
 
     }
@@ -166,13 +171,14 @@ const Notifications = () => {
                 <Box sx={{py:1}}>
                     <Grid2 container >
                         <Grid2>
-                            <Chip label="Confirmed" color="primary" onClick={()=>onFilter("success", "yes")} variant={success.includes("yes")?"filled":"outlined" }></Chip>
-                            <Chip label="Failed Extract" color="primary" onClick={()=>onFilter("success", "no")}  variant={success.includes("no")?"filled":"outlined" }></Chip>
+                            <Chip label="Confirmed" color="primary" onClick={()=>onFilter("matched", "yes")} variant={success.includes("yes")?"filled":"outlined" }></Chip>
+                            <Chip label="Failed Extract" color="primary" onClick={()=>onFilter("matched", "no")}  variant={success.includes("no")?"filled":"outlined" }></Chip>
                         </Grid2>
                         <Grid2>
                             <Chip label="Notifications" color="primary" onClick={()=>onFilter("type", "notif")}  variant={type.includes("notif")?"filled":"outlined" }></Chip>
                             <Chip label="SMS" color="primary"  onClick={()=>onFilter("type", "sms")}  variant={type.includes("sms")?"filled":"outlined" }></Chip>
                             <Chip label="Image" color="primary"  onClick={()=>onFilter("type", "image")}  variant={type.includes("image")?"filled":"outlined" }></Chip>
+                            <Chip label="Email" color="primary"  onClick={()=>onFilter("type", "email")}  variant={type.includes("email")?"filled":"outlined" }></Chip>
                         </Grid2>
                     </Grid2>
                 </Box>
@@ -219,7 +225,9 @@ const Notifications = () => {
                             <ListItemText><Skeleton variant="text" /></ListItemText>
                           </ListItem> </>
                           :
-                          [...(hookMessages||[])].map(e => <HooksAccordion key={e.id} notif={ e} onCancel={cancelDelete} onDelete={addDelete} />)}
+                          [...(hookMessages||[])].map(e => <HooksErrorBoundary data={e}> 
+                             <HooksAccordion key={e.id} notif={ e} onCancel={cancelDelete} onDelete={addDelete} />
+                          </HooksErrorBoundary>)}
                         
                     </List>
                 </Paper>

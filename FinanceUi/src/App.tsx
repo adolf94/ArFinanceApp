@@ -27,6 +27,7 @@ import Loader from "./components/Loader";
 import Login from "./Pages/Login";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import { AuthContext, AuthContextProvider } from "./components/UserInfoContext";
+import BackdropLoader, { BackdropLoaderProvider, useBackdropLoader } from "./components/BackdropLoader";
 
 export const queryClient = new QueryClient({
   defaultOptions: {
@@ -75,8 +76,7 @@ const TheApp = (props) => {
         setDropdown({ ...dropdown, [name]: values });
     };
     const navigate = useNavigate()
-    const location = useLocation()
-
+    const setLoading = useBackdropLoader()
 
 
 
@@ -159,11 +159,11 @@ const TheApp = (props) => {
   //@ts-ignore
   return (
     <DropdownContext.Provider value={{ ...dropdown, set: setDropdownValue }}>
-          <SnackbarProvider autoHideDuration={1000} >
-              {msalInitialized ? <Routes>{RouteMapper(AppRoutes)}</Routes>
-                  : <Loader />
-                }
-          </SnackbarProvider>
+            <SnackbarProvider autoHideDuration={1000} >
+                {msalInitialized ? <Routes>{RouteMapper(AppRoutes)}</Routes>
+                    : <Loader />
+                  }
+            </SnackbarProvider>
           <NavigateSetter />
       </DropdownContext.Provider>
 
@@ -177,21 +177,23 @@ export default class App extends Component {
     return (
     <Layout>
         <ConfirmProvider >
-        <LocalizationProvider dateAdapter={AdapterMoment}>
-          <QueryClientProvider client={queryClient}>
-            <ThemeProvider theme={theme}>
-              <GoogleOAuthProvider clientId={window.webConfig.clientId}>
-                <AuthContextProvider>
-                  <Login />
-                  <TheApp />
-                </AuthContextProvider>
-              </GoogleOAuthProvider>
-            </ThemeProvider>
-            <ReactQueryDevtools
-              initialIsOpen={false}
-              buttonPosition="bottom-left"
-            />
-          </QueryClientProvider>
+          <LocalizationProvider dateAdapter={AdapterMoment}>
+            <QueryClientProvider client={queryClient}>
+              <ThemeProvider theme={theme}>
+              <BackdropLoaderProvider>
+                <GoogleOAuthProvider clientId={window.webConfig.clientId}>
+                  <AuthContextProvider>
+                    <Login />
+                    <TheApp />
+                  </AuthContextProvider>
+                </GoogleOAuthProvider>
+                </BackdropLoaderProvider>
+              </ThemeProvider>
+              <ReactQueryDevtools
+                initialIsOpen={false}
+                buttonPosition="bottom-left"
+              />
+            </QueryClientProvider>
            </LocalizationProvider>
         </ConfirmProvider>
       </Layout>

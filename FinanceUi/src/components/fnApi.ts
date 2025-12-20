@@ -6,6 +6,7 @@ import { queryClient } from "../App";
 import { getAfterTransaction, TRANSACTION } from "../repositories/transactions";
 import { enqueueSnackbar } from "notistack";
 import { showLogin } from "../Pages/Login";
+import { setBackdropLoading } from "./BackdropLoader";
 
 
 
@@ -50,6 +51,7 @@ const getTokenFromApi = mm(
 
 
 export const getTokenViaRefreshToken = ()=>{
+  setBackdropLoading(true)
   let token = window.localStorage.getItem("refresh_token");
   if(!token) return ""
   return axios.post(`${window.webConfig.api}/auth/refresh`,{
@@ -59,6 +61,8 @@ export const getTokenViaRefreshToken = ()=>{
   .then((e) => {
     window.sessionStorage.setItem("access_token", e.data.access_token);
     window.localStorage.setItem("refresh_token", e.data.refresh_token);
+    setBackdropLoading(false)
+
     return e.data.access_token;
   })
   .catch(() => {
@@ -96,6 +100,7 @@ export const getToken = async (force? : boolean, config? : AxiosRequestConfig, a
     console.warn('REQUEST INTERCEPTOR: Token expired, but refresh is already running. Queueing request...');
     // Wait for the ongoing refresh to complete
     return new Promise((resolve, reject) => {
+
         failedQueue.push({ resolve: (newToken) => {
             // When resolved, set the new token and allow the request to proceed
             config.headers.Authorization = `Bearer ${newToken}`;
@@ -114,6 +119,7 @@ export const getToken = async (force? : boolean, config? : AxiosRequestConfig, a
         if(!dialogToken) dialogToken = await showLogin(); 
                         
         if (!dialogToken) {
+            
             // User cancelled
             processQueue(new Error('Login canceled by user.'));
             isRefreshing = false;

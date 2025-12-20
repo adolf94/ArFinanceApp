@@ -122,8 +122,11 @@ def process_unread_emails():
         
         if not email_ids:
             print("No unread emails found.")
-            return
+            return []
         print(f"Found {len(email_ids)} unread emails. Starting analysis...")
+
+
+        output = []
 
         for e_id in email_ids:
             e_id_str = e_id.decode()
@@ -153,6 +156,8 @@ def process_unread_emails():
             data = process_with_ai(body)
 
             output = json.loads(data.text)
+            output["matchedConfig"] = "email_default"
+
             
             utc_aware_dt = datetime.datetime.now(datetime.UTC)
             id=uuid7( as_type='str')
@@ -174,6 +179,7 @@ def process_unread_emails():
 
             add_to_app("HookMessages", newItem)
             add_to_persist("HookMessages", newItem)
+            output.append(newItem)
     except imaplib.IMAP4.error as e:
         print(f"\nIMAP Login Error: {e}")
         print("Please check your email address, ensure IMAP is enabled in Gmail settings, and verify the 16-character App Password is correct.")
@@ -188,6 +194,8 @@ def process_unread_emails():
             print("\nIMAP connection closed.")
         except:
             pass # Ignore if connection was never established
+    
+        return output
 # --- MAIN EXTRACTION FUNCTION (Prioritizing HTML) ---
 def get_ai_ready_body(msg):
     """

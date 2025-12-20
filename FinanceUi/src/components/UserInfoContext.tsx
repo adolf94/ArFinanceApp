@@ -5,6 +5,7 @@ import { Token } from "@mui/icons-material";
 import { jwtDecode, type JwtPayload } from "jwt-decode";
 import moment from "moment";
 import {getTokenViaRefreshToken} from '../components/fnApi'
+import { useBackdropLoader } from "./BackdropLoader";
 
 
 export const AuthContext = createContext<{user:UserInfo, setUserInfo:React.Dispatch<React.SetStateAction<UserInfo>>}>({
@@ -40,6 +41,7 @@ export const AuthContextProvider = ({children})=>{
         isLoggedIn:()=>false,
         role: ""
     })
+    const setLoading = useBackdropLoader()
     const [initialized, setInitialized] = useState(false)
     const isLoggedIn = ()=>{
         let token = window.sessionStorage.getItem("access_token")
@@ -52,10 +54,12 @@ export const AuthContextProvider = ({children})=>{
     }
     useEffect(()=>{
         (async()=>{
+            setLoading(true)
             let token = await getTokenViaRefreshToken()
             if(!token){
                 setInitialized(true)
                 
+                setLoading(false)
                 setUser({...user, isLoggedIn})
                 return
             }
@@ -65,10 +69,12 @@ export const AuthContextProvider = ({children})=>{
                 console.log("token expired")
                 window.localStorage.removeItem("access_token")
                 setInitialized(true)
+                setLoading(false)
                 return
             }
             setUser({...tokenJson, isAuthenticated: true, isLoggedIn})
             setInitialized(true)
+            setLoading(false)
         })()
        
 

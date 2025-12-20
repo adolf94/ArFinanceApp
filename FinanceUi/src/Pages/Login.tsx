@@ -4,6 +4,7 @@ import { CredentialResponse, GoogleLogin } from "@react-oauth/google"
 import { useCallback, useMemo, useState } from "react"
 import api from "../components/fnApi"
 import * as Passwordless from '@passwordlessdev/passwordless-client';
+import { setBackdropLoading } from "../components/BackdropLoader"
 
 export var showLogin = ()=>{
     return new Promise((resolve)=>resolve(""))
@@ -39,6 +40,7 @@ const Login = ()=>{
 
 
     showLogin = ()=>{
+        setBackdropLoading(false)
         return new Promise((res)=>{
             setShow(true)
         })
@@ -58,10 +60,13 @@ const Login = ()=>{
 
     const onGoogleSuccess = (data: CredentialResponse)=>{
         setShow(false)
+        setBackdropLoading(true)
         api.post("/auth/google_credential", data, { preventAuth: true })
             .then(e=>{
                 window.localStorage.setItem("refresh_token", e.data.refresh_token);
                 window.sessionStorage.setItem("access_token", e.data.access_token);
+                
+                setBackdropLoading(false)
                 promise.resolve(e.data.access_token)
             })
     }
@@ -84,6 +89,7 @@ const Login = ()=>{
         .then(e=>{
             window.localStorage.setItem("refresh_token", e.data.refresh_token);
             window.sessionStorage.setItem("access_token", e.data.access_token);
+            setBackdropLoading(false)
             promise.resolve(e.data.access_token)
             setShow(false)
         })
