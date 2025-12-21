@@ -14,7 +14,10 @@ import {useDebouncedCallback} from 'use-debounce'
 import { mutateHookMessages } from "../repositories/hookMessages";
 import {Grid2} from "@mui/material";
 import HooksErrorBoundary from "./Notifications/HooksErrorBoundary.jsx";
+import { useBottomAppBarSize } from "../components/Layout.jsx";
+import { useContainerDimensions } from "../common/useContainerDimensions.js";
 
+import { useVirtualizer } from '@tanstack/react-virtual'
 
 
 
@@ -24,6 +27,12 @@ const Notifications = () => {
     })
     const forDelete = useRef([])
     const [query,setQuery] = useSearchParams()
+    const bottomAppSize = useBottomAppBarSize()
+    const topBarRef = useRef()
+    const topPartRef = useRef()
+    const parentRef = useRef()
+    const topBarSize = useContainerDimensions(topBarRef)
+    const topPartSize = useContainerDimensions(topPartRef)
 
 
     
@@ -68,6 +77,12 @@ const Notifications = () => {
             
     ,[params.get("month"), success,type])
 
+    const rowVirtualizer = useVirtualizer({
+        count: (hookMessages || []).length,
+        getScrollElement: () => parentRef.current,
+        estimateSize: () => 35,
+        overscan: 5,
+    })
     
     const commitDelete = useDebouncedCallback(
         // function
@@ -128,7 +143,7 @@ const Notifications = () => {
     
     return   <>
         
-        <AppBar position="static"  color="primary">
+        <AppBar position="static"  color="primary" ref={topBarRef}>
             <Toolbar>
                 <Grid container sx={{justifyContent: "space-between"}}>
                     <Grid>
@@ -147,8 +162,8 @@ const Notifications = () => {
         </AppBar>
         <Grid container sx={{width:"100%", p:2}}>
             <Grid size={{md:3}}></Grid>
-            <Grid container size={{md:9}}>
-                <Paper sx={{my:1,p:2, width:'100%'}}>
+            <Grid container size={{md:9}} sx={{ height:(window.innerHeight - topBarSize.height - bottomAppSize.height + rowVirtualizer.getTotalSize() )}} ref={parentRef}>
+                <Paper sx={{my:1,p:2, width:'100%'}} ref={topPartRef}>
                     <Grid container sx={{justifyContent:"space-between", alignItems:'center'}}>
                         <Grid>
                             <Typography variant="h6">
@@ -182,7 +197,7 @@ const Notifications = () => {
                         </Grid2>
                     </Grid2>
                 </Box>
-                <Paper sx={{ width:'100%'}}>
+                <Paper sx={{ width:'100%', overflow:'auto'}}>
                     <List>
                         {isFetching ? <>
                           <ListItem>
@@ -225,9 +240,13 @@ const Notifications = () => {
                             <ListItemText><Skeleton variant="text" /></ListItemText>
                           </ListItem> </>
                           :
-                          [...(hookMessages||[])].map(e => <HooksErrorBoundary data={e}> 
-                             <HooksAccordion key={e.id} notif={ e} onCancel={cancelDelete} onDelete={addDelete} />
-                          </HooksErrorBoundary>)}
+                          rowVirtualizer.getVirtualItems().map(row=><>
+                            <HooksErrorBoundary key={row.key} data={hookMessages[row.index]}>
+
+                                 <HooksAccordion key={hookMessages[row.index].id} notif={hookMessages[row.index]} onCancel={cancelDelete} onDelete={addDelete} />
+                            </HooksErrorBoundary>
+                          </>)
+                            }
                         
                     </List>
                 </Paper>

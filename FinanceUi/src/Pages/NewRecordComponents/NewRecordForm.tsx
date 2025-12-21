@@ -32,7 +32,7 @@ import moment from "moment";
 import SelectAccount from "./SelectAccount";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { v4 as uuid, v7 } from "uuid";
-import { Add, Calculate, Repeat as IcoRepeat, PlusOneRounded, Receipt } from "@mui/icons-material";
+import { Add, Calculate, CallSplit, Repeat as IcoRepeat, PlusOneRounded, Receipt } from "@mui/icons-material";
 import { Account, ScheduledTransactions, Transaction } from "FinanceApi";
 import { fetchTransactionById, useMutateTransaction } from "../../repositories/transactions";
 import {useConfirm} from 'material-ui-confirm'
@@ -952,8 +952,8 @@ const NewRecordForm = (props: NewRecordFormProps) => {
           
         </ListItem>
         <ListItem>
-          <Grid container spacing={2} width="100%" >
-            <Grid size={transId=="new"?4:8}>
+          <Grid container spacing={2} sx={{width:"100%"}}>
+            <Grid sx={{flexGrow:4}}>
               <Button
                   fullWidth
                   variant="contained"
@@ -965,7 +965,7 @@ const NewRecordForm = (props: NewRecordFormProps) => {
                     : "Confirm"}
               </Button>
             </Grid>
-            {transId == 'new' && <Grid size={5}>
+            {transId == 'new' && <Grid sx={{flexGrow:4}}>
               <Button
                   fullWidth
                   variant="contained"
@@ -976,7 +976,12 @@ const NewRecordForm = (props: NewRecordFormProps) => {
                 Submit and New
               </Button>
             </Grid>}
-            <Grid size={transId=="new"?3:4}>
+            <Grid sx={{flexShrink:1}}>
+              <Button variant="outlined">
+                <CallSplit />
+              </Button>
+            </Grid>
+            <Grid sx={{flexGrow:2}}>
               <Link to="/records">
                 <Button fullWidth variant="outlined">
                   Cancel

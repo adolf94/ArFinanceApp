@@ -36,7 +36,7 @@ namespace FinanceFunction.Middlewares
 
 
 										var type = principal.Claims.FirstOrDefault(e => e.Type == "typ" && e.Value == "access_token");
-										if(type != null)
+												if(type != null)
 										{
 												var userId = principal.Claims.FirstOrDefault(e => e.Type == "userId")?.Value;
 												if (string.IsNullOrEmpty(userId))

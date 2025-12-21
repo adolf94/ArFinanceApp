@@ -209,7 +209,7 @@ const Records = () => {
               </Box>
           </Paper>
         </Grid>
-        <Grid container size={{xs:12,md:8}}>
+        <Grid container size={{xs:12,md:8}} sx={{display:"block"}}>
           <Grid container size={12} sx={{ borderBottom: 1, borderColor: "divider", justifyContent:"space-between"}} >
             <Box sx={{display:"flex"}}>
               <Tabs

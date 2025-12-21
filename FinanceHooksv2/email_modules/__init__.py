@@ -3,7 +3,9 @@ import email
 from email.policy import default
 from email.utils import parsedate_to_datetime
 import json
+from pathlib import Path
 from google import genai
+from email_modules.html_handler import  smart_html_to_markdown
 from google.genai import types
 from google.genai.errors import APIError
 import pytz
@@ -25,8 +27,16 @@ GMAIL_APP_PASSWORD = os.environ.get("SECONDARY_EMAIL_PW","")
 IMAP_SERVER = 'imap.gmail.com'
 max_retries = 3
 tz_default = pytz.timezone(os.environ["TIMEZONE"])
-PRIMARY_ACCOUNTS = os.environ.get("PRIMARY_EMAILS",[])
 GOOGLE_GENAI_USE_VERTEXAI=True
+
+def get_primary_accounts():
+    i = 0
+    data = []
+    while os.environ.get(f"PRIMARY_EMAILS__{i}","") != "":
+        data.append(os.environ.get(f"PRIMARY_EMAILS__{i}",""))
+        i = i + 1
+    return data
+
 
 def process_with_ai(item):
     client = genai.Client(api_key=os.environ['GEMINI_API_KEY'], vertexai=True)
@@ -108,6 +118,7 @@ def process_unread_emails():
     if(GMAIL_USER == ""):
         print(f"Gmail user is blank, skipping")
         return
+    PRIMARY_ACCOUNTS = get_primary_accounts()
     mail = imaplib.IMAP4_SSL(IMAP_SERVER)
     
     try:
@@ -141,11 +152,19 @@ def process_unread_emails():
 
             raw_email = msg_data[0][1]
             msg = email.message_from_bytes(raw_email, policy=default)
-            if(is_validated_forward(msg) == False):
+            if(is_validated_forward(msg,PRIMARY_ACCOUNTS) == False):
                 continue
             subject = msg['subject'] if msg['subject'] else "[No Subject]"
             sender = msg['from']
             body = get_ai_ready_body(msg)
+            if(Path('./temp').is_dir() == False):
+                os.mkdir('./temp')
+            with open(f"./temp/{e_id_str}.md", "w", encoding="utf-8") as file:
+                file.write(body["default"])
+            with open(f"./temp/{e_id_str}.html", "w", encoding="utf-8") as file:
+                file.write(body["html_content"])
+            
+
 
             body["subject"] = subject
             body["sender"] = sender
@@ -159,6 +178,8 @@ def process_unread_emails():
             output = json.loads(data.text)
             output["matchedConfig"] = "email_default"
 
+            with open(f"./temp/{e_id_str}.txt", "w", encoding="utf-8") as file:
+                file.write(data.text)
             
             rules = get_all_records_by_partition("HookConfigs", "email_")
             rules = sorted(rules,key=lambda item: item["PriorityOrder"])
@@ -188,8 +209,8 @@ def process_unread_emails():
 
 
 
-            add_to_app("HookMessages", newItem)
-            add_to_persist("HookMessages", newItem)
+            # add_to_app("HookMessages", newItem)
+            # add_to_persist("HookMessages", newItem)
             arr.append(newItem)
     except imaplib.IMAP4.error as e:
         print(f"\nIMAP Login Error: {e}")
@@ -243,26 +264,8 @@ def get_ai_ready_body(msg):
     if output["html_content"] :
         print("Processing text/html content (Priority 1: HTML-to-Markdown).")
         try:
-            soup = BeautifulSoup(output["html_content"] , 'html.parser')
             
-            # A. Targeted Table Conversion: Replace <table> tags with Markdown
-            for table in soup.find_all('table'):
-                markdown = html_to_markdown_table(table)
-                
-                # Create a placeholder element to replace the table
-                markdown_div = soup.new_tag("div")
-                # Use clear markers for the AI
-                markdown_marker = f"\n---\nTRANSACTION TABLE START:\n{markdown}\nTRANSACTION TABLE END:\n---\n"
-                markdown_div.string = markdown_marker
-                table.replace_with(markdown_div)
-            
-            # B. Clean Text Extraction: Get the remaining text
-            clean_text = soup.get_text(separator='\n', strip=True)
-            
-            # C. Final cleanup of excessive blank lines/whitespace
-            final_text = re.sub(r'\n\s*\n', '\n\n', clean_text).strip()
-            
-            output["default"] = final_text
+            output["default"] = smart_html_to_markdown(output["html_content"])
             return output
         
         except Exception as e:
@@ -360,7 +363,7 @@ def html_to_markdown_table(table_tag):
     
     return "\n" + "\n".join(table_markdown) + "\n"
 
-def is_validated_forward(msg):
+def is_validated_forward(msg,PRIMARY_ACCOUNTS):
     """
     Performs comprehensive validation on a parsed email message (msg) 
     to confirm it originated from the primary email account via a Gmail server.
@@ -412,7 +415,7 @@ def is_validated_forward(msg):
 
     if not is_source_validated:
         from_header = msg.get('From', '')
-        print(f"❌ FAILED PART 1: Source is not a validated primary address. (From: {from_header})")
+        print(f"FAILED PART 1: Source is not a validated primary address. (From: {from_header})")
         return False
 
     # =========================================================================

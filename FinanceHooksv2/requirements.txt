@@ -11,6 +11,7 @@ uuid7
 azure.cosmos
 azure.storage.blob 
 azure.identity
+markdownify
 azure-ai-vision-imageanalysis
 google-genai
 Pillow

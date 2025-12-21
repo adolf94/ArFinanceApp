@@ -27,6 +27,7 @@ public class HookMessage
 				public string senderName { get; set; } = "";
 				public string senderAcct { get; set; } = "";
 				public string senderBank { get; set; } = "";
+				public string datetime { get; set; } = "";
 				public string recipientBank { get; set; } = "";
 				public string recipientAcct { get; set; } = "";
 				public string recipientName { get; set; } = "";
@@ -38,7 +39,6 @@ public class HookMessage
 				public string amount { get; set; } = "";
 				public string transactionFee { get; set; } = "";
 
-				public string dateTime { get; set; }
 				public string currency { get; set; } = "";
 
 				public Dictionary<string, string> otherData { get; set; } = new(); 

@@ -1,5 +1,5 @@
 ﻿import AppBar from "@mui/material/AppBar";
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import BottomNavigation from "@mui/material/BottomNavigation";
 import BottomNavigationAction from "@mui/material/BottomNavigationAction";
 import Toolbar from "@mui/material/Toolbar";
@@ -18,16 +18,18 @@ import { AccountBalanceWallet, ReceiptLong, History, Settings} from "@mui/icons-
 
 const BottomAppBar = (props) => {
   const navigate = useNavigate();
+  const appbarRef = useRef()
   const [value, setValue] = useState("Records");
-
   const onNav = (evt, value) => {
     console.log(evt, value);
     setValue(value);
     navigate(value);
   };
 
+
+
   return (
-    <AppBar position="fixed" color="primary" sx={{ top: "auto", bottom: 0 }}>
+    <AppBar position="fixed" color="primary" sx={{ top: "auto", bottom: 0 }} ref={props.barRef}>
       <BottomNavigation showLabels value={value} onChange={onNav}>
         <BottomNavigationAction
           value="/records"
