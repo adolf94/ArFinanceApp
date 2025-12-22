@@ -1,4 +1,5 @@
 using Newtonsoft.Json.Linq;
+using System.ComponentModel.DataAnnotations.Schema;
 using UUIDNext;
 
 namespace FinanceFunction.Models;
@@ -12,12 +13,11 @@ public class HookMessage
 	public string PartitionKey { get; set; } = "default";
     public JsonDataModel? JsonData { get; set; }
 		public ExtractedDataModel? ExtractedData { get; set; } = null;
-	public bool IsHtml { get; set; } =false;
+		public bool IsHtml { get; set; } =false;
     public string? Status { get; set; } = "New";
     public Guid? TransactionId { get; set; }
 		public string MonthKey { get; set; } = "";
 		public int? TimeToLive { get; set; } = 60*24*60*60;
-
 
 		public class ExtractedDataModel
 		{
@@ -40,11 +40,22 @@ public class HookMessage
 				public string transactionFee { get; set; } = "";
 
 				public string currency { get; set; } = "";
+				public List<Item> items { get; set; } = new List<Item>(); 
 
-				public Dictionary<string, string> otherData { get; set; } = new(); 
+				[NotMapped]
+				public JObject? otherData { get; set; }
 
 		}
 
+		public class Item
+		{
+				public string Name { get; set; } = "";
+				public string Variation { get; set; } = "";
+				public int Quantity { get; set; }
+				public decimal ListPrice { get; set; }
+				public decimal Discount { get; set; }
+				public decimal NetPrice { get; set; }
+		}
 
 		public class JsonDataModel
 		{

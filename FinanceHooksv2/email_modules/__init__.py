@@ -72,8 +72,20 @@ def process_with_ai(item):
         - amount : decimal - the paid/transfered amount, always make this a positive number even if the picture indicates a negative number
         - transactionFee : decimal - the fee for the transaction (default value:0.00)
         - currency : string - the payment currency (default value: PHP)
+        - items : Product[] - list of items that is referenced on the email
         - otherData : json_object - key-value pairs of details that are not yet captured but can be used for referencing the transaction
         ```````
+
+        Product model
+        ```````
+        - Name : string - The name of the product
+        - Variantion : string - the variant selected (if any) - if not found use "default"
+        - Quantity : int - Count of the product
+        - Subtotal : decimal - Total Product price 
+        - Discount : decimal - Total Discount (if it is not explicitly indicated, use the calculate in proportion of the total receipt price and the subtotal of this product)\
+        - NetPrice : decimal - the subtotal minus the discount
+        ```````
+
 
     """
     config = types.GenerateContentConfig(
@@ -157,12 +169,7 @@ def process_unread_emails():
             subject = msg['subject'] if msg['subject'] else "[No Subject]"
             sender = msg['from']
             body = get_ai_ready_body(msg)
-            if(Path('./temp').is_dir() == False):
-                os.mkdir('./temp')
-            with open(f"./temp/{e_id_str}.md", "w", encoding="utf-8") as file:
-                file.write(body["default"])
-            with open(f"./temp/{e_id_str}.html", "w", encoding="utf-8") as file:
-                file.write(body["html_content"])
+
             
 
 
@@ -178,8 +185,7 @@ def process_unread_emails():
             output = json.loads(data.text)
             output["matchedConfig"] = "email_default"
 
-            with open(f"./temp/{e_id_str}.txt", "w", encoding="utf-8") as file:
-                file.write(data.text)
+            
             
             rules = get_all_records_by_partition("HookConfigs", "email_")
             rules = sorted(rules,key=lambda item: item["PriorityOrder"])
@@ -209,8 +215,8 @@ def process_unread_emails():
 
 
 
-            # add_to_app("HookMessages", newItem)
-            # add_to_persist("HookMessages", newItem)
+            add_to_app("HookMessages", newItem)
+            add_to_persist("HookMessages", newItem)
             arr.append(newItem)
     except imaplib.IMAP4.error as e:
         print(f"\nIMAP Login Error: {e}")

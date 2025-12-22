@@ -1,0 +1,12 @@
+{
+  "name": "financeapp-hooks",
+  "version": "2.0.0",
+  "main": "func",
+  "scripts": {
+    "deploy": "func azure functionapp publish financeapp-hooks",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": ""
+}
