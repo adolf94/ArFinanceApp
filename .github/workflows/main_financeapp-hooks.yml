@@ -82,8 +82,11 @@ jobs:
           app-name: 'financeapp-hooks'
           slot-name: 'Production'
           remote-build:  true
+          scm-do-build-during-deployment: true
+          enable-oryx-build: true
           package: ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
 
           
+
 
 
