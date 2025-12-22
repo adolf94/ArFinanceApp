@@ -5,9 +5,6 @@
 name: Build and deploy Python project to Azure Function App - financeapp-hooks
 
 on:
-  push:
-    branches:
-      - main
   workflow_dispatch:
 
 env:
@@ -87,3 +84,4 @@ jobs:
           package: ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
 
           
+
