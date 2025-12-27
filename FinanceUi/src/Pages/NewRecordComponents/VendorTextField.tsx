@@ -52,6 +52,26 @@ const VendorTextField = (props) => {
         <>
             <Box sx={{ display: { lg: "block", xs: "none" } }}>
                 <Autocomplete
+                    renderInput={(params) => <TextField helperText={props.helperText}
+                    {...params}
+                    variant={props.variant || params.variant || "standard"}
+
+                     />}
+                     {...props}
+                    onChange={(event, newValue) => {
+                        if (typeof newValue === "string") {
+                            createNewVendor(newValue);
+                        } else if (newValue && newValue.inputValue) {
+                            // Create a new value from the user input
+                            createNewVendor(newValue.inputValue);
+                        } else if (newValue.new) {
+                            createNewVendor(newValue.inputValue);
+                        }
+                         else {
+                            props.onChange(newValue);
+                        }
+                    }}
+                    onOpen={props.onClick}
                     disablePortal={props.disablePortal === undefined || props.disablePortal == true}
                     options={vendors || []}
                     fullWidth
@@ -79,26 +99,6 @@ const VendorTextField = (props) => {
 
                         return filtered;
                     }}
-                    onOpen={props.onClick}
-                    onChange={(event, newValue) => {
-                        if (typeof newValue === "string") {
-                            createNewVendor(newValue);
-                        } else if (newValue && newValue.inputValue) {
-                            // Create a new value from the user input
-                            createNewVendor(newValue.inputValue);
-                        } else if (newValue.new) {
-                            createNewVendor(newValue.inputValue);
-                        }
-                         else {
-                            props.onChange(newValue);
-                        }
-                    }}
-                    renderInput={(params) => <TextField helperText={props.helperText}
-                    {...params}
-                    variant={props.variant || params.variant || "standard"}
-
-                     />}
-                     {...props}
                 />
             </Box>
             <Box sx={{ display: { sx: "block", lg: "none" } }}>
