@@ -229,218 +229,220 @@ const ViewAccount = () => {
               </IconButton>
             </Grid>
           </Grid>
-          <Grid size={{xs:12,md:5}}>
-          {/* <Grid size={{md:5}} sx={{ display: { xs: "none", md: "block" } }}> */}
-            <AccountHistoryBarChart acctId={acctId} date={month.format("yyyy-MM-01")} />
-          </Grid>
-          <Grid size={{xs:12,md:7}} sx={{maxHeight: "80vh", overflow: "overlay"}}>
-            <Paper sx={{ my: 1, p: 2 }}>
-              <Grid
-                container
-                sx={{ textAlign: "center", justifyContent: "space-around" }}
-              >
-                <Grid>
-                  Deposit
-                  <br />
-                  <Typography
-                    color="success.main"
-                    sx={{ px: 1, alignSelf: "center" }}
-                    variant="transactionHeaderDate"
-                  >
-                    
-                    {isLoading? <Skeleton variant="text" width="5rem"  /> :numeral(data.totals.deposit).format("0,0.00")}
-                  </Typography>
+          <Grid container sx={{maxHeight: "80vh", overflow: "overlay"}}>
+            <Grid size={{xs:12,md:5}}>
+            {/* <Grid size={{md:5}} sx={{ display: { xs: "none", md: "block" } }}> */}
+              <AccountHistoryBarChart acctId={acctId} date={month.format("yyyy-MM-01")} />
+            </Grid>
+            <Grid size={{xs:12,md:7}} >
+              <Paper sx={{ my: 1, p: 2 }}>
+                <Grid
+                  container
+                  sx={{ textAlign: "center", justifyContent: "space-around" }}
+                >
+                  <Grid>
+                    Deposit
+                    <br />
+                    <Typography
+                      color="success.main"
+                      sx={{ px: 1, alignSelf: "center" }}
+                      variant="transactionHeaderDate"
+                    >
+                      
+                      {isLoading? <Skeleton variant="text" width="5rem"  /> :numeral(data.totals.deposit).format("0,0.00")}
+                    </Typography>
+                  </Grid>
+                  <Grid>
+                    Withdrawal
+                    <br />
+                    <Typography
+                      color="danger.main"
+                      sx={{ px: 1, alignSelf: "center" }}
+                      variant="transactionHeaderDate"
+                    >
+                      {isLoading? <Skeleton variant="text" width="5rem"  /> :numeral(data.totals.withdrawal).format("0,0.00")}
+                    </Typography>
+                  </Grid>
+                  <Grid>
+                    Total
+                    <br />
+                    <Typography
+                      sx={{ px: 1, alignSelf: "center" }}
+                      variant="transactionHeaderDate"
+                    >
+                      {isLoading? <Skeleton variant="text" width="5rem"  /> :numeral(data.totals.total).format("0,0.00")}
+                    </Typography>
+                  </Grid>
+                  <Grid>
+                    Balance
+                    <br />
+                    <Typography
+                      sx={{ px: 1, alignSelf: "center" }}
+                      variant="transactionHeaderDate"
+                    >
+                      {isLoading? <Skeleton variant="text" width="5rem"  /> :numeral(acctBalance?.endingBalance).format(
+                        "0,0.00",
+                      )}
+                    </Typography>
+                  </Grid>
                 </Grid>
-                <Grid>
-                  Withdrawal
-                  <br />
-                  <Typography
-                    color="danger.main"
-                    sx={{ px: 1, alignSelf: "center" }}
-                    variant="transactionHeaderDate"
-                  >
-                    {isLoading? <Skeleton variant="text" width="5rem"  /> :numeral(data.totals.withdrawal).format("0,0.00")}
-                  </Typography>
-                </Grid>
-                <Grid>
-                  Total
-                  <br />
-                  <Typography
-                    sx={{ px: 1, alignSelf: "center" }}
-                    variant="transactionHeaderDate"
-                  >
-                    {isLoading? <Skeleton variant="text" width="5rem"  /> :numeral(data.totals.total).format("0,0.00")}
-                  </Typography>
-                </Grid>
-                <Grid>
-                  Balance
-                  <br />
-                  <Typography
-                    sx={{ px: 1, alignSelf: "center" }}
-                    variant="transactionHeaderDate"
-                  >
-                    {isLoading? <Skeleton variant="text" width="5rem"  /> :numeral(acctBalance?.endingBalance).format(
-                      "0,0.00",
-                    )}
-                  </Typography>
-                </Grid>
-              </Grid>
-            </Paper>
-            {
-                recordsLoading && <Paper sx={{ my: 1 }}>
+              </Paper>
+              {
+                  recordsLoading && <Paper sx={{ my: 1 }}>
+                    <List>
+                      <ListItem dense>
+                        <Grid size={6}>
+                          <Typography sx={{ px: 1 }} variant="transactionHeaderDate">
+                            <Skeleton variant="text" />
+                          </Typography>{" "}
+                        </Grid>
+                        <Grid
+                            size={3}
+                            sx={{
+                              display: "flex",
+                              textAlign: "center",
+                              justifyContent: "center",
+                            }}
+                        >
+                          <Typography
+                              color="green"
+                              sx={{ px: 1, alignSelf: "center", fontColor: "success" }}
+                              variant="transactionHeaderDate"
+                          >
+                            <Skeleton variant="text" width="5rem" />
+
+                          </Typography>
+                        </Grid>
+                        <Grid
+                            size={3}
+                            sx={{
+                              display: "flex",
+                              textAlign: "center",
+                              justifyContent: "center",
+                            }}
+                        >
+                          <Typography
+                              color="red"
+                              sx={{ px: 1, alignSelf: "center", fontColor: "danger" }}
+                              variant="transactionHeaderDate"
+                          >
+                            <Skeleton variant="text" width="5rem" />
+                          </Typography>
+                        </Grid>
+                      </ListItem>
+                      <Divider />
+                      <TransactionListItem item={{}} loading={true} />
+                      <TransactionListItem item={{}} loading={true} />
+                      <TransactionListItem item={{}} loading={true} />
+                    </List>
+                  </Paper>
+              }
+              {data.dates.sort((a,b)=>a.dateGroup<b.dateGroup?1:-1).map((data) => (
+                  <Paper key={data.dateGroup} sx={{ my: 1 }}>
                   <List>
-                    <ListItem dense>
-                      <Grid size={6}>
-                        <Typography sx={{ px: 1 }} variant="transactionHeaderDate">
-                          <Skeleton variant="text" />
-                        </Typography>{" "}
-                      </Grid>
-                      <Grid
+                    <ListItem
+                      dense
+                      onClick={() =>
+                        navigate(
+                          "/transactions/new?date=" +
+                            data.dateGroup +
+                            "&creditId=" +
+                            acctId,
+                        )
+                      }
+                    >
+                      <Grid container width="100%">
+                        <Grid size={6}>
+                          <Typography sx={{ px: 1 }} variant="transactionHeaderDate">
+                            {data.day}
+                          </Typography>{" "}
+                          <Chip label={data.dayOfWeek} sx={{ mr: 1 }}></Chip>
+                        </Grid>
+                        <Grid
                           size={3}
                           sx={{
                             display: "flex",
                             textAlign: "center",
                             justifyContent: "center",
                           }}
-                      >
-                        <Typography
+                        >
+                          <Typography
                             color="green"
                             sx={{ px: 1, alignSelf: "center", fontColor: "success" }}
                             variant="transactionHeaderDate"
-                        >
-                          <Skeleton variant="text" width="5rem" />
-
-                        </Typography>
-                      </Grid>
-                      <Grid
+                          >
+                            {numeral(data.income).format("0,0.00")}
+                          </Typography>
+                        </Grid>
+                        <Grid
+                          item
                           size={3}
                           sx={{
                             display: "flex",
                             textAlign: "center",
                             justifyContent: "center",
                           }}
-                      >
-                        <Typography
+                        >
+                          <Typography
                             color="red"
                             sx={{ px: 1, alignSelf: "center", fontColor: "danger" }}
                             variant="transactionHeaderDate"
-                        >
-                          <Skeleton variant="text" width="5rem" />
-                        </Typography>
+                          >
+                            {numeral(data.expenses).format("0,0.00")}
+                          </Typography>
+                        </Grid>
                       </Grid>
                     </ListItem>
                     <Divider />
-                    <TransactionListItem item={{}} loading={true} />
-                    <TransactionListItem item={{}} loading={true} />
-                    <TransactionListItem item={{}} loading={true} />
+                          {data.items.sort((a,b)=>a.date<b.date?1:-1).map((item) => (
+                    <ListItem
+                        key={ item.id }
+                        onClick={() => navigate("../../transactions/" + item.id)}
+                      >
+                        <Grid container width="100%">
+                          <Grid size={3}>
+                            <Typography sx={{ px: 1 }} variant="body1">
+                              {item.type === "transfer"
+                                ? "Transfer"
+                                : item.type === "expense"
+                                  ? item.debit.name
+                                  : item.credit.name}
+                            </Typography>
+                            <Typography sx={{ px: 1 }} variant="body1">
+                              {item.vendor?.name}
+                            </Typography>
+                          </Grid>
+                          <Grid size={5}>
+                            <Typography sx={{ fontWeight: 600 }} variant="body1">
+                              {item.description || ""}
+                            </Typography>
+                            <Typography variant="body1">
+                            {item.type == "transfer"
+                              ? (item.creditId == acctId ?  `=> ${item.debit.name}`: `<= ${item.credit.name} ` )
+                              // item.credit.name + " => " + item.debit.name
+                              : item.type == "expense"
+                                ? item.credit.name
+                                : item.debit.name}
+                              </Typography>
+                          </Grid>
+                          <Grid size={4} sx={{ textAlign: "right", px: 1 }}>
+                            <Typography
+                              color={fontColorOnType(item.debitId, item.creditId)}
+                              sx={{ fontWeight: 600 }}
+                              variant="body1">
+                              P {numeral(item.amount).format("0,0.00")}
+                            </Typography>
+                            <Typography variant="body1">
+                              {numeral(item.runningBalance).format("0,0.00")}
+                            </Typography>
+                          </Grid>
+                        </Grid>
+                      </ListItem>
+                    ))}
                   </List>
                 </Paper>
-            }
-            {data.dates.sort((a,b)=>a.dateGroup<b.dateGroup?1:-1).map((data) => (
-                <Paper key={data.dateGroup} sx={{ my: 1 }}>
-                <List>
-                  <ListItem
-                    dense
-                    onClick={() =>
-                      navigate(
-                        "/transactions/new?date=" +
-                          data.dateGroup +
-                          "&creditId=" +
-                          acctId,
-                      )
-                    }
-                  >
-                    <Grid container width="100%">
-                      <Grid size={6}>
-                        <Typography sx={{ px: 1 }} variant="transactionHeaderDate">
-                          {data.day}
-                        </Typography>{" "}
-                        <Chip label={data.dayOfWeek} sx={{ mr: 1 }}></Chip>
-                      </Grid>
-                      <Grid
-                        size={3}
-                        sx={{
-                          display: "flex",
-                          textAlign: "center",
-                          justifyContent: "center",
-                        }}
-                      >
-                        <Typography
-                          color="green"
-                          sx={{ px: 1, alignSelf: "center", fontColor: "success" }}
-                          variant="transactionHeaderDate"
-                        >
-                          {numeral(data.income).format("0,0.00")}
-                        </Typography>
-                      </Grid>
-                      <Grid
-                        item
-                        size={3}
-                        sx={{
-                          display: "flex",
-                          textAlign: "center",
-                          justifyContent: "center",
-                        }}
-                      >
-                        <Typography
-                          color="red"
-                          sx={{ px: 1, alignSelf: "center", fontColor: "danger" }}
-                          variant="transactionHeaderDate"
-                        >
-                          {numeral(data.expenses).format("0,0.00")}
-                        </Typography>
-                      </Grid>
-                    </Grid>
-                  </ListItem>
-                  <Divider />
-                        {data.items.sort((a,b)=>a.date<b.date?1:-1).map((item) => (
-                  <ListItem
-                      key={ item.id }
-                      onClick={() => navigate("../../transactions/" + item.id)}
-                    >
-                      <Grid container width="100%">
-                        <Grid size={3}>
-                          <Typography sx={{ px: 1 }} variant="body1">
-                            {item.type === "transfer"
-                              ? "Transfer"
-                              : item.type === "expense"
-                                ? item.debit.name
-                                : item.credit.name}
-                          </Typography>
-                          <Typography sx={{ px: 1 }} variant="body1">
-                            {item.vendor?.name}
-                          </Typography>
-                        </Grid>
-                        <Grid size={5}>
-                          <Typography sx={{ fontWeight: 600 }} variant="body1">
-                            {item.description || ""}
-                          </Typography>
-                          <Typography variant="body1">
-                          {item.type == "transfer"
-                            ? (item.creditId == acctId ?  `=> ${item.debit.name}`: `<= ${item.credit.name} ` )
-                            // item.credit.name + " => " + item.debit.name
-                            : item.type == "expense"
-                              ? item.credit.name
-                              : item.debit.name}
-                            </Typography>
-                        </Grid>
-                        <Grid size={4} sx={{ textAlign: "right", px: 1 }}>
-                          <Typography
-                            color={fontColorOnType(item.debitId, item.creditId)}
-                            sx={{ fontWeight: 600 }}
-                            variant="body1">
-                            P {numeral(item.amount).format("0,0.00")}
-                          </Typography>
-                          <Typography variant="body1">
-                            {numeral(item.runningBalance).format("0,0.00")}
-                          </Typography>
-                        </Grid>
-                      </Grid>
-                    </ListItem>
-                  ))}
-                </List>
-              </Paper>
-            ))}
+              ))}
+            </Grid>
           </Grid>
         
         </Grid>

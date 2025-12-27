@@ -12,6 +12,7 @@ import React from "react";
 import fnApi from "../../components/fnApi";
 import ImageModal from "./ImageModal";
 import EditAiData from "../Gallery/EditAiData";
+import HtmlDialog from "./HtmlModal";
 const HooksTransaction = lazy(()=>import('./HooksTransaction'))
 
 const camelToSpace = (str:string)=>{
@@ -202,8 +203,11 @@ const HooksAccordion = ({notif, onDelete, onCancel }) => {
                     <Grid size={{xs:12,md:6}}>
                         <List>
                                 
-                        {
+                                {
                                     !!notif.jsonData.imageId &&  <ImageModal id={notif.jsonData.imageId} />
+                                }
+                                {
+                                    !!notif.jsonData.html_content &&  <HtmlDialog data={notif.jsonData}/>
                                 }
                                 {
                                 notif.extractedData && Object.keys(notif.extractedData).map((key:string)=>{

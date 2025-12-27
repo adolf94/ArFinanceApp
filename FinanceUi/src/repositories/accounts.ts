@@ -20,8 +20,6 @@ export const fetchAccounts = () => {
 
   return fnApi.get("accounts").then(async (res) => {
       let newData = localPutAccount(res.data)
-      let last = localStorage.getItem("last_transaction");
-      if(!last) localStorage.setItem("last_transaction", res.headers["x-last-trans"])
     return newData;
   });
 };
@@ -87,13 +85,13 @@ export const localPutAccount = async (account: Account | Account[]) => {
   const getGroup = (id)=>groups.find(g=>g.id == id)
   let toPut
   if(Array.isArray(account)){
-    toPut = account.map(e=>({...e, type:getGroup(e.accountGroupId).accountTypeId, dateUpdated: moment().toDate()}))
+    toPut = account.map(e=>({...e, type:getGroup(e.accountGroupId).accountTypeId,accountGroup:groups.find(f=>f.id == e.accountGroupId),  dateUpdated: moment().toDate()}))
     toPut.forEach(acct=>{
       queryClient.setQueryData([ACCOUNT, { id: toPut.id }], acct);
     })
     db.accounts.bulkPut(toPut)
   }else{
-    toPut = {...account, type:getGroup(account.accountGroupId).accountTypeId, dateUpdated: moment().toDate()}
+    toPut = {...account, type:getGroup(account.accountGroupId).accountTypeId,accountGroup:groups.find(e=>e.id == account.accountGroupId), dateUpdated: moment().toDate()}
     queryClient.setQueryData([ACCOUNT, { id: toPut.id }], toPut);
     queryClient.setQueryData([ACCOUNT] , (prev : Account[])=>replaceById(toPut,prev))
     db.accounts.put(toPut)

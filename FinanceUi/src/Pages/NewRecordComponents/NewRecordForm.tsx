@@ -53,6 +53,7 @@ import { getConfigById, HOOK_CONFIG } from "../../repositories/hookConfig";
 import AccountTextField from "./AccountTextField";
 import ViewNotifDialog from "./ViewNotifDialog";
 import SelectTagField from "./SelectTagField";
+import MultiRecordDialog from "./MultiRecordDialog";
 
 const cronOptions = [
   { name: "Monthly", cron: "0 16 DD * *" },
@@ -71,7 +72,7 @@ interface NewRecordFormProps {
 
 
 
-const defaultValue = {
+export const defaultValue = {
   type: "expense",
   date: moment().toISOString(),
   credit: null,
@@ -604,55 +605,7 @@ const NewRecordForm = (props: NewRecordFormProps) => {
                         groupId: "892f20e5-b8dc-42b6-10c9-08dabb20ff77",
                         onChange: () => {},
                       });
-                      // if (params.onClick) params.onClick(evt);
                     }
-                    // slotProps:{
-                    //   endAdornment:(props)=><>
-                    //            <IconButton
-                    //              onClick={() => {
-                    //                setSchedule((prev) => {
-                    //                  prev.enabled = !prev.enabled;
-                    //                  if (!prev.enabled) {
-                    //                    prev.cronId = "";
-                    //                    prev.cronExpression = "";
-                    //                  }
-                    //                  return {
-                    //                    ...prev,
-                    //                    lastTransactionDate: formData.date,
-                    //                  };
-                    //                });
-                    //              }}
-                    //            >
-                    //              <IcoRepeat />
-                    //            </IconButton>
-                    //          </>
-                    // }
-                    // slotProps:{
-                    //   input:(params)=>({
-                    //     endAdornment: (
-                    //       <>
-                    //         {/* {params.endAdornment} */}
-                    //         <IconButton
-                    //           onClick={() => {
-                    //             setSchedule((prev) => {
-                    //               prev.enabled = !prev.enabled;
-                    //               if (!prev.enabled) {
-                    //                 prev.cronId = "";
-                    //                 prev.cronExpression = "";
-                    //               }
-                    //               return {
-                    //                 ...prev,
-                    //                 lastTransactionDate: formData.date,
-                    //               };
-                    //             });
-                    //           }}
-                    //         >
-                    //           <IcoRepeat />
-                    //         </IconButton>
-                    //       </>
-                    //     )
-                    //   })
-                    // }
                   }
                 }}
               />
@@ -825,7 +778,6 @@ const NewRecordForm = (props: NewRecordFormProps) => {
                     case "*":
                     case "+":
                     case "=":
-                      console.debug("Called Focus");
                       
                       setSelectProps((prev) => ({
                         ...selectAccountProps,
@@ -852,22 +804,6 @@ const NewRecordForm = (props: NewRecordFormProps) => {
                 }}
                 
                 
-                // InputProps={{
-                //   endAdornment: (
-                //     <IconButton
-                //       onClick={() =>
-                //         setSelectProps((prev) => ({
-                //           ...selectAccountProps,
-                //           show: true,
-                //           dest: "amount",
-                //           operation:""
-                //         }))
-                //       }
-                //     >
-                //       <Calculate />
-                //     </IconButton>
-                //   ),
-                // }}
                           
                 slotProps={{
                   input:{
@@ -977,9 +913,11 @@ const NewRecordForm = (props: NewRecordFormProps) => {
               </Button>
             </Grid>}
             <Grid sx={{flexShrink:1}}>
-              <Button variant="outlined">
-                <CallSplit />
-              </Button>
+                <MultiRecordDialog formData={formData}>
+                  <Button variant="outlined">
+                      <CallSplit />
+                  </Button>
+                </MultiRecordDialog>
             </Grid>
             <Grid sx={{flexGrow:2}}>
               <Link to="/records">
@@ -991,7 +929,6 @@ const NewRecordForm = (props: NewRecordFormProps) => {
           </Grid>
         </ListItem>
       </List>
-
       <Portal container={props.selectPortal}>
         <SelectAccount
           show={selectAccountProps.show && selectAccountProps.dest === "source"}

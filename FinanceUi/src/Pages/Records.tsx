@@ -14,12 +14,12 @@ import {
     Tabs,
     Toolbar,
     colors,
-    Button
+    Button,ButtonGroup
 } from "@mui/material";
 import { createContext, useState, useMemo } from "react";
 import AccountsPage from "./Accounts";
 
-import { Add, Refresh } from "@mui/icons-material";
+import { Add, ControlPointDuplicateOutlined, ControlPointOutlined, Refresh } from "@mui/icons-material";
 import { useQuery } from "@tanstack/react-query";
 import { Transaction } from "FinanceApi";
 import moment from "moment";
@@ -71,11 +71,22 @@ const fabGreenStyle = {
   },
 };
 
+const fabDefaultStyle = {
+  position: "absolute",
+  bottom: 72,
+  right: 80,
+  color: "common.white",
+  bgcolor: colors.grey[500],
+  "&:hover": {
+    bgcolor: colors.grey[600],
+  },
+};
+
 const Records = () => {
   const { view, monthStr } = useParams();
   const month = moment(monthStr);
     const navigate = useNavigate();
-
+  
 
     const { isLoading:loadingRecords, refetch, isFetching } = useOfflineData({
         defaultData: [],
@@ -197,13 +208,19 @@ const Records = () => {
       <Grid container width="100%" spacing={1}>
         <Grid size={{md:4}} sx={{ display: { xs: "none", md: "block" } }}>
           <Paper sx={{ mt: 3 }}>
-              <Link to="/transactions/new">
                   <Box sx={{px:2}}>
-                      <Button variant="contained" fullWidth color="primary">
-                          <Add/> Add Record
-                      </Button>
+                      <ButtonGroup fullWidth >
+                          <Button variant="contained" color="primary" 
+                          onClick={()=>navigate("/transactions/new")}>
+                              <ControlPointOutlined/> Add Record
+                          </Button>
+                        <Button variant="contained" color="primary" 
+                          sx={{minWidth: 'auto', width:"5rem"}}
+                          size="small">
+                            <ControlPointDuplicateOutlined/>
+                        </Button>
+                      </ButtonGroup>
                   </Box>
-              </Link>
               <Box sx={{ my: 1, maxHeight: "75vh", overflow: "overlay" }}>
                 <AccountsPage />
               </Box>
@@ -250,6 +267,11 @@ const Records = () => {
             <Add fontSize="large"/> 
         </Fab>
       </Link>
+      {/* <Link to="/transactions/new">
+        <Fab color="primary" size="small" sx={{...fabDefaultStyle, display:{md:'none'}}} >
+            <Add fontSize="small" color="warning" /> 
+        </Fab>
+      </Link> */}
     </>
   );
 };

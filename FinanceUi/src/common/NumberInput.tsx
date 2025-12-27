@@ -35,14 +35,6 @@ const NumberInput = (props: any) => {
   return (
     <>
     <TextField
-      slotProps={{
-        input: {
-          min: 0,
-          sx:{ textAlign: "right" },
-          ...props.slotProps.input
-        },
-        ...(props.slotProps || {})
-      }}
       // inputProps={{
       //   min: 0,
       //   style: { textAlign: "right" },
@@ -54,6 +46,15 @@ const NumberInput = (props: any) => {
       //   endAdornment: <IconButton onClick={() => setSelectProps(prev => ({ ...selectAccountProps, show: true, dest: "amount" }))} ><Calculate /></IconButton>
       //}}
       {...props}
+      slotProps={{
+        htmlInput: {
+          min: 0,
+          style:{textAlign:'right'},
+          ...props.slotProps?.input || {}
+        },
+
+        ...(props.slotProps || {})
+      }}
        
       onKeyPress={(event) => {
         if(props.onKeyPress && props.onKeyPress(event)) {
@@ -66,9 +67,14 @@ const NumberInput = (props: any) => {
       }}
       onBlur={(evt) => {
         setIsFocused(false);
+          if(!!props.onBlur) props.onBlur(evt)
           props.onChange(numeral(value.replace(",", "")).value());
-        if(evt.target.value==="") setValue("0.00")
+        if(evt.target.value==="") return setValue("0.00")
+          setValue( numeral((props.value || "0").toString().replace(",", "")).format(
+            "0,0.00",
+          ))
       }}
+      
           onFocus={() => {
             setIsFocused(true);
               if (Number.parseFloat(value) === 0) setValue("");

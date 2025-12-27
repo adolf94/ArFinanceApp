@@ -59,8 +59,8 @@ const ImageModal = ({id, children} : {id:string, children?: React.JSX})=>{
             !children?
             <>
             <ListItemButton  onClick={()=>setOpen(true)}>
-                    <ListItemIcon>
-                            <Image />
+                    <ListItemIcon >
+                            <Image color="primary" />
                     </ListItemIcon>
                     <ListItemText primary="Image" />
             </ListItemButton>
@@ -74,6 +74,7 @@ const ImageModal = ({id, children} : {id:string, children?: React.JSX})=>{
                     //@ts-ignore
                     data == "404"? 
                     <Alert variant="outlined" color="error">Not Found</Alert>:
+                    //@ts-ignore
                     <Box component="img" sx={{maxHeight:"85vh", maxWidth:"100%"}} src={data}></Box>
                 } 
             </DialogContent>

@@ -7,7 +7,7 @@ interface UseDexieDataWithQuery<T> {
     dexieData :  () => Promise<T> | T,
     queryParams : EnsureQueryDataOptions<T,Error,T, QueryKey, never>,
     initialData? : T,
-    dataToDbFunction? : (data : T)=>Promise<any>
+    dataToDbFunction? : (data : T)=>any
 }
 
 interface UseDexieDataWithQueryOutput<T>{

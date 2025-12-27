@@ -18,6 +18,7 @@ import { useBottomAppBarSize } from "../components/Layout.jsx";
 import { useContainerDimensions } from "../common/useContainerDimensions.js";
 
 import { useVirtualizer } from '@tanstack/react-virtual'
+import HtmlDialog from "./Notifications/HtmlModal.jsx";
 
 
 

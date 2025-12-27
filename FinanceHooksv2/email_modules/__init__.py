@@ -49,7 +49,7 @@ def process_with_ai(item):
         DateTime Sent: {item["timestamp"]}
 
     `````````
-        {item["default"]}
+        {item["ai_content"]}
 
     `````````
 
@@ -271,7 +271,7 @@ def get_ai_ready_body(msg):
         print("Processing text/html content (Priority 1: HTML-to-Markdown).")
         try:
             
-            output["default"] = smart_html_to_markdown(output["html_content"])
+            output["ai_content"] = smart_html_to_markdown(output["html_content"])
             return output
         
         except Exception as e:
@@ -283,11 +283,11 @@ def get_ai_ready_body(msg):
     # --- PLAIN TEXT FALLBACK ---
     if output["plain_text"] and len(output["plain_text"].strip()) > 50:
         print("Using text/plain content (Fallback).")
-        output["default"] = output["plain_text"]
+        output["ai_content"] = output["plain_text"]
         return output
     
     # --- FINAL FALLBACK ---
-    output["default"] = "[Email body is empty or unreadable]"
+    output["ai_content"] = "[Email body is empty or unreadable]"
     return output
 
 def get_original_sent_time(msg):

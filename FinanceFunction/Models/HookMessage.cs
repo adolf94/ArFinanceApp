@@ -1,3 +1,4 @@
+
 using Newtonsoft.Json.Linq;
 using System.ComponentModel.DataAnnotations.Schema;
 using UUIDNext;
@@ -70,6 +71,11 @@ public class HookMessage
 				public string? notif_title { get; set; }
 				public string? notif_msg { get; set; }
 				public string? notif_id { get; set; }
+				public string? html_content { get; set; }
+				public string? subject { get; set; }
+				public string? ai_content { get; set; }
+				public string? emailId { get; set; }
+				public string? sender { get; set; }
 		}
 
 }					

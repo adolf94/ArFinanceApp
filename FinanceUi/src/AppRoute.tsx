@@ -8,6 +8,7 @@ import { Navigate } from "react-router-dom";
 import Loader from "./components/Loader";
 import ImageGallery from "./Pages/Gallery/ImageGallery";
 import SecuritySettings from "./Pages/Settings/Security";
+import NewBatchRecords from "./Pages/NewBatchRecords";
 
 const AccountsPage = lazy(() => import("./Pages/AccountsPage.tsx"));
 const HooksSettings = lazy(() => import("./Pages/Settings/Hooks.tsx"));
@@ -37,6 +38,12 @@ const AppRoutes: (PathRouteProps | IndexRouteProps | LayoutRouteProps)[] = [
         <Records />
       </Suspense>
     ),
+  },
+  {
+    path:"/audits/new",
+    element: <Suspense fallback={<Loader />}>
+      <NewBatchRecords />
+    </Suspense>
   },
   {
     path: "/transactions/:transId",

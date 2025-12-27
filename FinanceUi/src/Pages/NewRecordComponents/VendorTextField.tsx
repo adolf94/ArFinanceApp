@@ -52,8 +52,7 @@ const VendorTextField = (props) => {
         <>
             <Box sx={{ display: { lg: "block", xs: "none" } }}>
                 <Autocomplete
-                    disablePortal
-                    id="combo-box-demo"
+                    disablePortal={props.disablePortal === undefined || props.disablePortal == true}
                     options={vendors || []}
                     fullWidth
                     autoSelect
@@ -96,16 +95,10 @@ const VendorTextField = (props) => {
                     }}
                     renderInput={(params) => <TextField helperText={props.helperText}
                     {...params}
-                    // onBlur={(evt)=>{
-                    //     let filtered = filter(vendors, {inputValue:evt.target.value, getOptionLabel:(e: any) => e.name} )
-                    //                     .filter(e=>!e.new)
-                    //     let count = filtered.filter(e=>!e.new).length
-                    //     if(evt.target.value != "" && !creating.current && filtered.length == 1){
-                    //         props.onChange(filtered[0]);
-                    //     }
-                    //     return params.onBlur && params.onBlur(evt)
-                    // }}
-                    variant="standard" />}
+                    variant={props.variant || params.variant || "standard"}
+
+                     />}
+                     {...props}
                 />
             </Box>
             <Box sx={{ display: { sx: "block", lg: "none" } }}>
