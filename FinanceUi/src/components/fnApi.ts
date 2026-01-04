@@ -219,22 +219,6 @@ api.interceptors.request.use(async (config: AxiosRequestConfig) => {
 
 api.interceptors.response.use(
     async (data) => {
-        //     const headerTransId = data.headers["x-last-trans"];
-        // if (!data.config?.noLastTrans && !!headerTransId) {
-        //     const lastTransId = localStorage.getItem("last_transaction");
-        //     const stgTransId = localStorage.getItem("stg_transaction");
-        //     if (!!lastTransId && headerTransId !== lastTransId && stgTransId !== headerTransId) {
-        //         //Do fetch new data
-        //             queryClient.prefetchQuery({ queryKey: [TRANSACTION, { after: lastTransId }], queryFn: () => getAfterTransaction(lastTransId) })
-        //     }
-        // }
-        // if (!headerTransId) {
-        //     console.debug("no last-trans found " + data.config.url);
-        // }
-            
-
-        // //queryClient
-
 
         
         return data;
@@ -244,10 +228,17 @@ api.interceptors.response.use(
             if (err.response.status === 401 && !err.request.config?.ignore401) {
 
                 handle401(err, axios, ()=>{})
+                throw err
             }
             if(err.response.status === 500){
                 enqueueSnackbar("Something went wrong!. Contact Developer", {variant:"error", autoHideDuration: 3000});
+                throw err
             }
+            if (err.response.status === 404) {
+                throw err
+            }
+            enqueueSnackbar("Unable to connect to server",  {variant:"error", autoHideDuration: 3000})
+                throw err
         }
     return Promise.reject(err)
   },

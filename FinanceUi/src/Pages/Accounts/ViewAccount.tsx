@@ -77,8 +77,8 @@ const ViewAccount = () => {
   const [month, setMonth] = useState(moment());
   const { data: records, isFetching:recordsLoading,refetch } = useOfflineData({
     defaultData:[],
-    getOnlineData: () => fetchByAccountMonthKey(acctId, month.year(), month.month(), false),
-    initialData: ()=> fetchByAccountMonthKey(acctId, month.year(), month.month(), true),
+    getOnlineData: () => fetchByAccountMonthKey(acctId, month.year(), month.month()+1, false),
+    initialData: ()=> fetchByAccountMonthKey(acctId, month.year(), month.month()+1, true),
     offlineOnly:false
   },[month.year(), month.month() + 1]);   
   const { data: account } = useQuery({
@@ -229,7 +229,7 @@ const ViewAccount = () => {
               </IconButton>
             </Grid>
           </Grid>
-          <Grid container sx={{maxHeight: "80vh", overflow: "overlay"}}>
+          <Grid container sx={{maxHeight: "80vh", overflow: "overlay", width:"100%"}}>
             <Grid size={{xs:12,md:5}}>
             {/* <Grid size={{md:5}} sx={{ display: { xs: "none", md: "block" } }}> */}
               <AccountHistoryBarChart acctId={acctId} date={month.format("yyyy-MM-01")} />

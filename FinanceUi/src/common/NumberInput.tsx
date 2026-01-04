@@ -47,13 +47,13 @@ const NumberInput = (props: any) => {
       //}}
       {...props}
       slotProps={{
+        ...(props.slotProps || {}),
         htmlInput: {
+          ...props.slotProps?.htmlInput || {},
           min: 0,
-          style:{textAlign:'right'},
-          ...props.slotProps?.input || {}
-        },
+          style:{...(props.slotProps?.htmlInput?.style || {}),textAlign:'right'}
+        }
 
-        ...(props.slotProps || {})
       }}
        
       onKeyPress={(event) => {

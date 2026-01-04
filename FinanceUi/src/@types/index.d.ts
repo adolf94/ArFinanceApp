@@ -330,6 +330,7 @@ declare module 'FinanceApi' {
     // ..\FinanceFunction\Models\Transaction.cs
     export interface Transaction {
         id: string;
+        groupId: string;
         epochUpdated: number;
         type: string;
         creditId: string;
@@ -360,6 +361,26 @@ declare module 'FinanceApi' {
         accountBalanceKey: string;
         accountId: string;
         isDebit: boolean;
+    }
+
+    // ..\FinanceFunction\Models\TransactionGroups.cs
+    export interface TransactionGroup {
+        id: string;
+        amount: number;
+        description: string;
+        partitionKey: string;
+        date: string;
+        accountId?: string;
+        vendorId?: string;
+        items: LinkItem[];
+    }
+
+    // ..\FinanceFunction\Models\TransactionGroups.cs
+    export interface LinkItem {
+        id: string;
+        amount: number;
+        linked: string;
+        description: string;
     }
 
     // ..\FinanceFunction\Models\User.cs

@@ -5,6 +5,7 @@
     "type": "module",
     "scripts": {
         "start": "vite",
+        "start-host": "vite --host",
         "build": "vite build",
         "buidevld": "vite",
         "prestart": "csharp-models-to-typescript --config=./ring_class_to_ts.json",

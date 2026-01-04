@@ -155,7 +155,6 @@ export const addToTransactions = (item: Transaction, replace: boolean) => {
 
 
 export const fetchTransactionsByMonthKey = async (year: number, month: number, offline: boolean) => {
-  console.debug("fetchTransactionsByMonthKey",  { year, month });
   let key = moment([year, month,1]).format("YYYY-MM-01")
 
   let monthData = await db.monthTransactions.where("monthKey").equals( key ).first();

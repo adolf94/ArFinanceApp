@@ -50,7 +50,7 @@ const theme = createTheme({
     body1:{
       fontSize: "0.75rem",
     },
-    formlabel: { fontWeight: 800, color: 'text.disabled', textTransform: 'uppercase', display: 'block', mb: 0.75, fontSize: '0.65rem' }
+    formlabel: { fontWeight: 800, color: 'text.disabled', textTransform: 'uppercase', display: 'block', mb: 0.75, fontSize: '0.75rem' }
   },
     palette: {
         primary: indigo,

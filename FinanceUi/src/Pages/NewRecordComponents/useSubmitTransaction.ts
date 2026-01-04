@@ -22,6 +22,7 @@ export const useSaveMultipleTransaction =  ()=>{
       const newTransaction = (index, transaction, notification, conf)=>{
             const newItem: Partial<Transaction> = {
               id: transaction.id,
+              groupId: transaction.groupId,
               addByUserId: "1668b555-9788-40ed-a6e8-feeabe9538f6",
               creditId: transaction.creditId,
               debitId: transaction.debitId,
@@ -115,6 +116,7 @@ const useSubmitTransaction = ({transaction : formData,schedule , transactionId:t
 
           const newItem: Partial<Transaction> = {
             id: formData.id,
+            groupId: formData.groupId || formData.id,
             addByUserId: "1668b555-9788-40ed-a6e8-feeabe9538f6",
             creditId: formData.creditId,
             debitId: formData.debitId,
