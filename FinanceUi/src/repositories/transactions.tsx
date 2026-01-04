@@ -247,7 +247,7 @@ export const fetchByAccountMonthKey = async (
         let MT1 = await db.monthTransactions.where("monthKey").equals( KEY1 ).first();
         
         if(!MT1){
-           await fnApi<Transaction[]>("transactions", { params: { year, month  }, noLastTrans: false })
+           await fnApi<Transaction[]>("transactions", { params: { year, month:month + 1 }, noLastTrans: false })
             .then(res=>res.data as Transaction[])
             .then(items=>Promise.all(items.map(e=>ensureTransactionAcctData(e)))) 
 
