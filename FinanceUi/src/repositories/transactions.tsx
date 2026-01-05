@@ -213,7 +213,7 @@ export const fetchByAccountMonthKey = async (
   offline: boolean = false
 )=>{
     console.debug("fetchTransactionsByMonthKey",  { year, month });
-    let date = moment([year, month - 1,1])
+    let date = moment([year, month,1])
   
     let accountBalance = await db.accountBalances.where("id").equals( `${date.format("YYYY|MM")}|${acctId}` ).first();
     let hasData = !!accountBalance
