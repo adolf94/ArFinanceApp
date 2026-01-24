@@ -18,7 +18,7 @@ tz_default = pytz.timezone(os.environ["TIMEZONE"])
 def check_duplicate_notif(data):
     db = open_db(dbName)
     container = db.get_container_client("HookMessages")
-    partition = utcstr_to_datetime(data["timestamp"]).astimezone(tz_default).strftime("%y-%m-01")
+    partition = utcstr_to_datetime(data["timestamp"]).astimezone(tz_default).strftime("%Y-%m-01")
 
     items = container.query_items("SELECT * from c where c.JsonData.notif_id = @notifId and c.MonthKey = @partition", parameters=[
             {"name": "@notifId","value": data["notif_id"]},

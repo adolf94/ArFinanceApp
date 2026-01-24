@@ -83,11 +83,11 @@ const HooksNewCondition = ({item, isNew, onChange} : HooksNewCondition)=>{
                 :tabState.tab == "email_" ? <Grid container>
                     <Grid size={{md:4}}>
                         <Select size="small" fullWidth value={form.property} onChange={(evt)=>setForm({...form, property:evt.target.value})}>
-                                <MenuItem value="subject">subject</MenuItem>
-                                <MenuItem value="plain_text">plain_text</MenuItem>
-                                <MenuItem value="html_content">html_content</MenuItem>
-                                <MenuItem value="sender">sender</MenuItem>
-                                <MenuItem value="markdown">markdown</MenuItem>
+                                <MenuItem value="#.subject">subject</MenuItem>
+                                <MenuItem value="#.plain_text">plain_text</MenuItem>
+                                <MenuItem value="#.html_content">html_content</MenuItem>
+                                <MenuItem value="#.sender">sender</MenuItem>
+                                <MenuItem value="#.markdown">markdown</MenuItem>
                         </Select>
                     </Grid>
                     <Grid size={{md:3}} sx={{px:1}}>
