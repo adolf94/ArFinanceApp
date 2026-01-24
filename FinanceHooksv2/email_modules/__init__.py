@@ -16,6 +16,7 @@ import logging
 import os
 import re
 import bleach
+from .templates import email_templates
 from bleach.css_sanitizer import CSSSanitizer
 
 from bs4 import BeautifulSoup
@@ -38,56 +39,13 @@ def get_primary_accounts():
     return data
 
 
-def process_with_ai(item):
+def process_with_ai(item : dict,prompt_template : str):
     client = genai.Client(api_key=os.environ['GEMINI_API_KEY'], vertexai=True)
+
+
+    address =  re.search(r'[\w.-]+@[\w.-]+', item["sender"]).group()
     
-    prompt = f"""
-        I am providing an email, it may or may not be a financial transaction email. if it is not, provide a description on the output of the current content and type to be "non_transaction", you may keep other fields blank. 
-
-        Subject: {item["subject"]}
-        From: {item["sender"]}
-        DateTime Sent: {item["timestamp"]}
-
-    `````````
-        {item["ai_content"]}
-
-    `````````
-
-
-        I would expect the following keys in JSON format
-        ```````
-        - transactionType  : string -  the transaction executed  (Use only these values: "bills_pay", "pay_merchant", "transfer", "transfer_via_instapay", "transfer_via_pesonet")
-                    . If it shows transfer to other bank use  "transfer_via_instapay"  (add in otherData if the transaction is not any of the above values as "exactTransactionType" )
-        - app: string - Use gmail since the source application is gmail
-        - description : string - description for the transaction, include a summary, recipient name for the transaction. Be more concise on the text. Make it at least 60 characters.
-        - reference : string - the reference number that can be used in later time. for record purposes
-        - datetime : datetime- the date and time the transaction was executed in the format of "YYYY-MM-DDTHH:mm:ssZ". Convert from GMT +8:00 if it was not provided
-        - senderAcct  : string - (source account) the account number used to send / pay as mentioned in the screenshot
-        - success: bool - if the email is a financial transaction or not.
-        - senderBank  : string - (source bank) the bank of the account used to send / pay as mentioned in the screenshot
-        - senderName  : string - the name or nickname used to send / pay as mentioned in the screenshot
-        - recipientAcct  : string - the destination account number of the transfer.
-        - recipientBank  : string - the bank of the account of the recipient
-        - recipientName  : string - the name or nickname of the recipient account as shown in the image. For Bills pay, this is the type of bill paid. It can be the merchant name
-        - amount : decimal - the paid/transfered amount, always make this a positive number even if the picture indicates a negative number
-        - transactionFee : decimal - the fee for the transaction (default value:0.00)
-        - currency : string - the payment currency (default value: PHP)
-        - items : Product[] - list of items that is referenced on the email
-        - otherData : json_object - key-value pairs of details that are not yet captured but can be used for referencing the transaction
-        ```````
-
-        Product model
-        ```````
-        - Name : string - The name of the product
-        - Variantion : string - the variant selected (if any) - if not found use "default"
-        - Quantity : int - Count of the product
-        - Subtotal : decimal - Total Product price 
-        - Discount : decimal - Total Discount (if it is not explicitly indicated, use the calculate in proportion of the total receipt price and the subtotal of this product)\
-        - NetPrice : decimal - the subtotal minus the discount
-        ```````
-
-
-    """
+    prompt = prompt_template.format(**item, address = address)
     config = types.GenerateContentConfig(
         response_mime_type="application/json"
     )
@@ -132,7 +90,12 @@ def process_unread_emails():
         return
     PRIMARY_ACCOUNTS = get_primary_accounts()
     mail = imaplib.IMAP4_SSL(IMAP_SERVER)
+
+
+    rules = get_all_records_by_partition("HookConfigs", "email_")
+    rules = sorted(rules,key=lambda item: item["PriorityOrder"])
     
+
     try:
         mail.login(GMAIL_USER, GMAIL_APP_PASSWORD)
         print("Login successful.")
@@ -170,6 +133,13 @@ def process_unread_emails():
             sender = msg['from']
             body = get_ai_ready_body(msg)
 
+            matched_rules = [
+                rule for rule in rules 
+                if run_conditions({"JsonData": body, "ExtractedData": {}}, rule["Conditions"])
+            ]
+            rule = matched_rules[0] if matched_rules else None
+            matchedConfig = matched_rules[0]["id"] if matched_rules else "email_default"
+
             
 
 
@@ -179,21 +149,14 @@ def process_unread_emails():
             body["emailId"] = f"{e_id_str}|{GMAIL_USER}"
             body["timestamp"] = get_original_sent_time(msg).strftime("%Y-%m-%dT%H:%M:%SZ")
             
-                    
-            data = process_with_ai(body)
+            prompt_to_use = "shopee_default" if (rule is None or "PromptTemplate" not in rule or rule["PromptTemplate"] == "") else rule["PromptTemplate"]   
+            data = process_with_ai(body, email_templates[prompt_to_use])
 
             output = json.loads(data.text)
-            output["matchedConfig"] = "email_default"
 
+
+            output["matchedConfig"] = matchedConfig
             
-            
-            rules = get_all_records_by_partition("HookConfigs", "email_")
-            rules = sorted(rules,key=lambda item: item["PriorityOrder"])
-            for rule in rules:
-                if(run_conditions({"JsonData": body, "ExtractedData":output}, rule["Conditions"])):
-                    output["matchedConfig"] = rule["id"]
-                    break
-                
 
             utc_aware_dt = datetime.datetime.now(datetime.UTC)
             id=uuid7( as_type='str')
@@ -218,6 +181,7 @@ def process_unread_emails():
             add_to_app("HookMessages", newItem)
             add_to_persist("HookMessages", newItem)
             arr.append(newItem)
+            rule = None
     except imaplib.IMAP4.error as e:
         print(f"\nIMAP Login Error: {e}")
         print("Please check your email address, ensure IMAP is enabled in Gmail settings, and verify the 16-character App Password is correct.")

@@ -72,9 +72,9 @@ def phone_hook(req: func.HttpRequest) -> func.HttpResponse:
         if(data["notif_msg"] == None):
             data["error"] = "No notif content"
             logging.info(json.dumps(data))
-            return func.HttpResponse( {"message" : "No notif content" }, status_code= 400, mimetype="application/json" )
+            return func.HttpResponse(  json.dumps({"message" : "No notif content" }), status_code= 400, mimetype="application/json" )
         
-        allow_duplicate = request.headers.get("x-allow-dup", "")
+        allow_duplicate = request.headers.get("x-allow-dup", None)
 
         if(allow_duplicate is None):
             exist_notif = check_duplicate_notif(data)
