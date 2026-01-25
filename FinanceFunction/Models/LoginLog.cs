@@ -11,6 +11,8 @@ namespace FinanceFunction.Models
 				public string Id { get; set; } = UUIDNext.Uuid.NewSequential().ToString();
 				public string JwtId { get; set; } = "";
 				public string RefreshToken { get; set; } = "";
+				public string EmailAddress { get; set; } = "";
+				public bool IsAuthenticated { get; set; } = false;
 
 				public DateTime Expiry { get; set; } = DateTime.UtcNow;
 				public DateTime MovingExpiry { get; set; } = DateTime.UtcNow;

@@ -1,6 +1,7 @@
 ﻿using FinanceFunction.Models;
 using FinanceFunction.Utilities;
 using Microsoft.EntityFrameworkCore;
+using UUIDNext;
 
 namespace FinanceFunction.Data.CosmosRepo
 {
@@ -95,6 +96,7 @@ namespace FinanceFunction.Data.CosmosRepo
 								JwtId = JwtId,
 								UserId = userId,
 								IsExpired = false,
+								IsAuthenticated = true,
 								RefreshToken = refreshToken,
 								MovingExpiry = DateTime.UtcNow.AddDays(7),
 								Expiry = DateTime.UtcNow.AddDays(30)
@@ -106,10 +108,44 @@ namespace FinanceFunction.Data.CosmosRepo
 						return item;
 				}
 
+
+				public async Task<LoginLog?> CreateAnonymousLoginLog(string JwtId, string email)
+				{
+						byte[] originalBytes = System.Text.Encoding.UTF8.GetBytes(UUIDNext.Uuid.NewRandom().ToString());
+						string base64String = Convert.ToBase64String(originalBytes);
+
+						string refreshToken = base64String;
+
+
+						var exist = await _context.LoginLogs.Where(e => e.JwtId == JwtId).FirstOrDefaultAsync();
+
+						if (exist != null) return null;
+
+						Guid ns = Guid.Parse("f5ea0a67-9178-4d01-a503-086e9e724ae6");
+						Guid anonUid = Uuid.NewNameBased(ns, email);
+
+
+						var item = new LoginLog
+						{
+								JwtId = JwtId,
+								UserId = anonUid,
+								EmailAddress = email,
+								IsAuthenticated = false, 
+								IsExpired = true,
+								RefreshToken = refreshToken,
+								MovingExpiry = DateTime.UtcNow.AddHours(4),
+								Expiry = DateTime.UtcNow.AddHours(4)
+						};
+
+
+						_context.LoginLogs.Add(item);
+						await _context.SaveChangesAsync();
+						return item;
+				}
+
 				public async Task<LoginLog> GetLoginLog(string Sid)
 				{
-						var item = await _context.LoginLogs.Where(e => e.Id == Sid 
-								&& e.IsExpired == false).FirstOrDefaultAsync();
+						var item = await _context.LoginLogs.Where(e => e.Id == Sid).FirstOrDefaultAsync();
 
 						return item;
 

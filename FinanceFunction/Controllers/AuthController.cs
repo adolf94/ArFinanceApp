@@ -19,6 +19,7 @@ using System.Text;
 using System.Text.Json;
 using Passwordless;
 using Newtonsoft.Json.Linq;
+using Microsoft.ApplicationInsights;
 namespace FinanceFunction.Controllers;
 
 public class AuthController
@@ -29,10 +30,11 @@ public class AuthController
 		private readonly CurrentUser _user;
 		private readonly IPasswordlessClient _fido2;
 		private readonly IDbHelper _db;
+		private readonly TelemetryClient _telemetryClient;
 		private readonly string RequiredRole = "finance_user";
 
 		public readonly int tokenLifetime = 60 * 4;
-		public AuthController(ILogger<AuthController> logger, AppConfig config,
+		public AuthController(ILogger<AuthController> logger, AppConfig config, TelemetryClient telemetryClient,
 				IUserRepo userRepo, CurrentUser user, IDbHelper db, IPasswordlessClient fido2)
 		{
 				_logger = logger;
@@ -41,6 +43,7 @@ public class AuthController
 				_user = user;
 				_fido2 = fido2;
 				_db = db;
+				_telemetryClient = telemetryClient;
 		}
 
 
@@ -183,19 +186,83 @@ public class AuthController
 						refreshToken = splitRefresh[1];
 				}catch(Exception ex)
 				{
+						_logger.LogWarning(ex, "Error parsing the refresh token");
 						return new BadRequestResult();
 				}
 
 				var item = await _userRepo.GetLoginLog(id.ToString());
 				if(item == null)
 				{
-
+						var evt = new Dictionary<string, string> { 
+						{"Event", "Refresh token rejected"},
+								{"Reason", "Not found" },
+								{"Jwt Id",  id.ToString()}
+						};
+						_telemetryClient.TrackEvent("Refresh Token rejected", evt);
 						return new StatusCodeResult(401);
 				}
+
+
+				if (!item.IsAuthenticated)
+				{
+
+						var evt = new Dictionary<string, string> {
+								{"Event", "Refresh token rejected"},
+								{"Reason", "Anonymouse User" },
+								{"JwtId", item.JwtId },
+								{"UserId", item.UserId.ToString() },
+								{ "Email", item.EmailAddress}
+						};
+						_telemetryClient.TrackEvent("Refresh Token rejected", evt);
+						return new StatusCodeResult(401);
+
+				}
+
+				if (item.IsExpired)
+				{
+						var evt = new Dictionary<string, string> {
+								{"Event", "Refresh token rejected"},
+								{"Reason", "Token expired" },
+								{"Refresh Token", body.Refresh_Token },
+								{"JwtId", item.JwtId },
+								{"UserId", item.UserId.ToString() }
+						};
+
+						if (!item.IsAuthenticated)
+						{
+								evt.Add("Email", item.EmailAddress);
+						}
+
+						_telemetryClient.TrackEvent("Refresh Token rejected", evt);
+						return new StatusCodeResult(401);
+				}
+
+
+
 				if(item.RefreshToken != refreshToken || item.Expiry < DateTime.UtcNow || item.MovingExpiry < DateTime.UtcNow)
 				{
 						item.IsExpired = true;
 						await _db.SaveChangesAsync();
+
+						var reason = item.RefreshToken != refreshToken ? "Refresh token mismatch" :
+								item.Expiry < DateTime.UtcNow ? "Hard Expiry Expired" :
+								item.MovingExpiry < DateTime.UtcNow ? "Moving Expiry Expired" : "";
+
+
+
+						var evt = new Dictionary<string, string> {
+								{"Event", "Refresh token rejected"},
+								{"Reason", reason},
+								{"Refresh Token", body.Refresh_Token },
+								{"JwtId", item.JwtId },
+								{"UserId", item.UserId.ToString() }
+						};
+
+						if (!item.IsAuthenticated)
+						{
+								evt.Add("Email", item.EmailAddress);
+						}
+						_telemetryClient.TrackEvent("Refresh Token rejected", evt);
 						return new StatusCodeResult(401);
 				}
 
@@ -212,10 +279,6 @@ public class AuthController
 				User? user = await _userRepo.GetById(item.UserId)!;
 
 				if(user == null) return new BadRequestResult();
-
-
-
-
 
 				List<Claim> claims = new List<Claim>
 				{
@@ -378,7 +441,7 @@ public class AuthController
 						claims.Add(new Claim("typ", "access_token"));
 
 						idClaims.Add(new Claim("userId", user!.Id.ToString()));
-						idClaims.Add(new Claim(ClaimTypes.Name, user.Name));
+						idClaims.Add(new Claim("name", user.Name));
 						idClaims.Add(new Claim("typ", "id_token"));
 
 						claims.Add(new Claim(ClaimTypes.Role, "Registered")); 
