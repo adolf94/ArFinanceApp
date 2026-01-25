@@ -86,11 +86,11 @@ public class AuthController
 								if(log == null) return new UnauthorizedResult();
 								claims.Add(new Claim("userId", user!.Id.ToString()));
 								claims.Add(new Claim("app", "finance"));
-								claims.Add(new Claim("name", user.Name ?? user.EmailAddress));
+								claims.Add(new Claim("name", user.Name ?? payload.Name ?? user.EmailAddress));
 								claims.Add(new Claim("typ", "access_token"));
 
 								idClaims.Add(new Claim("userId", user!.Id.ToString()));
-								idClaims.Add(new Claim(ClaimTypes.Name, user.Name ?? user.EmailAddress));
+								idClaims.Add(new Claim(ClaimTypes.Name, user.Name ?? payload.Name ?? user.EmailAddress));
 								idClaims.Add(new Claim("typ", "id_token"));
 
 								claims.Add(new Claim(ClaimTypes.Role, "Registered")); 
@@ -107,7 +107,9 @@ public class AuthController
 						{
 								_logger.LogInformation($"{payload.Email} has no linked user");
 								claims.Add(new Claim(ClaimTypes.Role, "Unregistered"));
+								claims.Add(new Claim(ClaimTypes.Name, payload.Name));
 								idClaims.Add(new Claim(ClaimTypes.Role, "Unregistered"));
+								idClaims.Add(new Claim(ClaimTypes.Name, payload.Name));
 						}
 
 						        
