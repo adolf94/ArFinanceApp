@@ -9,8 +9,8 @@ import time as t
 import json
 
 from cosmos_modules import get_all_records_by_partition
-GOOGLE_GENAI_USE_VERTEXAI=True
-client = genai.Client(api_key=os.environ['GEMINI_API_KEY'], vertexai=True)
+GOOGLE_GENAI_USE_VERTEXAI=False
+client = genai.Client(api_key=os.environ['GEMINI_API_KEY'], vertexai=False)
 max_retries = 3
 
 def identify_img_transact_ai(localpath, file_record):
