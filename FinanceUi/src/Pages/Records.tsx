@@ -216,7 +216,8 @@ const Records = () => {
                           </Button>
                         <Button variant="contained" color="primary" 
                           sx={{minWidth: 'auto', width:"5rem"}}
-                          size="small">
+                          size="small"
+                          onClick={()=>navigate("/audits/new")}>
                             <ControlPointDuplicateOutlined/>
                         </Button>
                       </ButtonGroup>

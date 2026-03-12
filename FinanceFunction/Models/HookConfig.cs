@@ -15,6 +15,7 @@ namespace FinanceFunction.Models
 				public string Regex { get; set; } = "";
 				public string TitleRegex { get; set; } = "";
 				public string Type { get; set; } = "";
+				public string PromptTemplate { get; set; } = "";
 				public string DisplayText { get; set; } = "";
 				public long PriorityOrder { get; set; } = 0;
 				public List<Condition> Conditions { get; set; } = new List<Condition>();

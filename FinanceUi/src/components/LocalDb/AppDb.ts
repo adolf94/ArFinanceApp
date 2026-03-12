@@ -1,6 +1,6 @@
 import { MakeOptional } from '@mui/x-date-pickers/internals';
 import Dexie, {  EntityTable } from 'dexie';
-import { Account as ApiAccount, AccountBalance as AccountBalanceApi, HookMessage, MonthlyTransaction as MTransactionFromApi,  Transaction as ApiTransaction, Tag} from 'FinanceApi';
+import { Account as ApiAccount, AccountBalance as AccountBalanceApi, HookMessage, MonthlyTransaction as MTransactionFromApi,  Transaction as ApiTransaction, Tag, TransactionGroup} from 'FinanceApi';
 
 
 
@@ -47,6 +47,7 @@ interface FinanceAppDb extends Dexie {
   hookMessages: EntityTable<HookMessage, 'id'>,
   tags : EntityTable<Tag, "value">,
   images: EntityTable<Image, 'id'>,
+  transactionGroups: EntityTable<TransactionGroup,"id">
 }; 
 
 var db : FinanceAppDb;
@@ -64,7 +65,8 @@ export const initializeDb = ()=>{
     accounts: '&id, type, accountGroupId',
     tags: "&value",
     hookMessages: '&id,monthKey,transactionId,jsonData.imageId',
-    images:"&id"
+    images:"&id",
+    transactionGroups:"&id"
   });
 
   db = dbInternal;

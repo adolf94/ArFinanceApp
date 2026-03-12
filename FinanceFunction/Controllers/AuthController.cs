@@ -34,6 +34,7 @@ public class AuthController
 		private readonly string RequiredRole = "finance_user";
 
 		public readonly int tokenLifetime = 60 * 4;
+		public readonly int idLifetime = 60 * 24 * 30;
 		public AuthController(ILogger<AuthController> logger, AppConfig config, TelemetryClient telemetryClient,
 				IUserRepo userRepo, CurrentUser user, IDbHelper db, IPasswordlessClient fido2)
 		{
@@ -108,9 +109,12 @@ public class AuthController
 						}
 						else
 						{
+								LoginLog? log = await _userRepo.CreateAnonymousLoginLog(payload.JwtId, payload.Email);
 								_logger.LogInformation($"{payload.Email} has no linked user");
 								claims.Add(new Claim(ClaimTypes.Role, "Unregistered"));
+								claims.Add(new Claim("userId", user!.Id.ToString()));
 								claims.Add(new Claim("name", payload.Name));
+								idClaims.Add(new Claim("userId", user!.Id.ToString()));
 								idClaims.Add(new Claim(ClaimTypes.Role, "Unregistered"));
 								idClaims.Add(new Claim("name", payload.Name));
 						}

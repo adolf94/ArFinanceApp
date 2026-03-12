@@ -7,6 +7,7 @@ namespace FinanceFunction.Models
     public class Transaction
     {
         public Guid Id { get; set; } = Uuid.NewSequential();
+        public Guid GroupId { get; set; } = Uuid.NewSequential();
         public long EpochUpdated { get; set; } = new DateTimeOffset(DateTime.UnixEpoch).ToUnixTimeSeconds();
 
         public string Type { get; set; } = "";

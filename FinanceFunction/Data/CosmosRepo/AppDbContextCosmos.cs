@@ -34,6 +34,7 @@ namespace FinanceFunction.Data.CosmosRepo
         public DbSet<BlobFile> Files { get; set; }
 				public DbSet<Tag> Tags { get; set; }
 				public DbSet<LoginLog> LoginLogs { get; set; }
+				public DbSet<TransactionGroup> TransactionGroups { get; set; }
 
 				public DbSet<HookConfig> HookConfigs { get; set; }
 
@@ -170,9 +171,13 @@ namespace FinanceFunction.Data.CosmosRepo
                 .HasOne(e => e.Credit).WithMany(e => e.TransactionsAsCredit);
 
 						builder.Entity<Transaction>()
-
 								.HasPartitionKey(e => e.PartitionKey)
 								.HasKey(c => c.Id);
+
+						builder.Entity<TransactionGroup>()
+		        .HasPartitionKey(e => e.PartitionKey)
+						.ToContainer("TransactionGroups")
+						.HasKey(c => c.Id);
 
 						builder.Entity<LoginLog>()
 
@@ -294,6 +299,7 @@ namespace FinanceFunction.Data.CosmosRepo
             services.AddScoped<IBlobFileRepo, BlobFileRepo>();
             services.AddScoped<IHookConfigRepo, HookConfigRepo>();
             services.AddScoped<ITagRepo, TagRepo>();
+            services.AddScoped<ITransactionGroupRepo, TransactionGroupRepo>();
 
 						return services;
         }

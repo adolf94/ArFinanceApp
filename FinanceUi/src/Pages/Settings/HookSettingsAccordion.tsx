@@ -1,5 +1,5 @@
 import { Check, CheckCircle, Edit, ExpandLess, ExpandMore,  SwapVert } from "@mui/icons-material"
-import { Accordion, AccordionDetails, AccordionSummary, Box, Menu, Button, Checkbox, Divider, FormControlLabel, Grid2 as Grid, IconButton, InputAdornment, List, ListItem, ListItemText,  Tab, TextField, Typography, MenuItem, ClickAwayListener, RadioGroup, Radio } from "@mui/material"
+import { Accordion, AccordionDetails, AccordionSummary, Box, Menu, Button, Checkbox, Divider, FormControlLabel, Grid2 as Grid, IconButton, InputAdornment, List, ListItem, ListItemText,  Tab, TextField, Typography, MenuItem, ClickAwayListener, RadioGroup, Radio, Select, FormLabel, FormControl } from "@mui/material"
 import { useEffect, useMemo, useState } from "react"
 import { useHooksSettingsState } from "./Hooks"
 import HooksConfigProperty from "./HooksConfigProperty"
@@ -20,6 +20,7 @@ interface HookSettingsAccordionProps {
         nameKey:string,
         app:string,
         regex:string,
+        promptTemplate:string,
         displayText:string,
         conditions:any[],
         properties:any[],
@@ -35,12 +36,22 @@ const defaultValue = {
     app:"",
     regex:"",
     success:true,
+    promptTemplate:"",
     enabled:true,
     conditions:[],
     displayText:"",
     subConfigs:[],
     properties:[]
 }
+
+const promptOptions = {
+    "email_":[
+        "shopee_default",
+        "transaction_default"
+    ],
+    "img_":[]
+}
+
 
 
 const HookSettingsAccordion = (props : HookSettingsAccordionProps)=>{
@@ -174,7 +185,15 @@ const HookSettingsAccordion = (props : HookSettingsAccordionProps)=>{
                     <TextField label="App" size="small" value={form.app} onChange={evt=>setForm({...form, app:evt.target.value})} fullWidth sx={{pb:1}}/>
                     <FormControlLabel control={<Checkbox defaultChecked checked={form.enabled} onChange={(evt)=>setForm({...form, enabled: evt.target.checked})}/>} label="Enabled" />
                     <FormControlLabel control={<Checkbox defaultChecked  checked={form.success} onChange={(evt)=>setForm({...form, success: evt.target.checked})}/>} label="Success" />
-                </Grid>
+                    {
+                        ["email_", "img_"].includes(settingsState.tab) && <FormControl fullWidth>
+                            <FormLabel>Prompt to use</FormLabel>
+                            <Select value={form.promptTemplate} fullWidth size="small" onChange={(evt)=>setForm({...form, promptTemplate:evt.target.value})}>
+                                {promptOptions[settingsState.tab].map(e=><MenuItem value={e}>{e}</MenuItem>)}
+                            </Select>
+                        </FormControl>
+                    }
+                    </Grid>
                 <Grid size={8} sx={{pl:1}}>
                     { ["sms_", "notif_"].includes(settingsState.tab) && <>
                         {

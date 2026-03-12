@@ -103,7 +103,7 @@ const Login = ()=>{
                 <Box sx={{p:1}}>
                     <GoogleLogin
                         onSuccess={onGoogleSuccess}
-                        
+                        size="large"
                         />
                 </Box>
                 {hasPasskey &&

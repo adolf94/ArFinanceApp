@@ -40,7 +40,7 @@ const AppRoutes: (PathRouteProps | IndexRouteProps | LayoutRouteProps)[] = [
     ),
   },
   {
-    path:"/audits/new",
+    path:"/audits/:groupId",
     element: <Suspense fallback={<Loader />}>
       <NewBatchRecords />
     </Suspense>

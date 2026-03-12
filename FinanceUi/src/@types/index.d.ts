@@ -66,6 +66,16 @@ declare module 'FinanceApi' {
         blobClient: BlobClientConfig;
     }
 
+    // ..\FinanceFunction\Models\BatchItem.cs
+    export interface BatchItem {
+        id: string;
+        date: string;
+        accountId?: string;
+        vendorId?: string;
+        total: number;
+        items: SplitBatchRecord[];
+    }
+
     // ..\FinanceFunction\Models\BlobFile.cs
     export interface BlobFile {
         id: string;
@@ -368,6 +378,7 @@ declare module 'FinanceApi' {
         id: string;
         amount: number;
         description: string;
+        monthKey: string;
         partitionKey: string;
         date: string;
         accountId?: string;

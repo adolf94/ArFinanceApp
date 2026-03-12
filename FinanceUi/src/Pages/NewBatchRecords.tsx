@@ -1,5 +1,5 @@
 import { Add, CheckBox, Delete, GppBad, Receipt } from "@mui/icons-material"
-import { AppBar, Box, Button, ButtonGroup, Card, CardContent, Checkbox, FormControlLabel, FormLabel, Grid2 as Grid, IconButton, InputAdornment, Stack, TextField, Toolbar, Typography } from "@mui/material"
+import { AppBar, Box, Button, ButtonGroup, Card, CardContent, Checkbox, FormControlLabel, FormLabel, Grid2 as Grid, IconButton, InputAdornment, MenuItem, Select, Stack, TextField, Toolbar, Typography } from "@mui/material"
 import { DatePicker, DateTimePicker } from "@mui/x-date-pickers"
 import moment from "moment"
 import { useEffect, useMemo, useRef, useState } from "react"
@@ -11,20 +11,23 @@ import { grey } from "@mui/material/colors"
 import numeral from "numeral"
 import SelectorDrawer from "../components/NewComponents/SelectorDrawer"
 import { Transaction } from "../components/LocalDb/AppDb"
-import { useMutateTransactionGroup } from "../repositories/transactionGroup"
+import { getOneTransactionGroup, useMutateTransactionGroup } from "../repositories/transactionGroup"
 import useSubmitTransaction, { useSaveMultipleTransaction } from "./NewRecordComponents/useSubmitTransaction"
 import { iteratee } from "underscore"
 import { fetchTransactionById } from "../repositories/transactions"
+import { faPersonMilitaryPointing } from "@fortawesome/free-solid-svg-icons"
+import { useParams } from "react-router-dom"
 
 
-const BatchLineItem = ({item})=>{
+const BatchLineItem = ({item, onChange, onDelete, enableDelivered})=>{
     const [form,setForm] = useState({
       id:uuid(),
       amount:0,
-      linked: "transaction",
+      linked: "pending",
       expense: null,
       expenseId:null,
       description:""
+      
 
     })
 
@@ -32,6 +35,12 @@ const BatchLineItem = ({item})=>{
     useEffect(()=>{
       setForm(item)
     },[item])
+
+
+    const emitItemChange = (data? : any) => {
+        if(!data) return onChange(form)
+        onChange(data)
+    }
 
 
     const [selectorConfig, setSelectorConfig] = useState({
@@ -48,9 +57,12 @@ const BatchLineItem = ({item})=>{
         <CardContent sx={{pb:0,mb:0}}>
           <Grid container>
             <Grid size={8} sx={{pt:1}}>
-              <TextField size="small" label="Product / Description" value={form.description} fullWidth multiline rows={2} sx={{ "& fieldset": {
-                border: 'none', // Removes the border
-                  }}}/>
+              <TextField size="small" label="Product / Description" value={form.description || ""} fullWidth multiline rows={2} 
+                  sx={{ "& fieldset": {
+                  border: 'none', // Removes the border
+                }}} onChange={(evt)=>{
+                  setForm({...form,description:evt.target.value})
+                }} onBlur={()=>emitItemChange()}/>
           <Box sx={{display:'flex', justifyContent:"space-between"}}>
                   <Button variant="text"  
                   size="small"
@@ -59,7 +71,9 @@ const BatchLineItem = ({item})=>{
                           show:true,
                           value:form.expense,
                           onChange:(value, shouldClose)=>{
-                            setForm({...form, expense:value, expenseId:value.id})
+                            let newData = {...form, expense:value, expenseId:value.id}
+                            setForm(newData)
+                            emitItemChange(newData)
                             if(shouldClose) setSelectorConfig({...selectorConfig, show:false})
                           },
                           type:"account"
@@ -70,14 +84,26 @@ const BatchLineItem = ({item})=>{
                     {form.expense?.name || 'Category'}
                   </Button>
                   <Box>
-                    <FormControlLabel control={<Checkbox size="small" />} label="Refunded Item" />
+                    <Select size="small" value={form.linked} onChange={(evt)=>{ 
+                        let newData = {...form, linked:evt.target.value}
+                        setForm(newData) 
+                        emitItemChange(newData)
+                      }}>
+                      
+                      <MenuItem value="refund">Refund Item</MenuItem>
+                      <MenuItem value="pending">Pending</MenuItem>
+                      {enableDelivered && <MenuItem value="transaction">Delivered</MenuItem>}
+                    </Select>
                   </Box>
                 </Box>
             </Grid>
             <Grid size={4}>
               <Stack>
                 <Box >
-                  <NumberInput size="small" variant="outlined" fullWidth value={form.amount} onChange={(e)=>setForm({...form,amount:e})}
+                  <NumberInput size="small" variant="outlined" fullWidth value={form.amount} 
+                  onChange={(e)=>setForm({...form,amount:e})}
+                  onBlur={()=>emitItemChange()}
+                  
                   sx={{ "& fieldset": {
                     border: 'none', // Removes the border
                   }}}
@@ -102,10 +128,18 @@ const BatchLineItem = ({item})=>{
     </Box>
 }
 
-
-const NewBatchRecords = ()=>{
-    const topBarRef = useRef()
-    const [form,setForm] = useState({
+const defaultLineItem = {
+    id:uuid(),
+    isDefault: true,
+    amount:0,
+    linked: "pending",
+    expense: null,
+    expenseId:null,
+    description:"",
+    isNew: true,
+    action:"none"
+}
+const defaultGroupItem = {
       id: uuid(),
       date: moment().format("YYYY-MM-DD"),
       account: null,
@@ -116,14 +150,23 @@ const NewBatchRecords = ()=>{
         id:uuid(),
         isDefault: true,
         amount:0,
-        linked: "transaction",
+        linked: "pending",
         expense: null,
         expenseId:null,
         description:"",
-        isNew:true
+        action:"none",
+        isNew: true,
       }],
       total:0
-    })
+    }
+
+const NewBatchRecords = ()=>{
+    const topBarRef = useRef()
+    const {groupId} = useParams()
+    console.log(groupId)
+    const [newItems, setNewItems] = useState([])
+    const [form,setForm] = useState({...defaultGroupItem,id:uuid()})
+    
     const [selectorConfig, setSelectorConfig] = useState({
       value:null,
       type:"account",
@@ -150,16 +193,44 @@ const NewBatchRecords = ()=>{
       },0)
     },[form.items])
 
+    useEffect(()=>{
+      if(groupId == "new"){
+        setForm({...defaultGroupItem,id:uuid()})
+      }else{
+        getOneTransactionGroup(groupId)
+          .then(async e=>{
+
+
+            setForm(e)
+            
+          })
+      }
+    },[groupId])
+
+
+
+    const canSetDelivered = useMemo(()=>{
+      if(!form.accountId) return false
+      if(!form.vendorId) return false
+      return true
+    },[form.accountId, form.vendorId])
+
+    const addItem = ()=>{
+        const newItem = {...defaultLineItem, id: uuid()}
+        setForm({...form,items:[...form.items,newItem]})
+    }
+
+
     const importTransaction = (d:Transaction)=>{
       var newItem = {
         id:d.id,
-        linked:"transaction",
+        linked:"pending",
         description:d.description,
         expense: d.debit,
         expenseId: d.debitId,
         amount:d.amount,
         isDefault:false,
-        isNew:false
+        action:"put"
       }
 
       if(form.items.length == 1 && form.items[0].isDefault){
@@ -173,30 +244,31 @@ const NewBatchRecords = ()=>{
       let output = []
       for( let i =0; i<form.items.length;i++){
         let transaction = form.items[i]
-        if(transaction.linked == "transaction"){
-          if(transaction.isNew){
+        switch(transaction.action){
+          case "post":
             const newItem: Partial<Transaction> = {
-                id: transaction.id,
-                groupId: form.id,
-                addByUserId: "1668b555-9788-40ed-a6e8-feeabe9538f6",
-                creditId: form.accountId,
-                debitId: transaction.expenseId,
-                amount: transaction.amount,
-                vendorId: form.vendorId,
-                vendor:form.vendor,
-                date: moment(form.date).toISOString(),
-                dateAdded: moment().toISOString(),
-                reference: "",
-                description: (transaction.description || ""),
-                type: "expense",
-                scheduleId: null,
-                notifications:[],
-                tags : []
-              };
-              await tr.newTransaction(0,newItem, null, null)
-          }else{
+                  id: transaction.id,
+                  groupId: form.id,
+                  addByUserId: "1668b555-9788-40ed-a6e8-feeabe9538f6",
+                  creditId: form.accountId,
+                  debitId: transaction.expenseId,
+                  amount: transaction.amount,
+                  vendorId: form.vendorId,
+                  vendor:form.vendor,
+                  date: moment(form.date).toISOString(),
+                  dateAdded: moment().toISOString(),
+                  reference: "",
+                  description: (transaction.description || ""),
+                  type: "expense",
+                  scheduleId: null,
+                  notifications:[],
+                  tags : []
+                };
+                await tr.newTransaction(0,newItem, null, null)
+            break
+          case "put":
             var toEdit = await fetchTransactionById(transaction.id)
-             const newItem: Partial<Transaction> = {
+             let item: Partial<Transaction> = {
                 ...toEdit,
                 groupId: form.id,
                 addByUserId: "1668b555-9788-40ed-a6e8-feeabe9538f6",
@@ -208,12 +280,32 @@ const NewBatchRecords = ()=>{
                 description: (transaction.description || ""),
                 type: "expense"
               };
-              await tr.updateTransaction(newItem)
-          }
+              await tr.updateTransaction(item)
+            break
+          case "delete":
+          case "none":
+            break
         }
+
+
       }
-      mutateGroup.create.mutateAsync(form)
+      await mutateGroup.create.mutateAsync(form)
     }
+
+    const onItemChange = (index, newValue)=>{
+        let oldArr = [...form.items]
+        let oldItem = oldArr[index]
+        let oldStatus = oldItem.linked
+        
+        let isNew = newItems.indexOf(newValue.id)
+        if(oldStatus == "transaction" && newValue.linked != "transaction") newValue.action =  newValue.isNew?  "none": "delete"
+        if(oldStatus != "transaction" && newValue.linked == "transaction") newValue.action = newValue.isNew? "post" : "put"
+
+        oldArr[index] = newValue
+        setForm({...form, items: oldArr})
+    }
+
+
 
     return <>
         
@@ -321,10 +413,9 @@ const NewBatchRecords = ()=>{
                     + Import from History
                   </Button>
                 </Box>
-                {form.items.map(e=><BatchLineItem item={e} />)}
+                {form.items.map((e,i)=><BatchLineItem item={e} onChange={(value)=>onItemChange(i, value)} enableDelivered={canSetDelivered}/>)}
                 <ButtonGroup  sx={{mt:2}}>
-                  <Button variant="text" > <Add /> Add new item</Button>    
-                  <Button variant="text"> <GppBad /> Refunded Item</Button>    
+                  <Button variant="text" onClick={addItem} > <Add /> Add new item</Button>    
                 </ButtonGroup>               
               </Stack>
           </Grid>
@@ -334,7 +425,7 @@ const NewBatchRecords = ()=>{
                   <Grid sx={{display:'flex', justifyContent:"space-between"}}>
                     <Box sx={{textAlign:'left'}}>
                       <Typography variant="caption">Current Total</Typography>
-                      <Typography variant="h5">{numeral(currentTotal).format("0,0.00")}</Typography>
+                      <Typography variant="h5" onClick={()=>setForm({...form,total:currentTotal})}>{numeral(currentTotal).format("0,0.00")}</Typography>
                     </Box>
                     <Box sx={{textAlign:'right'}}>
                       <Typography variant="caption">Variance</Typography>

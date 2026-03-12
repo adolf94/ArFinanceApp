@@ -11,13 +11,13 @@ public class AppProfile : Profile
 				CreateMap<CreateTransactionDto, Transaction>()
 												.ForMember(e => e.EpochUpdated, opt => opt.MapFrom(e => new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds()))
 												.ForMember(e => e.DateOlder, opt => opt.MapFrom(e => e.Date))
-												.ForMember(e => e.MonthKey, opt => opt.MapFrom(e => e.Date.ToString("yyyy-MM-01")));
+												.ForMember(e => e.MonthKey, opt => opt.MapFrom(e => e.Date.AddHours(8).ToString("yyyy-MM-01")));
 
 				CreateMap<UpdateTransactionDto, Transaction>()
 										.ForMember(e => e.EpochUpdated, opt => opt.MapFrom(e => new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds()))
 										.ForMember(e => e.DateOlder, opt => opt.MapFrom((e, o) => e.Date < o.DateOlder ? e.Date : o.DateOlder))
 										.ForMember(e => e.Notifications, opt => opt.Ignore())
-										.ForMember(e => e.MonthKey, opt => opt.MapFrom(e => e.Date.ToString("yyyy-MM-01")));
+										.ForMember(e => e.MonthKey, opt => opt.MapFrom(e => e.Date.AddHours(8).ToString("yyyy-MM-01")));
 
 				CreateMap<CreateUserDto, User>()
 						.ForMember(e => e.EmailAddress, opt => opt.MapFrom(e => e.UserName))

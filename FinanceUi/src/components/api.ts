@@ -56,23 +56,6 @@ api.interceptors.request.use(async (config: AxiosRequestConfig) => {
 
 api.interceptors.response.use(
     async (data) => {
-        //     const headerTransId = data.headers["x-last-trans"];
-        // if (!data.config?.noLastTrans && !!headerTransId) {
-        //     const lastTransId = localStorage.getItem("last_transaction");
-        //     const stgTransId = localStorage.getItem("stg_transaction");
-        //     if (!!lastTransId && headerTransId !== lastTransId && stgTransId !== headerTransId) {
-        //         //Do fetch new data
-        //             queryClient.prefetchQuery({ queryKey: [TRANSACTION, { after: lastTransId }], queryFn: () => getAfterTransaction(lastTransId) })
-        //     }
-        // }
-        // if (!headerTransId) {
-        //     console.debug("no last-trans found " + data.config.url);
-        // }
-            
-
-        //queryClient
-
-
         
         return data;
     },
