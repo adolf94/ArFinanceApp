@@ -84,6 +84,7 @@ public class AuthController
 						User? user = await _userRepo.GetByEmailAsync(payload.Email)!;
 						GoogleClaimResponse? currentToken = new GoogleClaimResponse();
 
+						int idLife = idLifetime;
 						if (user != null)
 						{
 								LoginLog? log = await _userRepo.CreateLoginLog(payload.JwtId, user.Id);
@@ -117,6 +118,7 @@ public class AuthController
 								idClaims.Add(new Claim("userId", user!.Id.ToString()));
 								idClaims.Add(new Claim(ClaimTypes.Role, "Unregistered"));
 								idClaims.Add(new Claim("name", payload.Name));
+								idLife = tokenLifetime;
 						}
 
 						        
@@ -136,7 +138,7 @@ public class AuthController
 						var idDescriptor = new SecurityTokenDescriptor
 						{
 								Subject = new ClaimsIdentity(idClaims),
-								Expires = DateTime.UtcNow.AddMinutes(tokenLifetime),
+								Expires = DateTime.UtcNow.AddMinutes(idLife),
 								Issuer = _config.jwtConfig.issuer,
 								Audience = _config.jwtConfig.audience,
 								SigningCredentials = new SigningCredentials
